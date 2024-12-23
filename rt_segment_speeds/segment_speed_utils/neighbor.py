@@ -6,10 +6,9 @@ import numpy as np
 import pandas as pd
 import shapely
 
-from segment_speed_utils import helpers, vp_transform     
+from segment_speed_utils import helpers     
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT, PROJECT_CRS
 from shared_utils import geo_utils
-
 
 def merge_stop_vp_for_nearest_neighbor(
     stop_times: gpd.GeoDataFrame,
@@ -37,7 +36,9 @@ def merge_stop_vp_for_nearest_neighbor(
         crs = PROJECT_CRS,
         get_pandas = True,
         filters = [[("shape_array_key", "in", stop_times.shape_array_key.tolist())]]
-    ).rename(columns = {"geometry": "shape_geometry"})
+    ).rename(
+        columns = {"geometry": "shape_geometry"}
+    ).dropna(subset="shape_geometry")
     
     gdf = pd.merge(
         stop_times.rename(
@@ -57,7 +58,7 @@ def merge_stop_vp_for_nearest_neighbor(
     # projected onto shape_geometry and is interpreted as
     # stop X is Y meters along shape
     gdf = gdf.assign(
-        stop_meters = gdf.shape_geometry.project(gdf.stop_geometry)
+        stop_meters = gdf.shape_geometry.project(gdf.stop_geometry),
     )
 
     return gdf
@@ -141,13 +142,13 @@ def filter_to_nearest2_vp(
     
     return before_idx, after_idx, before_vp_meters, after_vp_meters
 
-
+    
 def two_nearest_neighbor_near_stop(
     vp_direction_array: np.ndarray,
     vp_geometry: shapely.LineString,
     vp_idx_array: np.ndarray,
     stop_geometry: shapely.Point,
-    stop_direction: str,
+    opposite_stop_direction: str,
     shape_geometry: shapely.LineString,
     stop_meters: float
 ) -> np.ndarray: 
@@ -159,13 +160,11 @@ def two_nearest_neighbor_near_stop(
     When we're doing nearest neighbor search, we want to 
     first filter the full array down to valid vp
     before snapping it.
-    """    
-    opposite_direction = vp_transform.OPPOSITE_DIRECTIONS[stop_direction] 
-    
+    """        
     # These are the valid index values where opposite direction 
     # is excluded       
-    valid_indices = (vp_direction_array != opposite_direction).nonzero()   
-
+    valid_indices = (vp_direction_array != opposite_stop_direction).nonzero()   
+    
     # These are vp coords where index values of opposite direction is excluded
     valid_vp_coords_array = np.array(vp_geometry.coords)[valid_indices]
     
