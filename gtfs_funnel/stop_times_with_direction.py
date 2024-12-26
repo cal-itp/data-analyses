@@ -6,6 +6,9 @@ import datetime
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+import sys
+
+from loguru import logger
 
 from calitp_data_analysis import utils
 from shared_utils import rt_utils
@@ -56,109 +59,114 @@ def prep_scheduled_stop_times(analysis_date: str) -> gpd.GeoDataFrame:
     ).drop(columns = ["trip_id"])
     
     st_with_stop = gpd.GeoDataFrame(
-        st_with_stop, geometry = "geometry", crs = PROJECT_CRS)
+        st_with_stop, geometry = "geometry", crs = PROJECT_CRS
+    )
     
     return st_with_stop
 
 
 def get_projected_stop_meters(
-    stop_times: pd.DataFrame, 
-    shapes: gpd.GeoDataFrame
-) -> pd.DataFrame:
+    stop_times: gpd.GeoDataFrame,
+    analysis_date: str,
+) -> pd.Series:
     """
     Project the stop's position to the shape and
     get stop_meters (meters from start of the shape).
+    Only return stop_meters as pd.Series to use as a column later. 
     """
+    shapes = helpers.import_scheduled_shapes(
+        analysis_date, 
+        columns = ["shape_array_key", "geometry"],
+        crs = PROJECT_CRS,
+        get_pandas=True
+    ).dropna(subset="geometry")
+    
     gdf = pd.merge(
-        stop_times,
-        shapes.rename(columns = {"geometry": "shape_geometry"}),
+        stop_times.to_crs(PROJECT_CRS),
+        shapes.to_crs(PROJECT_CRS).rename(columns = {"geometry": "shape_geometry"}),
         on = "shape_array_key",
         how = "inner"
-    )
+    ).set_geometry("geometry")
     
-    gdf = gdf.assign(
-        stop_meters = gdf.shape_geometry.project(gdf.geometry)
-    ).drop(columns = "shape_geometry").drop_duplicates()
-    
-    return gdf
+    stop_meters = gdf.shape_geometry.project(gdf.geometry)
+
+    return stop_meters
     
 
-def find_prior_subseq_stop(
-    stop_times: gpd.GeoDataFrame,
-    trip_stop_cols: list
+def find_prior_subseq_stop_info(
+    stop_times: gpd.GeoDataFrame, 
+    analysis_date: str,
+    trip_cols: list = ["trip_instance_key"],
+    trip_stop_cols: list = ["trip_instance_key", "stop_sequence"]
 ) -> gpd.GeoDataFrame:
     """
     For trip-stop, find the previous stop (using stop sequence).
     Attach the previous stop's geometry.
     This will determine the direction for the stop (it's from prior stop).
     Add in subseq stop information too.
+    
+    Create columns related to comparing current to prior stop.
+    - stop_pair (stop_id1_stop_id2)
+    - stop_pair_name (stop_name1__stop_name2)
     """
-    prior_stop = stop_times[trip_stop_cols].sort_values(
-        trip_stop_cols).reset_index(drop=True)
-        
-    prior_stop = prior_stop.assign(
-        prior_stop_sequence = (prior_stop.groupby("trip_instance_key")
+    stop_meters = get_projected_stop_meters(stop_times, analysis_date)
+    
+    gdf = stop_times[
+        trip_stop_cols + ["stop_id", "stop_name", "geometry"]
+    ].assign(
+        stop_meters = stop_meters
+    )
+    
+    gdf = gdf.assign(
+        prior_geometry = (gdf.groupby(trip_cols)
+                          .geometry
+                          .shift(1)),
+        prior_stop_sequence = (gdf.groupby(trip_cols)
                                .stop_sequence
                                .shift(1)),
         # add subseq stop info here
-        subseq_stop_sequence = (prior_stop.groupby("trip_instance_key")
+        subseq_stop_sequence = (gdf.groupby(trip_cols)
                                 .stop_sequence
                                 .shift(-1)),
-        subseq_stop_id = (prior_stop.groupby("trip_instance_key")
+        subseq_stop_id = (gdf.groupby(trip_cols)
                           .stop_id
                           .shift(-1)),
-        subseq_stop_name = (prior_stop.groupby("trip_instance_key")
+        subseq_stop_name = (gdf.groupby(trip_cols)
                           .stop_name
-                          .shift(-1))        
-    )
-    
-    # Merge in prior stop geom as a separate column so we can
-    # calculate distance / direction
-    prior_stop_geom = (stop_times[["trip_instance_key", 
-                                   "stop_sequence", "geometry"]]
-                       .rename(columns = {
-                           "stop_sequence": "prior_stop_sequence",
-                           "geometry": "prior_geometry"
-                           })
-                       .set_geometry("prior_geometry")
-                      )
-    
-    stop_times_with_prior = pd.merge(
-        stop_times,
-        prior_stop,
-        on = trip_stop_cols,
-        how = "left"
-    )
-    
-    stop_times_with_prior_geom = pd.merge(
-        stop_times_with_prior,
-        prior_stop_geom,
-        on = ["trip_instance_key", "prior_stop_sequence"],
-        how = "left"
-    ).astype({
-        "prior_stop_sequence": "Int64",
-        "subseq_stop_sequence": "Int64"
-    }).fillna({
-        "subseq_stop_id": "",
-        "subseq_stop_name": ""
+                          .shift(-1)),
+    ).fillna({
+        **{c: "" for c in ["subseq_stop_id", "subseq_stop_name"]}
     })
-        
+    
+
+    stop_direction = np.vectorize(rt_utils.primary_cardinal_direction)(
+        gdf.prior_geometry.fillna(gdf.geometry), gdf.geometry)
+    
+    # Just keep subset of columns because we'll get other stop columns back when we merge with stop_times
+    keep_cols = [
+        "trip_instance_key", "stop_sequence",
+        "stop_meters",
+        "prior_stop_sequence", "subseq_stop_sequence"
+    ]
+    
     # Create stop pair with underscores, since stop_id 
     # can contain hyphens
-    stop_times_with_prior_geom = stop_times_with_prior_geom.assign(
-        stop_pair = stop_times_with_prior_geom.apply(
-            lambda x: 
-            str(x.stop_id) + "__" + str(x.subseq_stop_id), 
-            axis=1, 
-        ),
-        stop_pair_name = stop_times_with_prior_geom.apply(
-            lambda x: 
-            x.stop_name + "__" + x.subseq_stop_name, 
-            axis=1, 
-        ),    
-    ).drop(columns = ["subseq_stop_id", "subseq_stop_name"])
+    gdf2 = gdf[keep_cols].assign(
+        stop_primary_direction = stop_direction,
+        stop_pair = gdf.stop_id.astype(str).str.cat(
+            gdf.subseq_stop_id.astype(str)),
+        stop_pair_name = gdf.stop_name.astype(str).str.cat(
+            gdf.subseq_stop_name.astype(str)),
+    )
     
-    return stop_times_with_prior_geom
+    stop_times_geom_direction = pd.merge(
+        stop_times,
+        gdf2,
+        on = trip_stop_cols,
+        how = "inner"
+    )
+
+    return stop_times_geom_direction 
 
 
 def assemble_stop_times_with_direction(
@@ -179,50 +187,17 @@ def assemble_stop_times_with_direction(
     
     scheduled_stop_times = prep_scheduled_stop_times(analysis_date)
 
-    trip_stop_cols = ["trip_instance_key", "stop_sequence", 
-                      "stop_id", "stop_name"]
+    trip_cols = ["trip_instance_key"]
+    trip_stop_cols = ["trip_instance_key", "stop_sequence"]
         
-    scheduled_stop_times2 = find_prior_subseq_stop(
-        scheduled_stop_times, trip_stop_cols
-    )
-    
-    other_stops = scheduled_stop_times2[
-        ~(scheduled_stop_times2.prior_geometry.isna())
-    ]
-
-    first_stop = scheduled_stop_times2[
-        scheduled_stop_times2.prior_geometry.isna()
-    ]
-    
-    first_stop = first_stop.assign(
-        stop_primary_direction = "Unknown"
-    ).drop(columns = "prior_geometry")
-    
-    other_stops_no_geom = other_stops.drop(columns = ["prior_geometry"])
-    
-    prior_geom = other_stops.prior_geometry
-    current_geom = other_stops.geometry
-    
-    # Create a column with readable direction like westbound, eastbound, etc
-    stop_direction = np.vectorize(
-        rt_utils.primary_cardinal_direction)(prior_geom, current_geom)
-    stop_distance = prior_geom.distance(current_geom)
-    
-    other_stops_no_geom = other_stops_no_geom.assign(
-        stop_primary_direction = stop_direction,
-        stop_meters = stop_distance,
-    )
-    
-    scheduled_stop_times_with_direction = pd.concat(
-        [first_stop, other_stops_no_geom], 
-        axis=0
-    )
-        
-    df = scheduled_stop_times_with_direction.sort_values(
-        trip_stop_cols).reset_index(drop=True)
-
-    time1 = datetime.datetime.now()
-    print(f"get scheduled stop times with direction: {time1 - start}")
+    df = find_prior_subseq_stop_info(
+        scheduled_stop_times,
+        analysis_date,
+        trip_cols = trip_cols,
+        trip_stop_cols = trip_stop_cols
+    ).sort_values(
+        trip_stop_cols
+    ).reset_index(drop=True)
     
     utils.geoparquet_gcs_export(
         df,
@@ -231,7 +206,9 @@ def assemble_stop_times_with_direction(
     )
     
     end = datetime.datetime.now()
-    print(f"execution time: {end - start}")
+    logger.info(
+        f"scheduled stop times with direction {analysis_date}: {end - start}"
+    )
         
     return
 
@@ -239,7 +216,12 @@ def assemble_stop_times_with_direction(
 if __name__ == "__main__":  
     
     from update_vars import analysis_date_list
-
+    
+    LOG_FILE = "./logs/preprocessing.log"
+    logger.add(LOG_FILE, retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+        
     for date in analysis_date_list:
-        print(date)
         assemble_stop_times_with_direction(date, GTFS_DATA_DICT)
