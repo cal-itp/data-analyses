@@ -80,7 +80,7 @@ y2023_dates = [
     v for k, v in DATES.items() if k.endswith("2023") and not any(substring in k for substring in ["jan", "feb"])
 ]
 
-y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
+y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["oct2024g"]]
 
 
 valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
