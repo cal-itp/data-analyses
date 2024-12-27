@@ -21,7 +21,7 @@ preprocess_schedule_only:
 	make route_typologies_data
 	python operator_scheduled_stats.py 
 	python schedule_stats_by_stop.py 
-	#python track_publish_dates.py
+	python track_publish_dates.py
     
 route_typologies_data:
 	python route_typologies.py

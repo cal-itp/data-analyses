@@ -51,7 +51,7 @@ def filter_to_not_moving_vp(analysis_date: str) -> pd.DataFrame:
         ],
         filters = [[("vp_primary_direction", "==", "Unknown"), 
                    ("vp_idx", "not in", first_vp)]]
-    )
+    ).sort_values("vp_idx").reset_index(drop=True)
     
     return vp_staying
 
@@ -112,8 +112,11 @@ def assign_vp_groupings(
         axis=0
     ).sort_values(["trip_instance_key", "vp_idx"]).reset_index(drop=True)
     
+    # Before, we assigned 0 if vp appeared to be dwelling at the location
+    # Now, for the other portion, we assign 1 because we do not want those vps to be in same group
+    # so we want the cumsum to move up in value
     vp = vp.assign(
-        same_group = vp.same_group.fillna(0).astype("int8")
+        same_group = vp.same_group.fillna(1).astype("int8")
     )
     
     
@@ -169,13 +172,18 @@ def add_dwell_time(
         on = group_cols,
         how = "inner"
     )
+
+    # We'll get these back when we merge on vp_idx later
+    # Use it to get dwell_sec and then drop
+    drop_cols = ["trip_instance_key", "location_timestamp_local"]
     
     df = df.assign(
         dwell_sec = (df.moving_timestamp_local - 
                      df.location_timestamp_local).dt.total_seconds().astype("int")
-    )
-
+    ).drop(columns = drop_cols)
+    
     return df
+
 
 if __name__ == "__main__":
     
@@ -194,7 +202,9 @@ if __name__ == "__main__":
         
         start = datetime.datetime.now()
         
-        vp_unknowns = filter_to_not_moving_vp(analysis_date).pipe(group_vp_dwelling_rows) 
+        vp_unknowns = filter_to_not_moving_vp(
+            analysis_date
+        ).pipe(group_vp_dwelling_rows) 
            
         vp_grouped = assign_vp_groupings(
             vp_unknowns, analysis_date
@@ -205,14 +215,19 @@ if __name__ == "__main__":
         time1 = datetime.datetime.now()
         logger.info(f"compute dwell df: {time1 - start}")
 
-        vp_usable = import_vp(analysis_date)
+        remaining_vp = vp_with_dwell.vp_idx.tolist()
+        
+        vp_usable = import_vp(
+            analysis_date,
+            filters = [[("vp_idx", "in", remaining_vp)]]
+        )
 
         vp_usable_with_dwell = pd.merge(
             vp_usable,
             vp_with_dwell,
-            on = ["trip_instance_key", "vp_idx", "location_timestamp_local"],
+            on = "vp_idx",
             how = "inner"
-        )
+        ).sort_values("vp_idx").reset_index(drop=True)
 
         publish_utils.if_exists_then_delete(
             f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}")
