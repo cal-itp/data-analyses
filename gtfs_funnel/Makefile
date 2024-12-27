@@ -13,7 +13,6 @@ preprocess_schedule_vp_dependency:
     
 preprocess_vp:
 	python vp_keep_usable.py
-	python vp_direction.py
 	python cleanup.py
 	python vp_dwell_time.py    
 	python vp_condenser.py
@@ -22,7 +21,7 @@ preprocess_schedule_only:
 	make route_typologies_data
 	python operator_scheduled_stats.py 
 	python schedule_stats_by_stop.py 
-	#python track_publish_dates.py
+	python track_publish_dates.py
     
 route_typologies_data:
 	python route_typologies.py
