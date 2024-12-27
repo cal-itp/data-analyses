@@ -53,11 +53,11 @@ graph TB
 
     subgraph vp_preprocessing
         E --> E3([vp_keep_usable.py]):::script --> 
-            E4([vp_direction.py]):::script --> 
-            F[vp_usable]:::df --> 
+            E4([vp_dwell_time.py]):::script --> 
+            F[vp_usable_dwell]:::df --> 
             E5([cleanup.py]):::script;
         F --> F1([vp_condenser.py]):::script --> 
-            F2[vp_condensed<br>vp_nearest_neighbor<br>NAD83]:::df;
+            F2[vp_nearest_neighbor<br>NAD83]:::df;
     
     end
 
