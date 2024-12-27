@@ -2,33 +2,58 @@
 Add dwell time to vp
 """
 import datetime
+import numpy as np
 import pandas as pd
 import sys
 
-from dask import delayed, compute
 from loguru import logger
 
-from segment_speed_utils import segment_calcs
 from segment_speed_utils.project_vars import SEGMENT_GCS
 from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT
 
-def import_vp(analysis_date: str) -> pd.DataFrame:
+
+def import_vp(analysis_date: str, **kwargs) -> pd.DataFrame:
     """
-    Import vehicle positions with a subset of columns
-    we need to check whether bus is dwelling
-    at a location.
+    Import vehicle positions for this script, 
+    and allow for kwargs for filtering columns or rows from
+    the partitioned parquet.
     """
     USABLE_VP = GTFS_DATA_DICT.speeds_tables.usable_vp
-    vp = pd.read_parquet(
-        f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}",
+
+    df = pd.read_parquet(
+        f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}/",
+        **kwargs
+    )
+    
+    return df
+
+
+def filter_to_not_moving_vp(analysis_date: str) -> pd.DataFrame:
+    """
+    Filter down to vp that aren't moving, 
+    because they have vp_primary_direction == Unknown.
+    Exclude first vp of each trip.
+    """
+    first_vp = import_vp(
+        analysis_date, 
+        columns = ["trip_instance_key", "vp_idx"]
+    ).groupby("trip_instance_key").vp_idx.min().tolist()
+    
+    # If the direction is Unknown, that means vp hasn't moved
+    # from prior point
+    # filter out the first vp for each trip (since that one row always has Unknown direction) 
+    vp_staying = import_vp(
+        analysis_date,
         columns = [
             "trip_instance_key", "vp_idx", 
             "location_timestamp_local", "vp_primary_direction"
         ],
+        filters = [[("vp_primary_direction", "==", "Unknown"), 
+                   ("vp_idx", "not in", first_vp)]]
     )
-        
-    return vp
+    
+    return vp_staying
 
 
 def group_vp_dwelling_rows(df: pd.DataFrame) -> pd.DataFrame: 
@@ -43,100 +68,68 @@ def group_vp_dwelling_rows(df: pd.DataFrame) -> pd.DataFrame:
     and it can stop at a plaza, go on elsewhere, and come back to a plaza,
     and we don't want to mistakenly group non-consecutive vp.
     """
+    prior_expected = (df.vp_idx - 1).to_numpy()
+    prior = (df.groupby("trip_instance_key").vp_idx.shift(1)).to_numpy()
+    
+    # Assign 0 if it seems to be dwelling (we want it to be grouped together)
+    # 1 if it's moving
+    same_group = np.where(prior == prior_expected, 0, 1)
+    
     df = df.assign(
-        #prior_expected = df.vp_idx - 1,
-        prior = (df.sort_values(["trip_instance_key", "vp_idx"])
-                .groupby("trip_instance_key", observed=True, group_keys=False)
-                .vp_idx
-                .apply(lambda x: x.shift(1))
-               )
-    )
-
-
-    df = df.assign(
-        # flag whether it is moving (we want 0's to show up for dwelling vp 
-        # because this will get the cumcount() to work 
-        is_moving = df.apply(
-            lambda x: 
-            0 if x.prior == x.prior_expected
-            else 1, axis=1).astype("int8")
+        same_group = same_group
     )
     
     return df
 
 
-def split_into_moving_and_dwelling(vp: pd.DataFrame):
+def assign_vp_groupings(
+    unknown_vp: pd.DataFrame,
+    analysis_date: str
+):
     """
-    Use vp_primary_direction to split vp into either moving vp or dwelling vp.
-    Dwelling vp need extra transforms to figure how long it dwelled.
-    It's unknown if there was no movement, because the x, y is the 
-    same, so direction was not able to be calculated.
-    The only exception is the first vp, because there is no prior point against which
-    to calculate direction.
-    """
-    usable_bounds = segment_calcs.get_usable_vp_bounds_by_trip(
-        vp
-    ).drop(columns = "max_vp_idx")
-
-    vp2 = pd.merge(
-        vp, 
-        usable_bounds,
-        on = "trip_instance_key",
-        how = "inner"
+    Concatenate the unknown-direction vp with known-direction vp.
+    A portion of unknown direction vps were flagged as being in the same
+    group (consecutive timestamps and locations) or not.
+    
+    Use this to set a vp_grouping column that can help us do a more 
+    nuanced grouping.
+    Need to do this because it's possible for vp to show up in the same location
+    but with timestamps far apart.
+    """    
+    subset_vp_idx = unknown_vp.vp_idx.tolist()
+    
+    known_vp = import_vp(
+        analysis_date,
+        columns = [
+            "trip_instance_key", "vp_idx", 
+            "location_timestamp_local", "vp_primary_direction"
+        ],
+        filters = [[("vp_idx", "not in", subset_vp_idx)]]
     )
     
-    vp2 = vp2.assign(
-        prior_expected = vp2.vp_idx - 1,
+    vp = pd.concat(
+        [known_vp, unknown_vp], 
+        axis=0
+    ).sort_values(["trip_instance_key", "vp_idx"]).reset_index(drop=True)
+    
+    vp = vp.assign(
+        same_group = vp.same_group.fillna(0).astype("int8")
     )
     
-    # keep subset of prior vp when we have unknowns, 
-    #then we want to grab just the one above
-    subset_vp_prior = vp2[
-        vp2.vp_primary_direction=="Unknown"
-    ].prior_expected.unique().tolist()
     
-    subset_unknown_vp = vp2[
-        vp2.vp_primary_direction=="Unknown"
-    ].vp_idx.unique().tolist()
-    
-    # These vp have unknowns and may need to consolidate 
-    # leave first vp in, just in case the second vp is unknown
-    vp_unknowns = vp2.loc[
-        vp2.vp_idx.isin(subset_vp_prior + subset_unknown_vp)
-    ]
-
-    # Vast majority of vp should be here, and we want to 
-    # separate these out because no change is happening
-    # and we don't want to do an expensive row-wise shift on these
-    vp_knowns = vp2.loc[~vp2.vp_idx.isin(subset_vp_prior + subset_unknown_vp)]
-    
-    vp_unknowns2 = group_vp_dwelling_rows(vp_unknowns)
-    
-    vp3 = pd.concat(
-        [vp_knowns, vp_unknowns2], 
-        axis=0, ignore_index=True
-    ).drop(
-        columns = ["prior", "prior_expected"]
-    ).fillna(
-        {"is_moving": 1}
-    ).astype(
-        {"is_moving": "int8"}
-    ).sort_values("vp_idx").reset_index(drop=True)
-    
-    vp3 = vp3.assign(
-        # since is_moving=0 if the vp is dwelling,
+    vp = vp.assign(
+        # since same_group=0 if the vp is dwelling,
         # cumsum() will not change from the prior vp
         # and a set of 2 or 3 will hold the same vp_grouping value
         # once the vp moves and is_moving=1, then cumsum() will increase again
-        vp_grouping = (vp3.groupby("trip_instance_key", 
-                                  observed=True, group_keys=False)
-                   .is_moving
+        vp_grouping = (vp.groupby("trip_instance_key")
+                   .same_group
                    .cumsum() 
                   )
     )
     
-    return vp3
-
+    return vp
+    
 
 def add_dwell_time(
     vp_grouped: pd.DataFrame,
@@ -149,7 +142,7 @@ def add_dwell_time(
     group_cols = ["trip_instance_key", "vp_grouping"]
 
     start_vp = (vp_grouped
-                .groupby(group_cols, observed=True, group_keys=False)
+                .groupby(group_cols, group_keys=False)
                 .agg({
                     "vp_idx": "min",
                     "location_timestamp_local": "min",
@@ -159,7 +152,7 @@ def add_dwell_time(
                )
 
     end_vp = (vp_grouped
-              .groupby(group_cols, observed=True, group_keys=False)
+              .groupby(group_cols, group_keys=False)
               .agg({
                   "vp_idx": "max",
                   "location_timestamp_local": "max"
@@ -183,7 +176,7 @@ def add_dwell_time(
     )
 
     return df
-    
+
 if __name__ == "__main__":
     
     from update_vars import analysis_date_list
@@ -200,21 +193,19 @@ if __name__ == "__main__":
         EXPORT_FILE = GTFS_DATA_DICT.speeds_tables.vp_dwell
         
         start = datetime.datetime.now()
-    
-        vp = delayed(import_vp)(analysis_date)
+        
+        vp_unknowns = filter_to_not_moving_vp(analysis_date).pipe(group_vp_dwelling_rows) 
+           
+        vp_grouped = assign_vp_groupings(
+            vp_unknowns, analysis_date
+        )
 
-        vp_grouped = delayed(split_into_moving_and_dwelling)(vp)
-
-        vp_with_dwell = delayed(add_dwell_time)(vp_grouped)
-
-        vp_with_dwell = compute(vp_with_dwell)[0]
+        vp_with_dwell = add_dwell_time(vp_grouped)
 
         time1 = datetime.datetime.now()
         logger.info(f"compute dwell df: {time1 - start}")
 
-        vp_usable = pd.read_parquet(
-            f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}",
-        )
+        vp_usable = import_vp(analysis_date)
 
         vp_usable_with_dwell = pd.merge(
             vp_usable,
