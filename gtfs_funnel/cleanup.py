@@ -15,7 +15,7 @@ if __name__ == "__main__":
         INPUT_FILE = GTFS_DATA_DICT.speeds_tables.usable_vp
         
         publish_utils.if_exists_then_delete(
-            f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage"
+            f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage.parquet"
         )       
         publish_utils.if_exists_then_delete(
             f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet"
