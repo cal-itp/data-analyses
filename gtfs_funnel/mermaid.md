@@ -126,7 +126,7 @@ flowchart TB
     end
 
     subgraph RT stop_times
-        J(segment_type=rt_stop_times):::segmentType --> 
+        J(segment_type=rt_stop_times<br>speedmap_segments):::segmentType --> 
             C;
         E --> K([average_summary_speeds.py]):::script -->
         L[rollup_singleday/rollup_multiday
