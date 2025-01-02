@@ -4,6 +4,7 @@ The goal of this tool is to provide predictions to estimate increases in annual 
 
 This tool was developed in Fall 2022 for AHSC Round 7 and has not yet been updated. It currently does not support the addition of new routes or routing changes, but it will continue to evolve as more data becomes available. Feedback is always welcome to help improve its functionality. If you have additional questions, email hello@calitp.org.
 
+[Dashboard URL](https://dashboards.calitp.org/public/dashboard/01fb85e3-625d-4d77-9da7-565dd218bb16?agency_name=&route_name=&number_of_additional_trips_-_weekday=0&number_of_additional_trips_-_saturday=0&number_of_additional_trips_-_sunday=0)
 
 ## Definitions and Methodology
 
