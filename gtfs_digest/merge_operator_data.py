@@ -56,10 +56,9 @@ def concatenate_crosswalks(
         "counties_served",
         "service_area_sq_miles",
         "hq_city",
-        "uza_name",
         "service_area_pop",
         "organization_type",
-        "primary_uza",
+        "primary_uza_name",
         "reporter_type"
     ]
         
@@ -67,7 +66,7 @@ def concatenate_crosswalks(
         time_series_utils.concatenate_datasets_across_dates(
             SCHED_GCS,
             FILE,
-            analysis_date_list,
+            date_list,
             data_type="df",
             columns=ntd_cols
         )
