@@ -20,7 +20,7 @@ def condense_point_geom_to_line(
     df: gpd.GeoDataFrame,
     group_cols: list,
     geom_col: str = "geometry",
-    array_cols: list: = []
+    array_cols: list = []
 ) -> gpd.GeoDataFrame:
     """    
     To apply nearest neighbors, we need to create our equivalent
