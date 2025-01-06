@@ -76,6 +76,8 @@ def load_operator_metrics(organization_name:str)->pd.DataFrame:
     df = pd.read_parquet(url,
     filters=[[(("organization_name", "==", organization_name))]])
     
+    df = df.drop_duplicates(subset = ["service_date"]).reset_index(drop = True)
+    
     # Rename dataframe
     df = _report_utils.replace_column_names(df)
     
