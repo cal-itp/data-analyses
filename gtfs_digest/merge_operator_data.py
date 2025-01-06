@@ -191,13 +191,22 @@ if __name__ == "__main__":
     )
     
     # Drop duplicates created after merging
+    # Add more strigent drop duplicate criteria
+    
+    duplicate_cols = ["schedule_gtfs_dataset_key",
+                     "vp_per_min_agency",
+                     "spatial_accuracy_agency",
+                     "service_date",
+                     "organization_name",
+                     "caltrans_district"]
+
     op_profiles_df3 = (
         op_profiles_df2
         .pipe(
             publish_utils.exclude_private_datasets, 
             col = "schedule_gtfs_dataset_key", 
             public_gtfs_dataset_keys = public_feeds
-        ).drop_duplicates(subset = list(op_profiles_df2.columns))
+        ).drop_duplicates(subset = duplicate_cols)
     .reset_index(drop = True))
 
     op_profiles_df3.to_parquet(
