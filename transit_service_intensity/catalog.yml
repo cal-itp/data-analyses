@@ -1,0 +1,22 @@
+metadata:
+  version: 1
+sources:
+  # CalEnviroScreen
+  calenviroscreen_raw:
+    driver: shapefile
+    description: CalEnviroScreen 4.0 raw data
+    args:
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen40shpf2021shp.zip
+      use_fsspec: true
+  ca_geoportal:
+        driver: dcat
+        args:
+          url: https://gis.data.ca.gov/data.json
+          items:
+              county_boundaries: https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries   
+  calenviroscreen_lehd_by_tract:
+    driver: geoparquet
+    description: CalEnviroScreen 4.0 + LEHD 2021 data by tract
+    args:
+      # source: bus_service_utils/generate_calenviroscreen_lehd_data.py 
+      urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen_lehd_by_tract.parquet
