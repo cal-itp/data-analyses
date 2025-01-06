@@ -14,7 +14,6 @@ from segment_speed_utils.project_vars import (
 from shared_utils import gtfs_utils_v2, publish_utils, rt_dates
 from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
-
 def concatenate_trips(
     date_list: list,
 ) -> pd.DataFrame:
