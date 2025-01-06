@@ -72,7 +72,6 @@ def load_operator_metrics(organization_name:str)->pd.DataFrame:
     Load dataframe with the total scheduled service hours 
     a transit operator.
     """
-    # url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_metrics}.parquet"
     url = "gs://calitp-analytics-data/data-analyses/rt_vs_schedule/digest/operator_profiles.parquet"
     df = pd.read_parquet(url,
     filters=[[(("organization_name", "==", organization_name))]])
