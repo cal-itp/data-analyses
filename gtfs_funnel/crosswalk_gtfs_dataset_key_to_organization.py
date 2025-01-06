@@ -58,7 +58,8 @@ def load_ntd(year: int) -> pd.DataFrame:
     Load NTD Data stored in our warehouse.
     Select certain columns.
     """
-    df = (
+    try:
+        df = (
         tbls.mart_ntd.dim_annual_agency_information()
         >> filter(_.year == year, _.state == "CA", _._is_current == True)
         >> select(
@@ -81,8 +82,34 @@ def load_ntd(year: int) -> pd.DataFrame:
             _.year,
         )
         >> collect()
-    )
-
+        )
+    except:
+        df = (
+        tbls.mart_ntd.dim_annual_agency_information()
+        >> filter(_.year == year, _.state == "CA", _._is_current == True)
+        >> select(
+            _.number_of_state_counties,
+            _.uza_name,
+            _.density,
+            _.number_of_counties_with_service,
+            _.state_admin_funds_expended,
+            _.service_area_sq_miles,
+            _.population,
+            _.service_area_pop,
+            _.subrecipient_type,
+            _.reporter_type,
+            _.organization_type,
+            _.agency_name,
+            _.voms_pt,
+            _.voms_do,
+            _.ntd_id,
+            _.year,
+            _.primary_uza,
+        )
+        >> collect()
+        )
+        df = df.rename(columns = {"uza_name":"primary_uza_name",
+                                 "primary_uza":"primary_uza_code"})
     df2 = df.sort_values(by=df.columns.tolist(), na_position="last")
     df3 = df2.groupby("agency_name").first().reset_index()
     

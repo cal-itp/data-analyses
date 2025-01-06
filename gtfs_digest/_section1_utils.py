@@ -78,9 +78,7 @@ def get_counties()->gpd.GeoDataFrame:
 
 def load_operator_ntd_profile(organization_name:str)->pd.DataFrame:
 
-    # op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
-    # TEMPORARY
-    op_profiles_url = "gs://calitp-analytics-data/data-analyses/rt_vs_schedule/digest/operator_profiles_AH_TESTING_.parquet"
+    op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
     op_profiles_df = pd.read_parquet(
     op_profiles_url,
     filters=[[("organization_name", "==", organization_name)]])

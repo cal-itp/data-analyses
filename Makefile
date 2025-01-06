@@ -37,13 +37,14 @@ build_gtfs_digest:
 	$(eval export site = gtfs_digest)
 	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && make assemble_data && cd ..   
+	cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..       
 	make build_portfolio_site
 	make git_check_sections
 
 build_district_digest:
 	$(eval export site = district_digest)
 	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	#cd gtfs_digest/ && python deploy_district_yaml.py district && cd .. 
+	cd gtfs_digest/ && python deploy_district_yaml.py district && cd .. 
 	make build_portfolio_site 
 	make git_check_no_sections
     
