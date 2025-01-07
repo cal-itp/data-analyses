@@ -129,8 +129,8 @@ STANDARDIZED_COLUMNS_DICT = {
     "route_name_used": "route_name",
     "route_types_served": "routetypes",
     "n_hours_in": "n_hours_in_service",
-    "route_ids_": "route_ids_served"
-
+    "route_ids_": "route_ids_served",
+    "meters_to_shn": "meters_to_ca_state_highway"
 }
 
 
