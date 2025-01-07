@@ -32,7 +32,7 @@ def concatenate_operator_routes(
     date_list: list
 ) -> gpd.GeoDataFrame:
     FILE = GTFS_DATA_DICT.schedule_tables.operator_routes
-
+    
     df = time_series_utils.concatenate_datasets_across_dates(
         SCHED_GCS,
         FILE,

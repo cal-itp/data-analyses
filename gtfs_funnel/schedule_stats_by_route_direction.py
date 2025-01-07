@@ -197,7 +197,7 @@ if __name__ == "__main__":
         trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
  
         trip_metrics.to_parquet(
-            f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
+            f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet"
         
         route_group_merge_cols = [
             "schedule_gtfs_dataset_key", 
