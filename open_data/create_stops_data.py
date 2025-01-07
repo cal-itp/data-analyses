@@ -4,17 +4,20 @@ route_id, route_name, agency_id, agency_name.
 """
 import datetime
 import geopandas as gpd
+import intake
 import pandas as pd
 import yaml
 
 import open_data_utils
-from calitp_data_analysis import utils
+from calitp_data_analysis import geography_utils, utils
 from shared_utils import publish_utils
 from update_vars import (analysis_date, 
                          GTFS_DATA_DICT,
                          TRAFFIC_OPS_GCS, 
                          RT_SCHED_GCS, SCHED_GCS
                         )
+
+catalog = intake.open_catalog("../_shared_utils/shared_utils/shared_data_catalog.yml")
 
 def create_stops_file_for_export(
     date: str,
@@ -38,6 +41,31 @@ def create_stops_file_for_export(
     print(f"get stops for date: {time1 - time0}")
     
     return stops2
+
+
+def add_distance_to_state_highway(
+    stops: gpd.GeoDataFrame
+) -> gpd.GeoDataFrame:
+    """
+    Bring in State Highway Network gdf and add a column that tells us
+    distance (in meters) between stop and SHN.
+    For stops outside of CA, this will not be that meaningful.
+    See discussion in:
+    https://github.com/cal-itp/data-analyses/issues/1182
+    https://github.com/cal-itp/data-analyses/issues/1321
+    """
+    orig_crs = stops.crs
+    
+    shn = catalog.state_highway_network.read()[
+        ["geometry"]].to_crs(geography_utils.CA_NAD83Albers).geometry.iloc[0]    
+
+    stops = stops.to_crs(geography_utils.CA_NAD83Albers)
+    
+    stops = stops.assign(
+        meters_to_shn = stops.geometry.distance(shn).round(1)
+    )
+    
+    return stops.to_crs(orig_crs)
 
 
 def patch_previous_dates(
@@ -80,7 +108,8 @@ def patch_previous_dates(
     published_stops = pd.concat(
         [current_stops, patch_stops], 
         axis=0, ignore_index=True
-    )
+    ).pipe(add_distance_to_state_highway)
+    
     
     return published_stops
     
@@ -98,6 +127,8 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # add GTFS stop-related metrics
         'n_routes', 'route_ids_served', 'route_types_served', 
         'n_arrivals', 'n_hours_in_service',
+        # this is derived column
+        'meters_to_shn'
     ]
     agency_ids = ['base64_url', 'caltrans_district']
     
@@ -123,6 +154,7 @@ if __name__ == "__main__":
         analysis_date,
     ).pipe(finalize_export_df)    
 
+    
     utils.geoparquet_gcs_export(
         published_stops,
         TRAFFIC_OPS_GCS,
