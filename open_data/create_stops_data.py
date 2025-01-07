@@ -57,9 +57,9 @@ def add_distance_to_state_highway(
     orig_crs = stops.crs
     
     shn = catalog.state_highway_network.read()[
-        ["geometry"]].to_crs(geography_utils.CA_NAD83Albers).geometry.iloc[0]    
+        ["geometry"]].to_crs(geography_utils.CA_NAD83Albers_m).geometry.iloc[0]    
 
-    stops = stops.to_crs(geography_utils.CA_NAD83Albers)
+    stops = stops.to_crs(geography_utils.CA_NAD83Albers_m)
     
     stops = stops.assign(
         meters_to_shn = stops.geometry.distance(shn).round(1)
