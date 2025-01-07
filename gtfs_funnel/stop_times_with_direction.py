@@ -154,9 +154,9 @@ def find_prior_subseq_stop_info(
     gdf2 = gdf[keep_cols].assign(
         stop_primary_direction = stop_direction,
         stop_pair = gdf.stop_id.astype(str).str.cat(
-            gdf.subseq_stop_id.astype(str)),
+            gdf.subseq_stop_id.astype(str), sep = "__"),
         stop_pair_name = gdf.stop_name.astype(str).str.cat(
-            gdf.subseq_stop_name.astype(str)),
+            gdf.subseq_stop_name.astype(str), sep = "__"),
     )
     
     stop_times_geom_direction = pd.merge(
