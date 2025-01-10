@@ -40,7 +40,6 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
         columns = trip_scheduled_col,
         get_pandas = True
     )
-
     
     # Merge dfs
     merge_cols = ["trip_instance_key", 
@@ -188,6 +187,8 @@ if __name__ == "__main__":
     
     TRIP_EXPORT = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_trip_metrics
     ROUTE_DIR_EXPORT = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_route_direction_metrics
+    # AH TEMP
+    ROUTE_DIR_EXPORT = F"AH_{ROUTE_DIR_EXPORT}"
     ROUTE_TYPOLOGIES = GTFS_DATA_DICT.schedule_tables.route_typologies
     
     for date in analysis_date_list:
@@ -195,9 +196,10 @@ if __name__ == "__main__":
         
         # Find metrics on the trip grain
         trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
- 
-        trip_metrics.to_parquet(
-            f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
+         
+        # AH TEMP 
+        #trip_metrics.to_parquet(
+        #    f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
         
         route_group_merge_cols = [
             "schedule_gtfs_dataset_key", 
