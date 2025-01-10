@@ -388,7 +388,7 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
     
     most_common_shape = (
         trips.groupby(route_dir_cols + ["shape_id", "shape_array_key"], 
-                      observed=True, group_keys = False)
+                      observed=True, group_keys = False, dropna= False)
         .agg({"trip_instance_key": "count"})
         .reset_index()
         .sort_values(route_dir_cols + ["trip_instance_key"], 
