@@ -429,6 +429,8 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
         on = ["schedule_gtfs_dataset_key", "route_id"]
     )
     
+    # Amanda: test
+    common_shape_geom2.direction_id = common_shape_geom2.direction_id.fillna(0)
     return common_shape_geom2
  
     
