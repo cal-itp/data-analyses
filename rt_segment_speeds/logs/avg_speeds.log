@@ -584,3 +584,5 @@
 2024-12-18 15:06:31.961 | INFO     | average_segment_speeds:segment_averages_detail:249 - speedmap_segments detailed segment averaging for ['2024-12-11'] execution time: 0:07:17.222047
 2024-12-18 15:12:50.801 | INFO     | average_segment_speeds:segment_averages:185 - speedmap_segments segment averaging for ['2024-12-11'] execution time: 0:06:18.665542
 2024-12-18 15:17:58.646 | INFO     | average_segment_speeds:segment_averages:185 - speedmap_segments segment averaging for ['2024-12-11'] execution time: 0:05:07.636255
+2025-01-15 14:36:17.067 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:18.845972
+2025-01-15 14:36:31.001 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-11-13'] execution time: 0:00:32.780041

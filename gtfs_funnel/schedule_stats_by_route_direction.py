@@ -23,9 +23,6 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
         filters=[[("stop_primary_direction", "!=", "Unknown")]
     ])
     
-    # AH: temporarily fill in direction_id rows with nans
-    # should go back to the script that creates stop_times_df 
-    stop_times_df.direction_id = stop_times_df.direction_id.fillna(0)
     
     trip_scheduled_col = [
         "route_id",
@@ -52,6 +49,10 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
                   "shape_array_key"]
     
     stop_times_with_trip = pd.merge(stop_times_df, trips_df, on = merge_cols)
+    
+    # AH: temporarily fill in direction_id rows with nans
+    # should go back to the script that creates stop_times_df 
+    stop_times_with_trip.direction_id = stop_times_with_trip.direction_id.fillna(0)
     
     main_cols = [
         "route_id",
