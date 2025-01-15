@@ -1,5 +1,5 @@
-directory: ./ha_portfolio/
-notebook: ./ha_portfolio/ha_portfolio.ipynb
+directory: ./REPLACE_WITH_YOUR_FOLDER_NAME/
+notebook: ./REPLACE_WITH_YOUR_FOLDER_NAME/YOUR_NOTEBOOK.ipynb
 parts:
 - caption: Introduction
 - chapters:
@@ -27,5 +27,5 @@ parts:
       district: 11
   - params:
       district: 12
-readme: ./ha_portfolio/README.md
-title: Starter Kit Portfolio
+readme: ./REPLACE_WITH_YOUR_FOLDER_NAME/README.md
+title: REPLACE YOUR OWN TITLE
