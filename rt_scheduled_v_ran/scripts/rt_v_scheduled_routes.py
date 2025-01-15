@@ -52,6 +52,9 @@ def route_metrics(
         f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet"
     )
     
+    # Fill in trip_export with direction_id here temporarily
+    trip_df.direction_id = trip_df.direction_id.fillna(0)
+    
     crosswalk_cols = [
     "schedule_gtfs_dataset_key",
     "name",
