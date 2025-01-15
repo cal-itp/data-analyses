@@ -127,7 +127,7 @@ def add_weekday_weekend_column(df: pd.DataFrame, category_dict: dict = time_help
     )
     
     return df
-    
+
 def count_trips_by_group(df: pd.DataFrame, group_cols: list):
     """
     Given a df with trip_instance_key and an arbitrary list of 
@@ -140,7 +140,7 @@ def count_trips_by_group(df: pd.DataFrame, group_cols: list):
       )
     df = df.rename(columns = {"trip_instance_key": "n_trips"})
     return df
-    
+
 def aggregate_time_of_day_to_peak_offpeak(
     df: pd.DataFrame,
     group_cols: list,
