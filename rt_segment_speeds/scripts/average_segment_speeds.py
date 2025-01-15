@@ -1,7 +1,7 @@
 """
 Quick aggregation for segment speed averages.
 """
-import datetime
+import datetimeconcatenate_trip_segment_speeds
 import geopandas as gpd
 import pandas as pd
 import sys
@@ -83,6 +83,8 @@ def concatenate_trip_segment_speeds(
     df = df.pipe(
         gtfs_schedule_wrangling.add_weekday_weekend_column
     ) #  drop service_date?
+    
+    df.direction_id = df.direction_id.fillna(0)
     print("concatenated files") 
     return df
 
@@ -101,6 +103,9 @@ def merge_in_segment_geometry(
     segment_geom = gpd.read_parquet(
         f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
     ).to_crs(WGS84)
+    
+    # Amanda: go back to the script that creates segment_geom to fill in nans
+    segment_geom.direction_id = segment_geom.direction_id.fillna(0)
     
     col_order = [c for c in speeds_by_segment.columns]
     
@@ -139,6 +144,9 @@ def segment_averages(
         segment_type,
         get_pandas = False
     )
+    
+    # Amanda, temporarily filling in direction id here 
+    df.direction_id = df.direction_id.fillna(0)
     
     if weighted_averages:
         avg_speeds = delayed(metrics.concatenate_peak_offpeak_allday_averages)(
