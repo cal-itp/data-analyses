@@ -23,6 +23,10 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
         filters=[[("stop_primary_direction", "!=", "Unknown")]
     ])
     
+    # AH: temporarily fill in direction_id rows with nans
+    # should go back to the script that creates stop_times_df 
+    stop_times_df.direction_id = stop_times_df.direction_id.fillna(0)
+    
     trip_scheduled_col = [
         "route_id",
         "trip_instance_key",
@@ -57,7 +61,8 @@ def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
     
     agg1 = (
         stop_times_with_trip.groupby(
-            main_cols + ["stop_primary_direction"]
+            main_cols + ["stop_primary_direction"], 
+            dropna=False
         )
         .agg({"stop_sequence": "count"})
         .reset_index()
@@ -136,31 +141,37 @@ def schedule_metrics_by_route_direction(
     group_merge_cols: list,
 ) -> pd.DataFrame:
     """
-    Aggregate trip-level metrics to route-direction, and 
+    Aggregate trip-level metrics to route-direction, and
     attach shape geometry for common_shape_id.
     """
     service_freq_df = gtfs_schedule_wrangling.aggregate_time_of_day_to_peak_offpeak(
-        df, group_merge_cols, long_or_wide = "long")
-        
-    metrics_df = (df.groupby(group_merge_cols, 
-                             observed=True, group_keys=False)
-                  .agg({
-                      "median_stop_meters": "mean", 
-                      # take mean of the median stop spacing for trip
-                      # does this make sense?
-                      # median is the single boiled down metric at the trip-level
-                      "scheduled_service_minutes": "mean",
-                  }).reset_index()
-                  .rename(columns = {
-                      "median_stop_meters": "avg_stop_meters",
-                      "scheduled_service_minutes": "avg_scheduled_service_minutes"
-                  })
-                 )
-    
+        df, group_merge_cols, long_or_wide="long"
+    )
+
+    metrics_df = (
+        df.groupby(group_merge_cols, observed=True, group_keys=False, dropna=False)
+        .agg(
+            {
+                "median_stop_meters": "mean",
+                # take mean of the median stop spacing for trip
+                # does this make sense?
+                # median is the single boiled down metric at the trip-level
+                "scheduled_service_minutes": "mean",
+            }
+        )
+        .reset_index()
+        .rename(
+            columns={
+                "median_stop_meters": "avg_stop_meters",
+                "scheduled_service_minutes": "avg_scheduled_service_minutes",
+            }
+        )
+    )
+
     metrics_df = metrics_df.assign(
-        avg_stop_miles = metrics_df.avg_stop_meters.divide(METERS_PER_MILE).round(2)
-    ).drop(columns = ["avg_stop_meters"])
-    
+        avg_stop_miles=metrics_df.avg_stop_meters.divide(METERS_PER_MILE).round(2)
+    ).drop(columns=["avg_stop_meters"])
+
     round_me = ["avg_stop_miles", "avg_scheduled_service_minutes"]
     metrics_df[round_me] = metrics_df[round_me].round(2)
 
@@ -168,17 +179,11 @@ def schedule_metrics_by_route_direction(
         analysis_date
     ).pipe(helpers.remove_shapes_outside_ca)
 
-    df = pd.merge(
-        common_shape,
-        metrics_df,
-        on = group_merge_cols,
-        how = "inner"
-    ).merge(
-        service_freq_df,
-        on = group_merge_cols,
-        how = "inner"
+    df = pd.merge(common_shape, metrics_df, on=group_merge_cols, how="inner").merge(
+        service_freq_df, on=group_merge_cols, how="inner"
     )
-    
+
+    df.time_period = df.time_period.fillna(df.peak_offpeak)
     return df
     
     
