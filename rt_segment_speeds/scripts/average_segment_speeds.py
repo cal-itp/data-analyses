@@ -1,7 +1,7 @@
 """
 Quick aggregation for segment speed averages.
 """
-import datetimeconcatenate_trip_segment_speeds
+import datetime
 import geopandas as gpd
 import pandas as pd
 import sys
