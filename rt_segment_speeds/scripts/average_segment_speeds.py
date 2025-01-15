@@ -72,12 +72,18 @@ def concatenate_trip_segment_speeds(
     ).pipe(
         gtfs_schedule_wrangling.add_peak_offpeak_column
     )
+    """
+    Amanda: There's already a `service_date` column.
     df = df.rename(columns={'arrival_time':'service_date'}
     ).pipe(
         gtfs_schedule_wrangling.add_weekday_weekend_column
     ) #  drop service_date?
     print("concatenated files") 
-    
+    """ 
+    df = df.pipe(
+        gtfs_schedule_wrangling.add_weekday_weekend_column
+    ) #  drop service_date?
+    print("concatenated files") 
     return df
 
 
