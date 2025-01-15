@@ -9,15 +9,16 @@ This report shows general ridership trends by Monthly NTD Reporter, mode, and ty
 
 ## Definitions
 - **FTA**: Federal Transit Admisistration.
+- **MODE**: A system for carrying transit passengers described by specific right-of-way (ROW), technology and operational features. Examples: Bus, Cable Car, Light Rail.
+- **Monthly NTD Reporter**: Full Reporters that submit Monthly Ridership (MR) and monthly Safety and Security reports to NTD.
 - **NTD**: National Transit Database. A reporting system that collects public transportation financial and operating information.
 - **RTPA**: Regional Transportation Planning Authority.
+- **TOS**: Type of Service. Describes how public transportation services are provided by the transit agency: directly operated (DO) or purchased transportation (PT) services.
 - **UZA**: Urbanized Areas. An urbanized area is an incorporated area with a population of 50,000 or more that is designated as such by the U.S. Department of Commerce, Bureau of the Census.
-- **MODE**: A system for carrying transit passengers described by specific right-of-way (ROW), technology and operational features. Examples: Bus, Cable Car, Light Rail.
-- **TOS**: Describes how public transportation services are provided by the transit agency: directly operated (DO) or purchased transportation (PT) services.
-- **Monthly NTD Reporter**: Full Reporters that submit Monthly Ridership (MR) and monthly Safety and Security reports to NTD.
+
 
 ## Methodology
-Ridership data is ingested via the `FTA Complete Monthly Ridership` report, per the SB125 guidelines. Then filtered for Monthly NTD Reporters residing in California UZAs. These California Reporters are grouped by RTPAs, then aggregated mode and TOS. The processed data for each RTPA is saved to a public respository, see datasets below.
+Ridership data is ingested via the `FTA Complete Monthly Ridership` report, per the SB125 guidelines. Then filtered for Reporters residing in California UZAs. These California Reporters are grouped by RTPAs, then aggregated mode and TOS. The processed data for each RTPA is saved to a public respository, see datasets below.
 
 
 ## Frequently Asked Questions
@@ -26,13 +27,14 @@ Ridership data is ingested via the `FTA Complete Monthly Ridership` report, per 
 Per the [NTD Complete Monthly Ridership Report](https://www.transit.dot.gov/ntd/data-product/monthly-module-adjusted-data-release) webpage:
 >File Summary: Contains monthly-updated service information reported by urban Full Reporters.
 
-Transit operators/agencies that are **Urban full reporters, that submit monthly ridership data (Monthly NTD Reporter) to NTD from 2018 to present**, are included in this report. Monthly NTD Reporters that were previously Urban full reporters, but are currently not, may appear. This may result in operators showing zero or partial ridership data in the report. 
+Transit operators/agencies that are **Urban full reporters, that submit monthly ridership data to NTD from 2018 to present**, are included in this report. Reporters that were previously Urban full reporters, but are currently not, may appear. This may result in Reporters showing zero or partial ridership data in the report. 
 
 If a Reporter is not a monthly reporter, or has not reported data since 2018, they will not appear in the report.
 
 Examples: 
-- Operator A is a urban full reporter from 2019-2022, then became a reduced reporter for 2023. Operator A's ridership data will be displayed for 2019-2022 only.
-- Operator B is a urban full reporter from 2000-2017, then became a reduced reporter for 2018. Operator B's will be named in the report, but will not display ridership data. 
+- Reporter A is an urban full reporter from 2019-2022, then became a reduced reporter for 2023. Reporter A's ridership data will be displayed for 2019-2022 only.
+- Reporter B is an urban full reporter from 2000-2017, then became a reduced reporter for 2018. Reporter B will be named in the report, but will not display ridership data.
+- Reporter C was a reduced reporter form 2015-2020, then became an urban full reporter and began submitting monthly ridership data to NTD for 2021. Reporter C's ridership data will be displayed for 2021-present. 
 
 
 **Q: Where can I download my RTPA's data?**
