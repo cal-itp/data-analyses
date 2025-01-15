@@ -28,7 +28,6 @@ weeks_available = [
     rt_dates.oct2023_week, rt_dates.apr2023_week, 
 ]
 
-
 analysis_date_list = [analysis_date]
                      
 

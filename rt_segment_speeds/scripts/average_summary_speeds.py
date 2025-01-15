@@ -149,7 +149,6 @@ def summary_average_speeds(
         f"{export_file}_{time_span_str}"
     )
     
-    
     end = datetime.datetime.now()
     
     logger.info(
@@ -177,7 +176,6 @@ if __name__ == "__main__":
     ROUTE_DIR_COLS = [*dict_inputs["route_dir_cols"]]
     
     ROUTE_DIR_FILE = dict_inputs["route_dir_single_summary"]
-    
     for analysis_date in analysis_date_list:
               
         summary_average_speeds(
@@ -186,7 +184,6 @@ if __name__ == "__main__":
             group_cols = OPERATOR_COLS + ROUTE_DIR_COLS,
             export_file = ROUTE_DIR_FILE
         )
-        
     '''
     from segment_speed_utils.project_vars import weeks_available
     

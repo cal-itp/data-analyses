@@ -61,7 +61,7 @@ def route_metrics(
     "organization_name",
     "caltrans_district",]
     
-    route_df = metrics.concatenate_peak_offpeak_allday_averages(
+    route_df = metrics.calculate_avg_speeds(
         trip_df,
         group_cols = ["schedule_gtfs_dataset_key"] + ROUTE_DIR_COLS,
         metric_type = "rt_vs_schedule"
