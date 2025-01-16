@@ -20,9 +20,9 @@ from loguru import logger
 from calitp_data_analysis import utils
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils.project_vars import PROJECT_CRS
+from segment_speed_utils import vp_transform
 from shared_utils import geo_utils, publish_utils, rt_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
-import vp_transform
 
 def find_valid_trips(
     vp: pd.DataFrame,
