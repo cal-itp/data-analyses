@@ -309,3 +309,4 @@
 2024-12-17 14:08:13.713 | INFO     | __main__:<module>:235 - merge with original and export: 0:01:19.916578
 2024-12-17 14:08:13.714 | INFO     | __main__:<module>:236 - vp with dwell time 2024-12-11: 0:06:07.248833
 2024-12-17 14:13:50.962 | INFO     | __main__:<module>:78 - 2024-12-11: condense vp for trip 0:05:19.406518
+2025-01-16 15:00:10.192 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:40.192578
