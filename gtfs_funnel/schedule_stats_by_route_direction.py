@@ -201,7 +201,9 @@ if __name__ == "__main__":
         
         # Find metrics on the trip grain
         trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
- 
+     
+        trip_metrics.direction_id = trip_metrics.direction_id.fillna(0)
+        
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
         
