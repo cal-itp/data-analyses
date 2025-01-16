@@ -33,12 +33,12 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     """
     Load schedule versus realtime file.
     """
-    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
-    
+    # schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
+    schd_vp_url = "gs://calitp-analytics-data/data-analyses/rt_vs_schedule/digest/schedule_vp_metrics_AH_TESTING.parquet"
     # Keep only rows that are found in both schedule and real time data
     df = (pd.read_parquet(schd_vp_url, 
           filters=[[("organization_name", "==", organization),
-         ("sched_rt_category", "==", "schedule_and_vp")]])
+         ("sched_rt_category", "in", ["schedule_and_vp"])]])
          )
     
     # Delete duplicates
