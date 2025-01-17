@@ -9,9 +9,8 @@ from typing import Literal
 from segment_speed_utils import segment_calcs
 
 def weighted_average_speeds_across_segments(
-    df: pd.DataFrame,
-    group_cols: list
-) -> pd.DataFrame: 
+    df: pd.DataFrame, group_cols: list
+) -> pd.DataFrame:
     """
     We can use our segments and the deltas within a trip
     to calculate the trip-level average speed, or
@@ -19,15 +18,16 @@ def weighted_average_speeds_across_segments(
     But, we want a weighted average, using the raw deltas
     instead of mean(speed_mph), since segments can be varying lengths.
     """
-    avg_speeds = (df.groupby(group_cols, 
-                      observed=True, group_keys=False)
-           .agg({
-               "meters_elapsed": "sum",
-               "sec_elapsed": "sum",
-           }).reset_index()
-          ).pipe(
-        segment_calcs.speed_from_meters_elapsed_sec_elapsed
-    )
+    avg_speeds = (
+        df.groupby(group_cols, observed=True, group_keys=False, dropna=False)
+        .agg(
+            {
+                "meters_elapsed": "sum",
+                "sec_elapsed": "sum",
+            }
+        )
+        .reset_index()
+    ).pipe(segment_calcs.speed_from_meters_elapsed_sec_elapsed)
 
     return avg_speeds
     
@@ -112,10 +112,10 @@ def derive_trip_comparison_metrics(
 
 
 def calculate_weighted_average_vp_schedule_metrics(
-    df: pd.DataFrame, 
+    df: pd.DataFrame,
     group_cols: list,
 ) -> pd.DataFrame:
-    
+
     sum_cols = [
         "minutes_atleast1_vp",
         "minutes_atleast2_vp",
@@ -123,21 +123,20 @@ def calculate_weighted_average_vp_schedule_metrics(
         "scheduled_service_minutes",
         "total_vp",
         "vp_in_shape",
-        "is_early", "is_ontime", "is_late"
+        "is_early",
+        "is_ontime",
+        "is_late",
     ]
 
     count_cols = ["trip_instance_key"]
-    
+
     df2 = (
-        df.groupby(group_cols,
-                   observed=True, group_keys=False)
-        .agg({
-            **{e: "sum" for e in sum_cols}, 
-            **{e: "count" for e in count_cols}}
-        ).reset_index()
-        .rename(columns = {"trip_instance_key": "n_vp_trips"})
+        df.groupby(group_cols, observed=True, group_keys=False, dropna=False)
+        .agg({**{e: "sum" for e in sum_cols}, **{e: "count" for e in count_cols}})
+        .reset_index()
+        .rename(columns={"trip_instance_key": "n_vp_trips"})
     )
-        
+
     return df2
 
 

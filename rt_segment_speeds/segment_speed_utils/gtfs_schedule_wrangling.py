@@ -127,20 +127,21 @@ def add_weekday_weekend_column(df: pd.DataFrame, category_dict: dict = time_help
     )
     
     return df
-    
+
 def count_trips_by_group(df: pd.DataFrame, group_cols: list):
     """
-    Given a df with trip_instance_key and an arbitrary list of 
+    Given a df with trip_instance_key and an arbitrary list of
     group_cols, return trip counts by group.
     """
     assert "trip_instance_key" in df.columns
-    df = (df.groupby(group_cols)
-               .agg({"trip_instance_key": "count"})
-               .reset_index()
-      )
-    df = df.rename(columns = {"trip_instance_key": "n_trips"})
+    df = (
+        df.groupby(group_cols, dropna=False)
+        .agg({"trip_instance_key": "count"})
+        .reset_index()
+    )
+    df = df.rename(columns={"trip_instance_key": "n_trips"})
     return df
-    
+
 def aggregate_time_of_day_to_peak_offpeak(
     df: pd.DataFrame,
     group_cols: list,
@@ -388,7 +389,7 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
     
     most_common_shape = (
         trips.groupby(route_dir_cols + ["shape_id", "shape_array_key"], 
-                      observed=True, group_keys = False)
+                      observed=True, group_keys = False, dropna= False)
         .agg({"trip_instance_key": "count"})
         .reset_index()
         .sort_values(route_dir_cols + ["trip_instance_key"], 
@@ -429,6 +430,8 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
         on = ["schedule_gtfs_dataset_key", "route_id"]
     )
     
+    # Amanda: test
+    common_shape_geom2.direction_id = common_shape_geom2.direction_id.fillna(0)
     return common_shape_geom2
  
     

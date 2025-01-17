@@ -584,3 +584,97 @@
 2024-12-18 15:06:31.961 | INFO     | average_segment_speeds:segment_averages_detail:249 - speedmap_segments detailed segment averaging for ['2024-12-11'] execution time: 0:07:17.222047
 2024-12-18 15:12:50.801 | INFO     | average_segment_speeds:segment_averages:185 - speedmap_segments segment averaging for ['2024-12-11'] execution time: 0:06:18.665542
 2024-12-18 15:17:58.646 | INFO     | average_segment_speeds:segment_averages:185 - speedmap_segments segment averaging for ['2024-12-11'] execution time: 0:05:07.636255
+2025-01-15 14:36:17.067 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:18.845972
+2025-01-15 14:36:31.001 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-11-13'] execution time: 0:00:32.780041
+2025-01-16 16:04:20.713 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:16.934088
+2025-01-16 16:04:32.821 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-01-17'] execution time: 0:00:29.042487
+2025-01-16 16:04:46.545 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:13.629139
+2025-01-16 16:04:57.111 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-02-14'] execution time: 0:00:24.194859
+2025-01-16 16:05:11.281 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:14.052910
+2025-01-16 16:05:20.619 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-03-13'] execution time: 0:00:23.391635
+2025-01-16 16:05:34.034 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:13.328255
+2025-01-16 16:05:43.981 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-04-17'] execution time: 0:00:23.274450
+2025-01-16 16:05:56.572 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.484715
+2025-01-16 16:06:06.317 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-05-22'] execution time: 0:00:22.229829
+2025-01-16 16:06:17.425 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.002452
+2025-01-16 16:06:25.857 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-06-12'] execution time: 0:00:19.433568
+2025-01-16 16:06:38.063 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.129066
+2025-01-16 16:06:46.950 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-07-17'] execution time: 0:00:21.016595
+2025-01-16 16:06:59.293 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.254732
+2025-01-16 16:07:08.575 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-08-14'] execution time: 0:00:21.535979
+2025-01-16 16:07:21.188 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.529217
+2025-01-16 16:07:30.842 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-09-18'] execution time: 0:00:22.183636
+2025-01-16 16:07:43.077 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.145614
+2025-01-16 16:07:52.741 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-10-16'] execution time: 0:00:21.809547
+2025-01-16 16:08:06.064 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:13.208644
+2025-01-16 16:08:16.431 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-11-13'] execution time: 0:00:23.576042
+2025-01-16 16:08:29.763 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:13.232394
+2025-01-16 16:08:40.304 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-12-11'] execution time: 0:00:23.773742
+2025-01-16 16:08:52.689 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.282962
+2025-01-16 16:09:03.966 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-03-15'] execution time: 0:00:23.560709
+2025-01-16 16:09:16.346 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.293681
+2025-01-16 16:09:27.403 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-04-12'] execution time: 0:00:23.350808
+2025-01-16 16:09:39.044 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.520841
+2025-01-16 16:09:49.899 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-05-17'] execution time: 0:00:22.376414
+2025-01-16 16:10:01.160 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.178880
+2025-01-16 16:10:11.350 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-06-14'] execution time: 0:00:21.369181
+2025-01-16 16:10:23.073 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.634097
+2025-01-16 16:10:33.139 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-07-12'] execution time: 0:00:21.699396
+2025-01-16 16:10:45.143 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.916611
+2025-01-16 16:10:56.045 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-08-15'] execution time: 0:00:22.818622
+2025-01-16 16:11:07.561 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.420412
+2025-01-16 16:11:18.107 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-09-13'] execution time: 0:00:21.966925
+2025-01-16 16:11:30.453 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.253862
+2025-01-16 16:11:41.081 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-10-11'] execution time: 0:00:22.881764
+2025-01-16 16:11:53.690 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.516304
+2025-01-16 16:12:04.782 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-11-15'] execution time: 0:00:23.608095
+2025-01-16 16:12:17.336 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.461608
+2025-01-16 16:12:27.033 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-12-13'] execution time: 0:00:22.158792
+2025-01-16 16:12:38.972 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.817331
+2025-01-16 16:12:48.760 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-10-14'] execution time: 0:00:21.605632
+2025-01-16 16:13:00.707 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.855366
+2025-01-16 16:13:10.306 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-10-15'] execution time: 0:00:21.454589
+2025-01-16 16:13:22.517 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.118255
+2025-01-16 16:13:32.147 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-10-17'] execution time: 0:00:21.748474
+2025-01-16 16:13:44.222 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.973277
+2025-01-16 16:13:54.036 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-10-18'] execution time: 0:00:21.787478
+2025-01-16 16:14:03.231 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:09.096869
+2025-01-16 16:14:10.890 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-10-19'] execution time: 0:00:16.755838
+2025-01-16 16:14:19.475 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:08.520944
+2025-01-16 16:14:27.037 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-10-20'] execution time: 0:00:16.082530
+2025-01-16 16:22:23.209 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:15.830816
+2025-01-16 16:22:35.360 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-04-15'] execution time: 0:00:27.982591
+2025-01-16 16:22:49.048 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:13.587776
+2025-01-16 16:23:00.716 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-04-16'] execution time: 0:00:25.255428
+2025-01-16 16:23:14.773 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:13.934353
+2025-01-16 16:23:24.388 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-04-18'] execution time: 0:00:23.549288
+2025-01-16 16:23:36.612 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.119526
+2025-01-16 16:23:46.011 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-04-19'] execution time: 0:00:21.518818
+2025-01-16 16:23:54.762 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:08.666832
+2025-01-16 16:24:02.242 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-04-20'] execution time: 0:00:16.145971
+2025-01-16 16:24:11.687 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:09.381356
+2025-01-16 16:24:19.204 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2024-04-21'] execution time: 0:00:16.898038
+2025-01-16 16:24:31.946 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.679766
+2025-01-16 16:24:43.239 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-10-09'] execution time: 0:00:23.972403
+2025-01-16 16:24:57.759 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:14.395392
+2025-01-16 16:25:10.122 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-10-10'] execution time: 0:00:26.758428
+2025-01-16 16:25:22.503 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.292461
+2025-01-16 16:25:33.968 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-10-12'] execution time: 0:00:23.756984
+2025-01-16 16:25:46.305 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.247253
+2025-01-16 16:25:57.723 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-10-13'] execution time: 0:00:23.665107
+2025-01-16 16:26:08.382 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:10.573562
+2025-01-16 16:26:19.198 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-10-14'] execution time: 0:00:21.388992
+2025-01-16 16:26:27.808 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:08.541491
+2025-01-16 16:26:36.529 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-10-15'] execution time: 0:00:17.262397
+2025-01-16 16:26:48.305 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:11.712182
+2025-01-16 16:26:59.835 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-04-10'] execution time: 0:00:23.242696
+2025-01-16 16:27:12.344 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.418244
+2025-01-16 16:27:24.277 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-04-11'] execution time: 0:00:24.351473
+2025-01-16 16:27:36.863 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:12.501083
+2025-01-16 16:27:48.867 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-04-13'] execution time: 0:00:24.505543
+2025-01-16 16:28:02.931 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:13.978393
+2025-01-16 16:28:14.047 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-04-14'] execution time: 0:00:25.093847
+2025-01-16 16:28:22.438 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:08.302166
+2025-01-16 16:28:31.739 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-04-15'] execution time: 0:00:17.603240
+2025-01-16 16:28:40.309 | INFO     | __main__:summary_average_speeds:120 - trip avg 0:00:08.508140
+2025-01-16 16:28:49.151 | INFO     | __main__:summary_average_speeds:154 - rt_stop_times summary speed averaging for ['2023-04-16'] execution time: 0:00:17.350031

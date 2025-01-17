@@ -394,6 +394,7 @@ if __name__ == "__main__":
         df3.to_parquet(
             f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet")
         
+        
         time1 = datetime.datetime.now()
         print(f"route typologies {analysis_date}: {time1 - time0}")
         

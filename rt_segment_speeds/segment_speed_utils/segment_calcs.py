@@ -68,11 +68,10 @@ def calculate_avg_speeds(
     # pd.groupby and pd.quantile is so slow
     # create our own list of speeds and use np
     df2 = (df.groupby(group_cols, 
-                      observed=True, group_keys=False)
+                      observed=True, group_keys=False, dropna=False)
            .agg({"speed_mph": lambda x: sorted(list(x))})
            .reset_index()
-           .rename(columns = {"speed_mph": "speed_mph_list"})
-    )
+           .rename(columns = {"speed_mph": "speed_mph_list"}))
                         
     df2 = df2.assign(
         p50_mph = df2.apply(lambda x: np.percentile(x.speed_mph_list, q=50), axis=1),
