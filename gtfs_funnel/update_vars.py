@@ -12,8 +12,8 @@ all_dates = (
 )
 
 
-analysis_date_list = [rt_dates.DATES["dec2024"]] + [rt_dates.DATES['nov2024']]
-# analysis_date_list = all_dates
+# analysis_date_list = [rt_dates.DATES["dec2024"]] + [rt_dates.DATES['nov2024']]
+analysis_date_list = all_dates
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 COMPILED_CACHED_VIEWS = GTFS_DATA_DICT.gcs_paths.COMPILED_CACHED_VIEWS
