@@ -192,7 +192,7 @@ if __name__ == "__main__":
         ).merge(
             route_typology_grouped,
             on = ["schedule_gtfs_dataset_key", "route_id"],
-            how = "inner"
+            how = "left"
         ).merge(
             crosswalk,
             on = "schedule_gtfs_dataset_key",

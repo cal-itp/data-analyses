@@ -18,7 +18,9 @@ from shared_utils import catalog_utils, rt_dates, rt_utils
 
 # Data Dictionary
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
+
 import yaml
+
 with open("readable.yml") as f:
     readable_dict = yaml.safe_load(f)
 
@@ -34,11 +36,11 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     Load schedule versus realtime file.
     """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
-    
+    # schd_vp_url = "gs://calitp-analytics-data/data-analyses/rt_vs_schedule/digest/schedule_vp_metrics_AH_TESTING.parquet"
     # Keep only rows that are found in both schedule and real time data
     df = (pd.read_parquet(schd_vp_url, 
           filters=[[("organization_name", "==", organization),
-         ("sched_rt_category", "==", "schedule_and_vp")]])
+         ("sched_rt_category", "in", ["schedule_and_vp"])]])
          )
     
     # Delete duplicates
@@ -75,6 +77,8 @@ def load_operator_metrics(organization_name:str)->pd.DataFrame:
     url = "gs://calitp-analytics-data/data-analyses/rt_vs_schedule/digest/operator_profiles.parquet"
     df = pd.read_parquet(url,
     filters=[[(("organization_name", "==", organization_name))]])
+    
+    df = df.drop_duplicates(subset = ["service_date"]).reset_index(drop = True)
     
     # Rename dataframe
     df = _report_utils.replace_column_names(df)
@@ -288,11 +292,11 @@ def grouped_bar_chart(
 
     chart = (
         alt.Chart(df)
-        .mark_bar(size=8)
+        .mark_bar(size=5)
         .encode(
             x=alt.X(
                 "yearmonthdate(Date):O",
-                title=["Grouped by Direction ID", "Date"],
+                title=["Date"],
                 axis=alt.Axis(labelAngle=-45, format="%b %Y"),
             ),
             y=alt.Y(f"{y_col}:Q", title=_report_utils.labeling(y_col)),
@@ -359,15 +363,17 @@ def base_facet_line(
             )
         )
 
-    chart = chart.properties(width=200, height=250)
-    chart = chart.facet(
-            column=alt.Column("Direction:N", title=_report_utils.labeling("Direction")),
-        ).properties(
+    chart = chart.properties(width=200, height=250).properties(
             title={
                 "text": [title],
                 "subtitle": [subtitle],
             }
         )
+    """ 
+    chart = chart.facet(
+            column=alt.Column("Direction:N", title=_report_utils.labeling("Direction")),
+        )
+    """
     return chart
 
 def base_facet_circle(
@@ -883,12 +889,26 @@ def filtered_route(
     .transform_filter(xcol_param)
     )
     
-    speed_graph = (
-        base_facet_line(
-            df,
+    speed_graph_dir_0 = (
+       grouped_bar_chart(
+            df.loc[df.dir_0_1 == 0],
+            "Period",
             "Speed (MPH)",
-            readable_dict["speed_graph"]["title"],
-            readable_dict["speed_graph"]["subtitle"],
+            "Period",
+            readable_dict["speed_graph_dir_0"]["title"],
+            readable_dict["speed_graph_dir_0"]["subtitle"],
+        )
+        .add_params(xcol_param)
+        .transform_filter(xcol_param)
+    )
+    speed_graph_dir_1 = (
+       grouped_bar_chart(
+            df.loc[df.dir_0_1 == 1],
+            "Period",
+            "Speed (MPH)",
+            "Period",
+            readable_dict["speed_graph_dir_1"]["title"],
+            readable_dict["speed_graph_dir_0"]["subtitle"],
         )
         .add_params(xcol_param)
         .transform_filter(xcol_param)
@@ -964,7 +984,8 @@ def filtered_route(
     timeliness_trips_dir_1,
     frequency_graph_dir_0,
     frequency_graph_dir_1,
-    speed_graph,
+    speed_graph_dir_0,
+    speed_graph_dir_1,
     data_quality,
     vp_per_min_graph,
     sched_vp_per_min,
