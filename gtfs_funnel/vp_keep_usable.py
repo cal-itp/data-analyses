@@ -157,7 +157,7 @@ def get_vp_direction_column(
     vp_condensed = vp_transform.condense_point_geom_to_line(
         vp_gdf,
         group_cols = ["trip_instance_key"],
-        sort_cols = ["trip_instance_key", "vp_idx"], 
+#        sort_cols = ["trip_instance_key", "vp_idx"], not used?
         array_cols = ["vp_idx", "geometry"]        
     )
     
