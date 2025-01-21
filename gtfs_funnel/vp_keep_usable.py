@@ -10,7 +10,7 @@ Doing this with dask ddfs  + np arrays takes ~4 min. (but persisting takes anoth
 Doing this with pandas and numpy arrays takes ~8 min.
 """
 import datetime
-import geopandas as pd
+import geopandas as gpd
 import numpy as np
 import pandas as pd
 import sys
