@@ -93,7 +93,7 @@ def map_excluded_shapes(existing_state: dict, speedmap_segs: gpd.GeoDataFrame, s
     excluded_shapes = shapes_gdf.overlay(speedmap_segs, how='difference')
     excluded_shapes['color'] = [(50,50,50) for _ in excluded_shapes.iterrows()] #  make it dark gray!
     excluded_shapes['info'] = "No data in time period"
-    excluded_shapes.geometry = excluded_shapes.buffer(10) #  for display
+    excluded_shapes.geometry = excluded_shapes.buffer(8) #  for display
     
     export_result = rt_utils.set_state_export(excluded_shapes, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename = filename,
                         map_title = title, existing_state = existing_state)
