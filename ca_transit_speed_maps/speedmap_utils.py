@@ -4,6 +4,7 @@ import numpy as np
 import geopandas as gpd
 import update_vars_index
 from shared_utils import rt_utils, catalog_utils
+from segment_speed_utils import helpers
 from calitp_data_analysis.geography_utils import CA_NAD83Albers
 import datetime as dt
 import altair as alt
@@ -23,6 +24,16 @@ def read_segments_shn(organization_source_record_id: str) -> (gpd.GeoDataFrame, 
     this_shn = shn >> filter(_.District.isin([int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]))
     
     return (speedmap_segs, this_shn)
+
+def read_shapes(speedmap_segs: gpd.GeoDataFrame):
+
+    shapes = helpers.import_scheduled_shapes(update_vars_index.ANALYSIS_DATE, columns=['shape_array_key', 'geometry'])
+    trips = helpers.import_scheduled_trips(update_vars_index.ANALYSIS_DATE, columns=['shape_array_key', 'shape_id', 'route_id',
+                                                                   'route_short_name', 'gtfs_dataset_key']).drop_duplicates()
+    shapes = shapes.merge(trips, on='shape_array_key')
+    org_shapes = shapes.merge(speedmap_segs[['schedule_gtfs_dataset_key']].drop_duplicates(),
+                              on='schedule_gtfs_dataset_key')
+    return org_shapes
 
 def prepare_segment_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
@@ -67,8 +78,31 @@ def map_shn(district_gdf: gpd.GeoDataFrame):
     spa_map_state = export_result['state_dict']
     return spa_map_state
 
-def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFrame, analysis_date: dt.date,
-                    time_of_day: str, map_type: str):
+def map_excluded_shapes(existing_state: dict, speedmap_segs: gpd.GeoDataFrame, shapes_gdf: gpd.GeoDataFrame,
+                       time_of_day: str, analysis_date: dt.date):
+    '''
+    
+    '''
+    display_date = analysis_date.strftime('%B %d %Y (%A)')
+    filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_excluded_shapes_{time_of_day}"
+    title = f"{speedmap_segs.organization_name.iloc[0]} {display_date} Excluded Shapes {time_of_day}"
+
+    shapes_gdf = shapes_gdf[['shape_id', 'route_id', 'route_short_name', 'geometry']]
+    speedmap_segs = speedmap_segs.dissolve()
+    speedmap_segs.geometry = speedmap_segs.buffer(35) #  slightly bigger than parallel_offset in rt_utils
+    excluded_shapes = shapes_gdf.overlay(speedmap_segs, how='difference')
+    excluded_shapes['color'] = [(50,50,50) for _ in excluded_shapes.iterrows()] #  make it dark gray!
+    excluded_shapes['info'] = "No data in time period"
+    excluded_shapes.geometry = excluded_shapes.buffer(10) #  for display
+    
+    export_result = rt_utils.set_state_export(excluded_shapes, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename = filename,
+                        map_title = title, existing_state = existing_state)
+    
+    return export_result['state_dict']
+
+
+def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFrame, org_shapes: gpd.GeoDataFrame,
+                    analysis_date: dt.date, time_of_day: str, map_type: str):
     '''
     Always add State Highway Network first.
     '''
@@ -78,6 +112,9 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
         return None
     color_col = {'new_speedmap': 'p20_mph', 'new_speed_variation': 'fast_slow_ratio'}[map_type]
     shn_state = map_shn(district_gdf)
+    excluded_shapes_state = map_excluded_shapes(shn_state, speedmap_segs, org_shapes,
+                                                time_of_day, analysis_date)
+    
     display_date = analysis_date.strftime('%B %d %Y (%A)')
     filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_{map_type}_{time_of_day}"
     title = f"{speedmap_segs.organization_name.iloc[0]} {display_date} {time_of_day}"
@@ -94,7 +131,7 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
         map_type=map_type,
         color_col=color_col, cmap=cmap, legend_url=legend_url,
         map_title=title,
-        existing_state = shn_state)
+        existing_state = excluded_shapes_state)
     
     spa_link = export_result['spa_link'] 
     return spa_link
