@@ -10,7 +10,7 @@ Doing this with dask ddfs  + np arrays takes ~4 min. (but persisting takes anoth
 Doing this with pandas and numpy arrays takes ~8 min.
 """
 import datetime
-import geopandas as gpd
+import geopandas as pd
 import numpy as np
 import pandas as pd
 import sys
@@ -154,7 +154,7 @@ def get_vp_direction_column(
         ["trip_instance_key", "vp_idx", "geometry"]
     ].to_crs(PROJECT_CRS)
     
-    vp_condensed = vp_transform.condense_by_trip(
+    vp_condensed = vp_transform.condense_point_geom_to_line(
         vp_gdf,
         group_cols = ["trip_instance_key"],
         sort_cols = ["trip_instance_key", "vp_idx"], 
