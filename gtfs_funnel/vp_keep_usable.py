@@ -179,10 +179,7 @@ def get_vp_direction_column(
     
     vp_condensed = vp_condensed.assign(
         vp_primary_direction = vp_direction_series
-    )[keep_cols].pipe(
-        vp_transform.explode_arrays, 
-        array_cols = keep_cols
-    )
+    )[keep_cols].explode(columns=keep_cols)
     
     vp_condensed.to_parquet(
         f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet"

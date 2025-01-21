@@ -312,3 +312,5 @@
 2025-01-16 15:00:10.192 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:40.192578
 2025-01-20 20:40:27.661 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:57.913529
 2025-01-20 20:45:06.455 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:28.449333
+2025-01-20 20:58:21.900 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:27.450257
+2025-01-20 21:06:38.791 | INFO     | __main__:pare_down_to_valid_trips:94 - export vp direction: 0:08:16.891594
