@@ -11,14 +11,13 @@ PREDICTIONS_GCS = GTFS_DATA_DICT.gcs_paths.PREDICTIONS_GCS
 SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
 PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
 
-# analysis_date = rt_dates.DATES["nov2024"]
+analysis_date = rt_dates.DATES["jan2025"]
 
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
 apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
 apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
 oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 
-# One file wasn't found for October 21 2024 
 all_dates = (
     rt_dates.y2024_dates + rt_dates.y2023_dates + 
     oct2024_week + apr2024_week + oct2023_week + apr2023_week
@@ -29,7 +28,8 @@ weeks_available = [
     rt_dates.oct2023_week, rt_dates.apr2023_week, 
 ]
 
-analysis_date_list =  apr2024_week + oct2023_week + apr2023_week
+
+analysis_date_list = [analysis_date]
                      
 
 PROJECT_CRS = "EPSG:3310"
