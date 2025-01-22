@@ -222,10 +222,15 @@ def overlay_shapes_to_roads(
     buffer_meters: int
 ) -> gpd.GeoDataFrame:
     
+    # AH: removed pipe b/c it erases routes from Amtrak
+    #common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
+    #    analysis_date
+    #).pipe(helpers.remove_shapes_outside_ca)
+
     common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
         analysis_date
-    ).pipe(helpers.remove_shapes_outside_ca)
-
+    )
+    
     common_shape = common_shape.assign(
         route_meters = common_shape.geometry.length,
     )

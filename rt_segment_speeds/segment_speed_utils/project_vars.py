@@ -29,8 +29,9 @@ weeks_available = [
     rt_dates.oct2023_week, rt_dates.apr2023_week, 
 ]
 
-analysis_date_list =  apr2024_week + oct2023_week + apr2023_week
+# analysis_date_list =  apr2024_week + oct2023_week + apr2023_week
                      
+analysis_date_list = [rt_dates.DATES["dec2024"]] + [rt_dates.DATES['nov2024']]
 
 PROJECT_CRS = "EPSG:3310"
 ROAD_SEGMENT_METERS = 1_000
