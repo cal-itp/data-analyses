@@ -20,9 +20,9 @@ parts:
     -   file: district_06-fresno.md
         sections:
         -   glob: district_06-fresno/*
-    -   file: district_07-los-angeles.md
+    -   file: district_07-los-angeles-ventura.md
         sections:
-        -   glob: district_07-los-angeles/*
+        -   glob: district_07-los-angeles-ventura/*
     -   file: district_08-san-bernardino.md
         sections:
         -   glob: district_08-san-bernardino/*
