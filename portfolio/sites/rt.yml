@@ -85,9 +85,9 @@ parts:
           - organization_source_record_id: reczIiFqdL5AXTpm1
           - organization_source_record_id: rec5MLJKrAgeM8f6H
           - organization_source_record_id: recWLwvtjXhiVWjKt
-      - caption: District 07 - Los Angeles
+      - caption: District 07 - Los Angeles / Ventura
         params:
-          district: 07 - Los Angeles
+          district: 07 - Los Angeles / Ventura
         sections:
           - organization_source_record_id: recxsWR0KRrQTdjmg
           - organization_source_record_id: rec6z2ivjTxc8Sag3

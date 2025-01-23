@@ -95,6 +95,8 @@ def map_excluded_shapes(existing_state: dict, speedmap_segs: gpd.GeoDataFrame, s
     excluded_shapes['info'] = "No data in time period"
     excluded_shapes.geometry = excluded_shapes.buffer(8) #  for display
     
+    if excluded_shapes.empty:
+        return {}
     export_result = rt_utils.set_state_export(excluded_shapes, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename = filename,
                         map_title = title, existing_state = existing_state)
     
