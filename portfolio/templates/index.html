@@ -1,37 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Cal-ITP Data Analyses Portfolio</title>
-    <!-- Shamelessly stolen -->
-    <style type="text/css">
-        body {
-            margin: 40px auto;
-            max-width: 650px;
-            line-height: 1.6;
-            font-size: 18px;
-            color: #444;
-            padding: 0 10px
-        }
+<meta charset="UTF-8">
+<title>Cal-ITP Data Analyses Portfolio</title>
+<!-- Shamelessly stolen -->
+<style type="text/css">
+body {
+margin: 40px auto;
+max-width: 650px;
+line-height: 1.6;
+font-size: 18px;
+color: #444;
+padding: 0 10px
+}
 
-        h1, h2, h3 {
-            line-height: 1.2
-        }
-    </style>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=TAG_ID"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '{{ google_analytics_id }}');
-    </script>
+    h1, h2, h3 {
+        line-height: 1.2
+    }
+</style>
+<script async src="(link unavailable)"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{{ google_analytics_id }}');
+</script>
+
 </head>
 <body style>
-    <h1>Cal-ITP Data Analysis Portfolio</h1>
-    {% for site in sites -%}
-    <p><a href="/{{ site.name }}/">{{ site.title }}</a></p>
-    {% endfor %}
+{% include clipped-header.html %}
+<div class="row justify-content-center">
+<div class="clipped-header background-purple-4 col-11 col-md-10 mt-4 mt-md-5 mb-4 py-4 py-md-5 px-4 px-md-0">
+<div class="offset-md-2 col-md-8 py-3 py-md-5 px-2 px-md-2">
+<h1 class="text-white mb-2">Data and Digital Services's Data Products</h1>
+<p class="text-white mb-3 pb-3">
+The California Department of Transportation (Caltrans)’s Division of Data and Digital Services (DDS) is a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape.
+</p>
+</div>
+</div>
+</div>
 
-    <p>Source code can be found <a href="https://github.com/cal-itp/data-analyses/">on GitHub.</a></p>
+<h2>Cal-ITP Data Analysis Portfolio</h2>
+<p>Certain analytical projects are accessible on individual sites. All the source code can be found on <a href="(link unavailable)">on GitHub.</a></p>
+{% for site in sites -%}
+<p><a href="/{{ site.name }}/">{{ site.title }}</a></p>
+{% endfor %}
+
+<h2>Reports</h2>
+<p>Accurate and timely GTFS data is a critical part of a providing a good transit experience. Our reports measure the quality of the GTFS data produced by an individual transit operator each month. 
+</p>
+<a rel="noreferrer" target="_blank" class="fw-bolder text-white" href="https://reports.calitp.org/">reports.calitp.org</a>.
+
+
 </body>
 </html>
