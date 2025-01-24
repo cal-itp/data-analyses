@@ -7,8 +7,8 @@ from segment_speed_utils import helpers, time_series_utils, gtfs_schedule_wrangl
 from segment_speed_utils.project_vars import SCHED_GCS, SEGMENT_GCS, GTFS_DATA_DICT, analysis_date
 
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
-CORRIDOR_BUFFER = 70 #  70 meters
-CORRIDOR_RELEVANCE = 500 #  500 meters, or half corridor length
+CORRIDOR_BUFFER = 70 #  meters
+CORRIDOR_RELEVANCE = 1000 #  meters, or half corridor length
 
 def describe_cleaning(df:pd.DataFrame, cleaning_query:str, message:str):
     '''
