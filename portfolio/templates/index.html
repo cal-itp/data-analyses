@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Cal-ITP Data Analyses Portfolio</title>
     <!-- Shamelessly stolen -->
     <style type="text/css">
         body {
@@ -10,21 +11,17 @@
             line-height: 1.6;
             font-size: 18px;
             color: #444;
-            padding: 0 10px;
-            font-family: Helvetica, Arial, sans-serif;
+            padding: 0 10px
         }
 
         h1, h2, h3 {
             line-height: 1.2
         }
-
-        .header-container {
-            display: flex;
-            align-items: center;
+        .background-teal {
+          background-color: #00B2A9;
         }
-
-        .header-container img {
-            margin-right: 20px;
+        .background-yellow {
+          background-color: #FFBE00;
         }
     </style>
     <script async src="https://www.googletagmanager.com/gtag/js?id=TAG_ID"></script>
@@ -39,13 +36,21 @@
 <body class="container">
     <div class="header-container">
         <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/refs/heads/main/portfolio/dds.png" alt="Alt text" width="200" height="100">
-        <h1 class="fs-1">Data Products</h1>
     </div>
     <header class="d-flex align-items-center pb-3 mb-5 border-bottom">
         <a href="/" class="d-flex align-items-center text-body-emphasis text-decoration-none">
-          <span class="fs-6">The California Department of Transportation (Caltrans)’s Division of Data and Digital Services (DDS) is a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. </span>
         </a>
       </header>
+    <div class="row justify-content-center">
+        <div class="rounded background-teal mt-4 mt-md-5 mb-4 py-4 py-md-5 px-4 px-md-0">
+          <div class="offset-md-1 col-md-8 py-3 py-md-5 px-2 px-md-2">
+            <h1 class="text-white mb-2">Data and Digital Services Portfolio</h1>
+            <p class="text-white mb-3 pb-3">
+              The California Department of Transportation (Caltrans)’s Division of Data and Digital Services (DDS) is a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape.<p> 
+            </p>
+          </div>
+        </div>
+      </div>
       <main>
         <h2>Portfolio</h2>
         <p>Certain analytical projects are accessible on individual sites. Source code can be found <a href="https://github.com/cal-itp/data-analyses/">on GitHub.</a></p>
@@ -55,13 +60,18 @@
         <p><p>
         <h2>Reports</h2>
 <p>Accurate and timely GTFS data is a critical part of a providing a good transit experience. Our reports measure the quality of the GTFS data produced by an individual transit operator each month.</p>
-<a rel="noreferrer" target="_blank" href="https://reports.calitp.org/">reports.calitp.org</a>
-        <p><p>
+<a href="https://reports.calitp.org/">California GTFS Quality Dashboard</a><p><p>
           <h2>Open Data Portal</h2>
-          
-      
+          <a href="https://gis.data.ca.gov/datasets/863e61eacbf3463ab239beb3cee4a2c3_0">HQTA Areas</a>: <a href="https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_HQ_Transit_Areas/FeatureServer">Feature Server</a> or <a href="https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_HQ_Transit_Areas/MapServer"> Map Server</a>.<p><p>
+          <a href="https://gis.data.ca.gov/datasets/f6c30480f0e84be699383192c099a6a4_0">HQTA Stops</a>: <a href="https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_HQ_Transit_Stops/FeatureServer">Feature Server</a> or <a href="https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_HQ_Transit_Stops/MapServer"> Map Server</a>.<p>
+          <a href="https://gis.data.ca.gov/datasets/dd7cb74665a14859a59b8c31d3bc5a3e_0">CA Transit Routes</a>: <a href="https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_Transit_Routes/FeatureServer">Feature Server</a> or <a href="https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_Transit_Routes/MapServer"> Map Server</a>.<p>
+          <a href="https://gis.data.ca.gov/datasets/900992cc94ab49dbbb906d8f147c2a72_0">CA Transit Stops</a>: <a href="https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_Transit_Stops/FeatureServer">Feature Server</a> or <a href="https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/CA_Transit_Stops/MapServer"> Map Server</a>.<p>
+           <a href="https://gis.data.ca.gov/datasets/4937eeb59fdb4e56ae75e64688c7f2c0_0/">CA Average Transit Speeds by Stop-to-Stop Segments</a>: <a href="https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHrailroad/Speeds_by_Stop_Segments/FeatureServer/0">Feature Server</a> or <a href="https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHrailroad/Speeds_by_Stop_Segments/MapServer/0"> Map Server</a>.<p>
+          <a href="https://gis.data.ca.gov/datasets/071df783099f4224b7ebb54839eae007_0/">CA Average Transit Speeds by Route and Time of Day</a>: <a href="https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHrailroad/Speeds_by_Route_Time_of_Day/FeatureServer/0">Feature Server</a> or <a href="https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHrailroad/Speeds_by_Route_Time_of_Day/MapServer/0"> Map Server</a>.<p>
+          <a href="https://gis.data.ca.gov/datasets/071df783099f4224b7ebb54839eae007_0/">All GTFS datasets</a>: <a href="https://data.ca.gov/dataset/cal-itp-gtfs-ingest-pipeline-dataset/resource/e26bf6ee-419d-4a95-8e4c-e2b13d5de793">Metadata/Data Dictionary</a>.
+          <p><p>
     </main>
 
     <footer class="pt-5 my-5 text-body-secondary border-top">
-        <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/Calitp_logo_MAIN.png" alt="Alt text" width="100" height="50"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/CT_logo_Wht_outline.gif" alt="Alt text" width="65" height="50">Caltrans®, the California Department of Transportation® and the Caltrans logo are registered service marks of the California Department of Transportation and may not be copied, distributed, displayed, reproduced or transmitted in any form without prior written permission from the California Department of Transportation.
+        <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/Calitp_logo_MAIN.png" alt="Alt text" width="160" height="80"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/CT_logo_Wht_outline.gif" alt="Alt text" width="104" height="80">Caltrans®, the California Department of Transportation® and the Caltrans logo are registered service marks of the California Department of Transportation and may not be copied, distributed, displayed, reproduced or transmitted in any form without prior written permission from the California Department of Transportation.
     </footer>
