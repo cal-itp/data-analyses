@@ -6,17 +6,13 @@ Functions here to be used in cleaning script that will
 - add project types that classify project type
 - create a public-friendly project title 
 '''
-
 import numpy as np
 import pandas as pd
 from siuba import *
 
 import dla_utils
-
 from calitp_data_analysis.sql import to_snakecase
-
 import _data_utils
-
 import intake
 
 # import nltk
@@ -26,7 +22,6 @@ import intake
 # import re
 
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
-
 
 def _prep_data(file_name): 
     proj = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
