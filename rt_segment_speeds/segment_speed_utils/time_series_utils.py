@@ -18,6 +18,7 @@ from dask import delayed, compute
 import gcsfs
 fs = gcsfs.GCSFileSystem()
 
+'''
 def concatenate_datasets_across_dates(
     gcs_bucket: str,
     dataset_name: str,
@@ -56,8 +57,8 @@ def concatenate_datasets_across_dates(
         df = compute(df)[0]    
     
     return df
+'''
 
-"""
 def concatenate_datasets_across_dates(
     gcs_bucket: str,
     dataset_name: str,
@@ -75,11 +76,12 @@ def concatenate_datasets_across_dates(
         date_list, 
         data_type = data_type,
         get_pandas=get_pandas,
-        add_date = True
+        add_date = True, 
+        **kwargs
     )  
     
     return df
-"""
+
 
 def clean_standardized_route_names(
     df: pd.DataFrame, 
