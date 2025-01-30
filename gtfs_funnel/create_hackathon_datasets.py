@@ -8,7 +8,9 @@ Our GTFS analytics data catalog:
 https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/gtfs_analytics_data.yml
 """
 import geopandas as gpd
+import glob
 import pandas as pd
+import os
 import shutil
 
 from segment_speed_utils import time_series_utils
@@ -227,6 +229,7 @@ if __name__ == "__main__":
         "LA DOT Schedule",
     ]
     
+    # Schedule tables - trips, shapes, stops, stop_times
     export_gtfs_schedule_tables(
         operators, analysis_date_list
     )
@@ -235,14 +238,25 @@ if __name__ == "__main__":
         f"{OUTPUT_FOLDER}trips.parquet"
     ).schedule_gtfs_dataset_key.unique().tolist()
            
+    # vehicle positions table
     export_gtfs_vp_table(
         schedule_keys, analysis_date_list
     )
     
+    # segments for mapping
     export_segments_table(
         schedule_keys, analysis_date_list
     )    
     
+    # roads for D7, which is where these operators are
     export_roads_for_district(district = 7)
     
-    shutil.make_archive(f"gtfs_assembled_hackathon", "zip", OUTPUT_FOLDER)
+    # Zip up folder of parquets within OUTPUT_FOLDER -- download this and send
+    # do not check into GitHub
+    shutil.make_archive("gtfs_assembled_hackathon", "zip", OUTPUT_FOLDER)
+    
+    # Delete local parquets, just keep zipped folder to download and send
+    for f in glob.glob(f"{OUTPUT_FOLDER}*.parquet"):
+        os.remove(f)
+    
+    
