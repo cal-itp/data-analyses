@@ -194,7 +194,7 @@ def add_new_codes(df):
     #new_codes = update_program_code_list2()
     
     ## adding updated program codes 1/30/25
-    new_codes = update_program_code_list_2025
+    new_codes = update_program_code_list_2025()
     code_map = dict(new_codes[['iija_program_code', 'program_name']].values)
 
     df['program_code_description'] = df.program_code.map(code_map)
