@@ -195,14 +195,24 @@ def add_new_codes(df):
     
     ## adding updated program codes 1/30/25
     new_codes = update_program_code_list_2025()
-    code_map = dict(new_codes[['iija_program_code', 'program_name']].values)
-
-    df['program_code_description'] = df.program_code.map(code_map)
+    iija_code_map = dict(new_codes[['iija_program_code', 'program_name']].values)
+    df['program_code_description'] = df.program_code.map(iija_code_map)
+    
+    # Add funding_type_code
+    funding_type_code_df = new_codes[[
+        'iija_program_code', 
+        'funding_type_code']].drop_duplicates()
+    
+    df = pd.merge(df, funding_type_code_df, 
+                  left_on = "program_code",
+                  right_on = "iija_program_code",
+                  how = "left")
+    # Turn summary_recipient_defined_text_field_1_value to a string
     df['summary_recipient_defined_text_field_1_value'] = df['summary_recipient_defined_text_field_1_value'].astype(str)
     
     # Amanda: January 2025, notified this should be called emergency supplement funding
-    #df.loc[df.program_code =='ER01', 'program_code_description'] = 'Emergency Relieve Funding'
-    #df.loc[df.program_code =='ER03', 'program_code_description'] = 'Emergency Relieve Funding'
+    df.loc[df.program_code =='ER01', 'program_code_description'] = 'Emergency Supplement Funding'
+    df.loc[df.program_code =='ER03', 'program_code_description'] = 'Emergency Supplement Funding'
     
     return df
 

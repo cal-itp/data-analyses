@@ -258,9 +258,11 @@ def condense_df(df):
     # make sure columns are in string format
     df[['county_code', 'improvement_type',
      'implementing_agency_locode', 'district',
-     'program_code_description', 'recipient_project_number']] = df[['county_code', 'improvement_type',
+     'program_code_description', 'recipient_project_number',
+       "funding_type_code"]] = df[['county_code', 'improvement_type',
                                                                      'implementing_agency_locode', 'district',
-                                                                     'program_code_description', 'recipient_project_number']].astype(str)
+                                                                     'program_code_description', 'recipient_project_number',
+                                  "funding_type_code"]].astype(str)
     # copy county column over to use for project title name easier
     df['county_name_title'] = df['county_name'] 
     # copy program code column over to use for project description column easier
@@ -272,7 +274,7 @@ def condense_df(df):
            .groupby(['fmis_transaction_date','project_number', 'implementing_agency', 'summary_recipient_defined_text_field_1_value'
                     # , 'program_code', 'program_code_description'
                     ])
-           .agg({
+           .agg({'funding_type_code':lambda x:'|'.join(x.unique()),
                  'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate                ##hashing this out to group by instead
                  'program_code_description':lambda x:'|'.join(x.unique()), # get unique values to concatenate    ##hashing this out to group by instead
                  'recipient_project_number':lambda x:'|'.join(x.unique()), #'first',
