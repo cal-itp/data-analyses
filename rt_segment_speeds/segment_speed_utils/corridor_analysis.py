@@ -43,28 +43,29 @@ def corridor_from_segments(
     for example in reference to published speedmaps.
     
     Can also specify a corridor using external GIS tools as a linestring, project
-    and measure its distance in meters, then buffer by 100m.
+    and measure its distance in meters, then buffer.
     '''
     
     shape_filtered = speed_segments_gdf.query("organization_source_record_id == @organization_source_record_id & shape_id == @shape_id")
-    
-    shape_filtered = shape_filtered.assign(start_point = shape_filtered.geometry.apply(lambda x: x.boundary.geoms[0]),
-                      end_point = shape_filtered.geometry.apply(lambda x: x.boundary.geoms[1])
-                     )
-
-    filter_ids = [start_seg_id, end_seg_id]
-    current_seg_id = start_seg_id
     assert not shape_filtered.empty, 'empty shape, check shape_id'
     assert start_seg_id in shape_filtered.segment_id.values, 'start seg not in shape'
     assert end_seg_id in shape_filtered.segment_id.values, 'end seg not in shape'
-
-    for _ in shape_filtered.segment_id:
-        if current_seg_id == end_seg_id: break
-        current_end = shape_filtered.loc[shape_filtered['segment_id'] == current_seg_id]['end_point'].iloc[0]
-        next_segment = shape_filtered.loc[shape_filtered['start_point'] == current_end]
-        assert not next_segment.empty, f'unable to locate segment after {current_seg_id}'
-        current_seg_id = next_segment.segment_id.iloc[0]
-        filter_ids += next_segment.segment_id.to_list()
+    
+    if start_seg_id == end_seg_id:
+        filter_ids = [start_seg_id]
+    else:
+        shape_filtered = shape_filtered.assign(start_point = shape_filtered.geometry.apply(lambda x: x.boundary.geoms[0]),
+                          end_point = shape_filtered.geometry.apply(lambda x: x.boundary.geoms[1])
+                         )
+        filter_ids = [start_seg_id, end_seg_id]
+        current_seg_id = start_seg_id
+        for _ in shape_filtered.segment_id:
+            if current_seg_id == end_seg_id: break
+            current_end = shape_filtered.loc[shape_filtered['segment_id'] == current_seg_id]['end_point'].iloc[0]
+            next_segment = shape_filtered.loc[shape_filtered['start_point'] == current_end]
+            assert not next_segment.empty, f'unable to locate segment after {current_seg_id}'
+            current_seg_id = next_segment.segment_id.iloc[0]
+            filter_ids += next_segment.segment_id.to_list()
         
     relevant_segments = shape_filtered.query("segment_id in @filter_ids").drop_duplicates(subset='segment_id')
     corridor = relevant_segments.dissolve()[['schedule_gtfs_dataset_key', 'shape_array_key', 'shape_id',
@@ -86,6 +87,9 @@ def find_corridor_data(
     '''
     With a buffered corridor defined, use the aggregated speed segments data to find relevant segments,
     then merge with trip-level speeds.
+    
+    Avoid capturing shapes merely crossing corridor by ensuring they run within the corridor for either
+    half of the corridor length or the CORRIDOR_RELEVANCE threshold
     '''
     speed_segments_gdf = speed_segments_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
     corridor_segments = speed_segments_gdf.clip(corridor_gdf)
@@ -105,8 +109,19 @@ def find_corridor_data(
     half_corr = corridor_gdf.corridor_distance_meters.iloc[0] / 2
     corridor_relevance_threshold = min(half_corr, CORRIDOR_RELEVANCE)
     trip_speeds_df = trip_speeds_df.query('shape_length >= @corridor_relevance_threshold')
+    trip_speeds_gdf = gpd.GeoDataFrame(trip_speeds_df, crs=geography_utils.CA_NAD83Albers_m)
     
-    return trip_speeds_df
+    return trip_speeds_gdf
+
+def validate_corridor_routes(corridor_gdf: gpd.GeoDataFrame, corridor_trips_gdf: gpd.GeoDataFrame):
+    '''
+    display table and map of shape directions with route short names for all routes
+    identified to be in corridor
+    '''
+    validation_cols = ['route_short_name', 'shape_length', 'shape_array_key']
+    m = corridor_gdf.explore(color='gray')
+    display(corridor_trips_gdf.drop_duplicates(subset=validation_cols)[validation_cols])
+    return corridor_trips_gdf[validation_cols + ['geometry']].explore(m=m, column='shape_length')
 
 def analyze_corridor_trips(
     corridor_trips_gdf: gpd.GeoDataFrame
@@ -153,7 +168,15 @@ def analyze_corridor_improvements(
     trip_percent_speedup: float = None
 ):
     '''
-    Translate time savings into speed increase, or vice-versa
+    Calculates potential transit priority effects using a floor speed and/or percent speed increase, or by number of seconds saved
+    per-trip alone.
+    
+    If floor speed and percent speedup are both provided, use floor speed if median corridor speed < floor speed * (1-trip_percent_speedup).
+    Otherwise use percent speedup.
+    
+    floor speed: assume all trips below floor speed in corridor achieve floor speed
+    percent speedup: assume all trips run x percent faster
+    seconds saved: assume all trips proceed through corridor/hotspot in x fewer seconds
     '''
     assert bool(trip_seconds_saved) ^ bool(trip_mph_floor or trip_percent_speedup), 'specify only trip_seconds_saved, or one/both of trip_mph_floor and trip_percent_speedup' #  ^ is XOR operator
     df = corridor_analysis_df
@@ -162,17 +185,20 @@ def analyze_corridor_improvements(
     if trip_mph_floor and trip_percent_speedup and df.corridor_speed_mph.median() >= (trip_mph_floor * (1-trip_percent_speedup) ):
         trip_mph_floor = None #  if median exceeding floor, use percent
     if trip_seconds_saved:
-        df = df.assign(improved_corridor_seconds = (df['corridor_seconds'] - trip_seconds_saved).clip(lower=0))
+        df = df.assign(improved_corridor_seconds = (df['corridor_seconds'] - trip_seconds_saved).clip(lower=0),
+                      intervention_assumption = f'each trip saves {trip_seconds_saved} seconds')
         df = df.assign(improved_corridor_speed_mps = df['corridor_meters'] / df['improved_corridor_seconds'])
         df = df.assign(improved_corridor_speed_mph = df['improved_corridor_speed_mps'] * rt_utils.MPH_PER_MPS)
     elif trip_percent_speedup and not trip_mph_floor: #  either percent alone specified or median speeds exceed floor
         print(f'percent mode: {trip_percent_speedup}')
-        df = df.assign(improved_corridor_speed_mph = df['corridor_speed_mph'] * (1 + trip_percent_speedup))
+        df = df.assign(improved_corridor_speed_mph = df['corridor_speed_mph'] * (1 + trip_percent_speedup),
+                      intervention_assumption = f'{trip_percent_speedup*100}% trip speed increase')
         df = df.assign(improved_corridor_speed_mps = df['improved_corridor_speed_mph'] / rt_utils.MPH_PER_MPS)
         df = df.assign(improved_corridor_seconds = df['corridor_meters'] / df['improved_corridor_speed_mps'])
     elif trip_mph_floor:
         print(f'mph floor mode: {trip_mph_floor}mph')
-        df = df.assign(improved_corridor_speed_mph = df['corridor_speed_mph'].clip(lower=trip_mph_floor))
+        df = df.assign(improved_corridor_speed_mph = df['corridor_speed_mph'].clip(lower=trip_mph_floor),
+                      intervention_assumption = f'trips achieve {trip_mph_floor}mph or existing spd if higher')
         df = df.assign(improved_corridor_speed_mps = df['improved_corridor_speed_mph'] / rt_utils.MPH_PER_MPS)
         df = df.assign(improved_corridor_seconds = df['corridor_meters'] / df['improved_corridor_speed_mps'])
 
