@@ -71,7 +71,7 @@ def corridor_from_segments(
                                             'name', 'organization_source_record_id', 'geometry']]
     corridor_start = corridor.geometry.iloc[0].boundary.geoms[0]
     corridor_end = corridor.geometry.iloc[0].boundary.geoms[1]
-    print(corridor_start, corridor_end)
+    # print(corridor_start, corridor_end)
     corridor = corridor.to_crs(geography_utils.CA_NAD83Albers_m).assign(corridor_distance_meters = lambda x: x.geometry.length)
     corridor.geometry = corridor.buffer(CORRIDOR_BUFFER) #  70m corridor buffer
     corridor = corridor.assign(corridor_id = hash(organization_source_record_id+shape_id+start_seg_id+end_seg_id),
@@ -89,8 +89,9 @@ def find_corridor_data(
     '''
     speed_segments_gdf = speed_segments_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
     corridor_segments = speed_segments_gdf.clip(corridor_gdf)
-    attach_geom = corridor_segments[['shape_array_key', 'segment_id', 'trips_hr_sch',
-                                     'geometry']].drop_duplicates()
+    attach_geom = (corridor_segments.groupby(
+        ['shape_array_key', 'segment_id','geometry']).agg(
+        {'trips_hr_sch': 'max'})).reset_index()
     trip_speeds_df = attach_geom.merge(trip_speeds_df, on=['shape_array_key', 'segment_id']).assign(
                         corridor_id = corridor_gdf.corridor_id.iloc[0])
     
@@ -148,20 +149,32 @@ def analyze_corridor_trips(
 def analyze_corridor_improvements(
     corridor_analysis_df: pd.DataFrame,
     trip_seconds_saved: int = None,
-    trip_mph_target: int = None
+    trip_mph_floor: int = None,
+    trip_percent_speedup: float = None
 ):
     '''
     Translate time savings into speed increase, or vice-versa
     '''
-    assert (trip_seconds_saved or trip_mph_target) and not (trip_seconds_saved and trip_mph_target), 'specify exactly one'
+    assert bool(trip_seconds_saved) ^ bool(trip_mph_floor or trip_percent_speedup), 'specify only trip_seconds_saved, or one/both of trip_mph_floor and trip_percent_speedup' #  ^ is XOR operator
     df = corridor_analysis_df
+    print(f'median: {df.corridor_speed_mph.round(2).median()}mph... ', end='')
+    if trip_percent_speedup and trip_percent_speedup > 1: trip_percent_speedup = trip_percent_speedup / 100
+    if trip_mph_floor and trip_percent_speedup and df.corridor_speed_mph.median() >= (trip_mph_floor * (1-trip_percent_speedup) ):
+        trip_mph_floor = None #  if median exceeding floor, use percent
     if trip_seconds_saved:
         df = df.assign(improved_corridor_seconds = (df['corridor_seconds'] - trip_seconds_saved).clip(lower=0))
         df = df.assign(improved_corridor_speed_mps = df['corridor_meters'] / df['improved_corridor_seconds'])
         df = df.assign(improved_corridor_speed_mph = df['improved_corridor_speed_mps'] * rt_utils.MPH_PER_MPS)
-    elif trip_mph_target:
-        df = df.assign(improved_corridor_speed_mph = df['corridor_speed_mph'].clip(lower=trip_mph_target))
+    elif trip_percent_speedup and not trip_mph_floor: #  either percent alone specified or median speeds exceed floor
+        print(f'percent mode: {trip_percent_speedup}')
+        df = df.assign(improved_corridor_speed_mph = df['corridor_speed_mph'] * (1 + trip_percent_speedup))
         df = df.assign(improved_corridor_speed_mps = df['improved_corridor_speed_mph'] / rt_utils.MPH_PER_MPS)
         df = df.assign(improved_corridor_seconds = df['corridor_meters'] / df['improved_corridor_speed_mps'])
+    elif trip_mph_floor:
+        print(f'mph floor mode: {trip_mph_floor}mph')
+        df = df.assign(improved_corridor_speed_mph = df['corridor_speed_mph'].clip(lower=trip_mph_floor))
+        df = df.assign(improved_corridor_speed_mps = df['improved_corridor_speed_mph'] / rt_utils.MPH_PER_MPS)
+        df = df.assign(improved_corridor_seconds = df['corridor_meters'] / df['improved_corridor_speed_mps'])
+
     
     return df
