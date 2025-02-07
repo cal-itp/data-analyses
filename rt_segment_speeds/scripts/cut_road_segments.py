@@ -146,6 +146,9 @@ def add_segment_direction(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     return df
 
+def spot_check_local_roads():
+    return
+
 
 def cut_road_segments(
     group_cols: list,
@@ -153,7 +156,11 @@ def cut_road_segments(
     road_segment_str: str, 
     **kwargs
 ):
-    roads = delayed(load_roads)(**kwargs)
+    # TODO: cut primary/secondary & local roads separately, since we always
+    # want to include all primary/secondary. But local roads, we want to filter it down.
+    #primary_secondary_roads = delayed(load_roads)(
+    #    filters = [[("MTFCC", "in", ["S1100", "S1200"])]]
+    #)
     
     road_segments = delayed(cut_segments)(
         roads, 
@@ -174,6 +181,7 @@ def cut_road_segments(
     
 if __name__ == '__main__': 
     
+    from shared_utils import rt_dates
     LOG_FILE = "../logs/cut_road_segments.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
@@ -184,8 +192,25 @@ if __name__ == '__main__':
     
     road_cols = ["linearid", "mtfcc", "fullname"]
 
-    cut_road_segments(road_cols, ROAD_SEGMENT_METERS, "onekm")
- 
+    #cut_road_segments(road_cols, ROAD_SEGMENT_METERS, "onekm")
+    subset_local_roads = pd.read_parquet(
+        f"../local_roads_{rt_dates.DATES['oct2024']}.parquet"
+    ).LINEARID.unique().tolist()
+    
+    subset_primary_sec_roads = pd.read_parquet(
+        f"{SHARED_GCS}all_roads_2020_state06.parquet",
+        columns=["LINEARID"],
+        filters = [[("MTFCC", "in", ["S1100", "S1200"])]]
+    ).LINEARID.unique().tolist()
+    
+    cut_road_segments(
+        road_cols, 100, "100m",
+        filters = [[
+            ("LINEARID", "in", subset_primary_sec_roads + subset_local_roads)
+        ]]
+    )
+    
+    
     '''
     TWO_MILES_IN_METERS = round(rt_utils.METERS_PER_MILE, 0)*2
     cut_road_segments(road_cols, TWO_MILES_IN_METERS, "twomile")
