@@ -1,5 +1,6 @@
 import pandas as pd
 import geopandas as gpd
+import numpy as np
 from shared_utils import rt_utils, catalog_utils
 
 from calitp_data_analysis import get_fs, geography_utils
@@ -9,6 +10,18 @@ from segment_speed_utils.project_vars import SCHED_GCS, SEGMENT_GCS, GTFS_DATA_D
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 CORRIDOR_BUFFER = 70 #  meters
 CORRIDOR_RELEVANCE = 1000 #  meters, or half corridor length
+
+def import_speedmap_segment_speeds(analysis_date: str) -> gpd.GeoDataFrame:
+    
+    path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{analysis_date}.parquet'
+    detail = gpd.read_parquet(path)
+    return detail
+
+def get_max_frequencies(segment_speeds: gpd.GeoDataFrame) -> pd.DataFrame:
+    
+    frequencies = segment_speeds[['route_id', 'schedule_gtfs_dataset_key', 'trips_hr_sch']].drop_duplicates()
+    frequencies = frequencies.groupby(['route_id', 'schedule_gtfs_dataset_key']).max().reset_index().sort_values('trips_hr_sch', ascending=False)
+    return frequencies
 
 def describe_cleaning(df:pd.DataFrame, cleaning_query:str, message:str):
     '''
@@ -107,7 +120,8 @@ def find_corridor_data(
                     )
     trip_speeds_df = trip_speeds_df.drop(columns=['shape_length']).merge(shape_lengths, on=['shape_id', 'schedule_gtfs_dataset_key'])
     half_corr = corridor_gdf.corridor_distance_meters.iloc[0] / 2
-    corridor_relevance_threshold = min(half_corr, CORRIDOR_RELEVANCE)
+    # corridor_relevance_threshold = min(half_corr, CORRIDOR_RELEVANCE)
+    corridor_relevance_threshold = half_corr
     trip_speeds_df = trip_speeds_df.query('shape_length >= @corridor_relevance_threshold')
     trip_speeds_gdf = gpd.GeoDataFrame(trip_speeds_df, crs=geography_utils.CA_NAD83Albers_m)
     
@@ -201,6 +215,92 @@ def analyze_corridor_improvements(
                       intervention_assumption = f'trips achieve {trip_mph_floor}mph or existing spd if higher')
         df = df.assign(improved_corridor_speed_mps = df['improved_corridor_speed_mph'] / rt_utils.MPH_PER_MPS)
         df = df.assign(improved_corridor_seconds = df['corridor_meters'] / df['improved_corridor_speed_mps'])
-
     
     return df
+
+def summarize_corridor_improvements(
+    analysis_df: pd.DataFrame,
+    frequencies: pd.DataFrame,
+    extra_group_cols: list = []) -> pd.DataFrame:
+    '''
+    aggregate results of specified corridor improvements from analyze_corridor_improvements
+    '''
+    group_cols=['corridor_id', 'schedule_gtfs_dataset_key', 'intervention_assumption'] + extra_group_cols
+    sum_cols = ['corridor_seconds', 'improved_corridor_seconds', 'delay_seconds',
+                   'delay_minutes']
+    array_cols = ['route_short_name', 'route_id']
+    analysis_df = analysis_df.assign(delay_seconds = analysis_df.corridor_seconds - analysis_df.improved_corridor_seconds)
+                  # corridor_miles = analysis_df.corridor_meters / rt_utils.METERS_PER_MILE)
+    analysis_df = analysis_df.assign(delay_minutes = analysis_df.delay_seconds / 60)
+    
+    group = analysis_df.groupby(group_cols)
+
+    analysis_df = group.agg({**{x:'sum' for x in sum_cols},
+                    **{x:'unique' for x in array_cols},
+                            'corridor_speed_mph': np.median})
+    analysis_df = analysis_df.rename(columns={'corridor_speed_mph': 'median_corridor_mph'})
+    analysis_df = analysis_df.merge(group.agg({'corridor_speed_mph':'count'}).rename(
+        columns={'corridor_speed_mph':'n_trips_daily'}), on=group_cols)
+    #  join in max route frequencies
+    freq = (analysis_df.explode(['route_short_name', 'route_id']).reset_index(
+                ).merge(frequencies, on=['route_id', 'schedule_gtfs_dataset_key'])
+           )
+    #  add frequencies to output to match array cols; allow inspection before summing delay metrics and frequencies
+    analysis_df = (analysis_df.reset_index().merge(
+        freq.groupby('schedule_gtfs_dataset_key').agg(
+            {'trips_hr_sch': lambda x: list(x)}), on='schedule_gtfs_dataset_key')
+         )
+    return analysis_df.round(1)
+
+def combine_corridor_operators(corridor_gdf):
+    '''
+    aggregate all transit operators in each corridor
+    '''
+    group_cols = ['corridor_id', 'corridor_name', 'geometry',
+                 'intervention_assumption']
+    overall = corridor_gdf.groupby(group_cols).agg({
+        'corridor_miles': 'min', 'delay_minutes': 'sum', 'minutes_per_mile': 'sum', 'median_corridor_mph': np.median,
+        'trips_per_hr_peak_directional': 'sum', 'n_trips_daily':'sum',
+    }).reset_index()
+    overall = overall.assign(average_trip_delay = overall.delay_minutes/overall.n_trips_daily)
+    return overall.sort_values('minutes_per_mile', ascending=False)
+
+def corridor_from_sheet(
+    corridor_specifications: pd.DataFrame,
+    speed_segments_gdf: gpd.GeoDataFrame,
+    trip_speeds_df: pd.DataFrame,
+    frequencies: pd.DataFrame,
+    intervention_dict: dict,
+    fwy_xpwy_floor: int = None):
+    '''
+    We've specified corridors in a spreadsheet. After reading that in, use this
+    to iterate and analyze each corridor.
+    '''
+    all_corridors = []
+    for _, row in corridor_specifications.iterrows():
+        try:
+            print(row["SHS Segment"])
+            corr = corridor_from_segments(speed_segments_gdf=speed_segments_gdf, organization_source_record_id=row.organization_source_record_id, shape_id=row.shape_id,
+                          start_seg_id=row.start_segment_id, end_seg_id=row.end_segment_id, name=row['SHS Segment'])
+            corridor_trips = find_corridor_data(speed_segments_gdf, corr, trip_speeds_df)
+            display(validate_corridor_routes(corr, corridor_trips))
+            corridor_results = analyze_corridor_trips(corridor_trips)
+            if hasattr(row, 'fwy_xpwy')  and row.fwy_xpwy:
+                analyzed_interventions = intervention_dict.copy()
+                analyzed_interventions['trip_mph_floor'] = fwy_xpwy_floor
+                df = analyze_corridor_improvements(corridor_results, **analyzed_interventions)
+            else:
+                df = analyze_corridor_improvements(corridor_results, **intervention_dict)
+            summ = summarize_corridor_improvements(df, frequencies).reset_index(drop=True)
+            corr = pd.merge(corr, summ, on='corridor_id')
+            corr = corr.assign(corridor_miles = corr.corridor_distance_meters / rt_utils.METERS_PER_MILE) #  from corridor def, not trip distance
+            corr = corr.assign(minutes_per_mile = corr.delay_minutes / corr.corridor_miles)
+            all_corridors += [corr]
+        except Exception as e:
+            print(f'failed for{row["SHS Segment"]}')
+            print(e)
+            pass
+    all_corridors = pd.concat(all_corridors)
+    all_corridors = all_corridors.assign(trips_per_hr_peak_directional = all_corridors.trips_hr_sch.map(lambda x: sum(x)))
+    all_corridors = combine_corridor_operators(all_corridors)
+    return gpd.GeoDataFrame(all_corridors, crs=geography_utils.CA_NAD83Albers_m)
