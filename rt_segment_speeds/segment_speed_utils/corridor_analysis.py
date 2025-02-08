@@ -31,15 +31,16 @@ def describe_cleaning(df:pd.DataFrame, cleaning_query:str, message:str):
     
     currently does not return anything or actually filter df
     '''
-    to_clean = df.query(cleaning_query)
+    to_clean = df.query(f"~({cleaning_query})")
     pct = round((to_clean.shape[0] / df.shape[0]) * 100, 1)
     print(f"{pct} percent of {message}")
+    return df.query(cleaning_query)
     
 def import_trip_speeds(analysis_date: str):
     path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.stage4}_{analysis_date}.parquet'
     st4 = pd.read_parquet(path)
-    describe_cleaning(st4, 'speed_mph.isna()', 'segments have no speed')
-    st4 = st4[~st4['speed_mph'].isna()]
+    st4 = describe_cleaning(st4, '~speed_mph.isna()', 'segments have no speed')
+    # st4 = st4[~st4['speed_mph'].isna()]
     return st4
 
 def corridor_from_segments(
@@ -158,10 +159,13 @@ def analyze_corridor_trips(
     df = df.assign(corridor_speed_mps = df['corridor_meters'] / df['corridor_seconds'])
     df = df.assign(corridor_speed_mph = df['corridor_speed_mps'] * rt_utils.MPH_PER_MPS)
     
-    describe_cleaning(df, 'corridor_seconds <= 0', 'trips with zero seconds')
-    describe_cleaning(df, 'corridor_speed_mph > 80', 'trips with speeds > 80mph')
+    df = describe_cleaning(df, 'corridor_seconds > 0', 'trips with zero seconds')
+    df = describe_cleaning(df, 'corridor_speed_mph < 80', 'trips with speeds > 80mph')
     
-    corridor_trips_usable = df.query('corridor_seconds > 0 & corridor_speed_mph <= 80')
+    # corridor_trips_usable = df.query('corridor_seconds > 0 & corridor_speed_mph <= 80')
+    corridor_trips_usable = describe_cleaning(df,
+                            'corridor_speed_mph > corridor_speed_mph.quantile(.05) & corridor_speed_mph < corridor_speed_mph.quantile(.95)',
+                                             'trips with speed below 5th or above 95%ile')
     trip_identifiers = corridor_trips_gdf[['trip_instance_key', 'route_short_name', 'route_id',
                    'shape_array_key', 'shape_id', 'schedule_gtfs_dataset_key',
                     'time_of_day', 'corridor_id']].drop_duplicates()
@@ -194,7 +198,7 @@ def analyze_corridor_improvements(
     '''
     assert bool(trip_seconds_saved) ^ bool(trip_mph_floor or trip_percent_speedup), 'specify only trip_seconds_saved, or one/both of trip_mph_floor and trip_percent_speedup' #  ^ is XOR operator
     df = corridor_analysis_df
-    print(f'median: {df.corridor_speed_mph.round(2).median()}mph... ', end='')
+    print(f'median: {round(df.corridor_speed_mph.median(), 2)}mph... ', end='')
     if trip_percent_speedup and trip_percent_speedup > 1: trip_percent_speedup = trip_percent_speedup / 100
     if trip_mph_floor and trip_percent_speedup and df.corridor_speed_mph.median() >= (trip_mph_floor * (1-trip_percent_speedup) ):
         trip_mph_floor = None #  if median exceeding floor, use percent
@@ -252,7 +256,7 @@ def summarize_corridor_improvements(
          )
     return analysis_df.round(1)
 
-def combine_corridor_operators(corridor_gdf):
+def combine_corridor_operators(corridor_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
     aggregate all transit operators in each corridor
     '''
@@ -263,7 +267,7 @@ def combine_corridor_operators(corridor_gdf):
         'trips_per_hr_peak_directional': 'sum', 'n_trips_daily':'sum',
     }).reset_index()
     overall = overall.assign(average_trip_delay = overall.delay_minutes/overall.n_trips_daily)
-    return overall.sort_values('minutes_per_mile', ascending=False)
+    return overall.sort_values('minutes_per_mile', ascending=False).round(1)
 
 def corridor_from_sheet(
     corridor_specifications: pd.DataFrame,
@@ -271,7 +275,7 @@ def corridor_from_sheet(
     trip_speeds_df: pd.DataFrame,
     frequencies: pd.DataFrame,
     intervention_dict: dict,
-    fwy_xpwy_floor: int = None):
+    fwy_xpwy_floor: int = None) -> gpd.GeoDataFrame:
     '''
     We've specified corridors in a spreadsheet. After reading that in, use this
     to iterate and analyze each corridor.
@@ -283,7 +287,7 @@ def corridor_from_sheet(
             corr = corridor_from_segments(speed_segments_gdf=speed_segments_gdf, organization_source_record_id=row.organization_source_record_id, shape_id=row.shape_id,
                           start_seg_id=row.start_segment_id, end_seg_id=row.end_segment_id, name=row['SHS Segment'])
             corridor_trips = find_corridor_data(speed_segments_gdf, corr, trip_speeds_df)
-            display(validate_corridor_routes(corr, corridor_trips))
+            # display(validate_corridor_routes(corr, corridor_trips))
             corridor_results = analyze_corridor_trips(corridor_trips)
             if hasattr(row, 'fwy_xpwy')  and row.fwy_xpwy:
                 analyzed_interventions = intervention_dict.copy()
