@@ -124,7 +124,7 @@ def update_program_code_list_2025():
     # Load September 2023 codes
     program_codes_sept_2023 = load_program_codes_sept_2023()
 
-    # Merge original + September first
+    # Merge original + September 2023 first
     m1 = pd.merge(
         program_codes_sept_2023,
         original_codes_df,
@@ -179,7 +179,7 @@ def update_program_code_list_2025():
         }
     )
 
-    # Add program to another program names without the string "program"
+    # Add the string "program" to values in the column "program_name"
     m2["program_name"] = m2.apply(add_program_to_row, axis=1)
     return m2
 
