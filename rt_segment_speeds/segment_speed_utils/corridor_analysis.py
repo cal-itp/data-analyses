@@ -18,9 +18,17 @@ def import_speedmap_segment_speeds(analysis_date: str) -> gpd.GeoDataFrame:
     return detail
 
 def get_max_frequencies(segment_speeds: gpd.GeoDataFrame) -> pd.DataFrame:
-    
-    frequencies = segment_speeds[['route_id', 'schedule_gtfs_dataset_key', 'trips_hr_sch']].drop_duplicates()
-    frequencies = frequencies.groupby(['route_id', 'schedule_gtfs_dataset_key']).max().reset_index().sort_values('trips_hr_sch', ascending=False)
+    '''
+    get max directional frequency by route from segment speeds
+    '''
+    group_cols = ['schedule_gtfs_dataset_key', 'route_id']
+    frequencies = segment_speeds[group_cols + ['direction_id', 'time_of_day', 'shape_array_key', 'trips_hr_sch']]
+    #  max for each shape across all times of day, then sum all shapes per direction, then max direction
+    frequencies = (frequencies.groupby(
+        group_cols + ['shape_array_key', 'direction_id']).max().groupby(
+        group_cols + ['direction_id']).sum().groupby(
+        group_cols).max().reset_index().round(1)
+              )
     return frequencies
 
 def describe_cleaning(df:pd.DataFrame, cleaning_query:str, message:str):
@@ -49,7 +57,6 @@ def corridor_from_segments(
     shape_id: str,
     start_seg_id: str,
     end_seg_id: str,
-    name: str = None
 ) -> gpd.GeoDataFrame:
     '''
     Replicates legacy RtFilterMapper.autocorridor functionality.
@@ -89,8 +96,7 @@ def corridor_from_segments(
     # print(corridor_start, corridor_end)
     corridor = corridor.to_crs(geography_utils.CA_NAD83Albers_m).assign(corridor_distance_meters = lambda x: x.geometry.length)
     corridor.geometry = corridor.buffer(CORRIDOR_BUFFER) #  70m corridor buffer
-    corridor = corridor.assign(corridor_id = hash(organization_source_record_id+shape_id+start_seg_id+end_seg_id),
-                              corridor_name = name)
+    corridor = corridor.assign(corridor_id = hash(organization_source_record_id+shape_id+start_seg_id+end_seg_id))
     return corridor
 
 def find_corridor_data(
@@ -260,9 +266,9 @@ def combine_corridor_operators(corridor_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFra
     '''
     aggregate all transit operators in each corridor
     '''
-    group_cols = ['corridor_id', 'corridor_name', 'geometry',
-                 'intervention_assumption']
-    overall = corridor_gdf.groupby(group_cols).agg({
+    group_cols = ['corridor_id', 'corridor_name', 'corridor_notes',
+                  'district', 'geometry', 'intervention_assumption']
+    overall = corridor_gdf.groupby(group_cols, dropna=False).agg({
         'corridor_miles': 'min', 'delay_minutes': 'sum', 'minutes_per_mile': 'sum', 'median_corridor_mph': np.median,
         'trips_per_hr_peak_directional': 'sum', 'n_trips_daily':'sum',
     }).reset_index()
@@ -285,7 +291,8 @@ def corridor_from_sheet(
         try:
             print(row["SHS Segment"])
             corr = corridor_from_segments(speed_segments_gdf=speed_segments_gdf, organization_source_record_id=row.organization_source_record_id, shape_id=row.shape_id,
-                          start_seg_id=row.start_segment_id, end_seg_id=row.end_segment_id, name=row['SHS Segment'])
+                          start_seg_id=row.start_segment_id, end_seg_id=row.end_segment_id)
+            corr = corr.assign(corridor_name=row['SHS Segment'], corridor_notes=row['Notes'], district=row['District'])
             corridor_trips = find_corridor_data(speed_segments_gdf, corr, trip_speeds_df)
             # display(validate_corridor_routes(corr, corridor_trips))
             corridor_results = analyze_corridor_trips(corridor_trips)
