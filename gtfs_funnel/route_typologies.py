@@ -357,6 +357,34 @@ def reconcile_route_and_nacto_typologies(
     
     return df2
 
+def add_rail_back(
+    categorize_routes_df: pd.DataFrame, overlay_shapes_to_roads_df: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    categorize_routes_df: df created by categorize_routes_by_name()
+    overlay_shapes_to_roads_df: df created by overlay_shapes_to_roads() 
+    """
+    # Filter out for only rail routes and drop duplicates.
+    rail_routes = categorize_routes_df.loc[categorize_routes_df.is_rail == 1][
+        ["route_id", "schedule_gtfs_dataset_key"]
+    ].drop_duplicates()
+
+    # Merge with route_typologies_df to retain the details for
+    # columns such as typology, freq_category, etc
+    m1 = pd.merge(gdf, rail_routes, how="inner")
+
+    # Retain only one row for each route-direction-operator
+    # keeping the row with the highest pct_typology
+    m1 = m1.sort_values(
+        by=["route_id", "direction_id", "schedule_gtfs_dataset_key", "pct_typology"],
+        ascending=[True, True, True, False],
+    ).drop_duplicates(subset=["route_id", "direction_id", "schedule_gtfs_dataset_key"])
+    
+    # Apply primary_secondary_typology() function which adds
+    # columns like is_nacto_rapid, is_nacto_coverage
+    m1 = primary_secondary_typology(m1)
+
+    return m1
 
 if __name__ == "__main__":
     
@@ -368,7 +396,7 @@ if __name__ == "__main__":
 
     roads = delayed(prep_roads)(GTFS_DATA_DICT)
     ROAD_BUFFER_METERS = 20
-    TYPOLOGY_THRESHOLD = 0.10
+    TYPOLOGY_THRESHOLD = 0.1
     
     for analysis_date in analysis_date_list:
         
@@ -388,17 +416,33 @@ if __name__ == "__main__":
         # Aggregate to route-dir-typology
         route_typology_df2 = primary_secondary_typology(route_typology_df)
         
+        # Tag if the route is express, rapid, or rail
         route_tagged = categorize_routes_by_name(analysis_date)
         
+        # Incorporate back rail routes that disappear if the routs
+        # dont't meet the minimum set in typology_threshold.
+        rail_routes_df = add_rail_back(route_tagged, gdf)
+        all_routes = pd.concat([route_typology_df2, rail_routes_df])
+        
+        
+        # Merge 
         df3 = pd.merge(
             route_tagged,
-            route_typology_df2,
+            all_routes,
             on = ["schedule_gtfs_dataset_key", "route_id"],
         ).pipe(reconcile_route_and_nacto_typologies)
         
-        df3.to_parquet(
-            f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet")
         
+        # Drop duplicates because some rail routes are found both
+        # route_typology_df2 and rail_routes_df
+        df3 = (df3.drop_duplicates(
+            subset = ["schedule_gtfs_dataset_key",
+                      "route_id", 
+                      "route_long_name", 
+                      "direction_id"])
+                      )
+        df3.to_parquet(
+            f"{SCHED_GCS}{EXPORT}_AH_TEST_{analysis_date}.parquet")
         
         time1 = datetime.datetime.now()
         print(f"route typologies {analysis_date}: {time1 - time0}")
