@@ -142,6 +142,35 @@ def import_df_func(
     return df
 
 
+def import_ddf_func(path, date_list, data_type, **kwargs):
+    """
+    Equivalent to improt_df_func, except uses dask to read in the dataframe
+    instead of pandas.
+    Concatenates the various dates.
+    """
+    if data_type == "df":
+        ddf = dd.multi.concat(
+            [
+                dd.read_parquet(f"{path}_{one_date}.parquet", **kwargs).assign(service_date=one_date)
+                for one_date in date_list
+            ],
+            axis=0,
+            ignore_index=True,
+        )
+
+    elif data_type == "gdf":
+        ddf = dd.multi.concat(
+            [
+                dg.read_parquet(f"{path}_{one_date}.parquet", **kwargs).assign(service_date=one_date)
+                for one_date in date_list
+            ],
+            axis=0,
+            ignore_index=True,
+        )
+
+    return ddf
+
+
 def get_ddf(paths, date_list, data_type, get_pandas: bool = False, **kwargs):
     """
     Set up function with little modifications based on
