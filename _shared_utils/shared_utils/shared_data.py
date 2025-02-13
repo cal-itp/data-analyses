@@ -19,7 +19,7 @@ def make_county_centroids():
     """
     URL = "https://opendata.arcgis.com/datasets/" "8713ced9b78a4abb97dc130a691a8695_0.geojson"
 
-    gdf = gpd.read_file(URL).to_crs(geography_utils.CA_StatePlane)
+    gdf = gpd.read_file(URL).to_crs(geography_utils.CA_NAD83Albers_ft)
     gdf.columns = gdf.columns.str.lower()
 
     gdf = (
@@ -167,7 +167,7 @@ def segment_highway_lines_by_postmile(gdf: gpd.GeoDataFrame):
 
     # Assign segment geometry and overwrite the postmile geometry column
     gdf2 = (
-        gdf.assign(geometry=gpd.GeoSeries(segment_geom, crs=geography_utils.CA_NAD83Albers))
+        gdf.assign(geometry=gpd.GeoSeries(segment_geom, crs=geography_utils.CA_NAD83Albers_m))
         .drop(columns=drop_cols)
         .set_geometry("geometry")
     )
@@ -205,7 +205,7 @@ def create_postmile_segments(
         .explode("geometry")
         .reset_index(drop=True)
         .pipe(round_odometer_values, ["bodometer", "eodometer"], num_decimals=3)
-        .to_crs(geography_utils.CA_NAD83Albers)
+        .to_crs(geography_utils.CA_NAD83Albers_m)
     )
 
     # Have a list accompany the geometry
@@ -222,7 +222,7 @@ def create_postmile_segments(
             f"{GCS_FILE_PATH}state_highway_network_postmiles.parquet", columns=group_cols + ["odometer", "geometry"]
         )
         .pipe(round_odometer_values, ["odometer"], num_decimals=3)
-        .to_crs(geography_utils.CA_NAD83Albers)
+        .to_crs(geography_utils.CA_NAD83Albers_m)
     )
     # Round to 3 digits for odometer. When there are more decimal places, it makes our cutoffs iffy
     # when we use this condition below: odometer >= bodometer & odometer <= eodometer

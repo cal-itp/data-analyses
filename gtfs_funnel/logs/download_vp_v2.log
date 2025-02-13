@@ -460,3 +460,5 @@
 2025-01-16 13:52:18.653 | INFO     | __main__:<module>:112 - export concatenated vp: 0:03:54.775914
 2025-01-16 13:56:18.964 | INFO     | __main__:<module>:134 - remove batched parquets
 2025-01-16 13:56:18.987 | INFO     | __main__:<module>:137 - execution time: 0:08:02.947545
+2025-02-13 09:16:42.270 | INFO     | __main__:<module>:148 - Analysis date: 2025-01-15
+2025-02-13 09:19:25.285 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 0 to GCS: 0:02:43.014412
