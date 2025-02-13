@@ -96,7 +96,7 @@ def get_week(month: Literal[[*valid_weeks]], exclude_wed: bool) -> list:
 apr2023_week = get_week(month="apr2023", exclude_wed=False)
 oct2023_week = get_week(month="oct2023", exclude_wed=False)
 apr2024_week = get_week(month="apr2024", exclude_wed=False)
-oct2024_week = get_week(month="oct2024", exclude_wed=False)
+oct2024_week = [d for d in get_week(month="oct2024", exclude_wed=False) if d != DATES["oct2024g"]]
 
 MONTH_DICT = {
     1: "January",
