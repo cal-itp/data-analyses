@@ -38,6 +38,11 @@ WEEKDAY_DICT = {
     **{k: "weekend" for k in ["Saturday", "Sunday"]},
 }
 
+WEEKDAY_DICT2 = {
+    **{k: "Weekday" for k in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]},
+    **{k: k for k in ["Saturday", "Sunday"]},
+}
+
 
 def time_span_labeling(date_list: list) -> tuple[str]:
     """
