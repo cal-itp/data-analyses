@@ -72,8 +72,7 @@ def concatenate_trip_segment_speeds(
     ).pipe(
         gtfs_schedule_wrangling.add_peak_offpeak_column
     )
-    # df = df.rename(columns={'arrival_time':'service_date'} #  will now cause errors by adding a second service_date col
-    #  drop arrival time if not needed, no need to rename to service_date since that now comes via concatenate_datasets_across_dates
+
     df = df.drop(columns=['arrival_time']
     ).pipe(
         gtfs_schedule_wrangling.add_weekday_weekend_column
