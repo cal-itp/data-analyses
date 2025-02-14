@@ -147,13 +147,8 @@ def identify_agency(df, identifier_col):
     
     return full_df
 
-def identify_agency2(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Fill in locodes, using the column rk_locode first
-    then using the original function from Natalie.
-    """
-    # Load dataframe with locodes
-    locodes_df = to_snakecase(
+def load_locodes()->pd.DataFrame:
+    df = to_snakecase(
         pd.read_excel(
             f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"
         )
@@ -162,7 +157,54 @@ def identify_agency2(df: pd.DataFrame) -> pd.DataFrame:
             "agency_name": "implementing_agency",
         }
     )
+    return df
 
+def load_county()->pd.DataFrame:
+    df = to_snakecase(
+    pd.read_excel(
+        f"{GCS_FILE_PATH}/Copy of County.xlsx", sheet_name="County", header=[1]
+    )
+)[["recipient_name", "county_description", "county_code"]]
+    
+    df['county_description'] = df['county_description'] + " County"
+    return df
+
+def county_district_crosswalk()->pd.DataFrame:
+    """
+    Aggregate locodes dataset to find which
+    districts a county lies in.
+    """
+    # Load locodes
+    locodes_df = load_locodes()
+    
+    # Load counties
+    county_base = load_county()
+
+    county_district = (
+        locodes_df
+        >> group_by(_.district, _.county_name)
+        >> count(_.county_name)
+        >> select(_.district, _.county_name)
+        >> filter(_.county_name != "Multi-County", _.district != 53)
+    )
+    
+    county_info = pd.merge(
+        county_base,
+        county_district,
+        how="left",
+        left_on="county_description",
+        right_on="county_name",
+    ).drop(columns=["county_name"])
+    return county_info
+
+def identify_agency2(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fill in locodes, using the column rk_locode first
+    then use the original function from Natalie.
+    """
+    # Load dataframe with locodes
+    locodes_df = load_locodes()
+    
     # Filter out for rows in which rk_locode is filled
     filled_locode_df = df.loc[df.rk_locode.notna()].reset_index(drop=True)
 
@@ -181,7 +223,6 @@ def identify_agency2(df: pd.DataFrame) -> pd.DataFrame:
     # Clean
     filled_locode_df2 = filled_locode_df2.rename(
         columns={
-            "agency_name": "implementing_agency",
             "rk_locode": "implementing_agency_locode",
         }
     ).drop(
@@ -199,50 +240,33 @@ def identify_agency2(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Fill in summary_recipient_defined_text_field_1_value
-    missing_locode_df.summary_recipient_defined_text_field_1_value = (
-        missing_locode_df.summary_recipient_defined_text_field_1_value.fillna("None")
-    )
+    #missing_locode_df.summary_recipient_defined_text_field_1_value = (
+    #    missing_locode_df.summary_recipient_defined_text_field_1_value.fillna("None")
+    #)
 
     # Try add_name_from_locode from _data_utils
     missing_locode_df2 = _data_utils.add_name_from_locode(
         missing_locode_df, "summary_recipient_defined_text_field_1_value"
     )
 
+    # Manually add in info for any rows that are still missing info
+    county_info = county_district_crosswalk()
+    
+    mapping1 = dict(county_info[["county_code", "county_description"]].values)
+    mapping2 = dict(county_info[["county_code", "recipient_name"]].values)
+    mapping3 = dict(county_info[["county_code", "district"]].values)
+    
+    missing_locode_df2["county_description"] = missing_locode_df2.county_code.map(mapping1)
+    missing_locode_df2["district"] = missing_locode_df2.county_code.map(mapping3)
+    missing_locode_df2["implementing_agency"] = missing_locode_df2.county_code.map(mapping2)
+
     # Concat all the dataframes
     final_df = pd.concat([filled_locode_df2, missing_locode_df2])
     display("Do the # of rows match?")
     display(len(final_df) == len(df))
 
-    # More cleaning
-    county_base = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/Copy of County.xlsx", sheet_name='County', header=[1]))
-    county_base.drop(columns =['unnamed:_0', 'unnamed:_4'], axis=1, inplace=True)
-    county_base['county_description'] = county_base['county_description'] + " County"
-    
-    county_district = (
-        locodes_df
-        >> group_by(_.district, _.county_name)
-        >> count(_.county_name)
-        >> select(_.district, _.county_name)
-        >> filter(_.county_name != "Multi-County", _.district != 53)
-    )
-    county_info = pd.merge(
-        county_base,
-        county_district,
-        how="left",
-        left_on="county_description",
-        right_on="county_name",
-    ).drop(columns=["county_name"])
-    mapping1 = dict(county_info[["county_code", "county_description"]].values)
-    mapping2 = dict(county_info[["county_code", "recipient_name"]].values)
-    mapping3 = dict(county_info[["county_code", "district"]].values)
-    
-    final_df["county_description"] = final_df.county_code.map(mapping1)
-    final_df["recipient_name"] = final_df.county_code.map(mapping2)
-    final_df["district"] = final_df.county_code.map(mapping3)
-    
-    final_df.loc[
-    final_df.county_name == "Statewide County", "county_name"] = "Statewide"
-
+    # Clean & fill in nans with Unknown
+    final_df.loc[final_df.county_name == "Statewide County", "county_name"] = "Statewide"
     final_df["implementing_agency"] = final_df[
         "implementing_agency"
     ].fillna(value="Unknown")
@@ -599,7 +623,7 @@ def get_clean_data(df, full_or_agg = ''):
         aggdf = add_new_description_col(aggdf)
                 
         ##asserting that the there is one row for each project id in the new 
-        assert len(aggdf) == df.project_number.nunique()
+        display(len(aggdf) == df.project_number.nunique())
     
         return aggdf
     
