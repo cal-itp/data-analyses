@@ -216,6 +216,16 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
     
     return df2
 
+def fill_in_x_y(df: pd.DataFrame, column: str) -> pd.DataFrame:
+    """
+    Fill in values from the ArcGIS Editor first,
+    then from Survey123 for columns that repeated across
+    both forms.
+    """
+    df[column] = df[f"{column}_x"]
+    df[column] = df[column].fillna(df[f"{column}_y"])
+    df = df.drop(columns=[f"{column}_x", f"{column}_y"])
+    return df
 
 def merge_data_sources_by_route_direction(
     df_schedule: pd.DataFrame,
@@ -257,7 +267,7 @@ def merge_data_sources_by_route_direction(
         merge_in_standardized_route_names,
     ).merge(
         df_crosswalk,
-        on = ["schedule_gtfs_dataset_key", "name", "service_date"],
+        on = ["schedule_gtfs_dataset_key", "service_date"],
         how = "left"
     ).pipe(
         # Find the most common cardinal direction
@@ -273,6 +283,11 @@ def merge_data_sources_by_route_direction(
     
     df[integrify] = df[integrify].fillna(0).astype("int")
    
+    # Some columns are duplicated with _x and _y. 
+    duplicated_columns = ['schedule_source_record_id','name']
+    for column in duplicated_columns:
+        df = fill_in_x_y(df, column)
+    
     return df
 
 
@@ -282,6 +297,7 @@ if __name__ == "__main__":
     
     analysis_date_list = (
         rt_dates.y2024_dates + rt_dates.y2023_dates
+        + rt_dates.y2025_dates
     )
     
     DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 

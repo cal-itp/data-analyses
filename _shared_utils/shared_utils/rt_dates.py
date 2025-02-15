@@ -74,14 +74,15 @@ DATES = {
     "oct2024g": "2024-10-21",  # additional one-off to capture Amtrak in HQTA
     "nov2024": "2024-11-13",
     "dec2024": "2024-12-11",
+    "jan2025": "2025-01-15",
 }
 
 y2023_dates = [
     v for k, v in DATES.items() if k.endswith("2023") and not any(substring in k for substring in ["jan", "feb"])
 ]
 
-y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["oct2024g"]]
-
+y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
+y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
 
 valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
 
@@ -96,7 +97,7 @@ def get_week(month: Literal[[*valid_weeks]], exclude_wed: bool) -> list:
 apr2023_week = get_week(month="apr2023", exclude_wed=False)
 oct2023_week = get_week(month="oct2023", exclude_wed=False)
 apr2024_week = get_week(month="apr2024", exclude_wed=False)
-oct2024_week = [d for d in get_week(month="oct2024", exclude_wed=False) if d != DATES["oct2024g"]]
+oct2024_week = get_week(month="oct2024", exclude_wed=False)
 
 MONTH_DICT = {
     1: "January",
