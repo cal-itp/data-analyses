@@ -48,7 +48,7 @@ funnel_gtfs_single_day:
 all:
 	make funnel_gtfs_single_day
     # update open_data/update_vars.py        
-#	cd ../open_data/ && make create_gtfs_schedule_geospatial_open_data -f Makefile
+	cd ../open_data/ && make create_gtfs_schedule_geospatial_open_data -f Makefile
     # update high_quality_transit_areas/update_vars.py    
 	cd ../high_quality_transit_areas/ && make hqta_data -f Makefile    
     # update rt_segment_speeds/segment_speed_utils/project_vars.py

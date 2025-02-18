@@ -77,3 +77,5 @@
 2025-01-21 13:22:00.233 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2025-01-15: 0:05:55.448966
 2025-02-12 09:54:53.038 | INFO     | __main__:<module>:168 - cut segments 2025-01-15: 0:27:45.038713
 2025-02-12 10:02:11.788 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2025-01-15: 0:05:29.432920
+2025-02-17 15:13:39.338 | INFO     | __main__:<module>:168 - cut segments 2025-01-15: 0:24:38.593221
+2025-02-17 15:20:17.313 | INFO     | __main__:<module>:244 - speedmap segments and proxy_stop_times 2025-01-15: 0:05:03.685138
