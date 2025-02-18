@@ -151,6 +151,16 @@ tables:
         "# hours this stop has scheduled service (unique departure hours)" 
       definition_source: |-
         "https://gtfs.org/schedule/reference/#stop_timestxt"
+    meters_to_ca_state_highway: 
+      definition: |-
+        "Distance in meters from this stop to the nearest CA State Highway System centerline" 
+      definition_source: |-
+        "https://gisdata-caltrans.opendata.arcgis.com/datasets/77f2d7ba94e040a78bfbe36feb6279da_0/explore"
+    district_name: 
+      definition: |-
+        "Caltrans District containing this stop" 
+      definition_source: |-
+        "https://gisdata-caltrans.opendata.arcgis.com/datasets/0144574f750f4ccc88749004aca6eb0c_0/explore"
 
   - dataset_name: speeds_by_stop_segments
     agency: *agency
