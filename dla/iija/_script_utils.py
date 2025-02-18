@@ -6,17 +6,13 @@ Functions here to be used in cleaning script that will
 - add project types that classify project type
 - create a public-friendly project title 
 '''
-
 import numpy as np
 import pandas as pd
 from siuba import *
 
 import dla_utils
-
 from calitp_data_analysis.sql import to_snakecase
-
 import _data_utils
-
 import intake
 
 # import nltk
@@ -26,7 +22,6 @@ import intake
 # import re
 
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
-
 
 def _prep_data(file_name): 
     proj = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
@@ -152,6 +147,133 @@ def identify_agency(df, identifier_col):
     
     return full_df
 
+def load_locodes()->pd.DataFrame:
+    df = to_snakecase(
+        pd.read_excel(
+            f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"
+        )
+    ).rename(
+        columns={
+            "agency_name": "implementing_agency",
+        }
+    )
+    return df
+
+def load_county()->pd.DataFrame:
+    df = to_snakecase(
+    pd.read_excel(
+        f"{GCS_FILE_PATH}/Copy of County.xlsx", sheet_name="County", header=[1]
+    )
+)[["recipient_name", "county_description", "county_code"]]
+    
+    df['county_description'] = df['county_description'] + " County"
+    return df
+
+def county_district_crosswalk()->pd.DataFrame:
+    """
+    Aggregate locodes dataset to find which
+    districts a county lies in.
+    """
+    # Load locodes
+    locodes_df = load_locodes()
+    
+    # Load counties
+    county_base = load_county()
+
+    county_district = (
+        locodes_df
+        >> group_by(_.district, _.county_name)
+        >> count(_.county_name)
+        >> select(_.district, _.county_name)
+        >> filter(_.county_name != "Multi-County", _.district != 53)
+    )
+    
+    county_info = pd.merge(
+        county_base,
+        county_district,
+        how="left",
+        left_on="county_description",
+        right_on="county_name",
+    ).drop(columns=["county_name"])
+    return county_info
+
+def identify_agency2(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fill in locodes, using the column rk_locode first
+    then use the original function from Natalie.
+    """
+    # Load dataframe with locodes
+    locodes_df = load_locodes()
+    
+    # Filter out for rows in which rk_locode is filled
+    filled_locode_df = df.loc[df.rk_locode.notna()].reset_index(drop=True)
+
+    # Merge the two dataframes
+    filled_locode_df2 = pd.merge(
+        filled_locode_df,
+        locodes_df,
+        left_on="rk_locode",
+        right_on="agency_locode",
+        how="left",
+        indicator=True,
+    )
+    display("Rows with locodes filled")
+    display(filled_locode_df2._merge.value_counts())
+
+    # Clean
+    filled_locode_df2 = filled_locode_df2.rename(
+        columns={
+            "rk_locode": "implementing_agency_locode",
+        }
+    ).drop(
+        columns=[
+            "active_e76s______7_12_2021_",
+            "mpo_locode_fads",
+            "agency_locode",
+            "_merge",
+        ]
+    )
+
+    # Filter out for rows with missing locodes
+    missing_locode_df = (df.loc[(df.rk_locode.isna())].reset_index(drop=True)).drop(
+        columns=["rk_locode"]
+    )
+
+    # Fill in summary_recipient_defined_text_field_1_value
+    #missing_locode_df.summary_recipient_defined_text_field_1_value = (
+    #    missing_locode_df.summary_recipient_defined_text_field_1_value.fillna("None")
+    #)
+
+    # Try add_name_from_locode from _data_utils
+    missing_locode_df2 = _data_utils.add_name_from_locode(
+        missing_locode_df, "summary_recipient_defined_text_field_1_value"
+    )
+
+    # Manually add in info for any rows that are still missing info
+    county_info = county_district_crosswalk()
+    
+    mapping1 = dict(county_info[["county_code", "county_description"]].values)
+    mapping2 = dict(county_info[["county_code", "recipient_name"]].values)
+    mapping3 = dict(county_info[["county_code", "district"]].values)
+    
+    missing_locode_df2["county_description"] = missing_locode_df2.county_code.map(mapping1)
+    missing_locode_df2["district"] = missing_locode_df2.county_code.map(mapping3)
+    missing_locode_df2["implementing_agency"] = missing_locode_df2.county_code.map(mapping2)
+
+    # Concat all the dataframes
+    final_df = pd.concat([filled_locode_df2, missing_locode_df2])
+    display("Do the # of rows match?")
+    display(len(final_df) == len(df))
+
+    # Clean & fill in nans with Unknown
+    final_df.loc[final_df.county_name == "Statewide County", "county_name"] = "Statewide"
+    final_df["implementing_agency"] = final_df[
+        "implementing_agency"
+    ].fillna(value="Unknown")
+    final_df["county_name"] = final_df["county_name"].fillna(
+        value="Unknown"
+    )
+    return final_df
 
 def condense_df(df):
     """
@@ -160,9 +282,11 @@ def condense_df(df):
     # make sure columns are in string format
     df[['county_code', 'improvement_type',
      'implementing_agency_locode', 'district',
-     'program_code_description', 'recipient_project_number']] = df[['county_code', 'improvement_type',
+     'program_code_description', 'recipient_project_number',
+       "funding_type_code"]] = df[['county_code', 'improvement_type',
                                                                      'implementing_agency_locode', 'district',
-                                                                     'program_code_description', 'recipient_project_number']].astype(str)
+                                                                     'program_code_description', 'recipient_project_number',
+                                  "funding_type_code"]].astype(str)
     # copy county column over to use for project title name easier
     df['county_name_title'] = df['county_name'] 
     # copy program code column over to use for project description column easier
@@ -174,7 +298,7 @@ def condense_df(df):
            .groupby(['fmis_transaction_date','project_number', 'implementing_agency', 'summary_recipient_defined_text_field_1_value'
                     # , 'program_code', 'program_code_description'
                     ])
-           .agg({
+           .agg({'funding_type_code':lambda x:'|'.join(x.unique()),
                  'program_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate                ##hashing this out to group by instead
                  'program_code_description':lambda x:'|'.join(x.unique()), # get unique values to concatenate    ##hashing this out to group by instead
                  'recipient_project_number':lambda x:'|'.join(x.unique()), #'first',
@@ -499,7 +623,7 @@ def get_clean_data(df, full_or_agg = ''):
         aggdf = add_new_description_col(aggdf)
                 
         ##asserting that the there is one row for each project id in the new 
-        assert len(aggdf) == df.project_number.nunique()
+        display(len(aggdf) == df.project_number.nunique())
     
         return aggdf
     
@@ -541,7 +665,23 @@ def run_script(file_name, recipient_column, df_agg_level):
     
     return agg
     
+def run_script2(file_name, recipient_column, df_agg_level):
     
+    ### Read in data
+    proj_list = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
+    
+    ### run function to get new program codes
+    proj_cleaned = _data_utils.add_new_codes(proj_list)
+    
+    ## function that adds known agency name to df 
+    df = identify_agency2(proj_cleaned)
+    
+    ### run the data through the rest of the script
+    ### return a dataset that is aggregated at the project and program code
+    agg = get_clean_data(df, full_or_agg = df_agg_level)
+    
+    return agg
+
 def export_to_gcs(df, export_date):
     
     ### pretty print the column names

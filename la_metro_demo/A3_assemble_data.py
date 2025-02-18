@@ -10,7 +10,7 @@ from segment_speed_utils.project_vars import SEGMENT_GCS, COMPILED_CACHED_VIEWS
 
 import A2_clean_up_gtfs as clean_up_gtfs
 
-PROJECT_CRS = geography_utils.CA_NAD83Albers
+PROJECT_CRS = geography_utils.CA_NAD83Albers_m 
 BUS_SERVICE_GCS = "gs://calitp-analytics-data/data-analyses/bus_service_increase/"
 
     
