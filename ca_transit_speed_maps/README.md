@@ -45,6 +45,8 @@ We're aligining with segment speeds published via the [open data portal!](https:
 While the datasets don't fully match just yet, this site is now based on the same underlying data. This should help us update it more often, enhance accuracy for complex route shapes, and include as many transit operators as possible.
 
 The site also includes a more informative speed and variation by time of day chart at the bottom of the page.
+
+Route segments with no data are now shown as thin, dark gray or black segments on the maps. These may be due to the route not running at that time of day, or a data availability or processing issue.
     
 ## Data Sources
 Archived GTFS-Realtime Vehicle Positions data, plus corresponding GTFS Schedule data.

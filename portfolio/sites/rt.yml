@@ -25,7 +25,6 @@ parts:
           district: 03 - Marysville
         sections:
           - organization_source_record_id: recf7l9tozKXOmqqZ
-          - organization_source_record_id: recaJnArpFEk5QooE
           - organization_source_record_id: rec43oyrfhtPDdRHj
           - organization_source_record_id: reczUcQgqgtMpkpKC
           - organization_source_record_id: recX9lccSE1jmjsmG
@@ -52,8 +51,8 @@ parts:
           - organization_source_record_id: recoX7qMhlPrgfuz3
           - organization_source_record_id: recANs4M9yDhvDyob
           - organization_source_record_id: recNOb7pqBRlQVG5e
-          - organization_source_record_id: recIeP8mUucOsbvbz
           - organization_source_record_id: rec9RGrya9SjWYp2p
+          - organization_source_record_id: rec2ErIfztLMJ4rgG
           - organization_source_record_id: recsBfXgev9ICDCY1
           - organization_source_record_id: recmatCuQAUrNcs8j
           - organization_source_record_id: recw3mRsmKDTNnVlT
@@ -85,24 +84,30 @@ parts:
           - organization_source_record_id: reczIiFqdL5AXTpm1
           - organization_source_record_id: rec5MLJKrAgeM8f6H
           - organization_source_record_id: recWLwvtjXhiVWjKt
-      - caption: District 07 - Los Angeles
+          - organization_source_record_id: rec4YWVqVwJ9XqDbq
+      - caption: District 07 - Los Angeles / Ventura
         params:
-          district: 07 - Los Angeles
+          district: 07 - Los Angeles / Ventura
         sections:
           - organization_source_record_id: recxsWR0KRrQTdjmg
+          - organization_source_record_id: recjaoK08lDmhjQga
           - organization_source_record_id: rec6z2ivjTxc8Sag3
           - organization_source_record_id: recD4Vzt0EDC3VY7I
+          - organization_source_record_id: recXYM27Lts8XF98x
           - organization_source_record_id: recd0hxcumVMausDU
           - organization_source_record_id: rec5ome04BbA9uf4y
           - organization_source_record_id: recZm8PD8WIdcDL0M
           - organization_source_record_id: recX4nQfupRQf3xGD
           - organization_source_record_id: recj8LXdeSurpSRNU
           - organization_source_record_id: rec4pgjrmdhCh4z01
+          - organization_source_record_id: recohwwty1Jn4lnsb
+          - organization_source_record_id: reccAVEcMntkbh6aY
           - organization_source_record_id: recojKzQsBzE1hjVu
           - organization_source_record_id: recPkUZgzjCjk5GrV
           - organization_source_record_id: reckQmUdXUzHFmlVf
           - organization_source_record_id: reczF5Y8R9CUJmfSy
           - organization_source_record_id: rec8zhnCPETu6qEiH
+          - organization_source_record_id: recKA7jKmdhFnj2ki
           - organization_source_record_id: recImm5SmW2zq9rMT
           - organization_source_record_id: recJHFDLpGRMIFgnL
           - organization_source_record_id: rec1ErIn9gG1Isk5W
@@ -126,6 +131,7 @@ parts:
           - organization_source_record_id: recG5aXxDPI645S86
           - organization_source_record_id: recGcv4NidDjwVSiN
           - organization_source_record_id: recYgajd92VLqio1p
+          - organization_source_record_id: recAsbHMwQWB7cri8
           - organization_source_record_id: recJcXMNC5MUm2uDe
       - caption: District 09 - Bishop
         params:
@@ -154,6 +160,8 @@ parts:
         params:
           district: 12 - Irvine
         sections:
+          - organization_source_record_id: recsrIZdx5Wt6n3ol
+          - organization_source_record_id: recK4si1uIoj6HfrO
           - organization_source_record_id: recfma7GNR5lQTTTg
 readme: ./ca_transit_speed_maps/README.md
 title: California Transit Speed Maps

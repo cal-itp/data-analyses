@@ -116,7 +116,10 @@ def find_prior_subseq_stop_info(
     ].assign(
         stop_meters = stop_meters
     )
-    
+    gdf = gdf.sort_values(trip_stop_cols) #  important! gdf loses sort after prep_scheduled_stop_times
+    #  slow check , commenting out since we're sorting right here (is there a faster way to test?)
+    # check_monotonic = gdf.groupby(trip_cols).stop_sequence.apply(lambda x: x.is_monotonic_increasing)
+    # assert check_monotonic.all(), 'gdf must be sorted by trip_instance_key, stop_sequence'
     gdf = gdf.assign(
         prior_geometry = (gdf.groupby(trip_cols)
                           .geometry

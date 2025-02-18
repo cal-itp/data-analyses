@@ -11,7 +11,7 @@ PREDICTIONS_GCS = GTFS_DATA_DICT.gcs_paths.PREDICTIONS_GCS
 SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
 PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
 
-# analysis_date = rt_dates.DATES["nov2024"]
+analysis_date = rt_dates.DATES["feb2025"]
 
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
 apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
@@ -30,8 +30,10 @@ weeks_available = [
 ]
 
 
-analysis_date_list = apr2024_week + oct2023_week + apr2023_week                     
-analysis_date_list = [rt_dates.DATES["dec2024"]] + [rt_dates.DATES['nov2024']]
+analysis_date_list = [analysis_date]
+
+# analysis_date_list = apr2024_week + oct2023_week + apr2023_week                     
+# analysis_date_list = [rt_dates.DATES["dec2024"]] + [rt_dates.DATES['nov2024']]
 
 PROJECT_CRS = "EPSG:3310"
 ROAD_SEGMENT_METERS = 1_000
