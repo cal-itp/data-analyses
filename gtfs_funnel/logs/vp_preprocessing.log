@@ -309,3 +309,35 @@
 2024-12-17 14:08:13.713 | INFO     | __main__:<module>:235 - merge with original and export: 0:01:19.916578
 2024-12-17 14:08:13.714 | INFO     | __main__:<module>:236 - vp with dwell time 2024-12-11: 0:06:07.248833
 2024-12-17 14:13:50.962 | INFO     | __main__:<module>:78 - 2024-12-11: condense vp for trip 0:05:19.406518
+2025-01-16 15:00:10.192 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:40.192578
+2025-01-20 20:40:27.661 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:57.913529
+2025-01-20 20:45:06.455 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:28.449333
+2025-01-20 20:58:21.900 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:27.450257
+2025-01-20 21:06:38.791 | INFO     | __main__:pare_down_to_valid_trips:94 - export vp direction: 0:08:16.891594
+2025-01-20 21:43:35.817 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:56.099553
+2025-01-20 22:19:14.276 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:55.161167
+2025-01-20 22:27:27.465 | INFO     | __main__:pare_down_to_valid_trips:94 - export vp direction: 0:08:13.188856
+2025-01-20 22:29:11.131 | INFO     | __main__:merge_in_vp_direction:143 - 2025-01-15: export usable vp with direction: 0:01:35.266091
+2025-01-20 22:29:11.360 | INFO     | __main__:<module>:215 - 2025-01-15: pare down vp, add direction execution time: 0:12:52.244708
+2025-01-20 22:34:09.150 | INFO     | __main__:<module>:216 - compute dwell df: 0:04:20.527838
+2025-01-20 22:35:38.339 | INFO     | __main__:<module>:241 - merge with original and export: 0:01:29.188729
+2025-01-20 22:35:38.340 | INFO     | __main__:<module>:242 - vp with dwell time 2025-01-15: 0:05:49.716567
+2025-01-20 22:42:17.477 | INFO     | __main__:<module>:80 - 2025-01-15: condense vp for trip 0:06:20.345485
+2025-02-13 10:08:33.367 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:19.071646
+2025-02-13 10:36:13.858 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:43.933692
+2025-02-17 13:52:33.036 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:23.300496
+2025-02-17 14:00:42.198 | INFO     | __main__:pare_down_to_valid_trips:94 - export vp direction: 0:08:09.162095
+2025-02-17 14:02:19.731 | INFO     | __main__:merge_in_vp_direction:143 - 2025-01-15: export usable vp with direction: 0:01:30.930961
+2025-02-17 14:02:19.974 | INFO     | __main__:<module>:215 - 2025-01-15: pare down vp, add direction execution time: 0:12:10.239378
+2025-02-17 14:07:29.338 | INFO     | __main__:<module>:216 - compute dwell df: 0:04:31.477602
+2025-02-17 14:08:50.431 | INFO     | __main__:<module>:241 - merge with original and export: 0:01:21.093084
+2025-02-17 14:08:50.432 | INFO     | __main__:<module>:242 - vp with dwell time 2025-01-15: 0:05:52.570686
+2025-02-17 14:15:23.550 | INFO     | __main__:<module>:80 - 2025-01-15: condense vp for trip 0:06:13.654816
+2025-02-17 18:47:19.452 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:27.142615
+2025-02-17 18:55:25.816 | INFO     | __main__:pare_down_to_valid_trips:94 - export vp direction: 0:08:06.363480
+2025-02-17 18:57:03.501 | INFO     | __main__:merge_in_vp_direction:143 - 2025-02-12: export usable vp with direction: 0:01:31.041359
+2025-02-17 18:57:03.760 | INFO     | __main__:<module>:215 - 2025-02-12: pare down vp, add direction execution time: 0:12:11.450291
+2025-02-17 19:02:02.627 | INFO     | __main__:<module>:216 - compute dwell df: 0:04:18.984864
+2025-02-17 19:03:22.212 | INFO     | __main__:<module>:241 - merge with original and export: 0:01:19.584936
+2025-02-17 19:03:22.213 | INFO     | __main__:<module>:242 - vp with dwell time 2025-02-12: 0:05:38.569800
+2025-02-17 19:10:23.415 | INFO     | __main__:<module>:80 - 2025-02-12: condense vp for trip 0:06:40.787142

@@ -1,7 +1,7 @@
 from pathlib import Path
 from shared_utils import catalog_utils, rt_dates
 
-analysis_date = rt_dates.DATES["dec2024"]
+analysis_date = rt_dates.DATES["feb2025"]
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 

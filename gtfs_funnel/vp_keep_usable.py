@@ -20,9 +20,9 @@ from loguru import logger
 from calitp_data_analysis import utils
 from calitp_data_analysis.geography_utils import WGS84
 from segment_speed_utils.project_vars import PROJECT_CRS
+from segment_speed_utils import vp_transform
 from shared_utils import geo_utils, publish_utils, rt_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
-import vp_transform
 
 def find_valid_trips(
     vp: pd.DataFrame,
@@ -154,10 +154,10 @@ def get_vp_direction_column(
         ["trip_instance_key", "vp_idx", "geometry"]
     ].to_crs(PROJECT_CRS)
     
-    vp_condensed = vp_transform.condense_by_trip(
+    vp_condensed = vp_transform.condense_point_geom_to_line(
         vp_gdf,
         group_cols = ["trip_instance_key"],
-        sort_cols = ["trip_instance_key", "vp_idx"], 
+#        sort_cols = ["trip_instance_key", "vp_idx"], not used?
         array_cols = ["vp_idx", "geometry"]        
     )
     
@@ -179,10 +179,7 @@ def get_vp_direction_column(
     
     vp_condensed = vp_condensed.assign(
         vp_primary_direction = vp_direction_series
-    )[keep_cols].pipe(
-        vp_transform.explode_arrays, 
-        array_cols = keep_cols
-    )
+    )[keep_cols].explode(column=keep_cols)
     
     vp_condensed.to_parquet(
         f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet"
