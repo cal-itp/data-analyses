@@ -2,8 +2,6 @@
 Cache a new time-of-day single day grain.
 Use that to build all the other aggregations
 for multiday. 
-
-TODO: make clear year/quarter or weekday/weekend grain
 """
 import datetime
 import geopandas as gpd
@@ -19,7 +17,6 @@ from segment_speed_utils import gtfs_schedule_wrangling, segment_calcs
 from segment_speed_utils.project_vars import (SEGMENT_GCS, 
                                               GTFS_DATA_DICT, 
                                               SEGMENT_TYPES)
-import average_segment_speeds
 
 CROSSWALK_COLS = average_segment_speeds.CROSSWALK_COLS
 
@@ -44,7 +41,17 @@ def aggregate_by_time_of_day(
     SEGMENT_COLS = [i for i in SEGMENT_COLS if i != "geometry"]
                                       
     OPERATOR_COLS = ["schedule_gtfs_dataset_key"]
-     
+    
+    if segment_type == "stop_segments":
+        group_cols = OPERATOR_COLS + SEGMENT_COLS + ["stop_pair_name", "time_of_day"]
+    
+    # Write out all the columns speedmap uses
+    # route_short_name, what else?
+    # break apart what has shown up in segment-trip file vs what needs to be added
+    # that can't be added from crosswalk
+    elif segment_type == "speedmap_segments":
+        group_cols = OPERATOR_COLS + SEGMENT_COLS + ["stop_pair_name", "time_of_day"]
+    
     df = delayed(pd.read_parquet)(
         f"{SEGMENT_GCS}{SPEED_FILE}_{analysis_date}.parquet",
         columns = OPERATOR_COLS + SEGMENT_COLS + [
@@ -53,10 +60,10 @@ def aggregate_by_time_of_day(
         filters = [[("speed_mph", "<=", MAX_SPEED)]]
     ).dropna(subset="speed_mph").pipe(
         segment_calcs.calculate_avg_speeds,
-        OPERATOR_COLS + SEGMENT_COLS + ["stop_pair_name", "time_of_day"]
+        group_cols
     )
     
-    avg_speeds_with_geom = delayed(average_segment_speeds.merge_in_segment_geometry)(
+    avg_speeds_with_geom = delayed(segment_calcs.merge_in_segment_geometry)(
         df,
         analysis_date,
         segment_type,
@@ -79,34 +86,9 @@ def aggregate_by_time_of_day(
     return
 
 
-def calculate_weighted_averages(
-    df: pd.DataFrame, 
-    group_cols: list, 
-    metric_cols: list, 
-    weight_col: str
-):
-    """
-    can we use dask_utils to put together
-    several days, weight the speed by n_trips,
-    and roll it up further?
-    """    
-    for c in metric_cols:
-        df[c] = df[c] * df[weight_col]    
-    
-    df2 = (df.groupby(group_cols, group_keys=False)
-           .agg({c: "sum" for c in metric_cols + [weight_col]})
-           .reset_index()
-          )
-    
-    for c in metric_cols:
-        df2[c] = df2[c].divide(df2[weight_col]).round(2)
-    
-    return df2
-
-
 def aggregate_to_peak_offpeak(
     analysis_date: str,
-    segment_type: Literal[SEGMENT_TYPES]
+    segment_type: str = "stop_segments"
 ):
     """
     Set the peak/offpeak/all_day single day aggregation
@@ -117,7 +99,7 @@ def aggregate_to_peak_offpeak(
     dict_inputs = GTFS_DATA_DICT[segment_type]
         
     SPEED_FILE = dict_inputs["segment_timeofday"]
-    EXPORT_FILE = dict_inputs["route_dir_single_segment"]
+    EXPORT_FILE = dict_inputs["segment_peakoffpeak"]
     
     SEGMENT_COLS = [*dict_inputs["segment_cols"]]
     SEGMENT_COLS_NO_GEOM = [i for i in SEGMENT_COLS if i != "geometry"]
@@ -130,16 +112,16 @@ def aggregate_to_peak_offpeak(
         gtfs_schedule_wrangling.add_peak_offpeak_column
     )
     
-    segment_gdf = df[SEGMENT_COLS].drop_duplicates()
+    segment_gdf = df[OPERATOR_COLS + SEGMENT_COLS].drop_duplicates()
     
-    peak_offpeak = calculate_weighted_averages(
+    peak_offpeak = segment_calcs.calculate_weighted_averages(
         df,
         OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["stop_pair_name", "peak_offpeak"],
         metric_cols = ["p20_mph", "p50_mph", "p80_mph"], 
         weight_col = "n_trips"
     ).rename(columns = {"peak_offpeak": "time_period"})
     
-    all_day = calculate_weighted_averages(
+    all_day = segment_calcs.calculate_weighted_averages(
         df,
         OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["stop_pair_name"],
         metric_cols = ["p20_mph", "p50_mph", "p80_mph"], 
@@ -181,9 +163,7 @@ def aggregate_to_peak_offpeak(
 
 
 if __name__ == "__main__":
-
-    from shared_utils import rt_dates
-    analysis_date_list = [rt_dates.DATES[f"{m}2024"] for m in ["oct", "nov", "dec"]]
+    from segment_speed_utils.project_vars import all_dates
     
     LOG_FILE = "../logs/test.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -193,6 +173,8 @@ if __name__ == "__main__":
     
     segment_type = "stop_segments"
 
-    for analysis_date in analysis_date_list:
-        aggregate_by_time_of_day(analysis_date, segment_type)
+    for analysis_date in all_dates:
+        #aggregate_by_time_of_day(analysis_date, segment_type)
         aggregate_to_peak_offpeak(analysis_date, segment_type)
+    
+    logger.remove()
