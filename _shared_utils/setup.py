@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 setup(
     name="shared_utils",
     packages=find_packages(),
-    version="3.0",
+    version="4.0",
     description="Shared utility functions for data analyses",
     author="Cal-ITP",
     license="Apache",

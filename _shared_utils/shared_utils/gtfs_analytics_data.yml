@@ -80,10 +80,14 @@ stop_segments:
   stop_pair_cols: ["stop_pair", "stop_pair_name"]
   route_dir_cols: ["route_id", "direction_id"]
   segment_cols: ["route_id", "direction_id", "stop_pair", "geometry"]
+  segment_timeofday: "rollup_singleday/speeds_route_dir_timeofday_segments"
+  # segment_peakoffpeak
+  # segment_weekday_timeofday
+  # -- cache segment_timeofday first and use this to build other layers? other keys to make peak/offpeak, weekday/weekend grains clear?
   #shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments" #-- stop after Oct 2024
   route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"
   route_dir_single_segment_detail: "rollup_singleday/speeds_route_dir_segments_detail" # interim for speedmaps
-  route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments"
+  route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments" # -- this one should be replaced with weekday/weekend, make clear the grain
   segments_file: "segment_options/shape_stop_segments"
   max_speed: ${speed_vars.max_speed}
   route_dir_quarter_segment: "rollup_multiday/quarter_speeds_route_dir_segments"

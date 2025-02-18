@@ -9,7 +9,7 @@ from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
 
 # LA Metro data is for Oct 2022, so let's use the date we already downloaded
 analysis_date = rt_dates.DATES["oct2022"]
-PROJECT_CRS = geography_utils.CA_NAD83Albers
+PROJECT_CRS = geography_utils.CA_NAD83Albers_m
 
 
 def fill_missing_route_short_name(df: pd.DataFrame) -> pd.DataFrame:
