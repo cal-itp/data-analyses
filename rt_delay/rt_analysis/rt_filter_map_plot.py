@@ -1,4 +1,4 @@
-from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers
+from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers_m
 from shared_utils.rt_utils import *
 from calitp_data_analysis.utils import geoparquet_gcs_export
 from calitp_data_analysis.calitp_color_palette import CALITP_CATEGORY_BOLD_COLORS, CALITP_CATEGORY_BRIGHT_COLORS
@@ -224,7 +224,7 @@ class RtFilterMapper:
         
         manual_exclude: dict in {'shape': {'min': int, 'max': int}, ...} format (values are stop sequence)
         '''
-        corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers)
+        corridor_gdf = corridor_gdf.to_crs(CA_NAD83Albers_m)
         if 'distance_meters' in corridor_gdf.columns:
             self.corridor = corridor_gdf >> select(_.geometry, _.distance_meters)
         else:
@@ -361,7 +361,7 @@ class RtFilterMapper:
                                  >> ungroup()
                                 )
                     # self.debug_dict[f'{shape_id}_{direction_id}_st_spd'] = stop_speeds
-                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(CA_NAD83Albers)
+                    stop_speeds = stop_speeds.dropna(subset=['last_loc']).set_crs(CA_NAD83Albers_m)
                     stop_speeds.geometry = stop_speeds.apply(
                         lambda x: shapely.ops.substring(
                                     (self.shapes >> filter(_.shape_id == x.shape_id)).geometry.iloc[0],
@@ -443,7 +443,7 @@ class RtFilterMapper:
         gdf['time_formatted'] = gdf['time_formatted'].apply(lambda x: f'{int(x)//60}' + f':{int(x)%60:02}')
 
         gdf = gdf >> arrange(_.trips_per_hour)
-        gdf = gdf.set_crs(CA_NAD83Albers)
+        gdf = gdf.set_crs(CA_NAD83Albers_m)
         
         ## shift to right side of road to display direction
         gdf.geometry = gdf.geometry.apply(try_parallel)
@@ -831,24 +831,25 @@ def from_gcs(itp_id, analysis_date, pbar = None):
     '''
     if type(analysis_date) == str:
         analysis_date = dt.date.fromisoformat(analysis_date)
+    warehouse_cutoff_date = dt.date(2022, 4, 1)
     date_iso = analysis_date.isoformat()
     
-    # if analysis_date <= warehouse_cutoff_date:
-    #     shapes = get_routelines(itp_id, analysis_date)
-    #     trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
-    #         .reset_index(drop=True))
-    #     stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
-    #              .reset_index(drop=True))
-    # else:
+    if analysis_date <= warehouse_cutoff_date:
+        shapes = get_routelines(itp_id, analysis_date)
+        trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
+            .reset_index(drop=True))
+        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
+                 .reset_index(drop=True))
+    else:
     
-    # always use v2 warehouse, v1 warehouse deprecated/gone
-    index_df = get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
-    trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
-        .reset_index(drop=True))
-    stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
-             .reset_index(drop=True))
-    shapes = get_shapes(index_df)
-    
+        # always use v2 warehouse, v1 warehouse deprecated/gone
+        index_df = get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
+        trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
+            .reset_index(drop=True))
+        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
+                 .reset_index(drop=True))
+        shapes = get_shapes(index_df)
+
     stop_delay['arrival_time'] = stop_delay.arrival_time.map(lambda x: np.datetime64(x))
     stop_delay['actual_time'] = stop_delay.actual_time.map(lambda x: np.datetime64(x))
     
