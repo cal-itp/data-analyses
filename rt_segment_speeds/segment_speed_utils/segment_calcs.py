@@ -11,6 +11,7 @@ from numba import jit
 from typing import Union
 
 from shared_utils.rt_utils import MPH_PER_MPS
+from segment_speed_utils.project_vars import SEGMENT_TYPES, GTFS_DATA_DICT
 
 def speed_from_meters_elapsed_sec_elapsed(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -192,3 +193,73 @@ def rolling_window_make_array(
     df[f"{rolling_col}_monotonic"] = is_monotonic_series
     
     return df
+
+
+def calculate_weighted_averages(
+    df: pd.DataFrame, 
+    group_cols: list, 
+    metric_cols: list, 
+    weight_col: str
+):
+    """
+    For certain aggregations, we need to calculate a weighted average, 
+    weighted by the number of trips.
+    
+    If we want peak/offpeak weighted calculations, 
+    we can take time-of-day (AM peak, PM peak) and
+    get a peak speed calculation, after weighting by the number
+    of trips present in each time-of-day bin.
+    
+    Ex: metric_cols = ['p20_mph', 'p50_mph', 'p80_mph']
+    weight_cols = 'n_trips'
+    
+    """    
+    for c in metric_cols:
+        df[c] = df[c] * df[weight_col]    
+    
+    df2 = (df.groupby(group_cols, group_keys=False)
+           .agg({c: "sum" for c in metric_cols + [weight_col]})
+           .reset_index()
+          )
+    
+    for c in metric_cols:
+        df2[c] = df2[c].divide(df2[weight_col]).round(2)
+    
+    return df2
+
+
+def merge_in_segment_geometry(
+    speeds_by_segment: pd.DataFrame,
+    analysis_date: str,
+    segment_type: Literal[SEGMENT_TYPES],
+) -> gpd.GeoDataFrame:
+    """
+    Import the segments to merge and attach it to the average speeds.
+    For a week's worth of data, we'll just use Wed segments.
+    
+    TODO: rewrite this to be dd.from_map + drop_duplicates when there are multiple days
+    instead of using Wed only
+    """
+    SEGMENT_FILE = GTFS_DATA_DICT[segment_type].segments_file
+
+    segment_geom = gpd.read_parquet(
+        f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
+    ).to_crs(WGS84)
+    
+    
+    col_order = [c for c in speeds_by_segment.columns]
+    
+    # The merge columns list should be all the columns that are in common
+    # between averaged speeds and segment gdf
+    geom_file_cols = segment_geom.columns.tolist()
+    merge_cols = list(set(col_order).intersection(geom_file_cols))
+    
+    gdf = pd.merge(
+        segment_geom[merge_cols + ["geometry"]].drop_duplicates(),
+        speeds_by_segment,
+        on = merge_cols, 
+    ).reset_index(drop=True).reindex(
+        columns = col_order + ["geometry"]
+    )
+    
+    return gdf

@@ -143,26 +143,16 @@ def calculate_weighted_average_vp_schedule_metrics(
 def concatenate_peak_offpeak_allday_averages(
     df: pd.DataFrame, 
     group_cols: list,
-    metric_type: Literal["segment_speeds", "rt_vs_schedule", "summary_speeds"]
+    metric_type: Literal["rt_vs_schedule", "summary_speeds"]
 ) -> pd.DataFrame:
     """
-    Calculate average speeds for all day and
+    Calculate metrics like summary speeds, RT vs schedule metrics for all day and
     peak_offpeak.
     Concatenate these, so that speeds are always calculated
     for the same 3 time periods.
     """
-    if metric_type == "segment_speeds":
-        avg_peak = segment_calcs.calculate_avg_speeds(
-            df,
-            group_cols + ["peak_offpeak"]
-        )
 
-        avg_allday = segment_calcs.calculate_avg_speeds(
-            df,
-            group_cols
-        ).assign(peak_offpeak = "all_day")
-    
-    elif metric_type == "summary_speeds":
+    if metric_type == "summary_speeds":
         avg_peak = weighted_average_speeds_across_segments(
             df,
             group_cols + ["peak_offpeak"]
