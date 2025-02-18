@@ -462,3 +462,25 @@
 2025-01-16 13:56:18.987 | INFO     | __main__:<module>:137 - execution time: 0:08:02.947545
 2025-02-13 09:16:42.270 | INFO     | __main__:<module>:148 - Analysis date: 2025-01-15
 2025-02-13 09:19:25.285 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 0 to GCS: 0:02:43.014412
+2025-02-13 09:37:36.354 | INFO     | __main__:<module>:148 - Analysis date: 2025-01-15
+2025-02-13 09:40:24.568 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 0 to GCS: 0:02:48.212532
+2025-02-13 09:41:36.607 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 1 to GCS: 0:01:12.038637
+2025-02-13 09:45:59.940 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 2 to GCS: 0:04:23.331885
+2025-02-13 09:48:03.850 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 3 to GCS: 0:02:03.908665
+2025-02-13 09:48:03.850 | INFO     | __main__:<module>:155 - execution time: 0:10:27.495360
+2025-02-13 09:48:44.549 | INFO     | __main__:<module>:97 - Analysis date: 2025-01-15
+2025-02-13 09:48:56.532 | INFO     | __main__:<module>:105 - concat and filter batched data: 0:00:11.982209
+2025-02-13 09:53:01.735 | INFO     | __main__:<module>:112 - export concatenated vp: 0:04:05.202995
+2025-02-13 09:57:18.916 | INFO     | __main__:<module>:134 - remove batched parquets
+2025-02-13 09:57:18.917 | INFO     | __main__:<module>:137 - execution time: 0:08:34.366768
+2025-02-17 13:23:28.712 | INFO     | __main__:<module>:148 - Analysis date: 2025-01-15
+2025-02-17 13:25:45.034 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 0 to GCS: 0:02:16.307399
+2025-02-17 13:27:04.647 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 1 to GCS: 0:01:19.611117
+2025-02-17 13:31:26.029 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 2 to GCS: 0:04:21.381410
+2025-02-17 13:33:25.406 | INFO     | __main__:loop_through_batches_and_download_vp:111 - exported batch 3 to GCS: 0:01:59.351721
+2025-02-17 13:33:25.407 | INFO     | __main__:<module>:155 - execution time: 0:09:56.679670
+2025-02-17 13:33:49.071 | INFO     | __main__:<module>:97 - Analysis date: 2025-01-15
+2025-02-17 13:33:57.391 | INFO     | __main__:<module>:105 - concat and filter batched data: 0:00:08.319348
+2025-02-17 13:38:12.928 | INFO     | __main__:<module>:112 - export concatenated vp: 0:04:15.536791
+2025-02-17 13:42:21.135 | INFO     | __main__:<module>:134 - remove batched parquets
+2025-02-17 13:42:21.136 | INFO     | __main__:<module>:137 - execution time: 0:08:32.064286
