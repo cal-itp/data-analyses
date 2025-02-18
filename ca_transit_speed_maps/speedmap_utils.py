@@ -5,7 +5,7 @@ import geopandas as gpd
 import update_vars_index
 from shared_utils import rt_utils, catalog_utils
 from segment_speed_utils import helpers
-from calitp_data_analysis.geography_utils import CA_NAD83Albers
+from calitp_data_analysis.geography_utils import CA_NAD83Albers_m
 import datetime as dt
 import altair as alt
 from IPython.display import display, Markdown, IFrame
@@ -18,7 +18,8 @@ def read_segments_shn(organization_source_record_id: str) -> (gpd.GeoDataFrame, 
     path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
     # path = f'{catalog.stop_segments.dir}{catalog.stop_segments.route_dir_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
     speedmap_segs = gpd.read_parquet(path, filters=[['organization_source_record_id', '==', organization_source_record_id]]) #  aggregated
-    assert (speedmap_segs >> select(-_.route_short_name)).isna().any().any() == False, 'no cols besides route_short_name should be nan'
+    assert (speedmap_segs
+    >> select(-_.route_short_name, -_.direction_id)).isna().any().any() == False, 'no cols besides route_short_name, direction_id should be nan'
     speedmap_segs = prepare_segment_gdf(speedmap_segs)
     shn = gpd.read_parquet(rt_utils.SHN_PATH)
     this_shn = shn >> filter(_.District.isin([int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]))
@@ -39,7 +40,7 @@ def prepare_segment_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
     Project segment speeds gdf and add column for rich speedmap display
     '''
-    gdf = gdf.to_crs(CA_NAD83Albers)
+    gdf = gdf.to_crs(CA_NAD83Albers_m)
     #  TODO move upstream and investigate
     gdf['fast_slow_ratio'] = gdf.p80_mph / gdf.p20_mph
     gdf.fast_slow_ratio = gdf.fast_slow_ratio.replace(np.inf, 3)
