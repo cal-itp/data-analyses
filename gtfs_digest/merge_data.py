@@ -257,7 +257,7 @@ def merge_data_sources_by_route_direction(
         merge_in_standardized_route_names,
     ).merge(
         df_crosswalk,
-        on = ["schedule_gtfs_dataset_key", "name", "service_date"],
+        on = ["schedule_gtfs_dataset_key", "service_date"],
         how = "left"
     ).pipe(
         # Find the most common cardinal direction

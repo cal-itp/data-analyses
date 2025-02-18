@@ -8,7 +8,7 @@ apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
 all_dates = (
     rt_dates.y2024_dates + rt_dates.y2023_dates + 
     oct2023_week + apr2023_week + 
-    apr2024_week
+    apr2024_week + rt_dates.y2025_dates
 )
 
 
