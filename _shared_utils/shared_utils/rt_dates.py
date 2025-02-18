@@ -82,7 +82,7 @@ y2023_dates = [
     v for k, v in DATES.items() if k.endswith("2023") and not any(substring in k for substring in ["jan", "feb"])
 ]
 
-y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
+y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["oct2024g"]]
 
 
 valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
@@ -98,7 +98,7 @@ def get_week(month: Literal[[*valid_weeks]], exclude_wed: bool) -> list:
 apr2023_week = get_week(month="apr2023", exclude_wed=False)
 oct2023_week = get_week(month="oct2023", exclude_wed=False)
 apr2024_week = get_week(month="apr2024", exclude_wed=False)
-oct2024_week = get_week(month="oct2024", exclude_wed=False)
+oct2024_week = [d for d in get_week(month="oct2024", exclude_wed=False) if d != DATES["oct2024g"]]
 
 MONTH_DICT = {
     1: "January",

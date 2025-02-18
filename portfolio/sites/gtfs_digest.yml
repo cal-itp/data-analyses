@@ -15,6 +15,7 @@ parts:
     - organization_name: Mendocino Transit Authority
     - organization_name: POINT
     - organization_name: Redwood Coast Transit Authority
+    - organization_name: Yurok Tribe
   - caption: District 02 - Redding
     params:
       district: 02 - Redding
@@ -94,6 +95,8 @@ parts:
       district: 05 - San Luis Obispo
     sections:
     - organization_name: City of Guadalupe
+    - organization_name: City of Lompoc
+    - organization_name: City of Morro Bay
     - organization_name: City of San Luis Obispo
     - organization_name: City of Santa Cruz
     - organization_name: City of Santa Maria
@@ -154,6 +157,7 @@ parts:
     - organization_name: City of Los Angeles
     - organization_name: City of Lynwood
     - organization_name: City of Maywood
+    - organization_name: City of Montebello
     - organization_name: City of Monterey Park
     - organization_name: City of Moorpark
     - organization_name: City of Norwalk
@@ -186,6 +190,7 @@ parts:
       district: 08 - San Bernardino
     sections:
     - organization_name: Basin Transit
+    - organization_name: Chemehuevi Indian Tribe
     - organization_name: City of Banning
     - organization_name: City of Beaumont
     - organization_name: City of Corona
@@ -194,6 +199,7 @@ parts:
     - organization_name: OmniTrans
     - organization_name: Palo Verde Valley Transit Agency
     - organization_name: Riverside Transit Agency
+    - organization_name: SunLine Transit Agency
     - organization_name: Victor Valley Transit Authority
   - caption: District 09 - Bishop
     params:
@@ -234,7 +240,13 @@ parts:
     params:
       district: 12 - Irvine
     sections:
+    - organization_name: Anaheim Transportation Network
+    - organization_name: City of Dana Point
+    - organization_name: City of Irvine
     - organization_name: City of Laguna Beach
+    - organization_name: City of Mission Viejo
+    - organization_name: City of San Clemente
+    - organization_name: City of San Juan Capistrano
     - organization_name: Orange County Transportation Authority
     - organization_name: University of California, Irvine
 readme: ./gtfs_digest/README.md
