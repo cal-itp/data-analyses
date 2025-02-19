@@ -82,39 +82,6 @@ def concatenate_trip_segment_speeds(
     return df
 
 
-def merge_in_segment_geometry(
-    speeds_by_segment: pd.DataFrame,
-    analysis_date: str,
-    segment_type: Literal[SEGMENT_TYPES],
-) -> gpd.GeoDataFrame:
-    """
-    Import the segments to merge and attach it to the average speeds.
-    For a week's worth of data, we'll just use Wed segments.
-    """
-    SEGMENT_FILE = GTFS_DATA_DICT[segment_type].segments_file
-
-    segment_geom = gpd.read_parquet(
-        f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
-    ).to_crs(WGS84)
-    
-    col_order = [c for c in speeds_by_segment.columns]
-    
-    # The merge columns list should be all the columns that are in common
-    # between averaged speeds and segment gdf
-    geom_file_cols = segment_geom.columns.tolist()
-    merge_cols = list(set(col_order).intersection(geom_file_cols))
-    
-    gdf = pd.merge(
-        segment_geom[merge_cols + ["geometry"]].drop_duplicates(),
-        speeds_by_segment,
-        on = merge_cols, 
-    ).reset_index(drop=True).reindex(
-        columns = col_order + ["geometry"]
-    )
-    
-    return gdf
-
-
 def segment_averages(
     analysis_date_list: list, 
     segment_type: Literal[SEGMENT_TYPES],
@@ -189,6 +156,7 @@ def segment_averages(
     )
     
     return    
+
 
 def segment_averages_detail(
     analysis_date_list: list, 
@@ -270,7 +238,6 @@ if __name__ == "__main__":
     ROUTE_DIR_COLS = [*dict_inputs["route_dir_cols"]]
     STOP_PAIR_COLS = [*dict_inputs["stop_pair_cols"]]
     
-#    TIME_OF_DAY_FILE = dict_inputs["shape_stop_single_segment"] + "_test"
     ROUTE_SEG_FILE = dict_inputs["route_dir_single_segment"]
 
     for analysis_date in analysis_date_list:
@@ -282,27 +249,5 @@ if __name__ == "__main__":
             export_file = ROUTE_SEG_FILE,
             weighted_averages = True
         )
-        
-#        segment_averages(
-#            [analysis_date], 
-#            segment_type, 
-#            group_cols = (OPERATOR_COLS + ROUTE_DIR_COLS + 
-#                          STOP_PAIR_COLS + ["time_of_day"]),
-#            export_file = TIME_OF_DAY_FILE,
-#            weighted_averages = False
-#        )
-        
-    '''
-    from segment_speed_utils.project_vars import weeks_available
     
-    ROUTE_SEG_FILE = dict_inputs["route_dir_multi_segment"]
-
-    for one_week in weeks_available:
-        
-        segment_averages(
-            one_week, 
-            segment_type,
-            group_cols = OPERATOR_COLS + ROUTE_DIR_COLS + STOP_PAIR_COLS + ["weekday_weekend"],
-            export_file = ROUTE_SEG_FILE
-        )
-    '''       
+     

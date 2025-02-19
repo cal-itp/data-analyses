@@ -14,81 +14,13 @@ from loguru import logger
 from typing import Literal
 
 from segment_speed_utils import gtfs_schedule_wrangling, segment_calcs
-from segment_speed_utils.project_vars import (SEGMENT_GCS, 
-                                              GTFS_DATA_DICT, 
-                                              SEGMENT_TYPES)
-
-CROSSWALK_COLS = average_segment_speeds.CROSSWALK_COLS
-
-def aggregate_by_time_of_day(
-    analysis_date: str,
-    segment_type: Literal[SEGMENT_TYPES]
-):
-    """
-    Set the time-of-day single day aggregation
-    and calculate 20th/50th/80th percentile speeds.
-    These daily metrics feed into multi-day metrics.
-    """
-    start = datetime.datetime.now()
-    
-    dict_inputs = GTFS_DATA_DICT[segment_type]
-        
-    SPEED_FILE = dict_inputs["stage4"]
-    MAX_SPEED = dict_inputs["max_speed"]
-    EXPORT_FILE = dict_inputs["segment_timeofday"]
-    
-    SEGMENT_COLS = [*dict_inputs["segment_cols"]]
-    SEGMENT_COLS = [i for i in SEGMENT_COLS if i != "geometry"]
-                                      
-    OPERATOR_COLS = ["schedule_gtfs_dataset_key"]
-    
-    if segment_type == "stop_segments":
-        group_cols = OPERATOR_COLS + SEGMENT_COLS + ["stop_pair_name", "time_of_day"]
-    
-    # Write out all the columns speedmap uses
-    # route_short_name, what else?
-    # break apart what has shown up in segment-trip file vs what needs to be added
-    # that can't be added from crosswalk
-    elif segment_type == "speedmap_segments":
-        group_cols = OPERATOR_COLS + SEGMENT_COLS + ["stop_pair_name", "time_of_day"]
-    
-    df = delayed(pd.read_parquet)(
-        f"{SEGMENT_GCS}{SPEED_FILE}_{analysis_date}.parquet",
-        columns = OPERATOR_COLS + SEGMENT_COLS + [
-            "trip_instance_key", "stop_pair_name", 
-            "time_of_day", "speed_mph"],
-        filters = [[("speed_mph", "<=", MAX_SPEED)]]
-    ).dropna(subset="speed_mph").pipe(
-        segment_calcs.calculate_avg_speeds,
-        group_cols
-    )
-    
-    avg_speeds_with_geom = delayed(segment_calcs.merge_in_segment_geometry)(
-        df,
-        analysis_date,
-        segment_type,
-    )
-    
-    avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]
-
-    utils.geoparquet_gcs_export(
-        avg_speeds_with_geom,
-        SEGMENT_GCS,
-        f"{EXPORT_FILE}_{analysis_date}"
-    )
-                    
-    end = datetime.datetime.now()
-    logger.info(
-        f"{segment_type}: time-of-day averages for {analysis_date} "
-        f"execution time: {end - start}"
-    )
-    
-    return
+from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 
 
 def aggregate_to_peak_offpeak(
     analysis_date: str,
-    segment_type: str = "stop_segments"
+    segment_type: str = "stop_segments", 
+    config_path: Optional = GTFS_DATA_DICT
 ):
     """
     Set the peak/offpeak/all_day single day aggregation
@@ -96,7 +28,7 @@ def aggregate_to_peak_offpeak(
     """
     start = datetime.datetime.now()
     
-    dict_inputs = GTFS_DATA_DICT[segment_type]
+    dict_inputs = config_path[segment_type]
         
     SPEED_FILE = dict_inputs["segment_timeofday"]
     EXPORT_FILE = dict_inputs["segment_peakoffpeak"]
@@ -105,7 +37,8 @@ def aggregate_to_peak_offpeak(
     SEGMENT_COLS_NO_GEOM = [i for i in SEGMENT_COLS if i != "geometry"]
                                       
     OPERATOR_COLS = ["schedule_gtfs_dataset_key"]
-     
+    CROSSWALK_COLS = [*dict_inputs.crosswalk_cols]
+    
     df = gpd.read_parquet(
         f"{SEGMENT_GCS}{SPEED_FILE}_{analysis_date}.parquet",
     ).pipe(
@@ -174,7 +107,5 @@ if __name__ == "__main__":
     segment_type = "stop_segments"
 
     for analysis_date in all_dates:
-        #aggregate_by_time_of_day(analysis_date, segment_type)
         aggregate_to_peak_offpeak(analysis_date, segment_type)
     
-    logger.remove()

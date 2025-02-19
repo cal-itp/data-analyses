@@ -15,7 +15,7 @@ HOURS_BY_TIME_OF_DAY = {
     "AM Peak": 3,  # [7, 9]
     "Midday": 5,  # [10, 14]
     "PM Peak": 5,  # [15, 19]
-    "Evening": 4,  # [20, 23]
+    "Evening": 5,  # [20, 24 (allow for 24th hour)]
 }
 
 TIME_OF_DAY_DICT = {

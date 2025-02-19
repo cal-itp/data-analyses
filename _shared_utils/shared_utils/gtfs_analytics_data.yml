@@ -79,6 +79,7 @@ stop_segments:
   stop_pair_cols: ["stop_pair", "stop_pair_name"]
   route_dir_cols: ["route_id", "direction_id"]
   segment_cols: ["route_id", "direction_id", "stop_pair", "geometry"]
+  crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
   segment_timeofday: "rollup_singleday/speeds_route_dir_timeofday_segments"
   segment_peakoffpeak: "rollup_singleday/speeds_route_dir_peak_segments"
   segment_timeofday_weekday_year: "rollup_multiday/year_weekday_speeds_route_dir_segments" # NEW
@@ -115,7 +116,8 @@ speedmap_segments:
   trip_stop_cols: ["trip_instance_key", "stop_sequence", "stop_sequence1"]
   stop_pair_cols: ["stop_pair", "stop_pair_name", "segment_id"]
   route_dir_cols: ["route_id", "direction_id"]
-  segment_cols: ["shape_array_key", "shape_id", "route_id", "direction_id", "stop_pair", "segment_id", "geometry"]
+  segment_cols: ["shape_id", "shape_array_key", "route_id", "direction_id", "stop_pair", "segment_id", "geometry"]
+  crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
   segments_file: "segment_options/speedmap_segments"
   shape_stop_single_segment: "rollup_singleday/speeds_shape_speedmap_segments"
   shape_stop_single_segment_detail: "rollup_singleday/speeds_shape_speedmap_segments_detail"

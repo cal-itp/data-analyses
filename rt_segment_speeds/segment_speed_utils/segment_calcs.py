@@ -8,8 +8,9 @@ import numpy as np
 import pandas as pd
 
 from numba import jit
-from typing import Union
+from typing import Literal, Union
 
+from calitp_data_analysis.geography_utils import WGS84
 from shared_utils.rt_utils import MPH_PER_MPS
 from segment_speed_utils.project_vars import SEGMENT_TYPES, GTFS_DATA_DICT
 
@@ -241,9 +242,9 @@ def merge_in_segment_geometry(
     instead of using Wed only
     """
     SEGMENT_FILE = GTFS_DATA_DICT[segment_type].segments_file
-
+    GCS_PATH = GTFS_DATA_DICT[segment_type].dir
     segment_geom = gpd.read_parquet(
-        f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
+        f"{GCS_PATH}{SEGMENT_FILE}_{analysis_date}.parquet",
     ).to_crs(WGS84)
     
     
