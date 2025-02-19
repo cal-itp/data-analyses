@@ -121,22 +121,27 @@ def find_prior_subseq_stop_info(
     # check_monotonic = gdf.groupby(trip_cols).stop_sequence.apply(lambda x: x.is_monotonic_increasing)
     # assert check_monotonic.all(), 'gdf must be sorted by trip_instance_key, stop_sequence'
     gdf = gdf.assign(
-        prior_geometry = (gdf.groupby(trip_cols)
+        prior_geometry = (gdf.sort_values(trip_stop_cols)
+                          .groupby(trip_cols)
                           .geometry
                           .shift(1)),
-        prior_stop_sequence = (gdf.groupby(trip_cols)
+        prior_stop_sequence = (gdf.sort_values(trip_stop_cols)
+                               .groupby(trip_cols)
                                .stop_sequence
                                .shift(1)),
         # add subseq stop info here
-        subseq_stop_sequence = (gdf.groupby(trip_cols)
+        subseq_stop_sequence = (gdf.sort_values(trip_stop_cols)
+                                .groupby(trip_cols)
                                 .stop_sequence
                                 .shift(-1)),
-        subseq_stop_id = (gdf.groupby(trip_cols)
+        subseq_stop_id = (gdf.sort_values(trip_stop_cols)
+                          .groupby(trip_cols)
                           .stop_id
                           .shift(-1)),
-        subseq_stop_name = (gdf.groupby(trip_cols)
-                          .stop_name
-                          .shift(-1)),
+        subseq_stop_name = (gdf.sort_values(trip_stop_cols)
+                            .groupby(trip_cols)
+                            .stop_name
+                            .shift(-1)),
     ).fillna({
         **{c: "" for c in ["subseq_stop_id", "subseq_stop_name"]}
     })
