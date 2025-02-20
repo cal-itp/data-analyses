@@ -88,6 +88,26 @@ def download_vehicle_positions(
     return df
 
 
+def download_vehicle_positions_grouped(
+    date: str,
+    operator_names: list
+) -> pd.DataFrame:    
+    
+    df = (tbls.mart_gtfs.fct_vehicle_locations_grouped()
+          >> filter(_.service_date == date)
+          >> filter(_.gtfs_dataset_name.isin(operator_names))
+          >> select(_.gtfs_dataset_key, _.gtfs_dataset_name,
+                    _.schedule_gtfs_dataset_key,
+                    _.trip_instance_key,
+                    _.location_timestamp, _.moving_timestamp,
+                    _.location, 
+                    _.n_vp, _.vp_direction
+                   )
+              >> collect()
+         )
+    
+    return df
+
 def loop_through_batches_and_download_vp(
     batches: dict, 
     analysis_date: str
@@ -98,9 +118,13 @@ def loop_through_batches_and_download_vp(
     """
     for i, subset_operators in batches.items():
         time0 = datetime.datetime.now()
-
-        df = download_vehicle_positions(
-            analysis_date, subset_operators)
+        
+        df = download_vehicle_positions_grouped(
+            analysis_date, 
+            subset_operators
+        )
+        #df = download_vehicle_positions(
+        #    analysis_date, subset_operators)
 
         df.to_parquet(
             f"{SEGMENT_GCS}vp_raw_{analysis_date}_batch{i}.parquet")
