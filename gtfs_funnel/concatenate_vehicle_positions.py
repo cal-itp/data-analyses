@@ -36,7 +36,7 @@ def concat_batches(analysis_date: str) -> dd.DataFrame:
     ddf = dd.from_delayed(delayed_dfs)
     
     ddf = schedule_rt_utils.localize_timestamp_col(
-        ddf, ["location_timestamp"])
+        ddf, ["location_timestamp", "moving_timestamp"])
     
     return ddf
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    RAW_VP = GTFS_DATA_DICT.speeds_tables.raw_vp
+    RAW_VP = f"{GTFS_DATA_DICT.speeds_tables.raw_vp}_grouped"
     
     for analysis_date in analysis_date_list:
     
