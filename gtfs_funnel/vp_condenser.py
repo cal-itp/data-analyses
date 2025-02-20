@@ -1,4 +1,7 @@
 """
+Pre-processing vehicle positions.
+Drop all RT trips with less than 10 min of data.
+
 Condense vp into arrays by trip-direction.
 """
 import datetime
@@ -40,6 +43,53 @@ def find_valid_trips(
     return usable_trips
 
 
+def pare_down_to_valid_trips(
+    analysis_date: str, 
+    dict_inputs: dict = {}
+):
+    """
+    Drop trips that do not meet the minimum time cutoff.
+    """
+    time0 = datetime.datetime.now()
+ 
+    INPUT_FILE = dict_inputs.speeds_tables.raw_vp2
+    EXPORT_FILE = dict_inputs.speeds_tables.vp_dwell
+    
+    BOTH_TIMESTAMP_COLS = [*dict_inputs.speed_vars.timestamp_cols]
+    TIMESTAMP_COL = dict_inputs.speeds_tables.timestamp_col
+    TIME_CUTOFF = dict_inputs.speeds_tables.time_min_cutoff
+    
+    vp = delayed(gpd.read_parquet)(
+        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
+        columns = [
+            "trip_instance_key", "n_vp", "vp_direction", "geometry"] +
+            BOTH_TIMESTAMP_COLS,
+    ).to_crs(WGS84)
+    
+    usable_trips = find_valid_trips(vp, BOTH_TIMESTAMP_COLS, TIME_CUTOFF).compute()
+    
+    vp = vp[vp.trip_instance_key.isin(usable_trips)].sort_values(
+        ["trip_instance_key", TIMESTAMP_COL]
+    ).reset_index(drop=True)
+    
+    vp = vp.assign(
+        vp_idx = vp.index,
+        x = vp.geometry.x,
+        y = vp.geometry.y,
+    ).drop(columns = "geometry")
+    
+    vp = compute(vp)[0]
+    
+    vp.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet"
+    )
+    
+    time1 = datetime.datetime.now()
+    logger.info(f"pare down vp: {time1 - time0}")  
+    
+    return
+    
+
 def condense_vp_to_linestring(
     analysis_date: str, 
     dict_inputs: dict
@@ -50,28 +100,20 @@ def condense_vp_to_linestring(
     We will group by trip and save out 
     the vp point geom into a shapely.LineString.
     """
-    RAW_VP = dict_inputs.speeds_tables.raw_vp2
+    INPUT_FILE = dict_inputs.speeds_tables.vp_dwell
     EXPORT_FILE = dict_inputs.speeds_tables.vp_condensed_line
     
     BOTH_TIMESTAMP_COLS = [*dict_inputs.speed_vars.timestamp_cols]
     TIMESTAMP_COL = dict_inputs.speeds_tables.timestamp_col
     TIME_CUTOFF = dict_inputs.speeds_tables.time_min_cutoff
     
-    vp = delayed(gpd.read_parquet)(
-        f"{SEGMENT_GCS}{RAW_VP}_{analysis_date}.parquet",
+    vp = delayed(pd.read_parquet)(
+        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
         columns = [
-            "trip_instance_key", "n_vp", "vp_direction", "geometry"] +
+            "trip_instance_key", "n_vp", "vp_direction", "x", "y"] +
             BOTH_TIMESTAMP_COLS,
-    )
-    
-    usable_trips = find_valid_trips(vp, BOTH_TIMESTAMP_COLS, TIME_CUTOFF).compute()
-    
-    vp = vp[vp.trip_instance_key.isin(usable_trips)].sort_values(
-        ["trip_instance_key", TIMESTAMP_COL]
-    ).reset_index(drop=True)
-    
-    vp = vp.assign(
-        vp_idx = vp.index,
+    ).pipe(
+        geo_utils.vp_as_gdf, crs = WGS84
     )
     
     vp_condensed = delayed(vp_transform.condense_point_geom_to_line)(
@@ -109,11 +151,13 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
-        condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
+        pare_down_to_valid_trips(analysis_date, GTFS_DATA_DICT)
+        
+        #condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
         
         end = datetime.datetime.now()
         
-        logger.info(
-            f"{analysis_date}: condense vp for trip "
-            f"{end - start}"
-        )    
+        #logger.info(
+        #    f"{analysis_date}: condense vp for trip "
+        #    f"{end - start}"
+        #)    
