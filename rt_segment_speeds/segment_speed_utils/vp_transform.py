@@ -20,7 +20,8 @@ def condense_point_geom_to_line(
     df: gpd.GeoDataFrame,
     group_cols: list,
     geom_col: str = "geometry",
-    array_cols: list = []
+    array_cols: list = [],
+    sort_cols: list = []
 ) -> gpd.GeoDataFrame:
     """    
     To apply nearest neighbors, we need to create our equivalent
@@ -31,6 +32,9 @@ def condense_point_geom_to_line(
     vp that occurred for a trip into a list and 
     create that as a shapely.LineString object.
     """
+    if len(sort_cols) == 0:
+        sort_cols = group_cols
+        
     valid_groups = (df.groupby(group_cols, group_keys=False)
                     .agg({geom_col: "count"})
                     .reset_index()
@@ -61,11 +65,11 @@ def condense_point_geom_to_line(
         valid_groups,
         on = group_cols,
         how = "inner"
-    )
+    ).sort_values(sort_cols).reset_index(drop=True)
     
     df3 = (
         df2
-        .groupby(group_cols)
+        .groupby(group_cols, group_keys=False, dropna=False)
         .agg({
             geom_col: lambda x: shapely.LineString(list(x)),
             **{c: lambda x: list(x) for c in array_cols},

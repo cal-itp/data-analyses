@@ -90,7 +90,7 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    RAW_VP = f"{GTFS_DATA_DICT.speeds_tables.raw_vp}_grouped"
+    RAW_VP = GTFS_DATA_DICT.speeds_tables.raw_vp2
     
     for analysis_date in analysis_date_list:
     
