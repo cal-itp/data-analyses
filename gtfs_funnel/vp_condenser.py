@@ -52,7 +52,7 @@ def pare_down_to_valid_trips(
     """
     time0 = datetime.datetime.now()
  
-    INPUT_FILE = dict_inputs.speeds_tables.raw_vp2
+    INPUT_FILE = dict_inputs.speeds_tables.raw_vp
     EXPORT_FILE = dict_inputs.speeds_tables.vp_dwell
     
     BOTH_TIMESTAMP_COLS = [*dict_inputs.speed_vars.timestamp_cols]
@@ -153,11 +153,11 @@ if __name__ == "__main__":
         
         pare_down_to_valid_trips(analysis_date, GTFS_DATA_DICT)
         
-        #condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
+        condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
         
         end = datetime.datetime.now()
         
-        #logger.info(
-        #    f"{analysis_date}: condense vp for trip "
-        #    f"{end - start}"
-        #)    
+        logger.info(
+            f"{analysis_date}: condense vp for trip "
+            f"{end - start}"
+        )    

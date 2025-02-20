@@ -52,3 +52,9 @@
 2025-02-17 19:03:22.213 | INFO     | __main__:<module>:242 - vp with dwell time 2025-02-12: 0:05:38.569800
 2025-02-17 19:10:23.415 | INFO     | __main__:<module>:80 - 2025-02-12: condense vp for trip 0:06:40.787142
 2025-02-20 10:09:19.263 | INFO     | __main__:<module>:116 - 2025-02-12: condense vp for trip 0:06:00.079742
+2025-02-20 14:01:41.984 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:18.227875
+2025-02-20 14:04:42.832 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:03:00.650110
+2025-02-20 14:07:17.608 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:34.692009
+2025-02-20 14:10:03.127 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:45.419478
+2025-02-20 14:12:59.149 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:55.934705
+2025-02-20 14:15:39.953 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:40.644917
