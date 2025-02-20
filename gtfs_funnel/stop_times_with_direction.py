@@ -33,7 +33,7 @@ def prep_scheduled_stop_times(analysis_date: str) -> gpd.GeoDataFrame:
         analysis_date,
         columns = ["feed_key", "trip_id", "stop_id", "stop_sequence"],
         get_pandas = True
-    )
+    ).pipe(keep_first_trip, analysis_date)
 
     trips = helpers.import_scheduled_trips(
         analysis_date,
@@ -274,8 +274,9 @@ def assemble_stop_times_with_direction(
 if __name__ == "__main__":  
     
     from update_vars import analysis_date_list
-    
+
     LOG_FILE = "./logs/preprocessing.log"
+    
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
