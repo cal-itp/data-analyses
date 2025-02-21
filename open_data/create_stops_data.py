@@ -128,9 +128,9 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         'n_routes', 'route_ids_served', 'route_types_served', 
         'n_arrivals', 'n_hours_in_service',
         # this is derived column
-        'meters_to_shn'
+        'meters_to_ca_state_highway'
     ]
-    agency_ids = ['base64_url', 'caltrans_district']
+    agency_ids = ['base64_url', 'caltrans_district', 'district_name']
     
     col_order = route_cols + stop_cols + agency_ids + ['geometry']
     
