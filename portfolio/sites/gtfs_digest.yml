@@ -2,10 +2,63 @@ directory: ./gtfs_digest/
 notebook: ./gtfs_digest/03_report.ipynb
 parts:
 - chapters:
+  - caption: District 01 - Eureka
+    params:
+      district: 01 - Eureka
+    sections:
+    - organization_name: Blue Lake Rancheria
+    - organization_name: City of Arcata
+    - organization_name: City of Eureka
+    - organization_name: Curry Public Transit
+    - organization_name: Humboldt Transit Authority
+    - organization_name: Lake Transit Authority
+    - organization_name: Mendocino Transit Authority
+    - organization_name: POINT
+    - organization_name: Redwood Coast Transit Authority
+    - organization_name: Yurok Tribe
+  - caption: District 02 - Redding
+    params:
+      district: 02 - Redding
+    sections:
+    - organization_name: Lassen Transit Service Agency
+    - organization_name: Modoc Transportation Agency
+    - organization_name: Plumas Transit Systems
+    - organization_name: Redding Area Bus Authority
+    - organization_name: Shasta County
+    - organization_name: Siskiyou County
+    - organization_name: Susanville Indian Rancheria
+    - organization_name: Tehama County
+    - organization_name: Trinity County
+  - caption: District 03 - Marysville
+    params:
+      district: 03 - Marysville
+    sections:
+    - organization_name: Amtrak
+    - organization_name: Butte County Association of Governments
+    - organization_name: City of Auburn
+    - organization_name: City of Elk Grove
+    - organization_name: City of Rancho Cordova
+    - organization_name: City of Roseville
+    - organization_name: El Dorado County Transit Authority
+    - organization_name: Glenn County
+    - organization_name: Nevada County
+    - organization_name: North Lake Tahoe Express
+    - organization_name: Placer County
+    - organization_name: Sacramento County
+    - organization_name: Sacramento Regional Transit District
+    - organization_name: Tahoe Transportation District
+    - organization_name: Tahoe Truckee Area Regional Transportation
+    - organization_name: University of California, Davis
+    - organization_name: Yolo County Transportation District
+    - organization_name: Yuba-Sutter Transit Authority
   - caption: District 04 - Oakland
     params:
       district: 04 - Oakland
     sections:
+    - organization_name: Alameda-Contra Costa Transit District
+    - organization_name: Capitol Corridor Joint Powers Authority
+    - organization_name: Central Contra Costa Transit Authority
+    - organization_name: City and County of San Francisco
     - organization_name: City of Fairfield
     - organization_name: City of Menlo Park
     - organization_name: City of Mountain View
