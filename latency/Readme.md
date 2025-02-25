@@ -1,7 +1,7 @@
 ### **GTFS-RT Vehicle Position Latency Research Project**
 The objective of this research project is to examine the current latency of vehicle position data. Latency is defined as the time between a transit vehicle obtaining a GPS reading request and the Cal-ITP data pipeline receiving the response.
-As per the GTFS.org standards California Transit Data Guidelines, the recommended latency is as follows:
-**_“Updates should be published to the Trip Updates and Vehicle Positions feeds at least once every 20 seconds, including updated timestamps and data for each trip and vehicle in service.”_**
+As per the GTFS.org standards, the recommended latency is as follows:
+**_“Updates should be published to the Trip Updates and Vehicle Positions feeds at least once every 30 seconds, including updated timestamps and data for each trip and vehicle in service.”_**
 Preliminary analysis of the entire feeds indicates that most fall significantly short of this expectation. This research project aims to quantify the extent of the latency issues, identify any patterns, and evaluate the current industry's capacity to improve latency.
 
 **Implementation**
