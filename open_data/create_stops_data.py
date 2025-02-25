@@ -57,7 +57,7 @@ def add_distance_to_state_highway(
     orig_crs = stops.crs
     
     shn = catalog.state_highway_network.read()[
-        ["geometry"]].to_crs(geography_utils.CA_NAD83Albers_m).geometry.iloc[0]    
+        ["geometry"]].to_crs(geography_utils.CA_NAD83Albers_m).dissolve().geometry.iloc[0]    
 
     stops = stops.to_crs(geography_utils.CA_NAD83Albers_m)
     
@@ -128,9 +128,9 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         'n_routes', 'route_ids_served', 'route_types_served', 
         'n_arrivals', 'n_hours_in_service',
         # this is derived column
-        'meters_to_ca_state_highway'
+        'meters_to_shn'
     ]
-    agency_ids = ['base64_url', 'caltrans_district', 'district_name']
+    agency_ids = ['base64_url', 'caltrans_district']
     
     col_order = route_cols + stop_cols + agency_ids + ['geometry']
     
