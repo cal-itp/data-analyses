@@ -155,7 +155,10 @@ if __name__ == "__main__":
 
     from shared_utils import rt_dates
     
-    analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates 
+    analysis_date_list = (
+        rt_dates.y2024_dates + rt_dates.y2023_dates +
+        rt_dates.y2025_dates
+    )
     
     OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
