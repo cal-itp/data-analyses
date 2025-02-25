@@ -1,0 +1,15 @@
+### **GTFS-RT Vehicle Position Latency Research Project**
+The objective of this research project is to examine the current latency of vehicle position data. Latency is defined as the time between a transit vehicle obtaining a GPS reading request and the Cal-ITP data pipeline receiving the response.
+As per the California Transit Data Guidelines, the recommended latency is as follows:
+**_“Updates should be published to the Trip Updates and Vehicle Positions feeds at least once every 20 seconds, including updated timestamps and data for each trip and vehicle in service.”_**
+Preliminary analysis of the entire feeds indicates that most fall significantly short of this expectation. This research project aims to quantify the extent of the latency issues, identify any patterns, and evaluate the current industry's capacity to improve latency.
+
+**Implementation**
+Several tables form [cal-itp-data-infra](https://console.cloud.google.com/bigquery?project=cal-itp-data-infra&pli=1&ws=!1m0) has been utilized in preparation for this project. However the main table which majority of the analysis is based on is: [fct_vehicle_positions_messages ](https://console.cloud.google.com/bigquery?project=cal-itp-data-infra&pli=1&ws=!1m5!1m4!4m3!1scal-itp-data-infra!2smart_gtfs!3sfct_vehicle_positions_messages).
+Due to the magnitude of this dataset, the Metabase app could not be used with this table, necessitating the execution of complex queries in BigQuery to extract the required data. We are collaborating with the Data Engineering team to develop new models and tables for the data warehouse. This will support vehicle position analysis and any future reporting needs for ongoing monitoring of vehicle position data, eliminating the need for complex queries each time. A ticket has been opened for this issue: see [Vehicle Position Data Modelling #3408](https://github.com/cal-itp/data-infra/issues/3408).
+The project was coded primarily in two data languages: R and Python. Most of the plots were created using the R language and the Tidyverse package. However, the lack of RStudio IDE in the CalITP cloud and limitations in R coding within the Jupyter environment required us to install additional packages, which delayed the project's completion. We are currently working on installing RStudio on the CalITP cloud to rectify this issue.
+The second part of the project, which involved creating a geographical map of vehicle position latencies, was written in Python. This decision was made due to issues we encountered with installing the [Leaflet R](https://rstudio.github.io/leaflet/articles/leaflet.html) package in Jupyter.
+The plots from this project was used in preparation of a Power Point Presentation which can be found [here](https://caltrans.sharepoint.com/:p:/r/sites/DOTPMPHQ-DataandDigitalServices/_layouts/15/Doc.aspx?sourcedoc=%7B6EA22AD2-0E63-46D7-97C1-9E8E87E328A6%7D&file=Latency%20Project.pptx&action=edit&mobileredirect=true).
+
+**Next step**
+Efforts to reduce latency are ongoing. In the second phase of this project, we are reaching out to transit RT vendors for further remediation as this report is being published.
