@@ -1,7 +1,8 @@
 # How to run GTFS Digest
-Make sure these files include the most recent date's worth of data. 
+Make sure these files include the most recent date's worth of data, **especially** at the  beginning of a new calendar year. 
 - `cd _shared_utils/_shared_utils/rt_dates.py`
--  `cd gtfs_digest/merge_data.py`.
+-  `cd gtfs_digest/merge_data.py`
+-  `cd gtfs_digest/merge_operator_data.py`
 -  `cd_gtfs_funnel`: double check that `update_vars.py` is correct before rerunning `python clean_route_naming.py`.
 
 Proceed with assembling the data using the `Makefile`.<br>

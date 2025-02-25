@@ -22,6 +22,8 @@ def operators_schd_vp_rt()->pd.DataFrame:
                      )
 
    
+    schd_vp_df = schd_vp_df.loc[schd_vp_df.caltrans_district != '07 - Los Angeles']
+    
     schd_vp_df2 = (
     schd_vp_df.dropna(subset="caltrans_district")
     .sort_values(
