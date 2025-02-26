@@ -11,7 +11,7 @@ import sys
 from calitp_data_analysis import utils
 from dask import delayed, compute
 from loguru import logger
-from typing import Literal
+from typing import Literal, Optional
 
 from segment_speed_utils import gtfs_schedule_wrangling, segment_calcs
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
@@ -96,9 +96,10 @@ def aggregate_to_peak_offpeak(
 
 
 if __name__ == "__main__":
-    from segment_speed_utils.project_vars import all_dates
     
-    LOG_FILE = "../logs/test.log"
+    from segment_speed_utils.project_vars import analysis_date_list
+    
+    LOG_FILE = "../logs/avg_speeds.log"
     logger.add(LOG_FILE, retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -106,6 +107,6 @@ if __name__ == "__main__":
     
     segment_type = "stop_segments"
 
-    for analysis_date in all_dates:
+    for analysis_date in analysis_date_list:
         aggregate_to_peak_offpeak(analysis_date, segment_type)
     
