@@ -3,9 +3,14 @@
 * cd data-analyses/rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ../gtfs_digest
 * RT Dates https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_dates.py
 * `import sys sys.path.append("../gtfs_funnel") import crosswalk_gtfs_dataset_key_to_organization`
-### Running to-do list
-* Portfolio:
-    * Figure out Makefile situation.
+
+### 2/26/2025
+* There is <i>District 7 Los Angeles</i> and <i>District 07 - Los Angeles / Ventura</i> are duplicative
+    * Go back to the pipeline and delete <i>District 7 Los Angeles</i>
+* Incorporate rail routes
+    * Split out rail vs bus for transit operators that do both. 
+* Find ferry operators.
+* Add `route_type` from `pd.read_parquet(f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet")` to `f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"`
 
 ### 7/16/2024
 * Figure out how to update the mermaid diagram/supporting docs. 
