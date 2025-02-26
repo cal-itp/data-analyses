@@ -1,5 +1,7 @@
 """
 Quick aggregation for segment speed averages.
+Refactor this into multi-day segment speed averages.
+Consolidate quarter_year_averages into this.
 """
 import datetime
 import geopandas as gpd
