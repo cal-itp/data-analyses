@@ -185,8 +185,8 @@ def import_unique_vp_trips(analysis_date: str) -> list:
     Get the unique trip_instance_keys that are present
     on a given day in vp_usable.
     """
-    TABLE = GTFS_DATA_DICT.speeds_tables.usable_vp
-    FILE = f"{SEGMENT_GCS}{TABLE}_{analysis_date}"
+    TABLE = GTFS_DATA_DICT.speeds_tables.vp_condensed_line
+    FILE = f"{SEGMENT_GCS}{TABLE}_{analysis_date}.parquet"
     
     rt_trips = pd.read_parquet(
         FILE,

@@ -9,7 +9,8 @@ from typing import Literal
 from segment_speed_utils import segment_calcs
 
 def weighted_average_speeds_across_segments(
-    df: pd.DataFrame, group_cols: list
+    df: pd.DataFrame, 
+    group_cols: list
 ) -> pd.DataFrame:
     """
     We can use our segments and the deltas within a trip
@@ -19,14 +20,17 @@ def weighted_average_speeds_across_segments(
     instead of mean(speed_mph), since segments can be varying lengths.
     """
     avg_speeds = (
-        df.groupby(group_cols, observed=True, group_keys=False, dropna=False)
+        df.groupby(group_cols, 
+                   observed=True, group_keys=False, dropna=False)
         .agg(
             {
                 "meters_elapsed": "sum",
                 "sec_elapsed": "sum",
+                "trip_instance_key": "nunique"
             }
         )
         .reset_index()
+        .rename(columns = {"trip_instance_key": "n_trips"})
     ).pipe(segment_calcs.speed_from_meters_elapsed_sec_elapsed)
 
     return avg_speeds
@@ -153,14 +157,19 @@ def concatenate_peak_offpeak_allday_averages(
     """
 
     if metric_type == "summary_speeds":
-        avg_peak = weighted_average_speeds_across_segments(
-            df,
-            group_cols + ["peak_offpeak"]
+        
+        avg_peak = segment_calcs.calculate_weighted_averages(
+            df, 
+            group_cols + ["peak_offpeak"], 
+            metric_cols = ["speed_mph"], 
+            weight_col = "n_trips"
         )
         
-        avg_allday = weighted_average_speeds_across_segments(
-            df,
-            group_cols
+        avg_allday = segment_calcs.calculate_weighted_averages(
+            df, 
+            group_cols, 
+            metric_cols = ["speed_mph"], 
+            weight_col = "n_trips"
         ).assign(peak_offpeak = "all_day")   
     
     elif metric_type == "rt_vs_schedule":
@@ -175,7 +184,7 @@ def concatenate_peak_offpeak_allday_averages(
         ).assign(peak_offpeak = "all_day")
     
     else:
-        print(f"Valid metric types: ['segment_speeds', 'summary_speeds', 'rt_vs_schedule']")
+        print(f"Valid metric types: ['summary_speeds', 'rt_vs_schedule']")
         
     # Concatenate so that every segment has 3 time periods: peak, offpeak, and all_day
     avg_metrics = pd.concat(

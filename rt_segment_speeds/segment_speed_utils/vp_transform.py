@@ -5,7 +5,14 @@ import shapely
 
 from calitp_data_analysis.geography_utils import WGS84
 
-ALL_DIRECTIONS = ["Northbound", "Southbound", "Eastbound", "Westbound"]
+ALL_DIRECTIONS = [
+    "Northbound", "Southbound", "Eastbound", "Westbound",
+]
+
+DIRECTION_VALUES = {
+    **{k: f"{k}bound" for k in ["North", "South", "East", "West"]},
+    "Unknown": "Unknown"
+}
 
 OPPOSITE_DIRECTIONS = {
     "Northbound": "Southbound",
