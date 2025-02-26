@@ -96,10 +96,10 @@ rt_stop_times:
   trip_stop_cols: ["trip_instance_key", "stop_sequence"]
   stop_pair_cols: ["stop_pair", "stop_pair_name"]
   route_dir_cols: ["route_id", "direction_id"]
+  crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
   segments_file: "segment_options/stop_segments"
   trip_speeds_single_summary: "rollup_singleday/speeds_trip"
-  route_dir_single_summary: "rollup_singleday/speeds_route_dir"
-  route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
+  route_dir_timeofday: "rollup_singleday/speeds_route_dir_timeofday" # -- this got renamed with suffix _timeofday
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}
@@ -119,13 +119,8 @@ speedmap_segments:
   segment_cols: ["shape_id", "shape_array_key", "route_id", "direction_id", "stop_pair", "segment_id", "geometry"]
   crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
   segments_file: "segment_options/speedmap_segments"
-  shape_stop_single_segment: "rollup_singleday/speeds_shape_speedmap_segments"
-  shape_stop_single_segment_detail: "rollup_singleday/speeds_shape_speedmap_segments_detail"
   # excluded_shapes_by_time_of_day: "rollup_singleday/excluded_shapes_by_time_of_day"
-  route_dir_single_segment: "rollup_singleday/speeds_route_dir_speedmap_segments"
-  route_dir_multi_segment: "rollup_multiday/speeds_route_dir_speedmap_segments"
   segment_timeofday: "rollup_singleday/speeds_shape_timeofday_speedmap_segments"
-  shape_stop_single_segment_detail: "rollup_singleday/speeds_shape_speedmap_segments_detail" # this one still needs route_short_name added
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}
