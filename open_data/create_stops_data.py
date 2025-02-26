@@ -50,22 +50,42 @@ def add_distance_to_state_highway(
     Bring in State Highway Network gdf and add a column that tells us
     distance (in meters) between stop and SHN.
     For stops outside of CA, this will not be that meaningful.
+    Using a dissolve takes a long time. Instead, opt for gpd.sjoin_nearest,
+    which allows us to return a distance column, and if there are multiple
+    rows, we'll keep the closest distance.
+    
     See discussion in:
     https://github.com/cal-itp/data-analyses/issues/1182
     https://github.com/cal-itp/data-analyses/issues/1321
+    https://github.com/cal-itp/data-analyses/issues/1397
     """
     orig_crs = stops.crs
     
     shn = catalog.state_highway_network.read()[
-        ["geometry"]].to_crs(geography_utils.CA_NAD83Albers_m).dissolve().geometry.iloc[0]    
+        ["District", "geometry"]].to_crs(geography_utils.CA_NAD83Albers_m)   
 
-    stops = stops.to_crs(geography_utils.CA_NAD83Albers_m)
-    
-    stops = stops.assign(
-        meters_to_shn = stops.geometry.distance(shn).round(1)
+    stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
+
+    nearest_shn_result = gpd.sjoin_nearest(
+        stops[stop_cols + ["geometry"]].to_crs(geography_utils.CA_NAD83Albers_m), 
+        shn, 
+        distance_col = "meters_to_shn"
+    ).sort_values(
+        stop_cols + ["meters_to_shn"]
+    ).drop_duplicates(subset = stop_cols).reset_index(drop=True)
+
+    stops2 = pd.merge(
+        stops,
+        nearest_shn_result[stop_cols + ["meters_to_shn"]],
+        on = stop_cols,
+        how = "inner"
+    )
+  
+    stops2 = stops2.assign(
+        meters_to_shn = stops2.meters_to_shn.round(1)
     )
     
-    return stops.to_crs(orig_crs)
+    return stops2.to_crs(orig_crs)
 
 
 def patch_previous_dates(
