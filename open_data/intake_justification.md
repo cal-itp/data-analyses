@@ -3,7 +3,7 @@
 Document links, justification, for why datasets need to be made public. Submit this information every time a ticket is open to update the existing layers.
 
 ## Intranet Links
-1. [Geospatial open data request (routine updates)](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNUo1NjRNRFpIOVRBMVFFTFJDM1JKNkY0SC4u)
+1. [Geospatial open data request (routine updates)](https://sv03tmcpo.ct.dot.ca.gov/portal/apps/sites/#/geep/pages/open-data-request)
 
     * District: `Sacramento HQ`
     * Division / Program: `Rail and Mass Transportation`
