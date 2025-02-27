@@ -28,9 +28,9 @@ schedule_downloads:
 
 speeds_tables:
   dir: ${gcs_paths.SEGMENT_GCS}
-  #raw_vp: vp
-  raw_vp: vp_grouped
-  #usable_vp: vp_usable # this can be dropped
+  raw_vp: vp
+  raw_vp2: vp_grouped
+  usable_vp: vp_usable # this can be dropped
   vp_dwell: vp_usable_dwell
   vp_condensed_line: condensed/vp_condensed
   timestamp_col: ${speed_vars.timestamp_col}
@@ -80,12 +80,8 @@ stop_segments:
   route_dir_cols: ["route_id", "direction_id"]
   segment_cols: ["route_id", "direction_id", "stop_pair", "geometry"]
   crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
-  segment_timeofday: "rollup_singleday/speeds_route_dir_timeofday_segments"
-  segment_peakoffpeak: "rollup_singleday/speeds_route_dir_peak_segments"
-  segment_timeofday_weekday_year: "rollup_multiday/year_weekday_speeds_route_dir_segments" # NEW
   segments_file: "segment_options/shape_stop_segments"
   max_speed: ${speed_vars.max_speed}
-  route_dir_year_segment: "rollup_multiday/year_speeds_route_dir_segments"
 
 rt_stop_times:
   dir: ${gcs_paths.SEGMENT_GCS}
@@ -96,10 +92,13 @@ rt_stop_times:
   trip_stop_cols: ["trip_instance_key", "stop_sequence"]
   stop_pair_cols: ["stop_pair", "stop_pair_name"]
   route_dir_cols: ["route_id", "direction_id"]
+  segment_cols: ["route_id", "direction_id", "stop_pair", "geometry"]
   crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
   segments_file: "segment_options/stop_segments"
+  segment_timeofday: "rollup_singleday/speeds_route_dir_timeofday_segments"
+  segment_peakoffpeak: "rollup_singleday/speeds_route_dir_peak_segments"
   trip_speeds_single_summary: "rollup_singleday/speeds_trip"
-  route_dir_timeofday: "rollup_singleday/speeds_route_dir_timeofday" # -- this got renamed with suffix _timeofday
+  segment_timeofday_weekday_year: "rollup_multiday/year_weekday_speeds_route_dir_segments" # NEW
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}
