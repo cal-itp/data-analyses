@@ -15,15 +15,14 @@ prep_roads:
 # where we have custom points along shape / corridor and check all trips against those
 #speeds_pipeline: # (refactor): subsume by rt_stop_times / add more outputs there
 	#python pipeline_segment_speeds.py
-	#python average_segment_speeds.py  
 
 rt_stop_times_pipeline:
 	python pipeline_rt_stop_times.py
 	python average_summary_speeds.py  
+	#python average_segment_speeds.py # will do yearly averages 
 
 speedmaps_pipeline:
 	python pipeline_speedmap.py
-	python average_speedmap_segment_speeds.py  
   
 all_speeds_pipeline:
 	make segmentize    
