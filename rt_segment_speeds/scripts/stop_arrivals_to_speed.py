@@ -168,7 +168,7 @@ def calculate_speed_from_stop_arrivals(
     )
         
     speed.to_parquet(
-        f"{SEGMENT_GCS}{SPEED_FILE}_new.parquet")
+        f"{SEGMENT_GCS}{SPEED_FILE}.parquet")
     
     del speed, df
     

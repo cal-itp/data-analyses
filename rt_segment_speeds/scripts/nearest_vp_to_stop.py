@@ -186,7 +186,7 @@ def nearest_neighbor_for_stop(
         
     del stop_times
     
-    gdf.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}_new.parquet")
+    gdf.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}.parquet")
     
     end = datetime.datetime.now()
     logger.info(f"nearest neighbor for {segment_type} "
