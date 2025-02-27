@@ -46,7 +46,9 @@ def stop_times_for_shape_segments(
         analysis_date,
         columns = ["trip_instance_key", "shape_array_key",
                    "stop_sequence", "stop_id", "stop_pair",
-                   "stop_primary_direction", "geometry"],
+                   "stop_primary_direction", 
+                   "stop_meters",
+                   "geometry"],
         filters = [[("trip_instance_key", "in", subset_trips)]],
         get_pandas = True,
         with_direction = True
@@ -77,7 +79,7 @@ def stop_times_for_all_trips(
         analysis_date,
         columns = ["trip_instance_key", "shape_array_key",
                    "stop_sequence", "stop_id", "stop_pair", 
-                   "stop_primary_direction",
+                   "stop_primary_direction", "stop_meters",
                    "geometry"],
         with_direction = True,
         get_pandas = True,
@@ -101,7 +103,7 @@ def stop_times_for_speedmaps(
     stop_time_col_order = [
         'trip_instance_key', 'shape_array_key',
         'stop_sequence', 'stop_sequence1', 
-        'stop_id', 'stop_pair',
+        'stop_id', 'stop_pair', 
         'stop_primary_direction', 'geometry'
     ] 
     
@@ -136,7 +138,9 @@ def nearest_neighbor_for_stop(
     stop_time_col_order = [
         'trip_instance_key', 'shape_array_key',
         'stop_sequence', 'stop_id', 'stop_pair',
-        'stop_primary_direction', 'geometry'
+        'stop_primary_direction', 
+        'stop_meters',
+        'geometry'
     ] 
     
     if segment_type == "stop_segments":
@@ -182,7 +186,7 @@ def nearest_neighbor_for_stop(
         
     del stop_times
     
-    gdf.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}.parquet")
+    gdf.to_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}_new.parquet")
     
     end = datetime.datetime.now()
     logger.info(f"nearest neighbor for {segment_type} "

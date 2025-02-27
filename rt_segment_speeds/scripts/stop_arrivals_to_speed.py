@@ -67,7 +67,7 @@ def attach_operator_natural_identifiers(
         
         df_with_natural_ids2 = df_with_natural_ids.merge(
             stop_pair,
-            on = ["shape_array_key", "stop_sequence"]
+            on = ["shape_array_key", "stop_sequence", "stop_pair"]
         )
     
     elif segment_type == "rt_stop_times":
@@ -168,7 +168,7 @@ def calculate_speed_from_stop_arrivals(
     )
         
     speed.to_parquet(
-        f"{SEGMENT_GCS}{SPEED_FILE}.parquet")
+        f"{SEGMENT_GCS}{SPEED_FILE}_new.parquet")
     
     del speed, df
     

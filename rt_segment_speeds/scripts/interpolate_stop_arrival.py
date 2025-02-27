@@ -229,7 +229,7 @@ def interpolate_stop_arrivals(
     results = compute(results)[0]
         
     results.to_parquet(
-        f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}_{analysis_date}.parquet"
+        f"{SEGMENT_GCS}{STOP_ARRIVALS_FILE}_{analysis_date}_new.parquet"
     )
         
     end = datetime.datetime.now()
