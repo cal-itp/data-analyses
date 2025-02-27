@@ -36,7 +36,9 @@ def concat_batches(analysis_date: str) -> dd.DataFrame:
     ddf = dd.from_delayed(delayed_dfs)
     
     ddf = schedule_rt_utils.localize_timestamp_col(
-        ddf, ["location_timestamp", "moving_timestamp"])
+        ddf, 
+        ["location_timestamp"] # add moving_timestamp with new mart table
+    )
     
     return ddf
 

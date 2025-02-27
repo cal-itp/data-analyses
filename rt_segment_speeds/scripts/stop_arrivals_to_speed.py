@@ -67,7 +67,7 @@ def attach_operator_natural_identifiers(
         
         df_with_natural_ids2 = df_with_natural_ids.merge(
             stop_pair,
-            on = ["shape_array_key", "stop_sequence"]
+            on = ["shape_array_key", "stop_sequence", "stop_pair"]
         )
     
     elif segment_type == "rt_stop_times":

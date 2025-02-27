@@ -15,6 +15,7 @@ from loguru import logger
 
 from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
+from shared_utils import geo_utils
 from segment_speed_utils import vp_transform
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
@@ -76,7 +77,8 @@ def pare_down_to_valid_trips(
         vp_idx = vp.index,
         x = vp.geometry.x,
         y = vp.geometry.y,
-    ).drop(columns = "geometry")
+        vp_primary_direction = vp.vp_direction.map(vp_transform.DIRECTION_VALUES),
+    ).drop(columns = ["geometry", "vp_direction"])
     
     vp = compute(vp)[0]
     
@@ -110,7 +112,8 @@ def condense_vp_to_linestring(
     vp = delayed(pd.read_parquet)(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
         columns = [
-            "trip_instance_key", "n_vp", "vp_direction", "x", "y"] +
+            "trip_instance_key", "n_vp", 
+            "vp_idx", "vp_primary_direction", "x", "y"] +
             BOTH_TIMESTAMP_COLS,
     ).pipe(
         geo_utils.vp_as_gdf, crs = WGS84
@@ -122,7 +125,7 @@ def condense_vp_to_linestring(
         geom_col = "geometry",
         array_cols = ["vp_idx", 
                       "location_timestamp_local", "moving_timestamp_local",
-                      "vp_direction",
+                      "vp_primary_direction",
                      ],
         sort_cols = ["vp_idx"]
     ).set_geometry("geometry").set_crs(WGS84)
@@ -151,7 +154,7 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
-        pare_down_to_valid_trips(analysis_date, GTFS_DATA_DICT)
+        #pare_down_to_valid_trips(analysis_date, GTFS_DATA_DICT)
         
         condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
         

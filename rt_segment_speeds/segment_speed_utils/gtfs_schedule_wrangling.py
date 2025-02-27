@@ -128,19 +128,24 @@ def add_weekday_weekend_column(df: pd.DataFrame, category_dict: dict = time_help
     
     return df
 
-def count_trips_by_group(df: pd.DataFrame, group_cols: list):
+def count_trips_by_group(
+    df: pd.DataFrame, 
+    group_cols: list, 
+    count_col: str = "trip_instance_key"
+):
     """
     Given a df with trip_instance_key and an arbitrary list of
     group_cols, return trip counts by group.
     """
-    assert "trip_instance_key" in df.columns
-    df = (
+    df2 = (
         df.groupby(group_cols, dropna=False)
-        .agg({"trip_instance_key": "count"})
+        .agg({count_col: "count"})
         .reset_index()
+    ).rename(
+        columns = {count_col: "n_trips"}
     )
-    df = df.rename(columns={"trip_instance_key": "n_trips"})
-    return df
+    
+    return df2
 
 def aggregate_time_of_day_to_peak_offpeak(
     df: pd.DataFrame,
@@ -537,8 +542,7 @@ def merge_route_identifiers(
     """
     keep_trip_cols = ['gtfs_dataset_key', 'route_id', 'route_short_name']
     trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols)
-    trips = trips.rename(
-        columns={'gtfs_dataset_key': 'schedule_gtfs_dataset_key'})
+
     routes = trips.drop_duplicates()
     df = pd.merge(
         df,

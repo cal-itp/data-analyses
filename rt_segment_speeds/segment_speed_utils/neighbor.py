@@ -57,10 +57,15 @@ def merge_stop_vp_for_nearest_neighbor(
     # Calculate stop_meters, which is the stop geometry
     # projected onto shape_geometry and is interpreted as
     # stop X is Y meters along shape
+    # Note: This can differ from stop_times_direction for stop_segments,
+    # which seems to aggregate trips up to shape, so we will not be always using
+    # the same stops for that trip, we might be asking for more granular segments.
+    # Should not be different for rt_stop_times.
     gdf = gdf.assign(
         stop_meters = gdf.shape_geometry.project(gdf.stop_geometry),
     )
 
+    
     return gdf
 
 
