@@ -59,7 +59,7 @@ def pare_down_to_valid_trips(
     TIMESTAMP_COL = dict_inputs.speeds_tables.timestamp_col
     TIME_CUTOFF = dict_inputs.speeds_tables.time_min_cutoff
     EXPORT_FILE = dict_inputs.speeds_tables.usable_vp
-
+    
     vp = gpd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
     ).to_crs(WGS84)
@@ -84,6 +84,10 @@ def pare_down_to_valid_trips(
         f"{EXPORT_FILE}_{analysis_date}_stage"
     )
     
+    del vp
+    
+    # This script seems to kill the kernel, should resolve if we swap upstream dataset
+    #vp = gpd.read_parquet(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}_stage.parquet")
     time1 = datetime.datetime.now()
     logger.info(f"pare down vp: {time1 - time0}")  
     
@@ -157,8 +161,8 @@ def get_vp_direction_column(
     vp_condensed = vp_transform.condense_point_geom_to_line(
         vp_gdf,
         group_cols = ["trip_instance_key"],
-#        sort_cols = ["trip_instance_key", "vp_idx"], not used?
-        array_cols = ["vp_idx", "geometry"]        
+        array_cols = ["vp_idx", "geometry"],
+        sort_cols = ["trip_instance_key", "vp_idx"]
     )
     
     vp_direction_series = []

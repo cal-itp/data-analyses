@@ -154,7 +154,7 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
-        pare_down_to_valid_trips(analysis_date, GTFS_DATA_DICT)
+        #pare_down_to_valid_trips(analysis_date, GTFS_DATA_DICT)
         
         condense_vp_to_linestring(analysis_date, GTFS_DATA_DICT)
         
