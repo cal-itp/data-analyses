@@ -1,4 +1,4 @@
-2024-12-11:
+2025-02-12:
   - Alhambra Schedule
   - Amador Schedule
   - Amtrak Schedule
@@ -7,7 +7,6 @@
   - Arcadia Schedule
   - Artesia Schedule
   - Arvin Schedule
-  - Auburn Schedule
   - B-Line Schedule
   - Baldwin Park Schedule
   - Banning Pass Schedule
@@ -20,9 +19,11 @@
   - Bay Area 511 Commute.org Schedule
   - Bay Area 511 County Connection Schedule
   - Bay Area 511 Dumbarton Express Schedule
+  - Bay Area 511 Emery Express Schedule
   - Bay Area 511 Emery Go-Round Schedule
   - Bay Area 511 Fairfield and Suisun Transit Schedule
   - Bay Area 511 Golden Gate Ferry Schedule
+  - Bay Area 511 Golden Gate Park Shuttle Schedule
   - Bay Area 511 Golden Gate Transit Schedule
   - Bay Area 511 MVGO Schedule
   - Bay Area 511 Marin Schedule
@@ -31,7 +32,6 @@
   - Bay Area 511 Muni Schedule
   - Bay Area 511 Petaluma Schedule
   - Bay Area 511 PresidiGo Schedule
-  - Bay Area 511 Rio Vista Delta Breeze Schedule
   - Bay Area 511 SFO AirTrain Schedule
   - Bay Area 511 SamTrans Schedule
   - Bay Area 511 San Francisco Bay Ferry Schedule
@@ -56,8 +56,8 @@
   - Big Blue Bus Schedule
   - BruinBus Schedule
   - Burbank Schedule
-  - Calabasas Schedule
   - Calaveras Schedule
+  - Carson Circuit Schedule
   - Cerritos on Wheels Schedule
   - Cerritos on Wheels Website Schedule
   - Clean Air Express Schedule
@@ -76,7 +76,6 @@
   - Eastern Sierra Schedule
   - El Dorado Schedule
   - El Monte Schedule
-  - Elk Grove Schedule
   - Flixbus Schedule
   - Foothill Schedule
   - Fresno County Schedule
@@ -85,13 +84,14 @@
   - GET Schedule
   - Get Around Town Express Schedule
   - Glendale Schedule
+  - Glendora Schedule
   - Glenn Schedule
   - Go West Schedule
   - Grapeline Schedule
   - Guadalupe Flyer Schedule
   - Havasu Landing Ferry Schedule
   - Humboldt Schedule
-  - Huntington Schedule
+  - Huntington Park Schedule
   - Imperial Valley Transit Schedule
   - Inglewood Schedule
   - Irvine CONNECT Schedule
@@ -105,7 +105,6 @@
   - LAX Flyaway Bus Schedule
   - LAX Shuttles Schedule
   - La Campana Schedule
-  - La Puente Schedule
   - Laguna Beach Schedule
   - Lake Schedule
   - Lassen Schedule
@@ -138,12 +137,10 @@
   - Palos Verdes PTA Schedule
   - Pasadena Schedule
   - Placer Schedule
-  - Plumas Schedule
   - Redding Schedule
   - Redwood Coast Schedule
   - Riverside Schedule
   - Rosemead Passio Schedule
-  - Roseville Schedule
   - Roseville Transit GMV Schedule
   - SBMTD Schedule
   - SLO Peak Transit Schedule
@@ -159,7 +156,6 @@
   - Santa Cruz Schedule
   - Santa Maria Schedule
   - Santa Ynez Mecatran Schedule
-  - Sierra Madre Schedule
   - Siskiyou Schedule
   - South County Transit Link Schedule
   - South San Francisco Schedule
@@ -177,7 +173,6 @@
   - Trinity Schedule
   - Tuolumne Remix Schedule
   - Turlock Schedule
-  - UCSC Schedule
   - Unitrans Schedule
   - VCTC GMV Schedule
   - Victor Valley GMV Schedule
@@ -186,13 +181,25 @@
   - WeHo Schedule
   - YARTS Schedule
   - Yolobus Schedule
-  - Yosemite Valley Shuttle Schedule
   - Yuba-Sutter Schedule
   - Yuma Schedule
   - Yurok Schedule
   - eTrans Schedule
+2025-01-15:
+  - Auburn Schedule
+  - Bay Area 511 Rio Vista Delta Breeze Schedule
+  - Golden Gate Park Shuttle Schedule
+  - Plumas Schedule
+  - UCSC Schedule
+2024-12-11:
+  - Calabasas Schedule
+  - Elk Grove Schedule
+  - Huntington Schedule
+  - La Puente Schedule
+  - Roseville Schedule
+  - Sierra Madre Schedule
+  - Yosemite Valley Shuttle Schedule
 2024-11-13:
-  - Glendora Schedule
   - Mariposa Grove Shuttle Schedule
   - San Clemente Trolley Schedule
 2024-10-16:
@@ -212,14 +219,3 @@
   - Avalon Schedule
 2024-02-14:
   - Rosemead Schedule
-2023-12-13:
-  - DowneyLINK Schedule
-  - Spirit Bus Schedule
-2023-11-15:
-  - Mission Bay Schedule
-2023-08-15:
-  - Blossom Express Schedule
-2023-06-14:
-  - Tuolumne Schedule
-2023-03-15:
-  - TIME GMV Schedule

@@ -9,10 +9,9 @@ import yaml
 from pathlib import Path
 from typing import Union
 
-from open_data import RUN_ME
 from metadata_update_pro import xml_to_json
 from update_data_dict import unpack_list_of_tables_as_dict
-from update_vars import XML_FOLDER, DATA_DICT_YML
+from update_vars import XML_FOLDER, DATA_DICT_YML, RUN_ME
 
 def grab_data_dictionary_for_dataset(
     dataset_name: str,

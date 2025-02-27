@@ -83,6 +83,7 @@ y2023_dates = [
 ]
 
 y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["oct2024g"]]
+y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
 
 y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
 

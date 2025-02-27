@@ -13,6 +13,7 @@ from typing import Union
 
 from shared_utils import gtfs_utils_v2, rt_dates
 from segment_speed_utils import time_series_utils
+import datetime
 
 def filter_to_recent_date(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -86,11 +87,14 @@ if __name__ == "__main__":
     operators = time_series_utils.concatenate_datasets_across_dates(
         COMPILED_CACHED_VIEWS,
         TABLE,
-        rt_dates.y2024_dates + rt_dates.y2023_dates,
+        rt_dates.y2025_dates + rt_dates.y2024_dates,
         data_type = "df",
         get_pandas = True,
         filters = [[("gtfs_dataset_key", "in", public_feeds)]],
         columns = ["name"]
     ).drop_duplicates().pipe(filter_to_recent_date)
     
+    current_year = str(datetime.datetime.now().year)
+    assert (operators.service_date.str.contains(current_year)).any(), 'must add current calendar year, see README'
+
     export_results_yml(operators, PUBLISHED_OPERATORS_YAML)
