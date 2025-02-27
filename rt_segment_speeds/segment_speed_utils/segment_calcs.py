@@ -11,6 +11,7 @@ from numba import jit
 from typing import Literal, Union
 
 from calitp_data_analysis.geography_utils import WGS84
+from shared_utils import dask_utils
 from shared_utils.rt_utils import MPH_PER_MPS
 from segment_speed_utils.project_vars import SEGMENT_TYPES, GTFS_DATA_DICT
 
@@ -231,22 +232,28 @@ def calculate_weighted_averages(
 
 def merge_in_segment_geometry(
     speeds_by_segment: pd.DataFrame,
-    analysis_date: str,
+    analysis_date_list: list,
     segment_type: Literal[SEGMENT_TYPES],
+    **kwargs
 ) -> gpd.GeoDataFrame:
     """
     Import the segments to merge and attach it to the average speeds.
-    For a week's worth of data, we'll just use Wed segments.
-    
-    TODO: rewrite this to be dd.from_map + drop_duplicates when there are multiple days
-    instead of using Wed only
     """
     SEGMENT_FILE = GTFS_DATA_DICT[segment_type].segments_file
-    GCS_PATH = GTFS_DATA_DICT[segment_type].dir
-    segment_geom = gpd.read_parquet(
-        f"{GCS_PATH}{SEGMENT_FILE}_{analysis_date}.parquet",
-    ).to_crs(WGS84)
+    SEGMENT_COLS = [*GTFS_DATA_DICT[segment_type]["segment_cols"]]
     
+    GCS_PATH = GTFS_DATA_DICT[segment_type].dir
+    
+    paths = [f"{GCS_PATH}{SEGMENT_FILE}" for date in analysis_date_list]
+
+    segment_geom = dask_utils.get_ddf(
+        paths, 
+        analysis_date_list, 
+        data_type = "gdf",
+        get_pandas = False,
+        add_date = False, 
+        columns = ["schedule_gtfs_dataset_key", "segment_id"] + SEGMENT_COLS 
+    ).drop_duplicates().to_crs(WGS84).compute()   
     
     col_order = [c for c in speeds_by_segment.columns]
     
