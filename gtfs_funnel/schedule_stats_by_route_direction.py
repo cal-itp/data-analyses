@@ -178,7 +178,7 @@ def schedule_metrics_by_route_direction(
 
     common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
         analysis_date
-    ).pipe(helpers.remove_shapes_outside_ca)
+    )
 
     df = pd.merge(common_shape, metrics_df, on=group_merge_cols, how="inner").merge(
         service_freq_df, on=group_merge_cols, how="inner"
