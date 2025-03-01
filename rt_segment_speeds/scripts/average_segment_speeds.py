@@ -72,20 +72,14 @@ def concatenate_trip_segment_speeds(
     ).pipe(
         gtfs_schedule_wrangling.add_peak_offpeak_column
     )
-    """
-    Amanda: There's already a `service_date` column.
-    df = df.rename(columns={'arrival_time':'service_date'}
+    # df = df.rename(columns={'arrival_time':'service_date'} #  will now cause errors by adding a second service_date col
+    #  drop arrival time if not needed, no need to rename to service_date since that now comes via concatenate_datasets_across_dates
+    df = df.drop(columns=['arrival_time']
     ).pipe(
         gtfs_schedule_wrangling.add_weekday_weekend_column
-    ) #  drop service_date?
+    )
     print("concatenated files") 
-    """ 
-    df = df.pipe(
-        gtfs_schedule_wrangling.add_weekday_weekend_column
-    ) #  drop service_date?
     
-    df.direction_id = df.direction_id.fillna(0)
-    print("concatenated files") 
     return df
 
 
@@ -103,9 +97,6 @@ def merge_in_segment_geometry(
     segment_geom = gpd.read_parquet(
         f"{SEGMENT_GCS}{SEGMENT_FILE}_{analysis_date}.parquet",
     ).to_crs(WGS84)
-    
-    # Amanda: go back to the script that creates segment_geom to fill in nans
-    segment_geom.direction_id = segment_geom.direction_id.fillna(0)
     
     col_order = [c for c in speeds_by_segment.columns]
     
@@ -144,9 +135,6 @@ def segment_averages(
         segment_type,
         get_pandas = False
     )
-    
-    # Amanda, temporarily filling in direction id here 
-    df.direction_id = df.direction_id.fillna(0)
     
     if weighted_averages:
         avg_speeds = delayed(metrics.concatenate_peak_offpeak_allday_averages)(

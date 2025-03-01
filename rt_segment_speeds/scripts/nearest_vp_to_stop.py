@@ -171,7 +171,7 @@ def nearest_neighbor_for_stop(
         gdf.stop_meters
     )
 
-    gdf = gdf[trip_stop_cols + ["shape_array_key"]]
+    gdf = gdf[trip_stop_cols + ["shape_array_key", "stop_meters"]]
     
     gdf = gdf.assign(
         prior_vp_idx = vp_before,

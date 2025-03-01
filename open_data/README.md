@@ -60,4 +60,4 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
    * Since we do not save multiple versions of published datasets, the columns are renamed prior to exporting the geoparquet as a zipped shapefile.
 
 ## Open Data Intake Process 
-* Open a [ticket](https://forms.office.com/Pages/ResponsePage.aspx?id=ZAobYkAXzEONiEVA00h1VuRQZHWRcbdNm496kj4opnZUNUo1NjRNRFpIOVRBMVFFTFJDM1JKNkY0SC4u) on the Intranet to update or add new services and provide [justification](./intake_justification.md)
+* Open a [ticket](https://sv03tmcpo.ct.dot.ca.gov/portal/apps/sites/#/geep/pages/open-data-request) on the Intranet to update or add new services and provide [justification](./intake_justification.md)

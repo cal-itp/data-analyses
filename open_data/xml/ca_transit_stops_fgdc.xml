@@ -64,26 +64,6 @@
 				<attrdef>Organization identifier for the agency</attrdef>
 			</attr>
 			<attr>
-				<attrlabl>route_id</attrlabl>
-				<attrdef>Identifies a route</attrdef>
-				<attrdefs>https://gtfs.org/schedule/reference/#routestxt</attrdefs>
-			</attr>
-			<attr>
-				<attrlabl>route_type</attrlabl>
-				<attrdef>Indicates the type of transportation used on a route. Valid options are
-  0 - Tram, Streetcar, Light rail. Any light rail or street level system within a metropolitan area.
-  1 - Subway, Metro. Any underground rail system within a metropolitan area.
-  2 - Rail. Used for intercity or long-distance travel.
-  3 - Bus. Used for short- and long-distance bus routes.
-  4 - Ferry. Used for short- and long-distance boat service.
-  5 - Cable tram. Used for street-level rail cars where the cable runs beneath the vehicle (e.g., cable car in San Francisco).
-  6 - Aerial lift, suspended cable car (e.g., gondola lift, aerial tramway). Cable transport where cabins, cars, gondolas or open chairs are suspended by means of one or more cables.
-  7 - Funicular. Any rail system designed for steep inclines.
-  11 - Trolleybus. Electric buses that draw power from overhead wires using poles.
-  12 - Monorail. Railway in which the track consists of a single rail or a beam.</attrdef>
-				<attrdefs>https://gtfs.org/schedule/reference/#routestxt</attrdefs>
-			</attr>
-			<attr>
 				<attrlabl>stop_id</attrlabl>
 				<attrdef>Identifies a stop, station, or station entrance</attrdef>
 				<attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
@@ -96,6 +76,41 @@
 			<attr>
 				<attrlabl>base64_url</attrlabl>
 				<attrdef>The base64 encoded url for the feed associated with the agency</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>n_routes</attrlabl>
+				<attrdef>"# of unique route_ids this stop serves"</attrdef>
+				<attrdefs>"https://gtfs.org/schedule/reference/#tripstxt"</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>routetypes</attrlabl>
+				<attrdef>"List of unique route types served at the stop. A value of 3 indicates a route_type==3."</attrdef>
+				<attrdefs>"https://gtfs.org/schedule/reference/#routestxt"</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>route_ids_served</attrlabl>
+				<attrdef>"List of unique route_ids served at the stop. A value of 1 indicates route_id==1."</attrdef>
+				<attrdefs>"https://gtfs.org/schedule/reference/#routestxt"</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>n_arrivals</attrlabl>
+				<attrdef>"# daily arrivals (across routes) this stop serves"</attrdef>
+				<attrdefs>"https://gtfs.org/schedule/reference/#stop_timestxt"</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>n_hours_in_service</attrlabl>
+				<attrdef>"# hours this stop has scheduled service (unique departure hours)" </attrdef>
+				<attrdefs>"https://gtfs.org/schedule/reference/#stop_timestxt"</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>meters_to_ca_state_highway</attrlabl>
+				<attrdef>"Distance in meters from this stop to the nearest CA State Highway System centerline" </attrdef>
+				<attrdefs>"https://gisdata-caltrans.opendata.arcgis.com/datasets/77f2d7ba94e040a78bfbe36feb6279da_0/explore"</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>district_name</attrlabl>
+				<attrdef>"Caltrans District containing this stop" </attrdef>
+				<attrdefs>"https://gisdata-caltrans.opendata.arcgis.com/datasets/0144574f750f4ccc88749004aca6eb0c_0/explore"</attrdefs>
 			</attr>
 		</detailed>
 	</eainfo>
