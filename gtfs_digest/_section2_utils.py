@@ -36,7 +36,7 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     Load schedule versus realtime file.
     """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
-    # schd_vp_url = "gs://calitp-analytics-data/data-analyses/rt_vs_schedule/digest/schedule_vp_metrics_AH_TESTING.parquet"
+   
     # Keep only rows that are found in both schedule and real time data
     df = (pd.read_parquet(schd_vp_url, 
           filters=[[("organization_name", "==", organization),
@@ -277,6 +277,7 @@ def grouped_bar_chart(
     offset_col: str,
     title: str,
     subtitle: str,
+    range_color: list,
 )-> alt.Chart:
     tooltip_cols = [
         "Period",
@@ -304,7 +305,7 @@ def grouped_bar_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=color_dict["four_colors"]),
+                scale=alt.Scale(range=range_color),
                 ),
             tooltip=tooltip_cols,
         ))
@@ -323,7 +324,8 @@ def base_facet_line(
     df: pd.DataFrame, 
     y_col: str, 
     title: str, 
-    subtitle: str
+    subtitle: str,
+    range_color: list
 ) -> alt.Chart:
     
     # Set y-axis
@@ -357,7 +359,7 @@ def base_facet_line(
                 color=alt.Color(
                     "Period:N",
                     title=_report_utils.labeling("Period"),
-                    scale=alt.Scale(range=color_dict["tri_color"]),
+                    scale=alt.Scale(range = range_color),
                 ),
                 tooltip=tooltip_cols,
             )
@@ -383,6 +385,7 @@ def base_facet_circle(
     ruler_col: str,
     title: str,
     subtitle: str,
+    range_color:list,
 ) -> alt.Chart:
 
     tooltip_cols = [
@@ -424,7 +427,7 @@ def base_facet_circle(
                 color=alt.Color(
                     f"{color_col}:N",
                     title=_report_utils.labeling(color_col),
-                    scale=alt.Scale(range=color_dict["tri_color"]),
+                    scale=alt.Scale(range=range_color),
                 ),
                 tooltip=tooltip_cols,
             )
@@ -449,6 +452,7 @@ def base_facet_chart(
     facet_col: str,
     title: str,
     subtitle: str,
+    range_color:list
 )-> alt.Chart:
     tooltip_cols = [
         "Period",
@@ -488,7 +492,7 @@ def base_facet_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=color_dict["tri_color"]),
+                scale=alt.Scale(range=range_color),
             ),
             tooltip=tooltip_cols,
         )
@@ -836,6 +840,7 @@ def filtered_route(
             offset_col="Direction",
             title=readable_dict["avg_scheduled_min_graph"]["title"],
             subtitle=readable_dict["avg_scheduled_min_graph"]["subtitle"],
+            range_color = color_dict["four_colors"]
         )
         .add_params(xcol_param)
         .transform_filter(xcol_param)
@@ -850,6 +855,7 @@ def filtered_route(
                     "Period",
                     readable_dict["timeliness_trips_graph"]["title"],
                     readable_dict["timeliness_trips_graph"]["subtitle"],
+                    color_dict["tri_color"]
                 )
             )
             .add_params(xcol_param)
@@ -865,6 +871,7 @@ def filtered_route(
                     "Period",
                     readable_dict["timeliness_trips_graph"]["title"],
                     "",
+                    color_dict["tri_color"]
                 )
             )
             .add_params(xcol_param)
@@ -897,6 +904,7 @@ def filtered_route(
             "Period",
             readable_dict["speed_graph_dir_0"]["title"],
             readable_dict["speed_graph_dir_0"]["subtitle"],
+            range_color = color_dict["four_colors"]
         )
         .add_params(xcol_param)
         .transform_filter(xcol_param)
@@ -909,6 +917,7 @@ def filtered_route(
             "Period",
             readable_dict["speed_graph_dir_1"]["title"],
             readable_dict["speed_graph_dir_0"]["subtitle"],
+            range_color = color_dict["four_colors"]
         )
         .add_params(xcol_param)
         .transform_filter(xcol_param)
@@ -937,6 +946,7 @@ def filtered_route(
             "ruler_100_pct",
             readable_dict["sched_vp_per_min_graph"]["title"],
             readable_dict["sched_vp_per_min_graph"]["subtitle"],
+            color_dict["tri_color"]
         )
         .add_params(xcol_param)
         .transform_filter(xcol_param)

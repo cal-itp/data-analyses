@@ -1,9 +1,11 @@
 # General Transit Feed Specification (GTFS) Digest
-The goal of this website is to give you an overview of transit operators that produce GTFS schedule and/or real-time data. We use data from the [National Transit Database](https://www.transit.dot.gov/ntd), [National Association of City Transportation Officials's Transit Route Types](https://nacto.org/publication/transit-street-design-guide/introduction/service-context/transit-route-types/), and [GTFS feeds](https://gtfs.org/) to deliver key insights. You can find details such as the types of routes and the total scheduled hours of public transit service for which an operator runs.
+The goal of this website is to give you an overview of transit operators that produce GTFS schedule and/or real-time data either on the individual operator, Caltrans district, or legislative district level. 
 
-For operators who produce real-time data, we also calculate additional performance metrics for all of their routes. Examples include displaying the number of on-time, early, and late trips, the average speed, and the headway for a route.
+We use data from the [National Transit Database](https://www.transit.dot.gov/ntd), [National Association of City Transportation Official’s Transit Route Types](https://nacto.org/publication/transit-street-design-guide/introduction/service-context/transit-route-types/), and [GTFS feeds](https://gtfs.org/) to deliver key insights. You can find details such as the types of routes and the total scheduled hours of public transit service for which an operator runs.
 
-GTFS Digest will continue to evolve as we dive into our own data warehouse!
+For operators who produce real-time data, we also calculate additional performance metrics for all their routes. Examples include displaying the number of on-time, early, and late trips, the average speed, and the headway for a route.
+
+GTFS Digest will continue to evolve as we dive into our own data warehouse! 
 
 ## Definitions and Methodology
 To read about the methodology behind and the definitions of terms used throughout our work, please visit [here](https://github.com/cal-itp/data-analyses/blob/main/gtfs_digest/methodology.md).

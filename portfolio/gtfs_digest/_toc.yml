@@ -23,6 +23,9 @@ parts:
     -   file: district_07-los-angeles.md
         sections:
         -   glob: district_07-los-angeles/*
+    -   file: district_07-los-angeles-ventura.md
+        sections:
+        -   glob: district_07-los-angeles-ventura/*
     -   file: district_08-san-bernardino.md
         sections:
         -   glob: district_08-san-bernardino/*

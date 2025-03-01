@@ -257,7 +257,7 @@ def merge_data_sources_by_route_direction(
         merge_in_standardized_route_names,
     ).merge(
         df_crosswalk,
-        on = ["schedule_gtfs_dataset_key", "name", "service_date"],
+        on = ["schedule_gtfs_dataset_key", "service_date"],
         how = "left"
     ).pipe(
         # Find the most common cardinal direction
@@ -272,7 +272,14 @@ def merge_data_sources_by_route_direction(
     ]
     
     df[integrify] = df[integrify].fillna(0).astype("int")
-   
+    
+    # Clean up repeated columns
+    df["name"] = df.name_x.fillna(df.name_y)
+    df["schedule_source_record_id"] = df.schedule_source_record_id_x.fillna(df.schedule_source_record_id_y)
+    df = df.drop(columns = ["name_x",
+                           "name_y",
+                           "schedule_source_record_id_x",
+                           "schedule_source_record_id_y"])
     return df
 
 
@@ -281,7 +288,8 @@ if __name__ == "__main__":
     from shared_utils import rt_dates
     
     analysis_date_list = (
-        rt_dates.y2024_dates + rt_dates.y2023_dates
+        rt_dates.y2024_dates + rt_dates.y2023_dates +
+        rt_dates.y2025_dates
     )
     
     DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 

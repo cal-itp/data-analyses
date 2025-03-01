@@ -396,7 +396,7 @@ if __name__ == "__main__":
 
     roads = delayed(prep_roads)(GTFS_DATA_DICT)
     ROAD_BUFFER_METERS = 20
-    TYPOLOGY_THRESHOLD = 0.1
+    TYPOLOGY_THRESHOLD = 0.09
     
     for analysis_date in analysis_date_list:
         
@@ -442,7 +442,7 @@ if __name__ == "__main__":
                       "direction_id"])
                       )
         df3.to_parquet(
-            f"{SCHED_GCS}{EXPORT}_AH_TEST_{analysis_date}.parquet")
+            f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet")
         
         time1 = datetime.datetime.now()
         print(f"route typologies {analysis_date}: {time1 - time0}")

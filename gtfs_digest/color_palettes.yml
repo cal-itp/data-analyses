@@ -15,9 +15,11 @@
 # This color palette is good for categorizing nominal values.
 # The colors do not represent "good" or "bad", they merely differentiate the values.
 tri_color: ["#ccbb44","#5b8efd","#dd217d"]
+tri_color2: ["#ee6677","#66ccee","#ccbb44"]
 full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44"]
 two_colors: ["#dd217d","#fcb40e"]
 four_colors: ["#dd217d","#fcb40e","#ccbb44","#5b8efd"]
+four_colors2: ["#ee6677","#66ccee","#ccbb44","#4477aa",]
 
 # Frequency of Trips in Minutes Chart
 # Headways of 0-15 are green, 30-60 are yellow, and 60+ are red.
@@ -44,6 +46,15 @@ spatial_accuracy_range: ["#dd217d","#fc5c04","#ff9c42","#fcb40e", "#e9d868","#cc
 #7cc665: dark green
 #49a2b2: teal
 #3b56a4: dark  blue
+
+# Version 2 of the colorblind friendly 
+#4477aa: dark blue
+#228833: dark green
+#bbbbbb: gray
+#66ccee: bright blue
+#ccbb44: bright green
+#ee6677: rose pink
+#aa3377: magenta
 
 # This palette goes from red, yellow, to green.
 # High values are shown in green, medium in yellow, and low in red. 
