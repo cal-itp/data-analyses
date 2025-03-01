@@ -75,14 +75,14 @@ DATES = {
     "nov2024": "2024-11-13",
     "dec2024": "2024-12-11",
     "jan2025": "2025-01-15",
-    "feb2025": "2025-02-12"
+    "feb2025": "2025-02-12",
 }
 
 y2023_dates = [
     v for k, v in DATES.items() if k.endswith("2023") and not any(substring in k for substring in ["jan", "feb"])
 ]
 
-y2024_dates = [v for k, v in DATES.items() if k.endswith("2024")]
+y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["oct2024g"]]
 y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
 
 valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]

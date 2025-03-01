@@ -12,9 +12,6 @@ preprocess_schedule_vp_dependency:
 	python crosswalk_gtfs_dataset_key_to_organization.py    
     
 preprocess_vp:
-	python vp_keep_usable.py
-	python cleanup.py
-	python vp_dwell_time.py    
 	python vp_condenser.py
 
 preprocess_schedule_only:
