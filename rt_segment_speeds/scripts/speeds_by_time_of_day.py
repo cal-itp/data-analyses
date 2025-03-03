@@ -111,6 +111,8 @@ def aggregate_by_time_of_day(
         group_cols
     )
     
+    segment_cols = SEGMENT_COLS
+    
     if segment_type == "speedmap_segments":
         df = delayed(merge_schedule_columns_for_speedmaps)(
             df, analysis_date
@@ -119,11 +121,16 @@ def aggregate_by_time_of_day(
             [analysis_date],
             columns = CROSSWALK_COLS
         )
+        
+        segment_cols = ["shape_array_key", 
+                        "route_id", "direction_id", 
+                        "stop_pair", "segment_id"]
     
     avg_speeds_with_geom = delayed(segment_calcs.merge_in_segment_geometry)(
         df,
         [analysis_date],
         segment_type,
+        SEGMENT_COLS
     )
     
     avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]
