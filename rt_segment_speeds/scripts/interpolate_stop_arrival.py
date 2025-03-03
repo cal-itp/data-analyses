@@ -29,7 +29,7 @@ def get_vp_timestamps(
 ) -> pd.DataFrame:
         
     vp = pd.read_parquet(
-        f"{SEGMENT_GCS}{input_file}_{analysis_date}",
+        f"{SEGMENT_GCS}{input_file}_{analysis_date}/",
         columns = ["vp_idx", "location_timestamp_local", 
                    "moving_timestamp_local"],
         **kwargs
