@@ -59,7 +59,7 @@ if __name__ == "__main__":
     [compute(i)[0] for i in delayed_dfs]
 
     logger.remove()
-
+    
     
     LOG_FILE = "../logs/speeds_by_segment_trip.log"
     logger.add(LOG_FILE, retention="3 months")
