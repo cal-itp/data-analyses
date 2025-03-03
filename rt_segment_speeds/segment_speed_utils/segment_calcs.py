@@ -238,3 +238,36 @@ def merge_in_segment_geometry(
     )
     
     return gdf
+
+
+def calculate_weighted_averages(
+    df: pd.DataFrame, 
+    group_cols: list, 
+    metric_cols: list, 
+    weight_col: str
+):
+    """
+    For certain aggregations, we need to calculate a weighted average, 
+    weighted by the number of trips.
+    
+    If we want peak/offpeak weighted calculations, 
+    we can take time-of-day (AM peak, PM peak) and
+    get a peak speed calculation, after weighting by the number
+    of trips present in each time-of-day bin.
+    
+    Ex: metric_cols = ['p20_mph', 'p50_mph', 'p80_mph']
+    weight_cols = 'n_trips'
+    
+    """    
+    for c in metric_cols:
+        df[c] = df[c] * df[weight_col]    
+    
+    df2 = (df.groupby(group_cols, group_keys=False)
+           .agg({c: "sum" for c in metric_cols + [weight_col]})
+           .reset_index()
+          )
+    
+    for c in metric_cols:
+        df2[c] = df2[c].divide(df2[weight_col]).round(2)
+    
+    return df2
