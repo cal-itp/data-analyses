@@ -58,3 +58,5 @@
 2025-02-20 14:10:03.127 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:45.419478
 2025-02-20 14:12:59.149 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:55.934705
 2025-02-20 14:15:39.953 | INFO     | __main__:pare_down_to_valid_trips:88 - pare down vp: 0:02:40.644917
+2025-03-03 08:21:18.253 | INFO     | __main__:<module>:81 - 2025-02-12: condense vp for trip 0:07:12.972022
+2025-03-03 08:56:13.468 | INFO     | __main__:<module>:81 - 2025-01-15: condense vp for trip 0:07:19.413209
