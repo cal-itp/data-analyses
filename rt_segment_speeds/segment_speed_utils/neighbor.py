@@ -57,9 +57,10 @@ def merge_stop_vp_for_nearest_neighbor(
     # Calculate stop_meters, which is the stop geometry
     # projected onto shape_geometry and is interpreted as
     # stop X is Y meters along shape
-    gdf = gdf.assign(
-        stop_meters = gdf.shape_geometry.project(gdf.stop_geometry),
-    )
+    if "stop_meters" not in gdf.columns:
+        gdf = gdf.assign(
+            stop_meters = gdf.shape_geometry.project(gdf.stop_geometry),
+        )
 
     return gdf
 

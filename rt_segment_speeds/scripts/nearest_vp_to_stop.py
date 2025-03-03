@@ -77,7 +77,7 @@ def stop_times_for_all_trips(
         analysis_date,
         columns = ["trip_instance_key", "shape_array_key",
                    "stop_sequence", "stop_id", "stop_pair", 
-                   "stop_primary_direction",
+                   "stop_primary_direction", "stop_meters",
                    "geometry"],
         with_direction = True,
         get_pandas = True,
