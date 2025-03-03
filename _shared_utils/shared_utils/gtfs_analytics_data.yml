@@ -99,6 +99,7 @@ rt_stop_times:
   segment_timeofday: "rollup_singleday/speeds_route_dir_timeofday_segments"
   segment_peakoffpeak: "rollup_singleday/speeds_route_dir_peak_segments"
   trip_speeds_single_summary: "rollup_singleday/speeds_trip"
+  route_dir_timeofday: "rollup_singleday/speeds_route_dir"
   segment_timeofday_weekday_year: "rollup_multiday/year_weekday_speeds_route_dir_segments" # NEW
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
