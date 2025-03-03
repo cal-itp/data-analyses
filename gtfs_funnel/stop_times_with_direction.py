@@ -121,11 +121,11 @@ def keep_first_trip(
 def get_projected_stop_meters(
     stop_times: gpd.GeoDataFrame,
     analysis_date: str,
-) -> pd.Series:
+) -> pd.DataFrame:
     """
     Project the stop's position to the shape and
     get stop_meters (meters from start of the shape).
-    Only return stop_meters as pd.Series to use as a column later. 
+    Return pared down stop_meters with trip-stop columns to merge back. 
     """
     shapes = helpers.import_scheduled_shapes(
         analysis_date, 
@@ -134,16 +134,22 @@ def get_projected_stop_meters(
         get_pandas=True
     ).dropna(subset="geometry")
     
+    # Merge stop times with shapes, 
+    # rename all geometry columns for clarity
     gdf = pd.merge(
-        stop_times.to_crs(PROJECT_CRS),
+        stop_times.rename(
+            columns = {"geometry": "stop_geometry"}
+        ).set_geometry("stop_geometry").to_crs(PROJECT_CRS),
         shapes.to_crs(PROJECT_CRS).rename(columns = {"geometry": "shape_geometry"}),
         on = "shape_array_key",
         how = "inner"
-    ).set_geometry("geometry")
+    ).reset_index(drop=True)
     
-    stop_meters = gdf.shape_geometry.project(gdf.geometry)
-
-    return stop_meters
+    gdf2 = gdf.assign(
+        stop_meters = gdf.shape_geometry.project(gdf.stop_geometry)
+    )[["trip_instance_key", "stop_sequence", "stop_meters"]]
+    
+    return gdf2
     
 
 def find_prior_subseq_stop_info(
@@ -162,12 +168,13 @@ def find_prior_subseq_stop_info(
     - stop_pair (stop_id1_stop_id2)
     - stop_pair_name (stop_name1__stop_name2)
     """
-    stop_meters = get_projected_stop_meters(stop_times, analysis_date)
+    stop_meters_df = get_projected_stop_meters(stop_times, analysis_date)
     
-    gdf = stop_times[
-        trip_stop_cols + ["stop_id", "stop_name", "geometry"]
-    ].assign(
-        stop_meters = stop_meters
+    gdf = pd.merge(
+        stop_times[trip_stop_cols + ["stop_id", "stop_name", "geometry"]],
+        stop_meters_df,
+        on = trip_stop_cols,
+        how = "inner"
     ).sort_values(trip_stop_cols).reset_index(drop=True) 
 
     gdf = gdf.assign(
@@ -273,8 +280,9 @@ def assemble_stop_times_with_direction(
 
 if __name__ == "__main__":  
     
-    from update_vars import analysis_date_list
-
+    #from update_vars import analysis_date_list
+    from shared_utils import rt_dates
+    analysis_date_list = [rt_dates.DATES["jan2025"], rt_dates.DATES["feb2025"]]
     LOG_FILE = "./logs/preprocessing.log"
     
     logger.add(LOG_FILE, retention="3 months")
