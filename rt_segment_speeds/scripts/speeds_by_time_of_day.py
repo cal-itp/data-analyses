@@ -93,16 +93,16 @@ def aggregate_by_time_of_day(
     EXPORT_FILE = dict_inputs["segment_timeofday"]
     
     SEGMENT_COLS = [*dict_inputs["segment_cols"]]
-    SEGMENT_COLS = [i for i in SEGMENT_COLS if i != "geometry"]
+    SEGMENT_COLS_NO_GEOM = [i for i in SEGMENT_COLS if i != "geometry"]
                                       
     OPERATOR_COLS = ["schedule_gtfs_dataset_key"]
     CROSSWALK_COLS = [*dict_inputs["crosswalk_cols"]]
     
-    group_cols = OPERATOR_COLS + SEGMENT_COLS + ["stop_pair_name", "time_of_day"]
+    group_cols = OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["stop_pair_name", "time_of_day"]
     
     df = delayed(pd.read_parquet)(
         f"{SEGMENT_GCS}{SPEED_FILE}_{analysis_date}.parquet",
-        columns = OPERATOR_COLS + SEGMENT_COLS + [
+        columns = OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + [
             "trip_instance_key", "stop_pair_name", 
             "time_of_day", "speed_mph"],
         filters = [[("speed_mph", "<=", MAX_SPEED)]]
@@ -110,6 +110,8 @@ def aggregate_by_time_of_day(
         segment_calcs.calculate_avg_speeds,
         group_cols
     )
+    
+    segment_cols = SEGMENT_COLS
     
     if segment_type == "speedmap_segments":
         df = delayed(merge_schedule_columns_for_speedmaps)(
@@ -119,11 +121,19 @@ def aggregate_by_time_of_day(
             [analysis_date],
             columns = CROSSWALK_COLS
         )
+        
+        # segment_id should capture the 1,000m segments, where it's suffixed -1, -2, -3
+        segment_cols = [
+            "shape_array_key", #exclude shape_id
+            "route_id", "direction_id", 
+            "stop_pair", "segment_id"
+        ]
     
     avg_speeds_with_geom = delayed(segment_calcs.merge_in_segment_geometry)(
         df,
         [analysis_date],
         segment_type,
+        segment_cols
     )
     
     avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]
