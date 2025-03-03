@@ -119,12 +119,12 @@ def loop_through_batches_and_download_vp(
     for i, subset_operators in batches.items():
         time0 = datetime.datetime.now()
         
-        df = download_vehicle_positions_grouped(
-            analysis_date, 
-            subset_operators
-        )
-        #df = download_vehicle_positions(
-        #    analysis_date, subset_operators)
+        #df = download_vehicle_positions_grouped(
+        #    analysis_date, 
+        #    subset_operators
+        #)
+        df = download_vehicle_positions(
+            analysis_date, subset_operators)
 
         df.to_parquet(
             f"{SEGMENT_GCS}vp_raw_{analysis_date}_batch{i}.parquet")
