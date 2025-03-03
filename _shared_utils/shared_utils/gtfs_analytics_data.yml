@@ -28,9 +28,9 @@ schedule_downloads:
 
 speeds_tables:
   dir: ${gcs_paths.SEGMENT_GCS}
-  #raw_vp: vp
-  raw_vp: vp_grouped
-  #usable_vp: vp_usable # this can be dropped
+  raw_vp: vp
+  raw_vp2: vp_grouped
+  usable_vp: vp_usable # this can be dropped
   vp_dwell: vp_usable_dwell
   vp_condensed_line: condensed/vp_condensed
   timestamp_col: ${speed_vars.timestamp_col}
