@@ -234,15 +234,15 @@ def merge_in_segment_geometry(
     speeds_by_segment: pd.DataFrame,
     analysis_date_list: list,
     segment_type: Literal[SEGMENT_TYPES],
-    **kwargs
+    segment_cols: list
 ) -> gpd.GeoDataFrame:
     """
     Import the segments to merge and attach it to the average speeds.
     """
-    SEGMENT_FILE = GTFS_DATA_DICT[segment_type].segments_file
-    SEGMENT_COLS = [*GTFS_DATA_DICT[segment_type]["segment_cols"]]
+    dict_inputs = GTFS_DATA_DICT[segment_type]
+    SEGMENT_FILE = dict_inputs.segments_file
     
-    GCS_PATH = GTFS_DATA_DICT[segment_type].dir
+    GCS_PATH = dict_inputs.dir
     
     paths = [f"{GCS_PATH}{SEGMENT_FILE}" for date in analysis_date_list]
 
@@ -252,7 +252,7 @@ def merge_in_segment_geometry(
         data_type = "gdf",
         get_pandas = False,
         add_date = False, 
-        columns = ["schedule_gtfs_dataset_key", "segment_id"] + SEGMENT_COLS 
+        columns = segment_cols
     ).drop_duplicates().to_crs(WGS84).compute()   
     
     col_order = [c for c in speeds_by_segment.columns]
