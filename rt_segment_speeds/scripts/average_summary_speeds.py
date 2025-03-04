@@ -178,10 +178,10 @@ if __name__ == "__main__":
         
     for analysis_date in analysis_date_list:
               
-        #trip_summary_speeds_by_time_of_day(
-        #    analysis_date, 
-        #    segment_type,
-        #)
+        trip_summary_speeds_by_time_of_day(
+            analysis_date, 
+            segment_type,
+        )
         
         summary_speeds_by_peak_offpeak(
             analysis_date,
