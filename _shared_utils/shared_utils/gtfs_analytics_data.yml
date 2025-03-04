@@ -59,7 +59,6 @@ rt_vs_schedule_tables:
   early_trip_minutes: -5
   late_trip_minutes: 5
 
-
 digest_tables:
   dir: ${gcs_paths.RT_SCHED_GCS}
   route_schedule_vp: "digest/schedule_vp_metrics"
@@ -69,20 +68,6 @@ digest_tables:
   operator_routes_map: "digest/operator_routes"
   operator_sched_rt: "digest/operator_schedule_rt_category"
   scheduled_service_hours: "digest/total_scheduled_service_hours"
-
-stop_segments:
-  dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.vp_dwell}
-  stage2: "nearest/nearest_vp_shape_segments"
-  stage3: "stop_arrivals"
-  stage4: "speeds_stop_segments"
-  trip_stop_cols: ["trip_instance_key", "stop_sequence", "stop_pair"]
-  stop_pair_cols: ["stop_pair", "stop_pair_name"]
-  route_dir_cols: ["route_id", "direction_id"]
-  segment_cols: ["route_id", "direction_id", "stop_pair", "geometry"]
-  crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
-  segments_file: "segment_options/shape_stop_segments"
-  max_speed: ${speed_vars.max_speed}
 
 rt_stop_times:
   dir: ${gcs_paths.SEGMENT_GCS}
