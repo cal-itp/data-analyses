@@ -36,7 +36,6 @@ DATES = {
     "may2023": "2023-05-17",
     "jun2023": "2023-06-14",
     "jul2023": "2023-07-12",
-    # "aug2023": "2023-08-16", # this date is missing Muni
     "aug2023": "2023-08-15",
     "aug2023a": "2023-08-23",  # date used for speedmaps
     "sep2023": "2023-09-13",
@@ -86,6 +85,9 @@ y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["
 y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
 
 valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
+
+# Remove all the one-offs
+all_dates = [v for k, v in DATES.items() if k not in ["jan2023", "feb2023", "aug2023a", "oct2024g"] and "2022" not in k]
 
 
 def get_week(month: Literal[[*valid_weeks]], exclude_wed: bool) -> list:

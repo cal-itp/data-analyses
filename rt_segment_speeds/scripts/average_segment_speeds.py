@@ -3,21 +3,20 @@ Multi-day segment speed averages.
 Start with year-weekday/weekend-time-of-day aggregation.
 
 TODO: test this on all the dates
-will need to adjust rt_dates to remove all the one-off dates
-that will not have outputs
 """
 import dask.dataframe as dd
 import datetime
 import pandas as pd
 import sys
 
+from dask import delayed, compute
 from loguru import logger
 from typing import Literal, Optional
 
 from calitp_data_analysis import utils
 
 from segment_speed_utils import gtfs_schedule_wrangling, segment_calcs, time_series_utils
-from shared_utils import time_helpers
+from shared_utils import publish_utils, time_helpers
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 from segment_speed_utils.project_vars import SEGMENT_TYPES
 
@@ -87,12 +86,22 @@ def annual_time_of_day_averages(
         OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["time_of_day", "weekday_weekend", "year"],
         metric_cols = ["p20_mph", "p50_mph", "p80_mph"], 
         weight_col = "n_trips"
-    ).compute()
+    ).persist()
     
-    speeds_gdf = segment_calcs.merge_in_segment_geometry(
+    publish_utils.if_exists_then_delete(
+        f"{SEGMENT_GCS}{EXPORT_FILE}"
+    )
+    
+    avg_speeds.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}",
+        partition_on = "time_of_day"
+    )
+    '''
+    speeds_gdf = delayed(segment_calcs.merge_in_segment_geometry)(
         avg_speeds,
         analysis_date_list,
         segment_type,
+        SEGMENT_COLS
     ).pipe(
         gtfs_schedule_wrangling.merge_operator_identifiers, 
         analysis_date_list,
@@ -104,7 +113,8 @@ def annual_time_of_day_averages(
         SEGMENT_GCS,
         EXPORT_FILE
     )
-    
+    '''
+
     end = datetime.datetime.now()
     
     logger.info(
