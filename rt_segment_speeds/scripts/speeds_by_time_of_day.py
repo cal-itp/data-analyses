@@ -110,9 +110,7 @@ def aggregate_by_time_of_day(
         segment_calcs.calculate_avg_speeds,
         group_cols
     )
-    
-    segment_cols = SEGMENT_COLS
-    
+        
     if segment_type == "speedmap_segments":
         df = delayed(merge_schedule_columns_for_speedmaps)(
             df, analysis_date
@@ -123,17 +121,17 @@ def aggregate_by_time_of_day(
         )
         
         # segment_id should capture the 1,000m segments, where it's suffixed -1, -2, -3
-        segment_cols = [
+        SEGMENT_COLS = [
             "shape_array_key", #exclude shape_id
             "route_id", "direction_id", 
-            "stop_pair", "segment_id"
+            "stop_pair", "segment_id", "geometry"
         ]
     
     avg_speeds_with_geom = delayed(segment_calcs.merge_in_segment_geometry)(
         df,
         [analysis_date],
         segment_type,
-        segment_cols
+        SEGMENT_COLS
     )
     
     avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]

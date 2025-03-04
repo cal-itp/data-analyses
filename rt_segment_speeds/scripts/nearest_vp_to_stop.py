@@ -145,10 +145,14 @@ def nearest_neighbor_for_stop(
 
     elif segment_type == "rt_stop_times":
         stop_times = stop_times_for_all_trips(analysis_date)
-        stop_times = stop_times.reindex(columns = stop_time_col_order)
+        stop_times = stop_times.reindex(columns = stop_time_col_order + ["stop_meters"])
     
     elif segment_type == "speedmap_segments":
         stop_times = stop_times_for_speedmaps(analysis_date)
+        
+        # TODO: speedmap segments does not have a stop_meters
+        # neighbor.merge_stop_vp_for_nearest_neighbor will create it
+        # but it might be more straightforward to project stop against shape now?
     
     else:
         print(f"{segment_type} is not valid")
