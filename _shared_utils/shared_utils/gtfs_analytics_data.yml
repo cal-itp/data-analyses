@@ -82,9 +82,9 @@ rt_stop_times:
   crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
   segments_file: "segment_options/stop_segments"
   segment_timeofday: "rollup_singleday/speeds_route_dir_timeofday_segments"
-  segment_peakoffpeak: "rollup_singleday/speeds_route_dir_peak_segments"
   trip_speeds_single_summary: "rollup_singleday/speeds_trip"
   route_dir_timeofday: "rollup_singleday/speeds_route_dir"
+  segment_peakoffpeak_weekday_month: "rollup_singleday/month_speeds_route_dir_peak_segments" # NEW? what to name
   segment_timeofday_weekday_year: "rollup_multiday/year_weekday_speeds_route_dir_segments"
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
