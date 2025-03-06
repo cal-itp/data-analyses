@@ -87,14 +87,15 @@ y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
 valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
 
 # Remove all the one-offs
-all_dates = [v for k, v in DATES.items() if k not in ["jan2023", "feb2023", "aug2023a", "oct2024g"] and "2022" not in k]
+one_off_dates = ["jan2023", "feb2023" "aug2023a", "oct2024g"]
+all_dates = [v for k, v in DATES.items() if k not in one_off_dates and "2022" not in k]
 
 
 def get_week(month: Literal[[*valid_weeks]], exclude_wed: bool) -> list:
     if exclude_wed:
-        return [v for k, v in DATES.items() if month in k and not k.endswith(month)]
+        return [v for k, v in DATES.items() if (month in k) and (not k.endswith(month)) and (k not in one_off_dates)]
     else:
-        return [v for k, v in DATES.items() if month in k]
+        return [v for k, v in DATES.items() if month in k and k not in one_off_dates]
 
 
 apr2023_week = get_week(month="apr2023", exclude_wed=False)
