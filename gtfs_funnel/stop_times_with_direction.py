@@ -280,9 +280,8 @@ def assemble_stop_times_with_direction(
 
 if __name__ == "__main__":  
     
-    #from update_vars import analysis_date_list
-    from shared_utils import rt_dates
-    analysis_date_list = [rt_dates.DATES["jan2025"], rt_dates.DATES["feb2025"]]
+    from update_vars import analysis_date_list
+
     LOG_FILE = "./logs/preprocessing.log"
     
     logger.add(LOG_FILE, retention="3 months")

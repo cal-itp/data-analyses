@@ -16,8 +16,8 @@ analysis_date = rt_dates.DATES["feb2025"]
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
 apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
 apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
-oct2024_week = [d for d in rt_dates.get_week("oct2024", exclude_wed=True) 
-                if d != rt_dates.DATES["oct2024g"]]
+oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True) 
+                
 
 all_dates = rt_dates.all_dates
 
@@ -31,4 +31,4 @@ analysis_date_list = [rt_dates.DATES["feb2025"]]
 
 PROJECT_CRS = "EPSG:3310"
 ROAD_SEGMENT_METERS = 1_000
-SEGMENT_TYPES = ["stop_segments", "rt_stop_times", "speedmap_segments"]
+SEGMENT_TYPES = ["rt_stop_times", "speedmap_segments"]
