@@ -142,13 +142,15 @@ def aggregate_by_time_of_day(
         f"{EXPORT_FILE}_{analysis_date}"
     )
     
+    del avg_speeds_with_geom
+    
     end = datetime.datetime.now()
     logger.info(
         f"{segment_type}: time-of-day averages for {analysis_date} "
         f"execution time: {end - start}"
     )
     
-    return avg_speeds_with_geom
+    return 
 
 
 
