@@ -41,7 +41,14 @@ def overwrite_yaml(
             f"{RT_SCHED_GCS}{OPERATOR_FILE}.parquet",
             columns = ["caltrans_district"]
         ).dropna(subset="caltrans_district").drop_duplicates()
-                
+        
+        # We have several values for Caltrans District as the names slightly 
+        # change (ex: D7 Los Angeles is now Los Angeles / Ventura).
+        df = df.assign(
+            caltrans_district = df.caltrans_district.map(
+                portfolio_utils.CALTRANS_DISTRICT_DICT)
+        )
+        
         portfolio_utils.create_portfolio_yaml_chapters_no_sections(
             DISTRICT_SITE, 
             chapter_name = "district",
