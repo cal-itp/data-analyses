@@ -8,9 +8,7 @@ parts:
     sections:
     - organization_name: Blue Lake Rancheria
     - organization_name: City of Arcata
-    - organization_name: City of Eureka
     - organization_name: Curry Public Transit
-    - organization_name: Humboldt Transit Authority
     - organization_name: Lake Transit Authority
     - organization_name: Mendocino Transit Authority
     - organization_name: POINT
@@ -24,10 +22,8 @@ parts:
     - organization_name: Modoc Transportation Agency
     - organization_name: Plumas Transit Systems
     - organization_name: Redding Area Bus Authority
-    - organization_name: Shasta County
     - organization_name: Siskiyou County
     - organization_name: Susanville Indian Rancheria
-    - organization_name: Tehama County
     - organization_name: Trinity County
   - caption: District 03 - Marysville
     params:
@@ -45,9 +41,7 @@ parts:
     - organization_name: North Lake Tahoe Express
     - organization_name: Placer County
     - organization_name: Sacramento County
-    - organization_name: Sacramento Regional Transit District
     - organization_name: Tahoe Transportation District
-    - organization_name: Tahoe Truckee Area Regional Transportation
     - organization_name: University of California, Davis
     - organization_name: Yolo County Transportation District
     - organization_name: Yuba-Sutter Transit Authority
@@ -60,7 +54,6 @@ parts:
     - organization_name: Capitol Corridor Joint Powers Authority
     - organization_name: Central Contra Costa Transit Authority
     - organization_name: City and County of San Francisco
-    - organization_name: City of Alameda
     - organization_name: City of Fairfield
     - organization_name: City of Menlo Park
     - organization_name: City of Mountain View
@@ -71,7 +64,6 @@ parts:
     - organization_name: City of Union City
     - organization_name: City of Vacaville
     - organization_name: Cloverdale Transit
-    - organization_name: Commute.org
     - organization_name: Dumbarton Bridge Regional Operations Consortium
     - organization_name: Eastern Contra Costa Transit Authority
     - organization_name: Emeryville Transportation Management Agency
@@ -89,8 +81,6 @@ parts:
     - organization_name: San Mateo County Transit District
     - organization_name: Santa Clara Valley Transportation Authority
     - organization_name: Solano County Transit
-    - organization_name: Solano Transportation Authority
-    - organization_name: Sonoma County
     - organization_name: Sonoma-Marin Area Rail Transit District
     - organization_name: Stanford University
     - organization_name: Treasure Island Community Development
@@ -113,7 +103,6 @@ parts:
     - organization_name: Santa Barbara County Association of Governments
     - organization_name: Santa Barbara Metropolitan Transit District
     - organization_name: Santa Cruz Metropolitan Transit District
-    - organization_name: University of California, Santa Cruz
   - caption: District 06 - Fresno
     params:
       district: 06 - Fresno
@@ -166,25 +155,18 @@ parts:
     - organization_name: City of Maywood
     - organization_name: City of Montebello
     - organization_name: City of Monterey Park
-    - organization_name: City of Moorpark
     - organization_name: City of Norwalk
-    - organization_name: City of Ojai
     - organization_name: City of Pasadena
     - organization_name: City of Redondo Beach
     - organization_name: City of Rosemead
     - organization_name: City of Santa Clarita
     - organization_name: City of Santa Monica
     - organization_name: City of Sierra Madre
-    - organization_name: City of Simi Valley
     - organization_name: City of South Gate
-    - organization_name: City of Thousand Oaks
     - organization_name: City of Torrance
     - organization_name: City of West Covina
     - organization_name: City of West Hollywood
     - organization_name: FlixBus
-    - organization_name: Foothill Transit
-    - organization_name: Gold Coast Transit District
-    - organization_name: Greyhound
     - organization_name: Long Beach Transit
     - organization_name: Los Angeles County
     - organization_name: Los Angeles County Metropolitan Transportation Authority
@@ -192,65 +174,19 @@ parts:
     - organization_name: Palos Verdes Peninsula Transit Authority
     - organization_name: Southern California Regional Rail Authority
     - organization_name: University of California, Los Angeles
-    - organization_name: Ventura County Transportation Commission
   - caption: District 07 - Los Angeles / Ventura
     params:
       district: 07 - Los Angeles / Ventura
     sections:
-    - organization_name: Antelope Valley Transit Authority
-    - organization_name: City of Alhambra
-    - organization_name: City of Arcadia
-    - organization_name: City of Artesia
-    - organization_name: City of Baldwin Park
     - organization_name: City of Bell
     - organization_name: City of Bell Gardens
-    - organization_name: City of Bellflower
-    - organization_name: City of Burbank
-    - organization_name: City of Camarillo
-    - organization_name: City of Cerritos
-    - organization_name: City of Commerce
-    - organization_name: City of Cudahy
     - organization_name: City of Culver City
     - organization_name: City of Downey
-    - organization_name: City of Duarte
-    - organization_name: City of El Monte
-    - organization_name: City of Gardena
-    - organization_name: City of Glendale
     - organization_name: City of Glendora
     - organization_name: City of Huntington Park
-    - organization_name: City of Inglewood
-    - organization_name: City of Lawndale
-    - organization_name: City of Los Angeles
     - organization_name: City of Lynwood
-    - organization_name: City of Maywood
-    - organization_name: City of Montebello
-    - organization_name: City of Monterey Park
-    - organization_name: City of Moorpark
-    - organization_name: City of Norwalk
-    - organization_name: City of Ojai
-    - organization_name: City of Pasadena
-    - organization_name: City of Redondo Beach
-    - organization_name: City of Rosemead
     - organization_name: City of San Fernando
-    - organization_name: City of Santa Clarita
-    - organization_name: City of Santa Monica
-    - organization_name: City of Simi Valley
-    - organization_name: City of South Gate
-    - organization_name: City of Thousand Oaks
-    - organization_name: City of Torrance
-    - organization_name: City of West Covina
     - organization_name: City of West Hollywood
-    - organization_name: FlixBus
-    - organization_name: Foothill Transit
-    - organization_name: Gold Coast Transit District
-    - organization_name: Greyhound
-    - organization_name: Long Beach Transit
-    - organization_name: Los Angeles County
-    - organization_name: Los Angeles County Metropolitan Transportation Authority
-    - organization_name: Los Angeles World Airports
-    - organization_name: Palos Verdes Peninsula Transit Authority
-    - organization_name: University of California, Los Angeles
-    - organization_name: Ventura County Transportation Commission
   - caption: District 08 - San Bernardino
     params:
       district: 08 - San Bernardino
@@ -265,7 +201,6 @@ parts:
     - organization_name: OmniTrans
     - organization_name: Palo Verde Valley Transit Agency
     - organization_name: Riverside Transit Agency
-    - organization_name: San Bernardino County Transportation Authority
     - organization_name: SunLine Transit Agency
     - organization_name: Victor Valley Transit Authority
   - caption: District 09 - Bishop
@@ -285,7 +220,6 @@ parts:
     - organization_name: City of Ripon
     - organization_name: City of Tracy
     - organization_name: City of Turlock
-    - organization_name: San Joaquin Joint Powers Authority
     - organization_name: San Joaquin Regional Rail Commission
     - organization_name: San Joaquin Regional Transit District
     - organization_name: Stanislaus Regional Transit Authority
@@ -300,8 +234,6 @@ parts:
     - organization_name: Flagship Cruises and Events Inc.
     - organization_name: Imperial County Transportation Commission
     - organization_name: North County Transit District
-    - organization_name: San Diego International Airport
-    - organization_name: San Diego Metropolitan Transit System
     - organization_name: Yuma County Intergovernmental Public Transportation Authority
   - caption: District 12 - Irvine
     params:
