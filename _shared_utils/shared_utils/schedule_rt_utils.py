@@ -13,14 +13,6 @@ from shared_utils import gtfs_utils_v2
 from siuba import *
 
 PACIFIC_TIMEZONE = "US/Pacific"
-RENAME_DISTRICT_DICT = {
-    "Marysville / Sacramento": "Marysville",  # D3
-    "Bay Area / Oakland": "Oakland",  # D4
-    "San Luis Obispo / Santa Barbara": "San Luis Obispo",  # D5
-    "Fresno / Bakersfield": "Fresno",  # D6
-    "San Bernardino / Riverside": "San Bernardino",  # D8
-    "Orange County": "Irvine",  # D12
-}
 
 
 def localize_timestamp_col(df: dd.DataFrame, timestamp_col: Union[str, list]) -> dd.DataFrame:
@@ -203,18 +195,6 @@ def filter_dim_county_geography(
         >> rename(county_geography_key=_.key)
         >> gtfs_utils_v2.subset_cols(keep_cols2)
         >> collect()
-    )
-
-    # Several caltrans_district values in mart_transit_database
-    # now contain slashes.
-    # Use dict to standardize these against how previous versions were
-    dim_county_geography = dim_county_geography.assign(
-        caltrans_district_name=dim_county_geography.apply(
-            lambda x: RENAME_DISTRICT_DICT[x.caltrans_district_name]
-            if x.caltrans_district_name in RENAME_DISTRICT_DICT.keys()
-            else x.caltrans_district_name,
-            axis=1,
-        )
     )
 
     bridge_orgs_county_geog = localize_timestamp_col(bridge_orgs_county_geog, ["_valid_from", "_valid_to"])
