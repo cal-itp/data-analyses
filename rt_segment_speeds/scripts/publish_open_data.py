@@ -20,9 +20,8 @@ def stage_open_data_exports(analysis_date: str):
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
     
     datasets = [
-        GTFS_DATA_DICT.stop_segments.route_dir_single_segment,
-        #GTFS_DATA_DICT.speedmap_segments.route_dir_single_segment,
-        GTFS_DATA_DICT.rt_stop_times.route_dir_single_summary
+        GTFS_DATA_DICT.speedmap_segments.segment_timeofday,
+        GTFS_DATA_DICT.rt_stop_times.route_dir_timeofday
     ]
 
     for d in datasets:

@@ -48,29 +48,7 @@ def attach_operator_natural_identifiers(
         how = "inner",
     )
     
-    if segment_type == "stop_segments":
-        SEGMENT_FILE = GTFS_DATA_DICT[segment_type].segments_file
-        trip_used_for_shape = pd.read_parquet(
-            f"{SEGMENT_GCS}"
-            f"{SEGMENT_FILE}_{analysis_date}.parquet",
-            columns = ["st_trip_instance_key"]
-        ).st_trip_instance_key.unique()
-
-        stop_pair = helpers.import_scheduled_stop_times(
-            analysis_date,
-            filters = [[("trip_instance_key", "in", trip_used_for_shape)]],
-            columns = ["shape_array_key", "stop_sequence", 
-                       "stop_pair", "stop_pair_name"],
-            with_direction = True,
-            get_pandas = True
-        )
-        
-        df_with_natural_ids2 = df_with_natural_ids.merge(
-            stop_pair,
-            on = ["shape_array_key", "stop_sequence"]
-        )
-    
-    elif segment_type == "rt_stop_times":
+    if segment_type == "rt_stop_times":
         
         trip_stop_cols = [*GTFS_DATA_DICT[segment_type]["trip_stop_cols"]]
         
