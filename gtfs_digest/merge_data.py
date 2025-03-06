@@ -337,6 +337,7 @@ if __name__ == "__main__":
     )
     
     # Delete out D7 
+    """ 
     df.caltrans_district = np.where(
     (df.caltrans_district == "07 - Los Angeles") &
     (~df.caltrans_district.str.contains("/ Ventura")),
@@ -346,5 +347,6 @@ if __name__ == "__main__":
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
+    """
     print("Saved Digest RT")
     
