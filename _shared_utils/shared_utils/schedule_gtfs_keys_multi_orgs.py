@@ -6,6 +6,9 @@ import pandas as pd
 import yaml
 
 from shared_utils import portfolio_utils
+
+import sys
+sys.path.append("../../gtfs_digest/")
 from update_vars import GTFS_DATA_DICT
 
 def count_orgs(df: pd.DataFrame) -> list:
@@ -14,7 +17,7 @@ def count_orgs(df: pd.DataFrame) -> list:
     to schedule_gtfs_dataset_keys. Filter out any
     schedule_gtfs_dataset_keys with less than 2 unique
     organization_names. Return these schedule_gtfs_dataset_keys
-    in a list
+    in a list. 
     """
     agg1 = (
         df.groupby(["caltrans_district", "schedule_gtfs_dataset_key"])
@@ -29,6 +32,12 @@ def count_orgs(df: pd.DataFrame) -> list:
     return multi_org_list
 
 def find_schd_keys_multi_ops() -> pd.DataFrame:
+    """
+    Return a dataframe with all the schedule_gtfs_dataset_keys
+    that have more than one organization_name that corresponds to it. 
+    This way, we won't include duplicate organizations when publishing
+    our GTFS products. 
+    """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
 
     subset = [
@@ -88,7 +97,7 @@ def find_schd_keys_multi_ops() -> pd.DataFrame:
 
     # Clean
     schd_vp_df6= schd_vp_df6.drop(columns = ["service_date"])
-    schd_vp_df6["combo"] = schd_vp_df6.caltrans_district + ' ' + schd_vp_df6.schedule_gtfs_dataset_key
+    schd_vp_df6["combo"] = schd_vp_df6.caltrans_district  + " (" + schd_vp_df6.schedule_gtfs_dataset_key + ")"
     
     return schd_vp_df6
 
@@ -100,10 +109,10 @@ if __name__ == "__main__":
     portfolio_utils.create_portfolio_yaml_chapters_with_sections(
         SITE_YML,
         df,
-        chapter_info = {
+        chapter_info =  {
             "column": "combo",
-            "name": "district and schedule_gtfs_dataset_key",
-            "caption_prefix": "District and Key",
+            "name": "District/Key",
+            "caption_prefix": "",
             "caption_suffix": "",
         },
         section_info = {
