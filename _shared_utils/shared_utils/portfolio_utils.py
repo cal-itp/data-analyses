@@ -159,3 +159,25 @@ def create_portfolio_yaml_chapters_with_sections(
     print(f"{portfolio_site_yaml} generated")
 
     return
+
+
+CALTRANS_DISTRICT_DICT = {
+    # old name variations (key): portfolio name displayed (value)
+    "03 - Marysville": "03 - Marysville / Sacramento",
+    "04 - Oakland": "04 - Bay Area / Oakland",
+    "05 - San Luis Obispo": "05 - San Luis Obispo / Santa Barbara",
+    "06 - Fresno": "06 - Fresno / Bakersfield",
+    "07 - Los Angeles": "07 - Los Angeles / Ventura",
+    "08 - San Bernardino": "08 - San Bernardino / Riverside",
+    "12 - Irvine": "12 - Santa Ana",
+    **{
+        k: k
+        for k in [
+            "01 - Eureka",
+            "02 - Redding",
+            "09 - Bishop",
+            "10 - Stockton",
+            "11 - San Diego",
+        ]
+    },
+}

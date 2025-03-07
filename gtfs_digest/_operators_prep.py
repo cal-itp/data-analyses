@@ -1,3 +1,4 @@
+
 from shared_utils import catalog_utils, portfolio_utils
 import pandas as pd
 
@@ -9,6 +10,7 @@ def operators_schd_vp_rt()->pd.DataFrame:
     """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
+
     schd_vp_df = (pd.read_parquet(schd_vp_url, 
                        filters=[[("sched_rt_category", "in", ["schedule_and_vp", "schedule_only"])]],
                        columns = [ "schedule_gtfs_dataset_key",
@@ -23,7 +25,7 @@ def operators_schd_vp_rt()->pd.DataFrame:
     schd_vp_df = schd_vp_df.assign(
         caltrans_district = schd_vp_df.caltrans_district.map(portfolio_utils.CALTRANS_DISTRICT_DICT)
     )
-    
+
     schd_vp_df2 = (
     schd_vp_df.dropna(subset="caltrans_district")
     .sort_values(
