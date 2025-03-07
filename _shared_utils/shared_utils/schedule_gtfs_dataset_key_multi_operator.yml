@@ -1,0 +1,121 @@
+directory: ./gtfs_digest/
+notebook: ./gtfs_digest/03_report.ipynb
+parts:
+- chapters:
+  - caption: 01 - Eureka (a253a8d7acd57657bb98050f37dd6b0f)
+    params:
+      District/Key: 01 - Eureka (a253a8d7acd57657bb98050f37dd6b0f)
+    sections:
+    - organization_name: City of Arcata
+    - organization_name: City of Eureka
+    - organization_name: Humboldt Transit Authority
+  - caption: 02 - Redding (73c79ccbfd681df300489226a158b9db)
+    params:
+      District/Key: 02 - Redding (73c79ccbfd681df300489226a158b9db)
+    sections:
+    - organization_name: Tehama County
+    - organization_name: Susanville Indian Rancheria
+  - caption: 02 - Redding (91af7482fde58c6261f386b732404e11)
+    params:
+      District/Key: 02 - Redding (91af7482fde58c6261f386b732404e11)
+    sections:
+    - organization_name: Shasta County
+    - organization_name: Redding Area Bus Authority
+  - caption: 03 - Marysville (6fda78099793184fe08dd78945d188c0)
+    params:
+      District/Key: 03 - Marysville (6fda78099793184fe08dd78945d188c0)
+    sections:
+    - organization_name: North Lake Tahoe Express
+    - organization_name: Tahoe Truckee Area Regional Transportation
+  - caption: 03 - Marysville (70c8a8b71c815224299523bf2115924a)
+    params:
+      District/Key: 03 - Marysville (70c8a8b71c815224299523bf2115924a)
+    sections:
+    - organization_name: Sacramento Regional Transit District
+    - organization_name: City of Rancho Cordova
+  - caption: 04 - Oakland (09e16227fc42c4fe90204a9d11581034)
+    params:
+      District/Key: 04 - Oakland (09e16227fc42c4fe90204a9d11581034)
+    sections:
+    - organization_name: Sonoma County
+    - organization_name: Cloverdale Transit
+  - caption: 04 - Oakland (1ebafaca8716652559b2017b6eedc4ef)
+    params:
+      District/Key: 04 - Oakland (1ebafaca8716652559b2017b6eedc4ef)
+    sections:
+    - organization_name: Solano County Transit
+    - organization_name: Solano Transportation Authority
+  - caption: 04 - Oakland (82f30e22dafe8156367297eb9a316c57)
+    params:
+      District/Key: 04 - Oakland (82f30e22dafe8156367297eb9a316c57)
+    sections:
+    - organization_name: City of Alameda
+    - organization_name: San Francisco Bay Area Water Emergency Transit Authority
+  - caption: 04 - Oakland (c2a40ce92e76ec5beb88c40df3cd3a67)
+    params:
+      District/Key: 04 - Oakland (c2a40ce92e76ec5beb88c40df3cd3a67)
+    sections:
+    - organization_name: City of Menlo Park
+    - organization_name: Commute.org
+  - caption: 05 - San Luis Obispo (b34f8d2270968f55f23f80b267df1d5f)
+    params:
+      District/Key: 05 - San Luis Obispo (b34f8d2270968f55f23f80b267df1d5f)
+    sections:
+    - organization_name: City of Santa Cruz
+    - organization_name: University of California, Santa Cruz
+  - caption: 07 - Los Angeles (1770249a5a2e770ca90628434d4934b1)
+    params:
+      District/Key: 07 - Los Angeles (1770249a5a2e770ca90628434d4934b1)
+    sections:
+    - organization_name: City of Ojai
+    - organization_name: Ventura County Transportation Commission
+    - organization_name: Gold Coast Transit District
+    - organization_name: City of Simi Valley
+    - organization_name: City of Moorpark
+    - organization_name: City of Thousand Oaks
+    - organization_name: City of Camarillo
+  - caption: 07 - Los Angeles (a37760dde6b9fdcb76b82e57afab7274)
+    params:
+      District/Key: 07 - Los Angeles (a37760dde6b9fdcb76b82e57afab7274)
+    sections:
+    - organization_name: Greyhound
+    - organization_name: FlixBus
+  - caption: 07 - Los Angeles (f74424acf8c41e4c1e9fd42838c4875c)
+    params:
+      District/Key: 07 - Los Angeles (f74424acf8c41e4c1e9fd42838c4875c)
+    sections:
+    - organization_name: City of Duarte
+    - organization_name: Foothill Transit
+  - caption: 07 - Los Angeles / Ventura (1770249a5a2e770ca90628434d4934b1)
+    params:
+      District/Key: 07 - Los Angeles / Ventura (1770249a5a2e770ca90628434d4934b1)
+    sections:
+    - organization_name: City of Camarillo
+    - organization_name: Gold Coast Transit District
+    - organization_name: City of Moorpark
+    - organization_name: City of Ojai
+    - organization_name: City of Simi Valley
+    - organization_name: City of Thousand Oaks
+    - organization_name: Ventura County Transportation Commission
+  - caption: 07 - Los Angeles / Ventura (a37760dde6b9fdcb76b82e57afab7274)
+    params:
+      District/Key: 07 - Los Angeles / Ventura (a37760dde6b9fdcb76b82e57afab7274)
+    sections:
+    - organization_name: Greyhound
+    - organization_name: FlixBus
+  - caption: 07 - Los Angeles / Ventura (f74424acf8c41e4c1e9fd42838c4875c)
+    params:
+      District/Key: 07 - Los Angeles / Ventura (f74424acf8c41e4c1e9fd42838c4875c)
+    sections:
+    - organization_name: City of Duarte
+    - organization_name: Foothill Transit
+  - caption: 11 - San Diego (baeeb157e85a901e47b828ef9fe75091)
+    params:
+      District/Key: 11 - San Diego (baeeb157e85a901e47b828ef9fe75091)
+    sections:
+    - organization_name: San Diego Metropolitan Transit System
+    - organization_name: Flagship Cruises and Events Inc.
+    - organization_name: San Diego International Airport
+readme: ./gtfs_digest/README.md
+title: This file contains the Schedule GTFS Datset Keys with multiple operators associated
+  with it.
