@@ -28,9 +28,9 @@ schedule_downloads:
 
 speeds_tables:
   dir: ${gcs_paths.SEGMENT_GCS}
-  #raw_vp: vp
-  raw_vp: vp_grouped
-  #usable_vp: vp_usable # this can be dropped
+  raw_vp: vp
+  raw_vp2: vp_grouped
+  usable_vp: vp_usable # this can be dropped
   vp_dwell: vp_usable_dwell
   vp_condensed_line: condensed/vp_condensed
   timestamp_col: ${speed_vars.timestamp_col}
@@ -59,7 +59,6 @@ rt_vs_schedule_tables:
   early_trip_minutes: -5
   late_trip_minutes: 5
 
-
 digest_tables:
   dir: ${gcs_paths.RT_SCHED_GCS}
   route_schedule_vp: "digest/schedule_vp_metrics"
@@ -70,30 +69,6 @@ digest_tables:
   operator_sched_rt: "digest/operator_schedule_rt_category"
   scheduled_service_hours: "digest/total_scheduled_service_hours"
 
-stop_segments:
-  dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.vp_dwell}
-  stage2: "nearest/nearest_vp_shape_segments"
-  stage3: "stop_arrivals"
-  stage4: "speeds_stop_segments"
-  trip_stop_cols: ["trip_instance_key", "stop_sequence"]
-  shape_stop_cols: ["shape_array_key", "shape_id", "stop_sequence"]
-  stop_pair_cols: ["stop_pair", "stop_pair_name"]
-  route_dir_cols: ["route_id", "direction_id"]
-  segment_cols: ["route_id", "direction_id", "stop_pair", "geometry"]
-  segment_timeofday: "rollup_singleday/speeds_route_dir_timeofday_segments"
-  # segment_peakoffpeak
-  # segment_weekday_timeofday
-  # -- cache segment_timeofday first and use this to build other layers? other keys to make peak/offpeak, weekday/weekend grains clear?
-  #shape_stop_single_segment: "rollup_singleday/speeds_shape_stop_segments" #-- stop after Oct 2024
-  route_dir_single_segment: "rollup_singleday/speeds_route_dir_segments"
-  route_dir_single_segment_detail: "rollup_singleday/speeds_route_dir_segments_detail" # interim for speedmaps
-  route_dir_multi_segment: "rollup_multiday/speeds_route_dir_segments" # -- this one should be replaced with weekday/weekend, make clear the grain
-  segments_file: "segment_options/shape_stop_segments"
-  max_speed: ${speed_vars.max_speed}
-  route_dir_quarter_segment: "rollup_multiday/quarter_speeds_route_dir_segments"
-  route_dir_year_segment: "rollup_multiday/year_speeds_route_dir_segments"
-
 rt_stop_times:
   dir: ${gcs_paths.SEGMENT_GCS}
   stage1: ${speeds_tables.vp_dwell}
@@ -101,13 +76,16 @@ rt_stop_times:
   stage3: "rt_stop_times/stop_arrivals"
   stage4: "rt_stop_times/speeds"
   trip_stop_cols: ["trip_instance_key", "stop_sequence"]
-  shape_stop_cols: ["shape_array_key", "shape_id", "stop_sequence"]
   stop_pair_cols: ["stop_pair", "stop_pair_name"]
   route_dir_cols: ["route_id", "direction_id"]
+  segment_cols: ["route_id", "direction_id", "stop_pair", "geometry"]
+  crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
   segments_file: "segment_options/stop_segments"
+  segment_timeofday: "rollup_singleday/speeds_route_dir_timeofday_segments"
   trip_speeds_single_summary: "rollup_singleday/speeds_trip"
-  route_dir_single_summary: "rollup_singleday/speeds_route_dir"
-  route_dir_multi_summary: "rollup_multiday/speeds_route_dir"
+  route_dir_timeofday: "rollup_singleday/speeds_route_dir"
+  segment_peakoffpeak_weekday_month: "rollup_singleday/month_speeds_route_dir_peak_segments" # NEW? what to name
+  segment_timeofday_weekday_year: "rollup_multiday/year_weekday_speeds_route_dir_segments"
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}
@@ -122,15 +100,13 @@ speedmap_segments:
   stage3b: "speedmap/stop_arrivals"
   stage4: "speedmap/speeds"
   trip_stop_cols: ["trip_instance_key", "stop_sequence", "stop_sequence1"]
-  shape_stop_cols: ["shape_array_key", "shape_id"]
   stop_pair_cols: ["stop_pair", "stop_pair_name", "segment_id"]
   route_dir_cols: ["route_id", "direction_id"]
+  segment_cols: ["shape_id", "shape_array_key", "route_id", "direction_id", "stop_pair", "segment_id", "geometry"]
+  crosswalk_cols: ["schedule_gtfs_dataset_key", "name", "caltrans_district", "organization_source_record_id", "organization_name", "base64_url"]
   segments_file: "segment_options/speedmap_segments"
-  shape_stop_single_segment: "rollup_singleday/speeds_shape_speedmap_segments"
-  shape_stop_single_segment_detail: "rollup_singleday/speeds_shape_speedmap_segments_detail"
   # excluded_shapes_by_time_of_day: "rollup_singleday/excluded_shapes_by_time_of_day"
-  route_dir_single_segment: "rollup_singleday/speeds_route_dir_speedmap_segments"
-  route_dir_multi_segment: "rollup_multiday/speeds_route_dir_speedmap_segments"
+  segment_timeofday: "rollup_singleday/speeds_shape_timeofday_speedmap_segments"
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}

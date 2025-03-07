@@ -564,13 +564,6 @@ def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
         return "Evening"
 
 
-def time_of_day_durations() -> pd.Series:
-    """
-    Get duration in hours of each time of day classification.
-    """
-    return pd.Series([categorize_time_of_day(x) for x in range(25)]).value_counts()
-
-
 @jit(nopython=True)  # numba gives huge speedup here (~60x)
 def time_at_position_numba(desired_position, shape_array, dt_float_array):
     if desired_position < shape_array.max() and desired_position > shape_array.min():

@@ -8,9 +8,12 @@ import numpy as np
 import pandas as pd
 
 from numba import jit
-from typing import Union
+from typing import Literal, Union
 
+from shared_utils import dask_utils
+from calitp_data_analysis.geography_utils import WGS84
 from shared_utils.rt_utils import MPH_PER_MPS
+from segment_speed_utils.project_vars import GTFS_DATA_DICT, SEGMENT_TYPES
 
 def speed_from_meters_elapsed_sec_elapsed(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -192,3 +195,79 @@ def rolling_window_make_array(
     df[f"{rolling_col}_monotonic"] = is_monotonic_series
     
     return df
+
+
+def merge_in_segment_geometry(
+    speeds_by_segment: pd.DataFrame,
+    analysis_date_list: list,
+    segment_type: Literal[SEGMENT_TYPES],
+    segment_cols: list
+) -> gpd.GeoDataFrame:
+    """
+    Import the segments to merge and attach it to the average speeds.
+    """
+    dict_inputs = GTFS_DATA_DICT[segment_type]
+    SEGMENT_FILE = dict_inputs.segments_file
+    
+    GCS_PATH = dict_inputs.dir
+    
+    paths = [f"{GCS_PATH}{SEGMENT_FILE}" for date in analysis_date_list]
+
+    segment_geom = dask_utils.get_ddf(
+        paths, 
+        analysis_date_list, 
+        data_type = "gdf",
+        get_pandas = False,
+        add_date = False, 
+        columns = segment_cols
+    ).drop_duplicates().to_crs(WGS84).compute()   
+    
+    col_order = [c for c in speeds_by_segment.columns]
+    
+    # The merge columns list should be all the columns that are in common
+    # between averaged speeds and segment gdf
+    geom_file_cols = segment_geom.columns.tolist()
+    merge_cols = list(set(col_order).intersection(geom_file_cols))
+    
+    gdf = pd.merge(
+        segment_geom[merge_cols + ["geometry"]].drop_duplicates(),
+        speeds_by_segment,
+        on = merge_cols, 
+    ).reset_index(drop=True).reindex(
+        columns = col_order + ["geometry"]
+    )
+    
+    return gdf
+
+
+def calculate_weighted_averages(
+    df: pd.DataFrame, 
+    group_cols: list, 
+    metric_cols: list, 
+    weight_col: str
+):
+    """
+    For certain aggregations, we need to calculate a weighted average, 
+    weighted by the number of trips.
+    
+    If we want peak/offpeak weighted calculations, 
+    we can take time-of-day (AM peak, PM peak) and
+    get a peak speed calculation, after weighting by the number
+    of trips present in each time-of-day bin.
+    
+    Ex: metric_cols = ['p20_mph', 'p50_mph', 'p80_mph']
+    weight_cols = 'n_trips'
+    
+    """    
+    for c in metric_cols:
+        df[c] = df[c] * df[weight_col]    
+    
+    df2 = (df.groupby(group_cols, group_keys=False)
+           .agg({c: "sum" for c in metric_cols + [weight_col]})
+           .reset_index()
+          )
+    
+    for c in metric_cols:
+        df2[c] = df2[c].divide(df2[weight_col]).round(2)
+    
+    return df2
