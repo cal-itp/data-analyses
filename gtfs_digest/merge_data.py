@@ -5,6 +5,7 @@ Grain is operator-service_date-route-direction-time_period.
 """
 import geopandas as gpd
 import pandas as pd
+import numpy as np
 
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
 from shared_utils import gtfs_utils_v2, publish_utils
@@ -334,9 +335,18 @@ if __name__ == "__main__":
         df_avg_speeds,
         df_crosswalk
     )
-
+    
+    # Delete out D7 
+    """ 
+    df.caltrans_district = np.where(
+    (df.caltrans_district == "07 - Los Angeles") &
+    (~df.caltrans_district.str.contains("/ Ventura")),
+    "07 - Los Angeles / Ventura",
+    df.caltrans_district
+    )
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
+    """
     print("Saved Digest RT")
     
