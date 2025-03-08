@@ -14,6 +14,7 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
 
 # get data from warehouse
+
 get_ntd_time_series = (
     tbls.mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt()
     >> filter(_.state.str.contains("CA") | 
@@ -149,3 +150,5 @@ ntd_data_to_rtpa_cleaned = alt_ntd_to_rtpa[["ntd_id","agency_name","reporter_typ
 
 ntd_data_to_rtpa_cleaned.to_parquet(f"{GCS_FILE_PATH}ntd_id_rtpa_crosswalk_all_reporter_types.parquet")
 ntd_data_to_rtpa_cleaned.to_csv(f"{GCS_FILE_PATH}ntd_id_rtpa_crosswalk_all_reporter_types.csv")
+
+if __name__ == "__main__":
