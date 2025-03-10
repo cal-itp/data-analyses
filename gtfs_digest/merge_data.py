@@ -305,14 +305,12 @@ if __name__ == "__main__":
         publish_utils.exclude_private_datasets, 
         public_gtfs_dataset_keys = public_feeds
     )
-    
     df_avg_speeds = concatenate_speeds_by_route_direction(
         analysis_date_list
     ).pipe(
         publish_utils.exclude_private_datasets, 
         public_gtfs_dataset_keys = public_feeds
     )
-                    
     df_rt_sched = (
         concatenate_rt_vs_schedule_by_route_direction(
             analysis_date_list
@@ -336,17 +334,9 @@ if __name__ == "__main__":
         df_crosswalk
     )
     
-    # Delete out D7 
-    """ 
-    df.caltrans_district = np.where(
-    (df.caltrans_district == "07 - Los Angeles") &
-    (~df.caltrans_district.str.contains("/ Ventura")),
-    "07 - Los Angeles / Ventura",
-    df.caltrans_district
-    )
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
-    """
+   
     print("Saved Digest RT")
     
