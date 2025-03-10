@@ -12,9 +12,11 @@ all_dates = (
 )
 
 
-analysis_date_list = [
-    rt_dates.DATES[d] for d in ["feb2025", "jan2025", "dec2024", "nov2024", "oct2024", "sep2024"]
-]
+# analysis_date_list = [
+#     rt_dates.DATES[d] for d in ["feb2025", "jan2025", "dec2024", "nov2024", "oct2024", "sep2024"]
+# ]
+
+analysis_date_list = [rt_dates.DATES["feb2025"]]
 
 # analysis_date_list = all_dates
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
