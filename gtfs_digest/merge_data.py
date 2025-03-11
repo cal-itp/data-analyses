@@ -61,7 +61,7 @@ def concatenate_speeds_by_route_direction(
     for route-direction-time_period grain 
     for all the dates we have.
     """
-    FILE = GTFS_DATA_DICT.rt_stop_times.route_dir_single_summary
+    FILE = GTFS_DATA_DICT.rt_stop_times.route_dir_timeofday
 
     df = time_series_utils.concatenate_datasets_across_dates(
         SEGMENT_GCS,

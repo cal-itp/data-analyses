@@ -45,9 +45,10 @@ def operators_schd_vp_rt()->pd.DataFrame:
     
     # Manually filter out certain operators for schedule_gtfs_dataset_keys
     # that have multiple operators because keeping another value is preferable. 
+ 
     operators_to_exclude = ["City of Alameda"]
     schd_vp_df2 = schd_vp_df2.loc[~schd_vp_df2.organization_name.isin(operators_to_exclude)]
-    
+
     # Keep only one instance of a schedule_gtfs_dataset_key
     schd_vp_df3 = (
     schd_vp_df2.drop_duplicates(
@@ -59,4 +60,4 @@ def operators_schd_vp_rt()->pd.DataFrame:
     )
     
     final = schd_vp_df3[["caltrans_district","organization_name"]]
-    return final
+    return schd_vp_df2, schd_vp_df3, final
