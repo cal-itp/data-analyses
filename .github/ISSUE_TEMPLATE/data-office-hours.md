@@ -15,15 +15,18 @@ Select from the below and be sure to affix the appropriate label to this issue.
 - [ ] Visualization: Altair   / Charts
 - [ ] Portfolio Publishing 
 - [ ] Metabase  
-- [ ] Other (add detail) 
+- [ ] Other (add detail)
+
 **Question:**
 A clear and concise description of what is blocking you.  
+
 **To Reproduce:** 
 In the notebook where the work is done, please include the following: 
 * Display part of the dataframe. 
 * Display info for your dataframe `df.info()`. 
-* In a markdown cell above the dataframe please include details such as:
+In a markdown cell above the dataframe please include details such as:
 * What you tried and what happened.
 * What you would like to happen. 
-* Link to your latest notebook. 
+* Link to your latest notebook.
+
 **Add any other context about the problem here.**
