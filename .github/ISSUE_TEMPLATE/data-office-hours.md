@@ -1,3 +1,10 @@
+---
+name: Data Office Hour Question 
+about: Post a question about data wrangling or the data you're working with.
+title: 'Data Office Hour Question : [description]'
+labels: ["data"]
+assignees: ''
+---
 **What type of question do you have?** 
 Select from the below and be sure to affix the appropriate label to this issue.
 - [ ] Data:  General Transit Feed Specification
