@@ -87,7 +87,7 @@ y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
 valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
 
 # Remove all the one-offs
-one_off_dates = ["jan2023", "feb2023" "aug2023a", "oct2024g"]
+one_off_dates = ["jan2023", "feb2023", "aug2023a", "oct2024g"]
 all_dates = [v for k, v in DATES.items() if k not in one_off_dates and "2022" not in k]
 
 
