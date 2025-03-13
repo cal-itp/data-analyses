@@ -80,13 +80,28 @@ def annual_time_of_day_averages(
     ).pipe(
         time_helpers.add_quarter
     )
-       
-    avg_speeds = segment_calcs.calculate_weighted_averages(
-        df,
+    
+    group_cols = OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + [
+        "time_of_day", "weekday_weekend", "year"]
+    
+    speed_cols = ["p20_mph", "p50_mph", "p80_mph"]
+    weight_col = "n_trips"
+    
+    orig_dtypes = df[group_cols + speed_cols + [weight_col]].dtypes.to_dict()
+    
+    avg_speeds = df.map_partitions(
+        segment_calcs.calculate_weighted_averages,
         OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["time_of_day", "weekday_weekend", "year"],
-        metric_cols = ["p20_mph", "p50_mph", "p80_mph"], 
-        weight_col = "n_trips"
-    ).persist()
+        metric_cols = speed_cols, 
+        weight_col = weight_col,
+        meta = {
+            **orig_dtypes,
+        },
+        align_dataframes = False
+    )
+    
+    avg_speeds = avg_speeds.compute()
+    
     
     publish_utils.if_exists_then_delete(
         f"{SEGMENT_GCS}{EXPORT_FILE}"
