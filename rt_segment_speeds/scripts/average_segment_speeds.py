@@ -98,21 +98,18 @@ def annual_time_of_day_averages(
             **orig_dtypes,
         },
         align_dataframes = False
-    )
-    
-    avg_speeds = avg_speeds.compute()
-    
+    ).compute()
+        
     
     publish_utils.if_exists_then_delete(
         f"{SEGMENT_GCS}{EXPORT_FILE}"
     )
     
     avg_speeds.to_parquet(
-        f"{SEGMENT_GCS}{EXPORT_FILE}",
-        partition_on = "time_of_day"
+        f"{SEGMENT_GCS}{EXPORT_FILE}.parquet",
     )
     '''
-    speeds_gdf = delayed(segment_calcs.merge_in_segment_geometry)(
+    speeds_gdf = segment_calcs.merge_in_segment_geometry(
         avg_speeds,
         analysis_date_list,
         segment_type,
