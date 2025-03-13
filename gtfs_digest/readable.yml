@@ -108,11 +108,9 @@ timeliness_trips_graph:
 frequency_graph:
     title: "Frequency of Trips in Minutes"
     subtitle: "Understanding how often a trip comes. If the bar says 120 minutes, that means a trip will pass that particular direction once every 2 hours."
-speed_graph_dir_0:
-    title: "Average Speed (MPH) for Direction 0"
+speed_graph_dir:
+    title: "Average Speed (MPH)"
     subtitle: "The average miles per hour the bus travels by direction and time of day."
-speed_graph_dir_1:
-    title: "Average Speed (MPH) for Direction 1"
 vp_per_min_graph:
     title: "Vehicle Positions per Minute"
     subtitle: "Trips should have 2+ VPs per minute. This metric reflects the accuracy of the temporal data collected."
@@ -123,13 +121,17 @@ spatial_accuracy_graph:
     title: "Spatial Accuracy"
     subtitle: "The percentage of vehicle positions that fall within 35 meters of a route's scheduled shape (path) reflects the accuracy of the collected spatial data."
 text_graph:
-    title: "Route Statistics for Direction "
-    subtitle: "Data taken from the most recent date."
+    title: "Route Statistics for "
+    subtitle: "Data taken from the most recent date of"
 ride_quality_graph:
     title: "The charts below measure the quality of the rider experience for this route."
 data_quality_graph:
     title: "The charts below describe the quality of GTFS data collected for this route."
+summary_graph:
+    title: "Below are some of the summary statistics collected for this route."
 agency_spatial_accuracy:
     title: "Spatial Accuracy (All Routes)"
 agency_vp_per_min_graph:
     title: "Vehicle Positions per Minute (All Routes)"
+trips_per_day_graph:
+    title: "Total Scheduled Trips by Period for "
