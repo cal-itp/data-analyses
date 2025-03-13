@@ -297,7 +297,7 @@ def basic_bar_chart(df: pd.DataFrame,
                 legend = None,
                 title=_report_utils.labeling(y_col),
                 scale=alt.Scale(
-                    range=color_dict["tri_color"],
+                    range=color_dict["full_color_scale"],
                 )
         ),
         tooltip = [x_col, y_col])
