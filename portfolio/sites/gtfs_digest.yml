@@ -25,9 +25,9 @@ parts:
     - organization_name: Siskiyou County
     - organization_name: Susanville Indian Rancheria
     - organization_name: Trinity County
-  - caption: District 03 - Marysville
+  - caption: District 03 - Marysville / Sacramento
     params:
-      district: 03 - Marysville
+      district: 03 - Marysville / Sacramento
     sections:
     - organization_name: Amtrak
     - organization_name: Butte County Association of Governments
@@ -45,9 +45,9 @@ parts:
     - organization_name: University of California, Davis
     - organization_name: Yolo County Transportation District
     - organization_name: Yuba-Sutter Transit Authority
-  - caption: District 04 - Oakland
+  - caption: District 04 - Bay Area / Oakland
     params:
-      district: 04 - Oakland
+      district: 04 - Bay Area / Oakland
     sections:
     - organization_name: Alameda-Contra Costa Transit District
     - organization_name: Angel Island-Tiburon Ferry Company
@@ -86,9 +86,9 @@ parts:
     - organization_name: Treasure Island Community Development
     - organization_name: University of California, Berkeley
     - organization_name: Western Contra Costa Transit Authority
-  - caption: District 05 - San Luis Obispo
+  - caption: District 05 - San Luis Obispo / Santa Barbara
     params:
-      district: 05 - San Luis Obispo
+      district: 05 - San Luis Obispo / Santa Barbara
     sections:
     - organization_name: City of Guadalupe
     - organization_name: City of Lompoc
@@ -103,9 +103,9 @@ parts:
     - organization_name: Santa Barbara County Association of Governments
     - organization_name: Santa Barbara Metropolitan Transit District
     - organization_name: Santa Cruz Metropolitan Transit District
-  - caption: District 06 - Fresno
+  - caption: District 06 - Fresno / Bakersfield
     params:
-      district: 06 - Fresno
+      district: 06 - Fresno / Bakersfield
     sections:
     - organization_name: City of Arvin
     - organization_name: City of Clovis
@@ -119,9 +119,9 @@ parts:
     - organization_name: Kings County Area Public Transit Agency
     - organization_name: Madera County
     - organization_name: Tulare County Regional Transit Agency
-  - caption: District 07 - Los Angeles
+  - caption: District 07 - Los Angeles / Ventura
     params:
-      district: 07 - Los Angeles
+      district: 07 - Los Angeles / Ventura
     sections:
     - organization_name: Antelope Valley Transit Authority
     - organization_name: City of Alhambra
@@ -172,24 +172,10 @@ parts:
     - organization_name: Los Angeles County Metropolitan Transportation Authority
     - organization_name: Los Angeles World Airports
     - organization_name: Palos Verdes Peninsula Transit Authority
-    - organization_name: Southern California Regional Rail Authority
     - organization_name: University of California, Los Angeles
-  - caption: District 07 - Los Angeles / Ventura
+  - caption: District 08 - San Bernardino / Riverside
     params:
-      district: 07 - Los Angeles / Ventura
-    sections:
-    - organization_name: City of Bell
-    - organization_name: City of Bell Gardens
-    - organization_name: City of Culver City
-    - organization_name: City of Downey
-    - organization_name: City of Glendora
-    - organization_name: City of Huntington Park
-    - organization_name: City of Lynwood
-    - organization_name: City of San Fernando
-    - organization_name: City of West Hollywood
-  - caption: District 08 - San Bernardino
-    params:
-      district: 08 - San Bernardino
+      district: 08 - San Bernardino / Riverside
     sections:
     - organization_name: Basin Transit
     - organization_name: Chemehuevi Indian Tribe
@@ -235,9 +221,9 @@ parts:
     - organization_name: Imperial County Transportation Commission
     - organization_name: North County Transit District
     - organization_name: Yuma County Intergovernmental Public Transportation Authority
-  - caption: District 12 - Irvine
+  - caption: District 12 - Santa Ana
     params:
-      district: 12 - Irvine
+      district: 12 - Santa Ana
     sections:
     - organization_name: Anaheim Transportation Network
     - organization_name: City of Dana Point

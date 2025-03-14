@@ -61,7 +61,7 @@ def concatenate_speeds_by_route_direction(
     for route-direction-time_period grain 
     for all the dates we have.
     """
-    FILE = GTFS_DATA_DICT.rt_stop_times.route_dir_single_summary
+    FILE = GTFS_DATA_DICT.rt_stop_times.route_dir_timeofday
 
     df = time_series_utils.concatenate_datasets_across_dates(
         SEGMENT_GCS,
@@ -305,14 +305,12 @@ if __name__ == "__main__":
         publish_utils.exclude_private_datasets, 
         public_gtfs_dataset_keys = public_feeds
     )
-    
     df_avg_speeds = concatenate_speeds_by_route_direction(
         analysis_date_list
     ).pipe(
         publish_utils.exclude_private_datasets, 
         public_gtfs_dataset_keys = public_feeds
     )
-                    
     df_rt_sched = (
         concatenate_rt_vs_schedule_by_route_direction(
             analysis_date_list
@@ -336,17 +334,9 @@ if __name__ == "__main__":
         df_crosswalk
     )
     
-    # Delete out D7 
-    """ 
-    df.caltrans_district = np.where(
-    (df.caltrans_district == "07 - Los Angeles") &
-    (~df.caltrans_district.str.contains("/ Ventura")),
-    "07 - Los Angeles / Ventura",
-    df.caltrans_district
-    )
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
-    """
+   
     print("Saved Digest RT")
     
