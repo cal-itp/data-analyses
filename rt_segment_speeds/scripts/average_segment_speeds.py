@@ -14,6 +14,7 @@ from loguru import logger
 from typing import Literal, Optional
 
 from calitp_data_analysis import utils
+from calitp_data_analysis.geography_utils import WGS84
 
 from segment_speed_utils import gtfs_schedule_wrangling, segment_calcs, time_series_utils
 from shared_utils import publish_utils, time_helpers
@@ -43,8 +44,60 @@ def import_singleday_segment_speeds(
     return df
 
 
+def export_segment_geometry(
+    year: str,
+):
+    """
+    Dedupe segment geometries using columns, 
+    since geometries may slightly differ.
+    Visual inspection shows start and endpoints might be
+    slightly different but still capture the same corridor.
+    
+    Big Blue Bus: stop_pair = "1115__187"
+    In 2024, there are 4 rows, but the 4 rows are basically the same,
+    so let's keep the most recent row.
+    """
+    SEGMENTS_FILE = GTFS_DATA_DICT.rt_stop_times.segments_file
+    EXPORT_FILE = GTFS_DATA_DICT.rt_stop_times.segments_year_file
+    
+    keep_cols = [
+        "schedule_gtfs_dataset_key", 
+        "route_id", "direction_id", 
+        "stop_pair", 
+    ]
+    
+    dates_in_year = [
+        date for date in rt_dates.all_dates if year in date
+    ]
+    
+    df = time_series_utils.concatenate_datasets_across_dates(
+        SEGMENT_GCS,
+        SEGMENTS_FILE,
+        dates_in_year,
+        columns = keep_cols + ["geometry"],
+        data_type = "gdf",
+        get_pandas= False,        
+    ).sort_values(
+        "service_date", ascending=False
+    ).drop(
+        columns = "service_date"
+    ).drop_duplicates(
+        subset = keep_cols
+    ).reset_index(drop=True).to_crs(WGS84)
+
+    df = df.compute()
+
+    df.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_{year}.parquet",
+    )
+    
+    print(f"exported stop segments for year {year}")
+        
+    return 
+    
+
 def annual_time_of_day_averages(
-    analysis_date_list: list,
+    year: str,
     segment_type: Literal[SEGMENT_TYPES],
     config_path: Optional = GTFS_DATA_DICT
 ):
@@ -63,6 +116,7 @@ def annual_time_of_day_averages(
     dict_inputs = config_path[segment_type]
         
     SPEED_FILE = dict_inputs["segment_timeofday"]
+    SEGMENTS_YEAR_FILE = dict_inputs["segments_year_file"]
     EXPORT_FILE = dict_inputs["segment_timeofday_weekday_year"]
     
     SEGMENT_COLS = [*dict_inputs["segment_cols"]]
@@ -70,6 +124,10 @@ def annual_time_of_day_averages(
                                       
     OPERATOR_COLS = ["schedule_gtfs_dataset_key"]
     CROSSWALK_COLS = [*dict_inputs.crosswalk_cols]
+    
+    analysis_date_list = [
+        date for date in rt_dates.all_dates if year in date
+    ]
     
     df = import_singleday_segment_speeds(
         SEGMENT_GCS, 
@@ -98,43 +156,25 @@ def annual_time_of_day_averages(
             **orig_dtypes,
         },
         align_dataframes = False
-    ).compute()
-        
-    
-    publish_utils.if_exists_then_delete(
-        f"{SEGMENT_GCS}{EXPORT_FILE}"
-    )
-    
-    avg_speeds.to_parquet(
-        f"{SEGMENT_GCS}{EXPORT_FILE}.parquet",
-    )
-    '''
-    speeds_gdf = segment_calcs.merge_in_segment_geometry(
-        avg_speeds,
-        analysis_date_list,
-        segment_type,
-        SEGMENT_COLS
-    ).pipe(
-        gtfs_schedule_wrangling.merge_operator_identifiers, 
+    ).compute().pipe(
+        gtfs_schedule_wrangling.merge_operator_identifiers,
         analysis_date_list,
         columns = CROSSWALK_COLS
     )
     
-    utils.geoparquet_gcs_export(
-        speeds_gdf,
-        SEGMENT_GCS,
-        EXPORT_FILE
+    avg_speeds.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_{year}.parquet"
     )
-    '''
 
     end = datetime.datetime.now()
     
     logger.info(
-        f"{segment_type}: weekday/time-of-day averages for {analysis_date_list} "
+        f"{segment_type}: weekday/time-of-day averages for {year} "
         f"execution time: {end - start}"
     )
     
     return 
+
 
 if __name__ == "__main__":
     
@@ -147,9 +187,18 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
+    # isolate segments per year to allow for export
+    # rerun previous years when necessary
+    for year in ["2025"]:
+        
+        export_segment_geometry(year)
     
-    annual_time_of_day_averages(
-        rt_dates.all_dates,
-        segment_type = "rt_stop_times",
-    )
+        annual_time_of_day_averages(
+            year,
+            segment_type = "rt_stop_times",
+        )
+    
+
+        
+
     

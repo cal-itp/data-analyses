@@ -83,7 +83,8 @@ rt_stop_times:
   trip_speeds_single_summary: "rollup_singleday/speeds_trip"
   route_dir_timeofday: "rollup_singleday/speeds_route_dir"
   segment_peakoffpeak_weekday_month: "rollup_singleday/month_speeds_route_dir_peak_segments" # NEW? what to name
-  segment_timeofday_weekday_year: "rollup_multiday/year_weekday_speeds_route_dir_segments"
+  segment_timeofday_weekday_year: "rollup_multiday/weekday_speeds_route_dir_segments"
+  segments_year_file: "rollup_multiday/stop_segments"
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}
