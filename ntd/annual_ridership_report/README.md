@@ -3,28 +3,17 @@
 
 Provide CalSTA with NTD Annual Ridership by each regional transportation planning authority (RTPA)
 
-This reoport shows general ridership trends by agency, mode and type of service. 
+Per the [SB125 Final Guildelines](https://calsta.ca.gov/-/media/calsta-media/documents/sb125-final-guidelines-a11y.pdf)
+>Caltrans will provide all RTPAs with a summary report each month that meets the requirements of this statutory provision... For RTPAs with transit operators who do not report monthly data to the NTD, Caltrans will include the most recent annual ridership numbers provided to the NTD. RTPAs may publish
 
-## Dataset
-1. [NTD Annual Service data](https://www.transit.dot.gov/ntd/data-product/2022-annual-database-service)
-2. [RTPA list](https://gis.data.ca.gov/datasets/CAEnergy::regional-transportation-planning-agencies/explore?appid=cf412a17daaa47bca93c6d6b7e77aff0&edit=true)
-3. Download our processed data here
 
----
-
-# Annual NTD Ridership by RTPA
-
-In response to... and the accompany the Monthly NTD Ridership Report, Caltrans is providing CalSTA with NTD Annual ridership by RTPA. 
-
-This report shows general ridership trends by Annual NTD Reporter by mode, and type of service for California RTPAs from 2018 to present. Unlinked passenger trips are reported, as well as the change from the prior year. For example, July 2023's change would be the change in July 2023's reported values against July 2022's reported values.
+This report shows general ridership trends by Annual NTD Reporter for California RTPAs. Unlinked passenger trips are reported, as well as the change from the prior year. For example, July 2023's change would be the change in July 2023's reported values against July 2022's reported values.
 
 ## Definitions
 - **FTA**: Federal Transit Admisistration.
-- **MODE**: A system for carrying transit passengers described by specific right-of-way (ROW), technology and operational features. Examples: Bus, Cable Car, Light Rail.
-- **Monthly NTD Reporter**: Full Reporters that submit Monthly Ridership (MR) and monthly Safety and Security reports to NTD.
+- **Annual NTD Reporter**: Transit agencies that are requried to report yearly to the NTD, includes rural, urban and reduced reporters.
 - **NTD**: National Transit Database. A reporting system that collects public transportation financial and operating information.
 - **RTPA**: Regional Transportation Planning Authority.
-- **TOS**: Type of Service. Describes how public transportation services are provided by the transit agency: directly operated (DO) or purchased transportation (PT) services.
 - **UZA**: Urbanized Areas. An urbanized area is an incorporated area with a population of 50,000 or more that is designated as such by the U.S. Department of Commerce, Bureau of the Census.
 
 
@@ -60,7 +49,7 @@ Per the [SB125 Final Guildelines](https://calsta.ca.gov/-/media/calsta-media/doc
 Hyperlinking this report on your RTPA's/Agency's webpage is a common method to meeting this requirement.
 
 ## Datasets / Data Sources
-- [NTD Complete Monthly Ridership Report](....) 
+- [NTD Annual Service data](https://www.transit.dot.gov/ntd/data-product/2022-annual-database-service 
 - [California RTPA list](https://gis.data.ca.gov/datasets/CAEnergy::regional-transportation-planning-agencies/explore?appid=cf412a17daaa47bca93c6d6b7e77aff0&edit=true)
 - [Fully Processed Data Download](https://console.cloud.google.com/storage/browser/calitp-publish-data-analysis)
 
