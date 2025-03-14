@@ -94,6 +94,9 @@ route_typology:
 longest_shortest_route:
     title: "Longest and Shortest Route"
     subtitle: "In miles."
+route_percentiles:
+    title: "Route Length Percentile Groups"
+    subtitle: "Count of routes by their percentile groups based on their length."
 daily_scheduled_hour:
     title: "Daily Scheduled Service Hours"
     subtitle: "Use the legend to highlight a particular month and hover over the line for additional information."
@@ -134,4 +137,4 @@ agency_spatial_accuracy:
 agency_vp_per_min_graph:
     title: "Vehicle Positions per Minute (All Routes)"
 trips_per_day_graph:
-    title: "Total Scheduled Trips by Period for "
+    title: "Total Scheduled Trips by Period"
