@@ -178,6 +178,76 @@ def shortest_longest_route(gdf:gpd.GeoDataFrame)->pd.DataFrame:
     
     return df
 
+def route_length_percentile(gdf:gpd.GeoDataFrame)->pd.DataFrame:
+    """
+    Total up each unique route that falls into 
+    a percentile group.
+    """
+    agg = (
+    gdf.groupby(["percentile_group"])
+    .agg({"Route": "nunique"})
+    .reset_index()
+    .rename(
+        columns={
+            "Route": "Total Unique Routes",
+        }
+    )
+    )
+    return agg
+
+def find_percentiles(df:pd.DataFrame, col_of_interest: str)->pd.DataFrame:
+    """
+    Take a column you're interested in and categorize it by row
+    for each percentile group it belongs to. 
+    """
+    # Get percentiles in objects for total vehicle.
+    p25 = df[col_of_interest].quantile(0.25).astype(float)
+    p50 = df[col_of_interest].quantile(0.50).astype(float)
+    p75 = df[col_of_interest].quantile(0.75).astype(float)
+
+    # Make a dataframe out of this 
+    percentile_data = {
+    f"{col_of_interest}_percentile": [
+        "25th percentile",
+        "50th percentile",
+        "< 75th percentile",
+        "> 75th percentile",
+    ],
+    "percentile_group": [
+        f"25 percentile (<{p25.astype(int)} miles)",
+        f"26-50th percentile ({p25.astype(int) + 0.1}-{p50.astype(int)} miles)",
+        f"51-75th percentile ({p50.astype(int) + 0.1}-{p75.astype(int)} miles)",
+        f"76th percentile (>{p75.astype(int) + 0.1} miles)",
+    ],
+}
+    percentile_df = pd.DataFrame(data=percentile_data)
+    
+    def categorize_percentile(row):
+        if (row[col_of_interest] > 0) and (row[col_of_interest] <= p25):
+            return "25th percentile"
+        elif (row[col_of_interest] > p25) and (row[col_of_interest] <= p50):
+            return "50th percentile"
+        elif (row[col_of_interest] > p50) and (row[col_of_interest] <= p75):
+            return "< 75th percentile"
+        elif row[col_of_interest] > p75:
+            return "> 75th percentile"
+        else:
+            return "Zero"
+
+    # Actually categorize each value for percentile
+    df[f"{col_of_interest}_percentile"] = df.apply(
+        lambda x: categorize_percentile(x), axis=1
+    )
+
+    # Delete out routes w/o service mile info
+    df = df.loc[
+    df[f"{col_of_interest}_percentile"] != "Zero"
+    ]
+    
+    # Merge the dataframes
+    df2 = pd.merge(df, percentile_df, on = f"{col_of_interest}_percentile")
+    return df2
+
 """
 Charts & Maps
 """

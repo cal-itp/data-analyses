@@ -269,7 +269,6 @@ def grouped_bar_chart(
     title: str,
     subtitle: str,
     range_color: list,
-    title_inc_dir:bool = False,
 )-> alt.Chart:
     tooltip_cols = [
         "Period",
@@ -283,13 +282,6 @@ def grouped_bar_chart(
     # Clean dataframe
     df = clean_data_charts(df, y_col)
 
-    # If title_inc_dir= True, add cardinal direction
-    # to the title
-    if title_inc_dir == True:
-        direction = df.Direction.iloc[0]
-        title = f"{title} {direction} Vehicles"
-    else:
-        title 
         
     chart = (
         alt.Chart(df)
@@ -911,7 +903,6 @@ def filtered_route(
         title=readable_dict["trips_per_day_graph"],
         subtitle="",
         range_color=color_dict["spatial_accuracy_range"],
-        title_inc_dir = True,
     )
                .add_params(xcol_param)
                .transform_filter(xcol_param)
@@ -925,7 +916,6 @@ def filtered_route(
         title=readable_dict["trips_per_day_graph"],
         subtitle="",
         range_color=color_dict["spatial_accuracy_range"],
-        title_inc_dir = True,
     )
                .add_params(xcol_param)
                .transform_filter(xcol_param)
