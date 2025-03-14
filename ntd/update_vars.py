@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 import ntd_dates
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
