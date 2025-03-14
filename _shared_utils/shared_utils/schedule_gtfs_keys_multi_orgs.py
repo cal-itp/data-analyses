@@ -1,13 +1,15 @@
 """
-Create the GTFS Digest yaml that 
+Create the GTFS Digest yaml that
 sets the parameterization for the analysis site.
 """
-import pandas as pd
-import yaml
-
-from shared_utils import portfolio_utils
-
 import sys
+
+import pandas as pd
+
+# import yaml
+from shared_utils import portfolio_utils
+from update_vars import GTFS_DATA_DICT
+
 sys.path.append("../../gtfs_digest/")
 import _operators_prep
 
@@ -17,7 +19,7 @@ def count_orgs(df: pd.DataFrame) -> list:
     to schedule_gtfs_dataset_keys. Filter out any
     schedule_gtfs_dataset_keys with less than 2 unique
     organization_names. Return these schedule_gtfs_dataset_keys
-    in a list. 
+    in a list.
     """
     agg1 = (
         df.groupby(["caltrans_district", "schedule_gtfs_dataset_key"])
@@ -34,10 +36,11 @@ def count_orgs(df: pd.DataFrame) -> list:
 def find_schd_keys_multi_ops() -> dict:
     """
     Return a dataframe with all the schedule_gtfs_dataset_keys
-    that have more than one organization_name that corresponds to it. 
+    that have more than one organization_name that corresponds to it.
     This way, we won't include duplicate organizations when publishing
-    our GTFS products. 
+    our GTFS products.
     """
+
     # Load in the various dataframes that create the GTFS Digest portfolio site yaml
     one_to_many_df, one_to_one_df, final = _operators_prep.operators_schd_vp_rt()
     
@@ -85,7 +88,7 @@ SITE_YML = "./schedule_gtfs_dataset_key_multi_operator.yml"
 
 if __name__ == "__main__":
     my_dict = find_schd_keys_multi_ops()
-
+    
     with open(SITE_YML) as f:
         site_yaml_dict = yaml.load(f, yaml.Loader)
         
