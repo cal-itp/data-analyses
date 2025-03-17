@@ -163,3 +163,5 @@
 2025-03-13 13:54:03.430 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2025-03-13 execution time: 0:00:10.883038
 2025-03-13 13:54:39.576 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2025-03-13 execution time: 0:00:16.685702
 2025-03-13 13:55:11.677 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2025-03-13 execution time: 0:00:12.334562
+2025-03-17 13:52:53.340 | INFO     | __main__:<module>:277 - A1_rail_ferry_brt_stops 2025-03-12 execution time: 0:00:18.637882
+2025-03-17 13:58:41.595 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:05:28.580663
