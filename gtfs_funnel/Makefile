@@ -40,7 +40,7 @@ monthly_scheduled_data:
 funnel_gtfs_single_day: 
 #	make download_gtfs_data 
 #	make preprocess_schedule_vp_dependency 
-	make preprocess_vp
+#	make preprocess_vp
 	make preprocess_schedule_only 
 	make timeseries_preprocessing
 	#make monthly_scheduled_data    
