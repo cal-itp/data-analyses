@@ -12,7 +12,7 @@ import _report_utils
 from IPython.display import HTML, Markdown, display
 
 # Other
-from segment_speed_utils import gtfs_schedule_wrangling,helpers
+from segment_speed_utils import gtfs_schedule_wrangling,helpers, segment_calcs
 from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
 from shared_utils import catalog_utils, rt_dates, rt_utils
 
@@ -212,6 +212,35 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
     )
     return df3
 
+def quarterly_rollup(all_day:pd.DataFrame)->pd.DataFrame:
+    """
+    Using the dataframe that houses only all_day values,
+    roll up months to each quarter for certain metrics.
+    """
+    # Turn date to quarters
+    all_day["quarter"] = pd.PeriodIndex(all_day.Date, freq="Q").astype("str")
+
+    quarterly_metrics = segment_calcs.calculate_weighted_averages(
+    
+    df=all_day,
+    group_cols=[
+        "quarter",
+        "Organization",
+        "Route",
+        "dir_0_1",
+        "Direction",
+    ],
+    metric_cols=[
+        "Average VP per Minute",
+        "% VP within Scheduled Shape",
+        "Average Scheduled Service (trip minutes)",
+        "ruler_100_pct",
+        "ruler_for_vp_per_min"
+    ],
+    weight_col="# Trips with VP",
+    )
+    return quarterly_metrics 
+
 """
 Charts
 """
@@ -240,10 +269,12 @@ def clean_data_charts(df:pd.DataFrame, y_col:str)->pd.DataFrame:
     """
     Do some basic cleaning to the datafarmes.
     """
-    df["Period"] = df["Period"].str.replace("_", " ").str.title()
     df[y_col] = df[y_col].fillna(0).astype(int)
     df[f"{y_col}_str"] = df[y_col].astype(str)
-    
+    try:
+        df["Period"] = df["Period"].str.replace("_", " ").str.title()
+    except:
+        pass
     return df
 
 def set_y_axis(df, y_col):
@@ -269,49 +300,77 @@ def grouped_bar_chart(
     title: str,
     subtitle: str,
     range_color: list,
-)-> alt.Chart:
+    quarter: bool = False,
+) -> alt.Chart:
+
     tooltip_cols = [
-        "Period",
         "Route",
-        "Date",
         "Direction",
         color_col,
         y_col,
     ]
-    
-    # Clean dataframe
-    df = clean_data_charts(df, y_col)
 
-        
-    chart = (
-        alt.Chart(df)
-        .mark_bar(size=5)
-        .encode(
-            x=alt.X(
-                "yearmonthdate(Date):O",
-                title=["Date"],
-                axis=alt.Axis(labelAngle=-45, format="%b %Y"),
-            ),
-            y=alt.Y(f"{y_col}:Q", title=_report_utils.labeling(y_col)),
-            xOffset=alt.X(f"{offset_col}:N", title=_report_utils.labeling(offset_col)),
-            color=alt.Color(
-                f"{color_col}:N",
-                title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=range_color),
+    if quarter == False:
+        # Clean dataframe
+        tooltip_cols.append("Period")
+        tooltip_cols.append("Date")
+        df = clean_data_charts(df, y_col)
+
+        chart = (
+            alt.Chart(df)
+            .mark_bar(size=5)
+            .encode(
+                x=alt.X(
+                    "yearmonthdate(Date):O",
+                    title=["Date"],
+                    axis=alt.Axis(labelAngle=-45, format="%b %Y"),
                 ),
-            tooltip=tooltip_cols,
-        ))
+                y=alt.Y(f"{y_col}:Q", title=_report_utils.labeling(y_col)),
+                xOffset=alt.X(
+                    f"{offset_col}:N", title=_report_utils.labeling(offset_col)
+                ),
+                color=alt.Color(
+                    f"{color_col}:N",
+                    title=_report_utils.labeling(color_col),
+                    scale=alt.Scale(range=range_color),
+                ),
+                tooltip=tooltip_cols,
+            )
+        )
+    else:
+        tooltip_cols.append("quarter")
+        chart = (
+            alt.Chart(df)
+            .mark_bar(size=5)
+            .encode(
+                x=alt.X(
+                    "quarter",
+                    title=["Quarter"],
+                    axis=alt.Axis(labelAngle=-45),
+                ),
+                y=alt.Y(f"{y_col}:Q", title=_report_utils.labeling(y_col)),
+                xOffset=alt.X(
+                    f"{offset_col}:N", title=_report_utils.labeling(offset_col)
+                ),
+                color=alt.Color(
+                    f"{color_col}:N",
+                    title=_report_utils.labeling(color_col),
+                    scale=alt.Scale(range=range_color),
+                ),
+                tooltip=tooltip_cols,
+            )
+        )
+
     chart = (chart).properties(
         title={
             "text": title,
             "subtitle": [subtitle],
         },
-       width=400,
+        width=400,
         height=250,
     )
 
     return chart
-    
 def base_facet_line(
     df: pd.DataFrame,
     y_col: str,
@@ -510,43 +569,42 @@ def base_facet_with_ruler_chart(
     ruler_col: str,
     title: str,
     subtitle: str,
-    domain_color:list,
-    range_color:list,
+    domain_color: list,
+    range_color: list,
+    quarter: bool = False,
 ) -> alt.Chart:
+
     tooltip_cols = [
-        "Period",
         "Route",
-        "Date",
         "Direction",
         y_col,
     ]
-    
+
     # Set y-axis
     max_y = set_y_axis(df, y_col)
-    
+
     # Clean dataframe
     df = clean_data_charts(df, y_col)
-    
+
     # Create color scale
-    color_scale = alt.Scale(
-    domain= domain_color,
-    range = range_color
-    )
-    
+    color_scale = alt.Scale(domain=domain_color, range=range_color)
+
     # Create ruler
     ruler = (
-            alt.Chart(df)
-            .mark_rule(color="red", strokeDash=[10, 7])
-            .encode(y=f"mean({ruler_col}):Q")
-        )
-    
-    chart = (
+        alt.Chart(df)
+        .mark_rule(color="red", strokeDash=[10, 7])
+        .encode(y=f"mean({ruler_col}):Q")
+    )
+    if quarter == False:
+        tooltip_cols.append("Period")
+        tooltip_cols.append("Date")
+        chart = (
             alt.Chart(df)
             .mark_bar(size=7, clip=True)
             .encode(
                 x=alt.X(
                     "yearmonthdate(Date):O",
-                    title=["Date"],
+                    title=[x_col],
                     axis=alt.Axis(labelAngle=-45, format="%b %Y"),
                 ),
                 y=alt.Y(
@@ -562,14 +620,42 @@ def base_facet_with_ruler_chart(
                 tooltip=df[tooltip_cols].columns.tolist(),
             )
         )
-
-    chart = (chart + ruler).properties(width=200, height=250)
-    chart = chart.facet(column=alt.Column("Direction:N",)).properties(
-            title={
-                "text": title,
-                "subtitle": [subtitle],
-            }
+    else:
+        tooltip_cols.append("quarter")
+        chart = (
+            alt.Chart(df)
+            .mark_bar(size=7, clip=True)
+            .encode(
+                x=alt.X(
+                    "quarter",
+                    title="Quarter",
+                    axis=alt.Axis(labelAngle=-45),
+                ),
+                y=alt.Y(
+                    f"{y_col}:Q",
+                    title=_report_utils.labeling(y_col),
+                    scale=alt.Scale(domain=[0, max_y]),
+                ),
+                color=alt.Color(
+                    f"{y_col}:Q",
+                    title=_report_utils.labeling(y_col),
+                    scale=color_scale,
+                ),
+                tooltip=df[tooltip_cols].columns.tolist(),
+            )
         )
+    # All charts
+    chart = (chart + ruler).properties(width=200, height=250)
+    chart = chart.facet(
+        column=alt.Column(
+            "Direction:N",
+        )
+    ).properties(
+        title={
+            "text": title,
+            "subtitle": [subtitle],
+        }
+    )
 
     return chart
 
@@ -823,6 +909,10 @@ def filtered_route(
     # Filter for only rows that are "all day" statistics
     all_day = df.loc[df["Period"] == "all_day"].reset_index(drop=True)
     
+    # Roll up some metrics that don't change too much
+    # to be quarterly instead of monthly
+    quarter_rollup = quarterly_rollup(all_day) 
+    
     # Filter for only rows that are "peak/offpeak" statistics
     peak_offpeak_df = df.loc[df["Period"] != "all_day"].reset_index(drop=True)
 
@@ -838,13 +928,14 @@ def filtered_route(
     # Create the charts
     avg_scheduled_min_graph = (
         grouped_bar_chart(
-            df=all_day,
+            df=quarter_rollup,
             color_col="Direction",
             y_col="Average Scheduled Service (trip minutes)",
             offset_col="Direction",
             title=readable_dict["avg_scheduled_min_graph"]["title"],
             subtitle=readable_dict["avg_scheduled_min_graph"]["subtitle"],
-            range_color = color_dict["four_colors"]
+            range_color = color_dict["four_colors"],
+            quarter=True,
         )
         .add_params(xcol_param)
         .transform_filter(xcol_param)
@@ -900,7 +991,7 @@ def filtered_route(
         color_col="Period",
         y_col="# scheduled trips",
         offset_col="Period",
-        title=readable_dict["trips_per_day_graph"],
+        title=readable_dict["trips_per_day_graph"]["title"],
         subtitle="",
         range_color=color_dict["spatial_accuracy_range"],
     )
@@ -913,7 +1004,7 @@ def filtered_route(
         color_col="Period",
         y_col="# scheduled trips",
         offset_col="Period",
-        title=readable_dict["trips_per_day_graph"],
+        title=readable_dict["trips_per_day_graph"]["title"],
         subtitle="",
         range_color=color_dict["spatial_accuracy_range"],
     )
@@ -936,13 +1027,14 @@ def filtered_route(
     vp_per_min_graph = (
         (
             base_facet_with_ruler_chart(
-                all_day,
+                quarter_rollup,
                 "Average VP per Minute",
                 "ruler_for_vp_per_min",
                 readable_dict["vp_per_min_graph"]["title"],
                 readable_dict["vp_per_min_graph"]["subtitle"],
                 color_dict["vp_domain"],
-                color_dict["vp_range"]
+                color_dict["vp_range"],
+                quarter=True,
             )
         )
         .add_params(xcol_param)
@@ -964,13 +1056,14 @@ def filtered_route(
     )
     spatial_accuracy = (
         base_facet_with_ruler_chart(
-            all_day,
+            quarter_rollup,
             "% VP within Scheduled Shape",
             "ruler_100_pct",
             readable_dict["spatial_accuracy_graph"]["title"],
             readable_dict["spatial_accuracy_graph"]["subtitle"],
             color_dict["spatial_accuracy_domain"],
-            color_dict["spatial_accuracy_range"]
+            color_dict["spatial_accuracy_range"],
+            quarter=True,
         )
         .add_params(xcol_param)
         .transform_filter(xcol_param)
@@ -997,6 +1090,7 @@ def filtered_route(
     ride_quality = divider_chart(df, readable_dict["ride_quality_graph"]["title"])
     data_quality = divider_chart(df, readable_dict["data_quality_graph"]["title"])
     summary_graph = divider_chart(df, readable_dict["summary_graph"]["title"])
+    
     # Combine all the charts
     chart_list = [
     summary_graph,
@@ -1016,6 +1110,7 @@ def filtered_route(
     sched_vp_per_min,
     spatial_accuracy,]
 
+    # Concat
     chart = alt.vconcat(*chart_list)
 
     return chart
