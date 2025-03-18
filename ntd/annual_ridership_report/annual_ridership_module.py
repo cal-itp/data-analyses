@@ -25,7 +25,7 @@ def add_change_columns(
     """
 
     sort_cols2 =  ["ntd_id",
-                   "report_year",
+                   "year",
                    #"mode", 
                    #"tos",
                    #"period_month", 
