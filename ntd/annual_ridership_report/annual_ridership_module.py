@@ -1,6 +1,9 @@
 # all functions used for annual ridership report
 
 import pandas as pd
+from siuba import _, collect, count, filter, select, show_query
+from calitp_data_analysis.tables import tbls
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
 def get_percent_change(
     df: pd.DataFrame, 
