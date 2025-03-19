@@ -13,7 +13,7 @@ preprocess_schedule_vp_dependency:
     
 preprocess_vp:
 	python vp_keep_usable.py
-	python cleanup.py
+#	python cleanup.py
 	python vp_dwell_time.py    
 	python vp_condenser.py
 
@@ -38,8 +38,8 @@ monthly_scheduled_data:
 	python concatenate_monthly_scheduled_service.py
     
 funnel_gtfs_single_day: 
-	make download_gtfs_data 
-	make preprocess_schedule_vp_dependency 
+#	make download_gtfs_data 
+#	make preprocess_schedule_vp_dependency 
 	make preprocess_vp
 	make preprocess_schedule_only 
 	make timeseries_preprocessing
