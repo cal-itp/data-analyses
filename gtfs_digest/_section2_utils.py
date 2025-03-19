@@ -66,7 +66,9 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     
     # Replace column names
     df = _report_utils.replace_column_names(df)
-
+    
+    # Turn date to quarters
+    df["quarter"] = pd.PeriodIndex(df.Date, freq="Q").astype("str")
     return df
 
 def load_operator_metrics(organization_name:str)->pd.DataFrame:
@@ -191,7 +193,6 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
         col2,
         "Route",
         "Period",
-        "ruler_100_pct",
     ]
     df2 = df[to_keep]
 
@@ -202,7 +203,6 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
             "Route",
             "Direction",
             "Period",
-            "ruler_100_pct",
         ],
         value_vars=[col1, col2],
     )
@@ -210,36 +210,30 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
     df3 = df3.rename(
         columns={"variable": "Category", "value": "% of Actual Trip Minutes"}
     )
+    
+    # The ruler is getting messed up, simply replace it
+    df3["ruler_100_pct"] = 100
     return df3
 
-def quarterly_rollup(all_day:pd.DataFrame)->pd.DataFrame:
+def quarterly_rollup(df:pd.DataFrame, metric_columns:list)->pd.DataFrame:
     """
-    Using the dataframe that houses only all_day values,
     roll up months to each quarter for certain metrics.
     """
-    # Turn date to quarters
-    all_day["quarter"] = pd.PeriodIndex(all_day.Date, freq="Q").astype("str")
-
     quarterly_metrics = segment_calcs.calculate_weighted_averages(
     
-    df=all_day,
+    df=df,
     group_cols=[
         "quarter",
+        "Period",
         "Organization",
         "Route",
         "dir_0_1",
         "Direction",
     ],
-    metric_cols=[
-        "Average VP per Minute",
-        "% VP within Scheduled Shape",
-        "Average Scheduled Service (trip minutes)",
-        "ruler_100_pct",
-        "ruler_for_vp_per_min"
-    ],
+    metric_cols= metric_columns,
     weight_col="# Trips with VP",
     )
-    return quarterly_metrics 
+    return quarterly_metrics
 
 """
 Charts
@@ -498,7 +492,7 @@ def base_facet_circle(
         )
     return chart
     
-def base_facet_chart(
+def stacked_bar_chart(
     df: pd.DataFrame,
     direction_to_filter: int,
     y_col: str,
@@ -909,13 +903,24 @@ def filtered_route(
     # Filter for only rows that are "all day" statistics
     all_day = df.loc[df["Period"] == "all_day"].reset_index(drop=True)
     
-    # Roll up some metrics that don't change too much
-    # to be quarterly instead of monthly
-    quarter_rollup = quarterly_rollup(all_day) 
-    
     # Filter for only rows that are "peak/offpeak" statistics
     peak_offpeak_df = df.loc[df["Period"] != "all_day"].reset_index(drop=True)
 
+    # Roll up some metrics that don't change too much
+    # to be quarterly instead of monthly
+    quarter_rollup_all_day = quarterly_rollup(all_day, [
+        "Average VP per Minute",
+        "% VP within Scheduled Shape",
+        "Average Scheduled Service (trip minutes)",
+        "ruler_100_pct",
+        "ruler_for_vp_per_min"
+    ]) 
+    
+    quarter_rollup_peakoffpeak = quarterly_rollup(peak_offpeak_df, [
+        "# scheduled trips", "headway_in_minutes"
+        
+    ]) 
+    
     # Manipulate the df for some of the metrics
     timeliness_df = timeliness_trips(df)
     sched_journey_vp = pct_vp_journey(
@@ -928,7 +933,7 @@ def filtered_route(
     # Create the charts
     avg_scheduled_min_graph = (
         grouped_bar_chart(
-            df=quarter_rollup,
+            df=quarter_rollup_all_day,
             color_col="Direction",
             y_col="Average Scheduled Service (trip minutes)",
             offset_col="Direction",
@@ -1027,7 +1032,7 @@ def filtered_route(
     vp_per_min_graph = (
         (
             base_facet_with_ruler_chart(
-                quarter_rollup,
+                quarter_rollup_all_day,
                 "Average VP per Minute",
                 "ruler_for_vp_per_min",
                 readable_dict["vp_per_min_graph"]["title"],
@@ -1056,7 +1061,7 @@ def filtered_route(
     )
     spatial_accuracy = (
         base_facet_with_ruler_chart(
-            quarter_rollup,
+            quarter_rollup_all_day,
             "% VP within Scheduled Shape",
             "ruler_100_pct",
             readable_dict["spatial_accuracy_graph"]["title"],
