@@ -1,8 +1,11 @@
 # all functions used for annual ridership report
+import sys
+sys.path.append("../")  # up one level
 
 import pandas as pd
 from siuba import _, collect, count, filter, select, show_query
 from calitp_data_analysis.tables import tbls
+from update_vars import NTD_MODES, NTD_TOS
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
 def get_percent_change(
@@ -148,6 +151,12 @@ def produce_annual_ntd_ridership_data_by_rtpa():
     
     print("add `change_column` to data")
     ntd_data_by_rtpa = add_change_columns(ntd_data_by_rtpa)
+    
+    print("map mode and tos desc.")
+    ntd_data_by_rtpa = ntd_data_by_rtpa.assign(
+        mode_full = ntd_data_by_rtpa["mode"].map(NTD_MODES),
+        service_full = ntd_data_by_rtpa["service"].map(NTD_TOS)
+    )
     
     return ntd_data_by_rtpa
 
