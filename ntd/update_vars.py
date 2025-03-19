@@ -35,6 +35,9 @@ NTD_MODES = {
     "TB": "Trolleybus",
     "VP": "Vanpool",
     "YR": "Hybrid Rail",
+    "DT": "Demand Response Taxi",
+    "JT": "Jitney"
+    ""
 }
 
 NTD_TOS = {
