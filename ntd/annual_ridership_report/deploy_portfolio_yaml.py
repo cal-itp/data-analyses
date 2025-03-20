@@ -15,7 +15,7 @@ from pathlib import Path
 from shared_utils import portfolio_utils
 from update_vars import GCS_FILE_PATH
 
-PORTFOLIO_SITE_YAML = Path("../portfolio/sites/annual_ridership_report.yml")
+PORTFOLIO_SITE_YAML = Path("../../portfolio/sites/ntd_annual_ridership_report.yml")
 
 if __name__ == "__main__":
     
