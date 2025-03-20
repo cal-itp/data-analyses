@@ -235,6 +235,29 @@ def quarterly_rollup(df:pd.DataFrame, metric_columns:list)->pd.DataFrame:
     )
     return quarterly_metrics
 
+def rollup_schd_qtr(peak_offpeak_df:pd.DataFrame)->pd.DataFrame:
+    """
+    Roll up # Scheduled Trips to be on a quarterly basis
+    since this metric doesn't change very often. 
+    """
+    # Aggregate
+    agg1 = (
+    peak_offpeak_df.groupby(
+        ["quarter", "Period", "Organization", "Route", "dir_0_1", "Direction"]
+    )
+    .agg({"Date":"nunique","# scheduled trips": "sum"})
+    .reset_index()
+    )
+    
+    # If a quarter is complete with all 3 months, divide by 3
+    agg1.loc[agg1["Date"] == 3, "# scheduled trips"] = (
+    agg1.loc[agg1["Date"] == 3, "# scheduled trips"] / 3)
+    
+    # If a quarter is incomplete with only 2 months, divide by 2 
+    agg1.loc[agg1["Date"] == 2, "# scheduled trips"] = (
+    agg1.loc[agg1["Date"] == 2, "# scheduled trips"] / 2
+)
+    return agg1
 """
 Charts
 """
@@ -494,36 +517,29 @@ def base_facet_circle(
     
 def stacked_bar_chart(
     df: pd.DataFrame,
-    direction_to_filter: int,
     y_col: str,
     color_col: str,
-    facet_col: str,
     title: str,
     subtitle: str,
-    range_color:list
+    range_color:list,
+    quarter: bool = False
 )-> alt.Chart:
     tooltip_cols = [
-        "Period",
         "Route",
-        "Date",
         "Direction",
         y_col,
-        color_col,
     ]
     
-    # Create a title.
-    try:
-        title = title + " for Direction " + str(direction_to_filter)
-    except:
-        pass
-    
     # Set y-axis
-    max_y = set_y_axis(df, y_col)
+    max_y = set_y_axis(df, y_col) * 2
     
     # Clean dataframe
     df = clean_data_charts(df, y_col)
 
-    chart = (
+    if quarter == False:
+        tooltip_cols.append("Period")
+        tooltip_cols.append("Date")
+        chart = (
         alt.Chart(df)
         .mark_bar(size=7, clip=True)
         .encode(
@@ -540,15 +556,41 @@ def stacked_bar_chart(
             color=alt.Color(
                 f"{color_col}:N",
                 title=_report_utils.labeling(color_col),
-                scale=alt.Scale(range=range_color),
+                scale=alt.Scale(range=color_dict["four_colors"]),
             ),
             tooltip=tooltip_cols,
         )
     )
-    chart = chart.properties(width=200, height=250)
+    
+    else:
+        tooltip_cols.append("quarter")
+        chart = (
+        alt.Chart(df)
+        .mark_bar(size=7, clip=True)
+        .encode(
+            x=alt.X(
+                "quarter",
+                title=["Quarter"],
+                axis=alt.Axis(labelAngle=-45),
+            ),
+            y=alt.Y(
+                f"{y_col}:Q",
+                title=_report_utils.labeling(y_col),
+                scale=alt.Scale(domain=[0, max_y]),
+            ),
+            color=alt.Color(
+                f"{color_col}:N",
+                title=_report_utils.labeling(color_col),
+                scale=alt.Scale(range=color_dict["four_colors"]),
+            ),
+            tooltip=tooltip_cols,
+        )
+    )
+        
+    chart = chart.properties(width=400, height=250)
     
     # Facet the chart
-    chart = chart.facet(column=alt.Column(f"{facet_col}:N",)).properties(
+    chart = chart.properties(
         title={
             "text": title,
             "subtitle": subtitle,
@@ -916,10 +958,7 @@ def filtered_route(
         "ruler_for_vp_per_min"
     ]) 
     
-    quarter_rollup_peakoffpeak = quarterly_rollup(peak_offpeak_df, [
-        "# scheduled trips", "headway_in_minutes"
-        
-    ]) 
+    total_scheduled_trips = rollup_schd_qtr(peak_offpeak_df)
     
     # Manipulate the df for some of the metrics
     timeliness_df = timeliness_trips(df)
@@ -991,31 +1030,29 @@ def filtered_route(
     .transform_filter(xcol_param)
     )
     
-    n_trips_dir_0 = (grouped_bar_chart(
-    peak_offpeak_df.loc[(peak_offpeak_df.dir_0_1 == 0)],
-        color_col="Period",
-        y_col="# scheduled trips",
-        offset_col="Period",
-        title=readable_dict["trips_per_day_graph"]["title"],
-        subtitle="",
-        range_color=color_dict["spatial_accuracy_range"],
+    n_trips_dir_0 = (stacked_bar_chart(
+    df = total_scheduled_trips.loc[total_scheduled_trips.dir_0_1 == 0],
+    y_col = "# scheduled trips",
+    color_col = "Period",
+    title = readable_dict["trips_per_day_graph"]["title"],
+    subtitle = "",
+    range_color=color_dict["four_colors"],
+    quarter = True)
+    .add_params(xcol_param)
+    .transform_filter(xcol_param)
     )
-               .add_params(xcol_param)
-               .transform_filter(xcol_param)
-              )
-
-    n_trips_dir_1 = (grouped_bar_chart(
-    peak_offpeak_df.loc[(peak_offpeak_df.dir_0_1 == 1)],
-        color_col="Period",
-        y_col="# scheduled trips",
-        offset_col="Period",
-        title=readable_dict["trips_per_day_graph"]["title"],
-        subtitle="",
-        range_color=color_dict["spatial_accuracy_range"],
+    n_trips_dir_1 = (stacked_bar_chart(
+    df = total_scheduled_trips.loc[total_scheduled_trips.dir_0_1 == 1],
+    y_col = "# scheduled trips",
+    color_col = "Period",
+    title = readable_dict["trips_per_day_graph"]["title"],
+    subtitle = "",
+    range_color=color_dict["four_colors"],
+    quarter = True)
+    .add_params(xcol_param)
+    .transform_filter(xcol_param)
     )
-               .add_params(xcol_param)
-               .transform_filter(xcol_param)
-              )
+    
     speed_graph = (
         base_facet_line(
             df,
