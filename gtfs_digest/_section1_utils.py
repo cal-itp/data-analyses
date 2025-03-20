@@ -214,10 +214,10 @@ def find_percentiles(df:pd.DataFrame, col_of_interest: str)->pd.DataFrame:
         "> 75th percentile",
     ],
     "percentile_group": [
-        f"25 percentile (<{p25.astype(int)} miles)",
+        f"25 percentile (<={p25.astype(int)} miles)",
         f"26-50th percentile ({p25.astype(int) + 0.1}-{p50.astype(int)} miles)",
         f"51-75th percentile ({p50.astype(int) + 0.1}-{p75.astype(int)} miles)",
-        f"76th percentile (>{p75.astype(int) + 0.1} miles)",
+        f"76th percentile (>={p75.astype(int) + 0.1} miles)",
     ],
 }
     percentile_df = pd.DataFrame(data=percentile_data)
