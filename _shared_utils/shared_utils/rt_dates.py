@@ -3,28 +3,13 @@ Cached dates available in rt_delay/.
 
 GCS: gs://calitp-analytics-data/data-analyses/rt_delay/cached_views/
 """
+import datetime
 from typing import Literal
 
 # HQTAs and RT speedmaps
 DATES = {
-    "feb2022": "2022-02-08",
-    "mar2022": "2022-03-30",  # "2022-03-23"?
-    # "apr2022": "", # None
-    "may2022": "2022-05-04",
-    "jun2022": "2022-06-15",
-    "jul2022": "2022-07-13",
-    "aug2022": "2022-08-17",
-    "sep2022": "2022-09-14",
-    "sep2022a": "2022-09-21",  # start of most v2 fct_vehicle_locations data? extent of backfill?
-    "oct2022": "2022-10-12",
-    "nov2022a": "2022-11-07",  # postfixed dates for d4/MTC analysis
-    "nov2022b": "2022-11-08",
-    "nov2022c": "2022-11-09",
-    "nov2022d": "2022-11-10",
-    "nov2022": "2022-11-16",
-    "dec2022": "2022-12-14",
-    "jan2023": "2023-01-18",  # start of v2
-    "feb2023": "2023-02-15",
+    # "jan2023": "2023-01-18",  # start of v2
+    # "feb2023": "2023-02-15",
     "mar2023": "2023-03-15",
     "apr2023a": "2023-04-10",  # postfixed dates for d4/MTC analysis
     "apr2023b": "2023-04-11",
@@ -77,6 +62,8 @@ DATES = {
     "feb2025": "2025-02-12",
 }
 
+years_available = list(range(2023, datetime.datetime.now().year + 1))
+
 y2023_dates = [
     v for k, v in DATES.items() if k.endswith("2023") and not any(substring in k for substring in ["jan", "feb"])
 ]
@@ -85,6 +72,7 @@ y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["
 y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
 
 valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
+
 
 # Remove all the one-offs
 one_off_dates = ["jan2023", "feb2023", "aug2023a", "oct2024g"]
