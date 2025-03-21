@@ -585,6 +585,23 @@ def fill_missing_stop_sequence1(df: pd.DataFrame) -> pd.DataFrame:
     )
     return df
 
+def mode_by_group(
+    df: pd.DataFrame, 
+    group_cols: list, 
+    value_cols: list
+) -> pd.DataFrame:
+    """
+    Get the most common value by grouping.
+    """
+    df2 = (df
+           .groupby(group_cols)
+           .agg({
+               **{c: lambda x: x.mode().iloc[0] for c in value_cols}
+           }).reset_index()
+          )
+    
+    return df2
+
 def top_cardinal_direction(df: pd.DataFrame) -> pd.DataFrame:
     """
     Some routes don't change their geographies over time,
