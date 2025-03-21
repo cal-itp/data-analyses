@@ -34,7 +34,7 @@ build_ntd_report:
 	make build_portfolio_site
 
 build_ntd_annual_report:
-	$(eval export site = )
+	$(eval export site = ntd_annual_ridership_report)
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	cd ntd/annual_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
 	make build_portfolio_site
