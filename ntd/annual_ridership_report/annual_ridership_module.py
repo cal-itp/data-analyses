@@ -1,11 +1,17 @@
 # all functions used for annual ridership report
+import os
+import shutil
 import sys
+import annual_ridership_module
 sys.path.append("../")  # up one level
 
 import pandas as pd
 from siuba import _, collect, count, filter, select, show_query
 from calitp_data_analysis.tables import tbls
-from update_vars import NTD_MODES, NTD_TOS
+from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS, MONTH, YEAR
+from segment_speed_utils.project_vars import PUBLIC_GCS
+import gcsfs
+fs = gcsfs.GCSFileSystem()
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
 
@@ -188,9 +194,138 @@ def produce_annual_ntd_ridership_data_by_rtpa():
     
     return ntd_data_by_rtpa
 
+def save_rtpa_outputs(
+    df: pd.DataFrame, 
+    year: int, 
+    month: str, 
+    upload_to_public: bool = False
+):
+    
+    """
+    Export an excel for each RTPA, adds a READ ME tab, then writes into a folder.
+    Zip that folder.
+    Upload zipped file to GCS.
+    """
+    #col_dict = {
+        #"agency_name":,
+        #"agency_status":,
+        #"city":,
+        #"state":,
+        #"ntd_id":,
+        #"primary_uza_name":,
+        #"reporter_type":,
+        #"mode":,
+        #"service":,
+        #"year":,
+        #"upt":,
+        #"RTPA":,
+        #"previous_y_upt":,
+        #"change_1yr":,
+        #"pct_change_1yr":,
+        #"mode_full":,
+        #"service_full":,
+    #}
+    print("creating individual RTPA excel files")
 
+    for i in df["RTPA"].unique():
+
+        print(f"creating excel file for: {i}")
+
+        # Filename should be snakecase
+        rtpa_snakecase = i.replace(" ", "_").replace("/","_").lower() #this fixes 'Lake County/City Area Planning Council`
+
+        # insertng readme cover sheet,
+        cover_sheet = pd.read_excel(
+            "./annual_report_cover_sheet_template.xlsx", index_col="**NTD Annual Ridership by RTPA**"
+        )
+        cover_sheet.to_excel(
+            f"./{year}_{month}/{rtpa_snakecase}.xlsx", sheet_name="README"
+        )
+        
+        #filter data by single RTPA
+        rtpa_data = (
+            df[df["RTPA"] == i].sort_values("ntd_id")
+            .drop(columns=[
+                "_merge", 
+                "xwalk_agency_name",
+                "xwalk_reporter_type",
+                "xwalk_agency_status",
+                "xwalk_city",
+                "xwalk_state",
+            ])
+            # cleaning column names
+            .rename(columns=lambda x: x.replace("_", " ").title().strip())
+            # rename columns
+            #.rename(columns=col_dict)
+        )
+        # column lists for aggregations
+        agency_cols = ["ntd_id", "agency_name", "RTPA"]
+        mode_cols = ["mode", "RTPA"]
+        tos_cols = ["service", "RTPA"]
+        reporter_type = ["reporter_type", "RTPA"]
+
+        # Creating aggregations
+        by_agency_long = annual_ridership_module.sum_by_group((df[df["RTPA"] == i]), agency_cols)
+        by_mode_long = annual_ridership_module.sum_by_group((df[df["RTPA"] == i]), mode_cols)
+        by_tos_long = annual_ridership_module.sum_by_group((df[df["RTPA"] == i]), tos_cols)
+        by_reporter_type_long = annual_ridership_module.sum_by_group((df[df["RTPA"] == i]), reporter_type)
+
+        # writing pages to excel file
+        with pd.ExcelWriter(
+            f"./{year}_{month}/{rtpa_snakecase}.xlsx", mode="a"
+        ) as writer:
+            rtpa_data.to_excel(
+                writer, sheet_name="RTPA Ridership Data", index=False
+            )
+            by_agency_long.to_excel(
+                writer, sheet_name="Aggregated by Agency", index=False
+            )
+            by_mode_long.to_excel(
+                writer, sheet_name="Aggregated by Mode", index=False
+            )
+            by_tos_long.to_excel(
+                writer, sheet_name="Aggregated by TOS", index=False
+            )
+            by_reporter_type_long.to_excel(
+                writer, sheet_name="Aggregate by Reporter Type", index=False
+            )
+
+    print("zipping all excel files")
+
+    shutil.make_archive(f"./{year}_{month}_annual_report_data", "zip", f"{year}_{month}")
+
+    print("Zipped folder")
+
+    print("Upload to private GCS")
+    fs.upload(f"./{year}_{month}_annual_report_data.zip", f"{GCS_FILE_PATH}{year}_{month}_annual_report_data.zip")
+
+    if upload_to_public:
+        fs.upload(
+            f"./{year}_{month}_annual_report_data.zip",
+            f"{PUBLIC_GCS}ntd_annual_ridership/{year}_{month}_annual_report_data.zip",
+        )
+
+        print("Uploaded to public GCS")
+
+    return
+
+
+def remove_local_outputs(
+    year: int, 
+    month: str
+):
+    shutil.rmtree(f"{year}_{month}/")
+    os.remove(f"{year}_{month}_annual_report_data.zip")
+
+    
 if __name__ == "__main__":
     
     df = produce_annual_ntd_ridership_data_by_rtpa()
-    print("saving to GCS")
+    print("saving parqut to private GCS")
+    
     df.to_parquet(f"{GCS_FILE_PATH}annual_ridership_report_data.parquet")
+
+    os.makedirs(f"./{YEAR}_{MONTH}/")
+
+    save_rtpa_outputs(df, YEAR, MONTH, upload_to_public = True)
+    remove_local_outputs(YEAR, MONTH)
