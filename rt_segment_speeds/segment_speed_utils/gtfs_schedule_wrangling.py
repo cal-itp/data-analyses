@@ -138,8 +138,8 @@ def count_trips_by_group(df: pd.DataFrame, group_cols: list):
         df.groupby(group_cols, dropna=False)
         .agg({"trip_instance_key": "count"})
         .reset_index()
-    )
-    df = df.rename(columns={"trip_instance_key": "n_trips"})
+    ).rename(columns={"trip_instance_key": "n_trips"})
+    
     return df
 
 def aggregate_time_of_day_to_peak_offpeak(
@@ -161,7 +161,9 @@ def aggregate_time_of_day_to_peak_offpeak(
     df = add_peak_offpeak_column(df)
     
     all_day = count_trips_by_group(df, group_cols).assign(time_period = "all_day")
-    peak_offpeak = count_trips_by_group(df, group_cols + ["peak_offpeak"]).rename({"peak_offpeak":"time_period"})
+    peak_offpeak = count_trips_by_group(
+        df, group_cols + ["peak_offpeak"]
+    ).rename(columns = {"peak_offpeak": "time_period"})
     
     df2 = pd.concat(
         [all_day, peak_offpeak], 
