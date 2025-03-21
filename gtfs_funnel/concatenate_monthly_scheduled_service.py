@@ -26,19 +26,13 @@ if __name__ == "__main__":
     MONTHLY_SERVICE = GTFS_DATA_DICT.schedule_tables.monthly_scheduled_service
     CROSSWALK = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     ROUTES = GTFS_DATA_DICT.schedule_tables.route_identification
-
-    year_list = [2023, 2024]
-    analysis_date_list = (rt_dates.y2024_dates + 
-                          rt_dates.y2023_dates + 
-                          rt_dates.oct2023_week + 
-                          rt_dates.apr2023_week + 
-                          rt_dates.apr2024_week
-                         )
     
+    analysis_date_list = rt_dates.all_dates
+                         
     df = pd.concat(
         [pd.read_parquet(
             f"{SCHED_GCS}{MONTHLY_SERVICE}_{y}.parquet") 
-         for y in year_list], 
+         for y in rt_dates.years_available], 
         axis=0, ignore_index=True
     ).rename(columns = {
         "source_record_id": "schedule_source_record_id"
