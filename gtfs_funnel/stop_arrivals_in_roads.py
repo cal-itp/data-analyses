@@ -4,6 +4,7 @@ for road segments.
 """
 import datetime
 import geopandas as gpd
+from itertools import product
 import pandas as pd
 
 from segment_speed_utils import (helpers, 
@@ -173,9 +174,13 @@ if __name__ == "__main__":
     
     from update_vars import GTFS_DATA_DICT
     
+    # Set the months we want quarterly data for
+    months = ["jan", "apr", "jul", "oct"]
+        
+    # Set the date combinations, like Jan2023, Apr2023, Jul2023, etc
     analysis_date_list = [
-        rt_dates.DATES["apr2023"], rt_dates.DATES["jul2023"],
-        rt_dates.DATES["oct2023"], rt_dates.DATES["jan2024"]
+        rt_dates.DATES[f"{m}{y}"] for y, m in product(rt_dates.years_available, months)
+        if f"{m}{y}" in rt_dates.DATES.keys()
     ]
 
     for analysis_date in analysis_date_list:
