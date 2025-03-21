@@ -12,79 +12,36 @@ from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from shared_utils.rt_utils import METERS_PER_MILE
 from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
-def cardinal_direction_for_route_direction(analysis_date:str, dict_inputs:dict):
+def cardinal_direction_by_trip(
+    stop_times: gpd.GeoDataFrame, 
+    group_cols: list
+):
     """
-    Get a cardinal direction (North, South, East, West) on the route grain.
+    Get a cardinal direction (North, South, East, West) 
+    on the route-direction grain.
+    Use the stop_times_direction file to count the 
+    number of stops for each trip. Most common direction is used
+    to designate that trip.
     """
-    STOP_TIMES_FILE = dict_inputs.rt_vs_schedule_tables.stop_times_direction
-    
-    stop_times_df = pd.read_parquet(
-        f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet",
-        filters=[[("stop_primary_direction", "!=", "Unknown")]
-    ])
-    
-    
-    trip_scheduled_col = [
-        "route_id",
-        "trip_instance_key",
-        "gtfs_dataset_key",
-        "shape_array_key",
-        "direction_id",
-        "route_long_name",
-        "route_short_name",
-        "route_desc",
-        "name"
-    ]
-        
-    trips_df = helpers.import_scheduled_trips(
-        analysis_date, 
-        columns = trip_scheduled_col,
-        get_pandas = True
-    )
-
-    
-    # Merge dfs
-    merge_cols = ["trip_instance_key", 
-                  "schedule_gtfs_dataset_key", 
-                  "shape_array_key"]
-    
-    stop_times_with_trip = pd.merge(stop_times_df, trips_df, on = merge_cols)
-    
-    # AH: temporarily fill in direction_id rows with nans
-    # should go back to the script that creates stop_times_df 
-    stop_times_with_trip.direction_id = stop_times_with_trip.direction_id.fillna(0)
-    
-    main_cols = [
-        "route_id",
-        "schedule_gtfs_dataset_key",
-        "direction_id"
-    ]
-    
-    agg1 = (
-        stop_times_with_trip.groupby(
-            main_cols + ["stop_primary_direction"], 
+    primary_direction = (
+        stop_times.groupby(
+            group_cols + ["stop_primary_direction"], 
             dropna=False
         )
         .agg({"stop_sequence": "count"})
         .reset_index()
         .rename(columns={"stop_sequence": "total_stops"})
-    )
-    
-    # Sort and drop duplicates so that the
-    # largest # of stops by stop_primary_direction is at the top
-    agg2 = agg1.sort_values(
-        by= main_cols + ["total_stops"],
-        ascending=[True, True, True, False],
-    )
-    
-    # Drop duplicates so only the top stop_primary_direction is kept.
-    agg3 = (agg2.drop_duplicates(subset= main_cols)
-            .reset_index(drop=True)
-            .drop(columns=["total_stops"])
-            .rename(columns = {"stop_primary_direction": "route_primary_direction"})
-           )
-    
-    return agg3
+    ).sort_values(
+        group_cols + ["total_stops"], 
+        ascending = [True for c in group_cols] + [False]
+    ).drop_duplicates(
+        subset = group_cols
+    )[
+        group_cols + ["stop_primary_direction"]
+    ].reset_index(drop=True)
+
+    return primary_direction
+
 
 def assemble_scheduled_trip_metrics(
     analysis_date: str, 
@@ -101,22 +58,25 @@ def assemble_scheduled_trip_metrics(
         f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet"
     )
     
-    trips_cols = ["trip_instance_key", "route_id", "direction_id"]
-    
+    trip_cols = ["trip_instance_key"]
+        
     trips_to_route = helpers.import_scheduled_trips(
         analysis_date,
-        columns = trips_cols,
+        columns = trip_cols + ["route_id", "direction_id"],
         get_pandas = True
     )
     
     time_of_day = (gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)   
-                   [["trip_instance_key", "time_of_day", 
+                   [trip_cols + ["time_of_day", 
                      "scheduled_service_minutes"]]
               )
     
-    trip_cols = ["schedule_gtfs_dataset_key", "trip_instance_key"]
-    
-    grouped_df = df.groupby(trip_cols, observed=True, group_keys=False)
+    primary_direction_by_trip = cardinal_direction_by_trip(df, trip_cols)
+        
+    grouped_df = df.groupby(
+        ["schedule_gtfs_dataset_key"] + trip_cols, 
+        observed=True, group_keys=False
+    )
     
     # Get median / mean stop meters for the trip
     # Attach time-of-day and route_id and direction_id
@@ -125,11 +85,15 @@ def assemble_scheduled_trip_metrics(
         grouped_df.agg({"stop_meters": "median"}).reset_index().rename(
             columns = {"stop_meters": "median_stop_meters"}),
         time_of_day,
-        on = "trip_instance_key",
+        on = trip_cols,
         how = "left"
     ).merge(
         trips_to_route,
-        on = "trip_instance_key",
+        on = trip_cols,
+        how = "inner"
+    ).merge(
+        primary_direction_by_trip,
+        on = trip_cols,
         how = "inner"
     )
 
@@ -139,18 +103,21 @@ def assemble_scheduled_trip_metrics(
 def schedule_metrics_by_route_direction(
     df: pd.DataFrame,
     analysis_date: str,
-    group_merge_cols: list,
+    route_direction_cols: list,
 ) -> pd.DataFrame:
     """
     Aggregate trip-level metrics to route-direction, and
     attach shape geometry for common_shape_id.
     """
     service_freq_df = gtfs_schedule_wrangling.aggregate_time_of_day_to_peak_offpeak(
-        df, group_merge_cols, long_or_wide="long"
+        df, 
+        route_direction_cols, 
+        long_or_wide="long"
     )
 
     metrics_df = (
-        df.groupby(group_merge_cols, observed=True, group_keys=False, dropna=False)
+        df.groupby(route_direction_cols, 
+                   observed=True, group_keys=False, dropna=False)
         .agg(
             {
                 "median_stop_meters": "mean",
@@ -158,6 +125,7 @@ def schedule_metrics_by_route_direction(
                 # does this make sense?
                 # median is the single boiled down metric at the trip-level
                 "scheduled_service_minutes": "mean",
+                "stop_primary_direction": lambda x: x.mode().iloc[0]
             }
         )
         .reset_index()
@@ -165,6 +133,7 @@ def schedule_metrics_by_route_direction(
             columns={
                 "median_stop_meters": "avg_stop_meters",
                 "scheduled_service_minutes": "avg_scheduled_service_minutes",
+                "stop_primary_direction": "route_primary_direction"
             }
         )
     )
@@ -181,11 +150,17 @@ def schedule_metrics_by_route_direction(
     ).pipe(helpers.remove_shapes_outside_ca)
 
 
-    df = pd.merge(common_shape, metrics_df, on=group_merge_cols, how="inner").merge(
-        service_freq_df, on=group_merge_cols, how="inner"
+    df = pd.merge(
+        common_shape, 
+        metrics_df, 
+        on = route_direction_cols, 
+        how = "inner"
+    ).merge(
+        service_freq_df, 
+        on = route_direction_cols, 
+        how = "inner"
     )
 
-    df.time_period = df.time_period.fillna(df.peak_offpeak)
     return df
     
     
@@ -202,40 +177,34 @@ if __name__ == "__main__":
         
         # Find metrics on the trip grain
         trip_metrics = assemble_scheduled_trip_metrics(date, GTFS_DATA_DICT)
-     
-        trip_metrics.direction_id = trip_metrics.direction_id.fillna(0)
-        
+             
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
         
-        route_group_merge_cols = [
+        route_dir_cols = [
             "schedule_gtfs_dataset_key", 
             "route_id", 
             "direction_id"
         ]
         
         route_dir_metrics = schedule_metrics_by_route_direction(
-            trip_metrics, date, route_group_merge_cols)
+            trip_metrics, date, route_dir_cols)
         
         route_typologies = pd.read_parquet(
             f"{SCHED_GCS}{ROUTE_TYPOLOGIES}_{date}.parquet",
-            columns = route_group_merge_cols + [
+            columns = route_dir_cols + [
                 "is_coverage", "is_downtown_local", 
                 "is_local", "is_rapid", "is_express", "is_rail"]
         )
         
-         # Find cardinal direction on the route grain
-        cardinal_dir_df = cardinal_direction_for_route_direction(date,GTFS_DATA_DICT)
         
         # Merge cardinal direction & typology work
         route_dir_metrics2 = pd.merge(
             route_dir_metrics,
             route_typologies,
-            on = route_group_merge_cols,
+            on = route_dir_cols,
             how = "left"
-        ).merge(cardinal_dir_df,
-            on = route_group_merge_cols,
-            how = "left")
+        )
         
         utils.geoparquet_gcs_export(
             route_dir_metrics2,
