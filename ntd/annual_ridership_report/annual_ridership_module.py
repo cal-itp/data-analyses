@@ -8,6 +8,34 @@ from calitp_data_analysis.tables import tbls
 from update_vars import NTD_MODES, NTD_TOS
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
+def sum_by_group(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
+    """
+    since data is now long to begin with, this replaces old sum_by_group, make_long and assemble_long_df functions.
+
+    """
+    grouped_df = (
+        df.groupby(group_cols + ["year"])
+        .agg(
+            {
+                "upt": "sum",
+                # "vrm":"sum",
+                # "vrh":"sum",
+                "previous_y_upt": "sum",
+                "change_1yr": "sum",
+            }
+        )
+        .reset_index()
+    )
+
+    # get %change back
+    grouped_df = annual_ridership_module.get_percent_change(grouped_df)
+
+    # decimal to whole number
+    grouped_df["pct_change_1yr"] = grouped_df["pct_change_1yr"] * 100
+
+    return grouped_df
+
+
 def get_percent_change(
     df: pd.DataFrame, 
 ) -> pd.DataFrame:
