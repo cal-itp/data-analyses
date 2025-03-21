@@ -24,9 +24,10 @@ preprocess_schedule_only:
 	python track_publish_dates.py
     
 route_typologies_data:
+	#python stop_arrivals_in_roads.py # quarterly cadence (Jan/Apr/Jul/Oct)
 	python route_typologies.py
 	python schedule_stats_by_route_direction.py
-
+    
 # Start compiling scripts needed when we start concatenating several days
 # Clean route names for displaying across time
 timeseries_preprocessing: 
