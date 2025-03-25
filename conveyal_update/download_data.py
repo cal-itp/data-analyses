@@ -18,9 +18,12 @@ regions_and_feeds = pd.read_parquet(f'{conveyal_vars.GCS_PATH}regions_feeds_{TAR
 
 def download_feed(row):
     # need wildcard for file too -- not all are gtfs.zip!
-    uri = f'gs://calitp-gtfs-schedule-raw-v2/schedule/dt={row.date.strftime("%Y-%m-%d")}/*/base64_url={row.base64_url}/*.zip'
-    fs.get(uri, f'{row.path}/{row.gtfs_dataset_name.replace(" ", "_")}_{row.feed_key}_gtfs.zip')
-    # print(f'downloaded {row.path}/{row.feed_key}_gtfs.zip')
+    try:
+        uri = f'gs://calitp-gtfs-schedule-raw-v2/schedule/dt={row.date.strftime("%Y-%m-%d")}/*/base64_url={row.base64_url}/*.zip'
+        fs.get(uri, f'{row.path}/{row.gtfs_dataset_name.replace(" ", "_")}_{row.feed_key}_gtfs.zip')
+        # print(f'downloaded {row.path}/{row.feed_key}_gtfs.zip')
+    except Exception as e:
+        print(f'\n could not download feed at {e}')
     
 def download_region(feeds_df, region: str):
     
