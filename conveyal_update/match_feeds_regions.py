@@ -23,11 +23,11 @@ def create_region_gdf():
     df['bbox'] = df.apply(to_bbox, axis=1)
     df['geometry'] = df.apply(lambda x: shapely.geometry.box(*x.bbox), axis = 1)
     df = df >> select(-_.bbox)
-    region_gdf = gpd.GeoDataFrame(df, crs=geography_utils.WGS84).to_crs(geography_utils.CA_NAD83Albers)
+    region_gdf = gpd.GeoDataFrame(df, crs=geography_utils.WGS84).to_crs(geography_utils.CA_NAD83Albers_m)
     return region_gdf
 
 def join_stops_regions(region_gdf: gpd.GeoDataFrame, feeds_on_target: pd.DataFrame):
-    all_stops = gtfs_utils_v2.get_stops(selected_date=TARGET_DATE, operator_feeds=feeds_on_target.feed_key).to_crs(geography_utils.CA_NAD83Albers)
+    all_stops = gtfs_utils_v2.get_stops(selected_date=TARGET_DATE, operator_feeds=feeds_on_target.feed_key).to_crs(geography_utils.CA_NAD83Albers_m)
     region_join = gpd.sjoin(region_gdf, all_stops)
     regions_and_feeds = region_join >> distinct(_.region, _.feed_key)
     return regions_and_feeds
