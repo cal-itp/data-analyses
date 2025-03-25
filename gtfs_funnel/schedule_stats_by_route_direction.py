@@ -175,14 +175,10 @@ def schedule_metrics_by_route_direction(
 
     round_me = ["avg_stop_miles", "avg_scheduled_service_minutes"]
     metrics_df[round_me] = metrics_df[round_me].round(2)
-
+    
     common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
         analysis_date
-    )
-
-    #common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
-    #    analysis_date
-    #).pipe(helpers.remove_shapes_outside_ca)
+    ).pipe(helpers.remove_shapes_outside_ca)
 
 
     df = pd.merge(common_shape, metrics_df, on=group_merge_cols, how="inner").merge(

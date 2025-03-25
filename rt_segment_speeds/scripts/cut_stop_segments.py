@@ -156,6 +156,15 @@ if __name__ == "__main__":
             on = "shape_array_key",
             how = "inner"
         )
+        
+        # Create uuid by concatenating several columns
+        # Can be easier to use if we want to do segment-specific things
+        # and find our way back to the full columns later
+        segments = segments.assign(
+            segment_uuid = segments.schedule_gtfs_dataset_key.str.cat(
+                segments[["route_id", "direction_id", "segment_id"]].astype(str), 
+                sep = "__")
+        )
                 
         utils.geoparquet_gcs_export(
             segments,
