@@ -7,7 +7,7 @@ apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
 oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 
 
-analysis_date_list = [rt_dates.DATES["feb2025"]]
+analysis_date_list = [rt_dates.DATES["mar2025"]]
 
 # analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates
 

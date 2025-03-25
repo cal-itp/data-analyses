@@ -38,9 +38,10 @@ def stop_times_with_shape(
                    "stop_id", "stop_sequence", "geometry"],
         filters = [[("trip_instance_key", "in", rt_trips)]],
         with_direction = True,
-        get_pandas = False,
+        get_pandas = True,
         crs = WGS84
     )
+    stop_times = dg.from_geopandas(stop_times, npartitions=4)
     
     shapes = helpers.import_scheduled_shapes(
         analysis_date,

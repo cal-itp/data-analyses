@@ -15,3 +15,10 @@ interpolate arrivals for stop_segments 2024-12-11:  2024-12-11: 0:14:09.409333
 2025-03-03 10:13:19.610 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for rt_stop_times 2025-02-12:  2025-02-12: 0:13:34.070995
 2025-03-03 12:54:42.560 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for speedmap_segments 2025-02-12:  2025-02-12: 0:03:09.033880
 2025-03-03 12:57:04.804 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for speedmap_segments 2025-01-15:  2025-01-15: 0:02:22.228792
+2025-03-13 15:15:04.789 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for rt_stop_times 2025-02-12:  2025-02-12: 0:12:25.491418
+2025-03-13 15:35:05.915 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for speedmap_segments 2025-02-12:  2025-02-12: 0:02:29.927929
+2025-03-17 15:58:38.500 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for rt_stop_times 2025-02-12:  2025-02-12: 0:13:12.002473
+2025-03-17 16:19:03.983 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for speedmap_segments 2025-02-12:  2025-02-12: 0:03:04.150031
+2025-03-20 10:54:10.063 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for rt_stop_times 2025-03-12:  2025-03-12: 0:11:32.948218
+2025-03-20 12:05:10.529 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for rt_stop_times 2025-03-12:  2025-03-12: 0:10:17.938227
+2025-03-20 12:22:55.881 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:236 - interpolate arrivals for speedmap_segments 2025-03-12:  2025-03-12: 0:02:33.032270
