@@ -154,3 +154,32 @@
 2025-02-17 20:31:07.926 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2025-02-12 execution time: 0:00:12.506741
 2025-02-17 20:31:47.700 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2025-02-12 execution time: 0:00:17.163715
 2025-02-17 20:32:19.288 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2025-02-12 execution time: 0:00:13.442771
+2025-03-13 13:44:12.254 | INFO     | __main__:<module>:277 - A1_rail_ferry_brt_stops 2025-03-13 execution time: 0:00:19.426997
+2025-03-13 13:49:28.372 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:04:56.740984
+2025-03-13 13:51:59.050 | INFO     | __main__:<module>:333 - B2_create_aggregate_stop_frequencies 2025-03-13 execution time: 0:02:09.646559
+2025-03-13 13:52:43.515 | INFO     | __main__:<module>:326 - B3_sjoin_stops_to_segments 2025-03-13 execution time: 0:00:12.369335
+2025-03-13 13:53:07.527 | INFO     | __main__:<module>:152 - C1_prep_pairwise_intersections 2025-03-13 execution time: 0:00:04.080314
+2025-03-13 13:53:33.280 | INFO     | __main__:<module>:124 - C2_find_intersections 2025-03-13 execution time: 0:00:06.731436
+2025-03-13 13:54:03.430 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2025-03-13 execution time: 0:00:10.883038
+2025-03-13 13:54:39.576 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2025-03-13 execution time: 0:00:16.685702
+2025-03-13 13:55:11.677 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2025-03-13 execution time: 0:00:12.334562
+2025-03-17 13:52:53.340 | INFO     | __main__:<module>:277 - A1_rail_ferry_brt_stops 2025-03-12 execution time: 0:00:18.637882
+2025-03-17 13:58:41.595 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:05:28.580663
+2025-03-17 14:21:09.159 | INFO     | __main__:<module>:277 - A1_rail_ferry_brt_stops 2025-03-12 execution time: 0:00:20.495120
+2025-03-17 14:26:44.237 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:05:16.205877
+2025-03-17 14:29:13.091 | INFO     | __main__:<module>:333 - B2_create_aggregate_stop_frequencies 2025-03-12 execution time: 0:02:07.864842
+2025-03-17 14:29:44.726 | INFO     | __main__:<module>:326 - B3_sjoin_stops_to_segments 2025-03-12 execution time: 0:00:12.286133
+2025-03-17 14:30:07.889 | INFO     | __main__:<module>:152 - C1_prep_pairwise_intersections 2025-03-12 execution time: 0:00:03.950582
+2025-03-17 14:30:33.410 | INFO     | __main__:<module>:124 - C2_find_intersections 2025-03-12 execution time: 0:00:06.624694
+2025-03-17 14:31:15.695 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2025-03-12 execution time: 0:00:11.075883
+2025-03-17 14:31:50.856 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2025-03-12 execution time: 0:00:16.339811
+2025-03-17 14:32:23.578 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2025-03-12 execution time: 0:00:12.367891
+2025-03-19 13:00:47.238 | INFO     | __main__:<module>:277 - A1_rail_ferry_brt_stops 2025-03-12 execution time: 0:00:17.080776
+2025-03-19 13:06:06.057 | INFO     | __main__:<module>:248 - B1_create_hqta_segments execution time: 0:05:00.672132
+2025-03-19 13:09:01.360 | INFO     | __main__:<module>:333 - B2_create_aggregate_stop_frequencies 2025-03-12 execution time: 0:02:22.979370
+2025-03-19 13:09:32.278 | INFO     | __main__:<module>:326 - B3_sjoin_stops_to_segments 2025-03-12 execution time: 0:00:11.906977
+2025-03-19 13:09:54.641 | INFO     | __main__:<module>:152 - C1_prep_pairwise_intersections 2025-03-12 execution time: 0:00:04.124620
+2025-03-19 13:10:19.735 | INFO     | __main__:<module>:124 - C2_find_intersections 2025-03-12 execution time: 0:00:06.659851
+2025-03-19 13:10:48.858 | INFO     | __main__:<module>:175 - C3_create_bus_hqta_types 2025-03-12 execution time: 0:00:10.639468
+2025-03-19 13:11:23.842 | INFO     | __main__:<module>:219 - D1_assemble_hqta_points 2025-03-12 execution time: 0:00:15.946026
+2025-03-19 13:11:53.645 | INFO     | __main__:<module>:168 - D2_assemble_hqta_polygons 2025-03-12 execution time: 0:00:11.047354
