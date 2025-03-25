@@ -16,6 +16,8 @@ The paper continues on to propose the use of other common metrics used in transp
 
 >[has] different implicit goals, which makes some metrics better for use in some areas than others.
 
+![image.png](https://private-user-images.githubusercontent.com/47205245/403160701-cbe50780-03d2-4b26-9a9b-5c30792020b2.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDI5Mzg5MDgsIm5iZiI6MTc0MjkzODYwOCwicGF0aCI6Ii80NzIwNTI0NS80MDMxNjA3MDEtY2JlNTA3ODAtMDNkMi00YjI2LTlhOWItNWMzMDc5MjAyMGIyLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAzMjUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMzI1VDIxMzY0OFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWU4Y2ZkMzMxN2E0OTM4MDIzZWU0ZWE0MzFhZTM1YjNiMzM5OWM1ZDAzNjc1ZGJiZDRjNGQ4ODhhNWYwMzRmZjYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.b0jr0WcmE9zAtcGyJpwB-PfoUGIzhs5r781LWJiMSsM)
+
 | Metric type          | Metric example                  | Implicit Goal(s)                       | Advantages                                   | Limitations                                  |
 |----------------------|---------------------------------|---------------------------------------|----------------------------------------------|----------------------------------------------|
 | Cost-efficiency      | Operating cost per revenue hour | Reduce costs*                         | Useful in both financial and service planning | Favors high labor productivity in dense, congested areas; does not track use |
@@ -24,43 +26,28 @@ The paper continues on to propose the use of other common metrics used in transp
 | Service-effectiveness| Passengers per revenue-vehicle hour | Increase ridership; reduce poorly patronized service | Useful for service planning; emphasizes what matters to riders | Favors high ridership; does not track costs   |
 |                      | Passengers per revenue-vehicle mile | Increase ridership; reduce low-ridership route miles/segments | Useful for service planning                | Favors high ridership and fast vehicle speeds; does not track costs |
 | Cost-effectiveness   | Farebox recovery ratio           | Reduce costs; increase fares; increase ridership | Commonly used; easy to calculate             | Combines both cost-efficiency and service-effectiveness into a single measure; difficult to deconstruct and interpret |
- 
 
 
-Outline why you pursued this project.
-* What research question(s) and topic(s) does your work address? 
-* What is the intent of your work? 
-* Why is this relevant?
-* Who is the intended audience for this product? 
-* How do you intend for the stakeholders to use it? 
-* What is the impact your research will have?
-* How often is this website updated with new data? Monthly/quarterly/annually? 
-* Add a link to the folder that houses your code. 
+This report intends to explores these metrics with data submitted to the NTD for all reporters in California.
+
 
 ## Definitions
-The narrative portion of your work can contain terms that are unclear. For example, what does <i>peak and off-peak hours</i> mean? Or <i>early, late, and on-time</i>? Although <i>MPO</i> is easily searched, perhaps that can benefit from being defined.
+- **UCLA Institue of Transportation**:
+- **Transportation Development Act (TDA)**:
+- 
+
 
 ## Methodology
-Detail the analytical decisions you made for your work. What did you do? How did you do it? Why did you approach your work a certain way? Here are some questions that will provide some food for thought. 
-    
-* What datasets did you use? 
-* Why did you choose these datasets? 
-* Where did these datasets come from? 
-* What aggregations did you do on your datasets? Why did you choose this particular grain? 
-* What were the steps you took to get to your results?
-* Why did you choose a particular date/time period? 
-* Why did you choose the metrics you did? How did you calculate your metrics? 
+ 
 
 ## Frequently Asked Questions
-If you foresee that there will be parts of your work that will spark some questions and curiosity from people viewing your work, you can add these potential questions to this FAQ portion. You can also add your contact information if you anticipate questions. 
+ 
     
 ## Data Sources
-Use this section to send users to the appropriate links to download/view the data you used to create your websites. If the methodology section above doesn't apply to your website, you can write about the data sources you used here. Below is some language you can use, if the data is uploaded to our public GCS folder. 
-
-To download the data that powers this website, please navigate to the folder titled `insert folder name, keep the back ticks` [here](insert link here). You will find the most recent datasets available in `insert the file extensions available` formats. We renamed some of the column names for readability and you can match the [readable column names](insert link to readable.yml) to the original column names. 
+ 
 
 ## Who We Are
-We want our audience to understand who we are and why our expertise and research should be trusted. Here is a blurb you can lift. 
+ 
 
 This website was created by the [California Department of Transportation](https://dot.ca.gov/)'s Division of Data and Digital Services. We are a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. For more of our work, visit our [portfolio](https://analysis.calitp.org/).
 
