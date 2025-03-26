@@ -31,18 +31,7 @@ with open("color_palettes.yml") as f:
 """
 Data
 """
-def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
-    """
-    Load schedule versus realtime file.
-    """
-    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
-   
-    # Keep only rows that are found in both schedule and real time data
-    df = (pd.read_parquet(schd_vp_url, 
-          filters=[[("organization_name", "==", organization),
-         ("sched_rt_category", "in", ["schedule_and_vp"])]])
-         )
-    
+def clean_schedule_vp_df(df:pd.DataFrame)->pd.DataFrame:
     # Delete duplicates
     df = df.drop_duplicates().reset_index(drop = True)
     
@@ -66,10 +55,29 @@ def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
     
     # Replace column names
     df = _report_utils.replace_column_names(df)
-    
-    # Turn date to quarters
-    df["quarter"] = pd.PeriodIndex(df.Date, freq="Q").astype("str")
     return df
+
+def load_schedule_vp_metrics(organization:str)->pd.DataFrame:
+    """
+    Load schedule versus realtime file.
+    """
+    monthly_schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp}.parquet"
+   
+    qtr_schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.quarterly_route_schedule_vp}.parquet"
+    
+    # Keep only rows that are found in both schedule and real time data
+    monthly_df = (pd.read_parquet(monthly_schd_vp_url, 
+          filters=[[("organization_name", "==", organization),
+         ("sched_rt_category", "in", ["schedule_and_vp"])]])
+         )
+ 
+    monthly_df = clean_schedule_vp_df(monthly_df)
+    qtr_df = (pd.read_parquet(qtr_schd_vp_url, 
+          filters=[[("organization_name", "==", organization),
+         ("sched_rt_category", "in", ["schedule_and_vp"])]])
+         )
+    qtr_df = clean_schedule_vp_df(qtr_df)
+    return monthly_df, qtr_df
 
 def load_operator_metrics(organization_name:str)->pd.DataFrame:
     """
@@ -215,49 +223,6 @@ def pct_vp_journey(df: pd.DataFrame, col1: str, col2: str) -> pd.DataFrame:
     df3["ruler_100_pct"] = 100
     return df3
 
-def quarterly_rollup(df:pd.DataFrame, metric_columns:list)->pd.DataFrame:
-    """
-    roll up months to each quarter for certain metrics.
-    """
-    quarterly_metrics = segment_calcs.calculate_weighted_averages(
-    
-    df=df,
-    group_cols=[
-        "quarter",
-        "Period",
-        "Organization",
-        "Route",
-        "dir_0_1",
-        "Direction",
-    ],
-    metric_cols= metric_columns,
-    weight_col="# Trips with VP",
-    )
-    return quarterly_metrics
-
-def rollup_schd_qtr(peak_offpeak_df:pd.DataFrame)->pd.DataFrame:
-    """
-    Roll up # Scheduled Trips to be on a quarterly basis
-    since this metric doesn't change very often. 
-    """
-    # Aggregate
-    agg1 = (
-    peak_offpeak_df.groupby(
-        ["quarter", "Period", "Organization", "Route", "dir_0_1", "Direction"]
-    )
-    .agg({"Date":"nunique","# scheduled trips": "sum"})
-    .reset_index()
-    )
-    
-    # If a quarter is complete with all 3 months, divide by 3
-    agg1.loc[agg1["Date"] == 3, "# scheduled trips"] = (
-    agg1.loc[agg1["Date"] == 3, "# scheduled trips"] / 3)
-    
-    # If a quarter is incomplete with only 2 months, divide by 2 
-    agg1.loc[agg1["Date"] == 2, "# scheduled trips"] = (
-    agg1.loc[agg1["Date"] == 2, "# scheduled trips"] / 2
-)
-    return agg1
 """
 Charts
 """
@@ -922,10 +887,14 @@ Section
 """
 def filtered_route(
     df: pd.DataFrame,
+    qtr_schd_df: pd.DataFrame
 ) -> alt.Chart:
     """
     This combines all the charts together, controlled by a single
     dropdown.
+    
+    df: monthly_schd_vp_url
+    qtr_schd_df = qtr_schdp_vd_url
     
     Resources:
         https://stackoverflow.com/questions/58919888/multiple-selections-in-altair
@@ -948,17 +917,9 @@ def filtered_route(
     # Filter for only rows that are "peak/offpeak" statistics
     peak_offpeak_df = df.loc[df["Period"] != "all_day"].reset_index(drop=True)
 
-    # Roll up some metrics that don't change too much
-    # to be quarterly instead of monthly
-    quarter_rollup_all_day = quarterly_rollup(all_day, [
-        "Average VP per Minute",
-        "% VP within Scheduled Shape",
-        "Average Scheduled Service (trip minutes)",
-        "ruler_100_pct",
-        "ruler_for_vp_per_min"
-    ]) 
-    
-    total_scheduled_trips = rollup_schd_qtr(peak_offpeak_df)
+    # Separate out all_day and off_peak for quarterly rollup
+    quarter_rollup_all_day = qtr_schd_df.loc[qtr_schd_df.Period == "all_day"]
+    quarter_rollup_peak_offpeak = qtr_schd_df.loc[qtr_schd_df.Period != "all_day"]
     
     # Manipulate the df for some of the metrics
     timeliness_df = timeliness_trips(df)
@@ -1031,7 +992,7 @@ def filtered_route(
     )
     
     n_trips_dir_0 = (stacked_bar_chart(
-    df = total_scheduled_trips.loc[total_scheduled_trips.dir_0_1 == 0],
+    df = quarter_rollup_peak_offpeak.loc[quarter_rollup_peak_offpeak.dir_0_1 == 0],
     y_col = "# scheduled trips",
     color_col = "Period",
     title = readable_dict["trips_per_day_graph"]["title"],
@@ -1042,7 +1003,7 @@ def filtered_route(
     .transform_filter(xcol_param)
     )
     n_trips_dir_1 = (stacked_bar_chart(
-    df = total_scheduled_trips.loc[total_scheduled_trips.dir_0_1 == 1],
+    df = quarter_rollup_peak_offpeak.loc[quarter_rollup_peak_offpeak.dir_0_1 == 1],
     y_col = "# scheduled trips",
     color_col = "Period",
     title = readable_dict["trips_per_day_graph"]["title"],
