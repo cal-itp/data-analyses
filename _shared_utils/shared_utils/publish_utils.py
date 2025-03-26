@@ -1,3 +1,8 @@
+"""
+Utility functions related to publishing datasets.
+Ex: writing out data to public GCS bucket,
+suppressing private datasets.
+"""
 import os
 from pathlib import Path
 from typing import Literal, Union
@@ -89,3 +94,19 @@ def subset_table_from_previous_date(
         )
 
     return past_df
+
+
+def filter_to_recent_date(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    By schedule_gtfs_dataset_name, keep the most recent
+    service_date that shows up in scheduled trips.
+    """
+    df2 = (
+        df.groupby("name", group_keys=False)
+        .service_date.max()
+        .reset_index()
+        .sort_values(["service_date", "name"], ascending=[False, True])
+        .reset_index(drop=True)
+        .astype({"service_date": "str"})
+    )
+    return df2
