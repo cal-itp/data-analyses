@@ -66,55 +66,21 @@ FULL_DATE_FMT = "%Y-%m-%d"  # 2022-06-01 for 6/1/22
 # decide to use v1 cached data from gcs or v2 warehouse cached data/fresh queries
 warehouse_cutoff_date = dt.date(2022, 12, 31)
 
-trip_cols = [
-    "feed_key",
-    "trip_key",
-    "gtfs_dataset_key",
-    "service_date",
-    "trip_id",
-    "route_id",
-    "route_short_name",
-    "shape_id",
-    "direction_id",
-    "route_type",
-    "route_long_name",
-    "route_desc",
-]
-
-st_cols = [
-    "feed_key",
-    "trip_id",
-    "stop_id",
-    "arrival_time",
-    "departure_time",
-    "timepoint",
-    "stop_sequence",
-    "continuous_drop_off",
-    "continuous_pickup",
-    "arrival_sec",
-    "departure_sec",
-]
-# must include _sec for util to work...
-stop_cols = ["feed_key", "stop_id", "stop_name", "pt_geom"]
 # must include pt_geom to return gdf
 shape_cols = ["feed_key", "shape_id"]
 
-
-# used in gtfs_utils
-def format_date(analysis_date: Union[dt.date, str]) -> str:
-    """
-    Get date formatted correctly in all the queries
-    """
-    if isinstance(analysis_date, dt.date):
-        return analysis_date.strftime(FULL_DATE_FMT)
-    elif isinstance(analysis_date, str):
-        return dt.datetime.strptime(analysis_date, FULL_DATE_FMT).date()
-
-
-def reversed_colormap(existing: branca.colormap.ColorMap) -> branca.colormap.ColorMap:
-    return branca.colormap.LinearColormap(
-        colors=list(reversed(existing.colors)), vmin=existing.vmin, vmax=existing.vmax
-    )
+route_type_names = {
+    "0": "Tram, Streetcar, Light rail",
+    "1": "Subway, Metro",
+    "2": "Rail",
+    "3": "Bus",
+    "4": "Ferry",
+    "5": "Cable tram",
+    "6": "Aerial lift, suspended cable car",
+    "7": "Funicular",
+    "11": "Trolleybus",
+    "12": "Monorail",
+}
 
 
 def cardinal_definition_rules(distance_east: float, distance_north: float) -> str:
@@ -233,65 +199,6 @@ def show_full_df(df: pd.DataFrame):
         return display(df)
 
 
-def fix_arrival_time(gtfs_timestring: str) -> tuple[str, int]:
-    """Reformats a GTFS timestamp (which allows the hour to exceed
-    24 to mark service day continuity)
-    to standard 24-hour time.
-    """
-    extra_day = 0
-    if not gtfs_timestring:  # preserve none if time not provided
-        return None, extra_day
-    split = gtfs_timestring.split(":")
-    hour = int(split[0])
-
-    if hour >= 24:
-        extra_day = 1
-        split[0] = str(hour - 24)
-        corrected = (":").join(split)
-        return corrected.strip(), extra_day
-
-    else:
-        return gtfs_timestring.strip(), extra_day
-
-
-# TODO use?
-def gtfs_time_to_dt(df: pd.DataFrame) -> pd.DataFrame:
-    date = df.service_date
-
-    timestring, extra_day = fix_arrival_time(df.arrival_time)
-
-    df["arrival_dt"] = dt.datetime.combine(
-        date + dt.timedelta(days=extra_day),
-        dt.datetime.strptime(timestring, HOUR_MIN_SEC_FMT).time(),
-    )
-
-    return df
-
-
-def interpolate_arrival_times(df):
-    """
-    Interpolate between provided arrival_times linearly with distance
-    """
-    interp_df = df.dropna(subset=["arrival_time"])
-    yp = interp_df.arrival_time.to_numpy()
-    yp = yp.astype("datetime64[s]").astype("float64")
-    xp = interp_df.shape_meters.to_numpy()
-
-    def interpolator(x, shape_meters_array, arrival_time_np):
-        return np.interp(x, shape_meters_array, arrival_time_np)
-
-    df = df.assign(
-        arrival_time=df.apply(
-            lambda x: interpolator(x.shape_meters, xp, yp) if pd.isnull(x.arrival_time) else x.arrival_time,
-            axis=1,
-        )
-    )
-
-    df["arrival_time"] = df.arrival_time.to_numpy().astype("datetime64[s]")
-
-    return df
-
-
 def check_cached(
     filename: str,
     GCS_FILE_PATH: Union[str, Path] = GCS_FILE_PATH,
@@ -306,21 +213,6 @@ def check_cached(
     path = f"{GCS_FILE_PATH}{subfolder}{filename}"
     if fs.exists(path):
         return path
-    else:
-        return None
-
-
-def trips_cached(itp_id: int, date_str: str) -> pd.DataFrame:
-    """
-    Check for the trips file for that operator on selected date.
-    Use in all the queries that can take a trips pd.DataFrame.
-
-    If not, return None, and a fresh query can be run.
-    """
-    trips_cached = check_cached(f"trips_{itp_id}_{date_str}.parquet")
-
-    if trips_cached:
-        return pd.read_parquet(trips_cached)
     else:
         return None
 
@@ -385,88 +277,6 @@ def compose_filename_check(ix_df: pd.DataFrame, table: str):
     return filename, path, service_date
 
 
-def get_vehicle_positions(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
-    """
-    Using ix_df as a guide, download all-operator data from GCS as queried via:
-        https://github.com/cal-itp/data-analyses/blob/main/open_data/download_vehicle_positions.py
-    Filter to relevant vehicle positions datasets; cache filtered version
-    """
-
-    filename, path, service_date = compose_filename_check(ix_df, "vp")
-    date_str = service_date.isoformat()
-
-    if path:
-        print(f"found vp parquet at {path}")
-        org_vp = gpd.read_parquet(path)
-    else:
-        vp_all = gpd.read_parquet(f"{VP_FILE_PATH}vp_{date_str}.parquet")
-        org_vp = vp_all >> filter(_.gtfs_dataset_key.isin(ix_df.vehicle_positions_gtfs_dataset_key))
-        org_vp = org_vp >> select(-_.location_timestamp, -_.service_date, -_.activity_date)
-        org_vp = org_vp.to_crs(geography_utils.CA_NAD83Albers_m)
-        utils.geoparquet_gcs_export(org_vp, GCS_FILE_PATH + V2_SUBFOLDER, filename)
-
-    return org_vp
-
-
-def get_trips(ix_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Using ix_df as a guide, query warehouse for trips via shared_utils.gtfs_utils_v2
-    Only request columns used in speedmap workflow; cache
-    """
-    filename, path, service_date = compose_filename_check(ix_df, "trips")
-
-    if path:
-        print(f"found trips parquet at {path}")
-        org_trips = pd.read_parquet(path)
-    else:
-        feed_key_list = list(ix_df.feed_key.unique())
-        org_trips = gtfs_utils_v2.get_trips(service_date, feed_key_list, trip_cols)
-        org_trips.to_parquet(GCS_FILE_PATH + V2_SUBFOLDER + filename)
-
-    return org_trips
-
-
-def get_st(ix_df: pd.DataFrame, trip_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Using ix_df as a guide, query warehouse for stop_times via shared_utils.gtfs_utils_v2
-    Only request columns used in speedmap workflow; cache
-    """
-    filename, path, service_date = compose_filename_check(ix_df, "st")
-
-    if path:
-        print(f"found stop times parquet at {path}")
-        org_st = pd.read_parquet(path)
-    else:
-        feed_key_list = list(ix_df.feed_key.unique())
-        org_st = gtfs_utils_v2.get_stop_times(
-            service_date, feed_key_list, trip_df=trip_df, stop_time_cols=st_cols, get_df=True
-        )
-        org_st = org_st >> select(-_.arrival_sec, -_.departure_sec)
-        org_st.to_parquet(GCS_FILE_PATH + V2_SUBFOLDER + filename)
-
-    return org_st
-
-
-def get_stops(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
-    """
-    Using ix_df as a guide, query warehouse for stops via shared_utils.gtfs_utils_v2
-    Only request columns used in speedmap workflow; cache
-    """
-    filename, path, service_date = compose_filename_check(ix_df, "stops")
-
-    if path:
-        print(f"found stops parquet at {path}")
-        org_stops = gpd.read_parquet(path)
-    else:
-        feed_key_list = list(ix_df.feed_key.unique())
-        org_stops = gtfs_utils_v2.get_stops(
-            service_date, feed_key_list, stop_cols, crs=geography_utils.CA_NAD83Albers_m
-        )
-        utils.geoparquet_gcs_export(org_stops, GCS_FILE_PATH + V2_SUBFOLDER, filename)
-
-    return org_stops
-
-
 def get_shapes(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
     """
     Using ix_df as a guide, query warehouse for shapes via shared_utils.gtfs_utils_v2
@@ -512,37 +322,6 @@ def get_routelines(
             return
 
         return routelines
-
-
-def check_intermediate_data(
-    speedmaps_index_df: pd.DataFrame = pd.DataFrame(),
-    analysis_date: dt.date = None,
-) -> pd.DataFrame:
-    """
-    speedmaps_index_df: pd.DataFrame of all agencies to try generating a speedmap
-        from rt_delay/build_speedmaps_index.py
-    For speedmap generation scripts in rt_delay.
-    Check if intermediate file exists (process partially complete) and
-    return that to script, otherwise check intermediate data from GCS
-    """
-    assert analysis_date or not speedmaps_index_df.empty, "must provide analysis date if not providing index df"
-    analysis_date = speedmaps_index_df.analysis_date.iloc[0] if not analysis_date else analysis_date
-    progress_path = f"./_rt_progress_{analysis_date}.parquet"
-    already_tried = os.path.exists(progress_path)
-    assert already_tried or not speedmaps_index_df.empty, "must provide df if no existing progress parquet"
-    if already_tried:
-        print(f"found {progress_path}, resuming")
-        speedmaps_index_joined = pd.read_parquet(progress_path)
-        print(speedmaps_index_joined >> count(_.status))  # show status when running script
-    else:
-        operators_ran = get_operators(analysis_date, speedmaps_index_df.organization_itp_id.to_list())
-        operators_ran_df = pd.DataFrame.from_dict(operators_ran, orient="index", columns=["status"])
-        operators_ran_df.index.name = "itp_id"
-        speedmaps_index_joined = speedmaps_index_df >> inner_join(
-            _, operators_ran_df, on={"organization_itp_id": "itp_id"}
-        )
-
-    return speedmaps_index_joined
 
 
 def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
@@ -639,86 +418,6 @@ def arrowize_by_frequency(row, frequency_col="trips_per_hour", frequency_thresho
     return row
 
 
-def layer_points(rt_interpolator):
-    keep_cols = [
-        "geometry",
-        "shape_meters",
-        "progressed",
-        "secs_from_last",
-        "meters_from_last",
-    ]
-
-    initial_bk_noise = rt_interpolator.position_gdf >> filter(_.meters_from_last < 0) >> select(*keep_cols)
-
-    initial_deduped = rt_interpolator.position_gdf >> distinct(_.shape_meters, _keep_all=True) >> select(*keep_cols)
-
-    cleaned = rt_interpolator.cleaned_positions >> select(*keep_cols)
-
-    popup_dict = {
-        "shape_meters": "shape_meters",
-        "progressed": "progressed",
-        "secs_from_last": "secs_from_last",
-        "meters_from_last": "meters_from_last",
-    }
-
-    layers_dict = {
-        "initial backwards noise": {
-            "df": initial_bk_noise,
-            "plot_col": "shape_meters",
-            "popup_dict": popup_dict,
-            "tooltip_dict": popup_dict,
-            "colorscale": branca.colormap.step.Blues_03,
-        },
-        "initial position deduplicated": {
-            "df": initial_deduped,
-            "plot_col": "shape_meters",
-            "popup_dict": popup_dict,
-            "tooltip_dict": popup_dict,
-            "colorscale": branca.colormap.step.Greens_03,
-        },
-        "cleaned_final": {
-            "df": cleaned,
-            "plot_col": "shape_meters",
-            "popup_dict": popup_dict,
-            "tooltip_dict": popup_dict,
-            "colorscale": branca.colormap.step.Greens_03,
-        },
-    }
-
-    for i in range(rt_interpolator._position_cleaning_count):
-        layers_dict[f"cleaned_{i}"] = {
-            "df": (rt_interpolator.debug_dict[f"clean_{i}"] >> select(*keep_cols)),
-            "plot_col": "shape_meters",
-            "popup_dict": popup_dict,
-            "tooltip_dict": popup_dict,
-            "colorscale": branca.colormap.step.Reds_03,
-            # 'marker':  marker
-        }
-    # return layers_dict
-    # TODO: fix multiple layer plotting using gdf.explore()
-    # return map_utils.make_folium_multiple_layers_map(layers_dict, 900, 500)
-
-
-def map_line(gdf):
-    # gdf = gdf.buffer(1)
-    gdf = gdf.to_crs(geography_utils.WGS84)
-    centroid = gdf.geometry.iloc[0].centroid
-    m = folium.Map(location=[centroid.y, centroid.x], zoom_start=13, tiles="cartodbpositron")
-
-    folium.GeoJson(gdf.to_json()).add_to(m)
-
-    return m
-
-
-def categorize_cleaning(rt_operator_day, interpolator_key):
-    rt_interpolator = rt_operator_day.position_interpolators[interpolator_key]["rt"]
-    raw = rt_interpolator.position_gdf.shape[0]
-    same_loc_dropped = (rt_interpolator.position_gdf >> distinct(_.shape_meters)).shape[0]
-    cleaned = rt_interpolator.cleaned_positions.shape[0]
-
-    return (interpolator_key, cleaned / raw, cleaned / same_loc_dropped)
-
-
 def exclude_desc(desc):
     # match descriptions that don't give additional info, like Route 602 or Route 51B
     exclude_texts = [
@@ -748,16 +447,6 @@ def which_desc(row):
         return ""
 
 
-def describe_most_delayed(row):
-    description = which_desc(row)
-    full_description = (
-        f"{row.route_short_name}{description}, {row.direction}: "
-        f"{round(row.mean_delay_seconds / 60, 0)} minutes late on average"
-    )
-    row["full_description"] = full_description
-    return row
-
-
 def describe_slowest(row):
     description = which_desc(row)
     full_description = (
@@ -767,59 +456,6 @@ def describe_slowest(row):
     )
     row["full_description"] = full_description
     return row
-
-
-route_type_names = {
-    "0": "Tram, Streetcar, Light rail",
-    "1": "Subway, Metro",
-    "2": "Rail",
-    "3": "Bus",
-    "4": "Ferry",
-    "5": "Cable tram",
-    "6": "Aerial lift, suspended cable car",
-    "7": "Funicular",
-    "11": "Trolleybus",
-    "12": "Monorail",
-}
-
-
-def get_operators(analysis_date, operator_list, verbose=False):
-    """
-    Function for checking the existence of rt_trips and stop_delay_views in GCS for operators on a given day.
-
-    analysis_date: datetime.date
-    operator_list: list of itp_id's
-    verbose: print status in additon to returning dict
-    """
-
-    if isinstance(analysis_date, str):
-        analysis_date = pd.to_datetime(analysis_date).date()
-    # if analysis_date <= dt.date(2022, 12, 31):  # look for v1 or v2 intermediate data
-    #     subfolder = "rt_trips/"
-    # else:
-    subfolder = "v2_rt_trips/"
-    fs_list = fs.ls(f"{GCS_FILE_PATH}{subfolder}")
-    # day = str(analysis_date.day).zfill(2)
-    # month = str(analysis_date.month).zfill(2)
-    date_iso = analysis_date.isoformat()
-    # now finds ran operators on specific analysis date
-    ran_operators = [
-        int(path.split(f"{subfolder}")[1].split("_")[0])
-        for path in fs_list
-        if date_iso in path.split(f"{subfolder}")[1]
-    ]
-    op_list_runstatus = {}
-    for itp_id in operator_list:
-        if itp_id in ran_operators:
-            if verbose:
-                print(f"already ran: {itp_id}")
-            op_list_runstatus[itp_id] = "already_ran"
-            continue
-        else:
-            if verbose:
-                print(f"not yet run: {itp_id}")
-            op_list_runstatus[itp_id] = "not_yet_run"
-    return op_list_runstatus
 
 
 def spa_map_export_link(
