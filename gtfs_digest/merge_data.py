@@ -347,3 +347,4 @@ if __name__ == "__main__":
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
+    print("Saved GTFS digest")
