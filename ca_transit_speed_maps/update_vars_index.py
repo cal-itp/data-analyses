@@ -2,7 +2,6 @@ import pandas as pd
 import geopandas as gpd
 import datetime as dt
 
-# from calitp_data_analysis.tables import tbls
 from shared_utils import rt_dates, catalog_utils, schedule_rt_utils
 
 from segment_speed_utils.project_vars import (
@@ -25,7 +24,7 @@ def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
     '''
     path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.segment_timeofday}_{analysis_date}.parquet'
     org_cols = ['organization_name', 'organization_source_record_id', 'name', 'base64_url']
-    speedmap_segs = gpd.read_parquet(path)[org_cols].drop_duplicates()
+    speedmap_segs = gpd.read_parquet(path)[org_cols].drop_duplicates().reset_index(drop=True)
     districts = schedule_rt_utils.filter_dim_county_geography(analysis_date)
     new_ix = speedmap_segs.merge(districts, on = 'organization_name')
     new_ix['status'] = 'speedmap_segs_available'
