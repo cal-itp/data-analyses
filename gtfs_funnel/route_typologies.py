@@ -28,6 +28,7 @@ from dask import delayed, compute
 from segment_speed_utils import gtfs_schedule_wrangling, helpers                       
 from segment_speed_utils.project_vars import PROJECT_CRS   
 from shared_utils import rt_dates
+from shared_utils.gtfs_utils_v2 import RAIL_ROUTE_TYPES
 from update_vars import SHARED_GCS, SCHED_GCS, GTFS_DATA_DICT
 
 route_dir_cols = [
@@ -42,22 +43,31 @@ road_segment_cols = road_cols + ["segment_sequence"]
 
 route_typologies = [
     "downtown_local", "local", "coverage",
-    "rapid", "express", "rail"
+    "rapid", "express", "rail", "ferry"
 ]
 
 def categorize_routes_by_name(
-    analysis_date: str
+    analysis_date: str,
+    route_typology_df: pd.DataFrame
 ) -> pd.DataFrame:
     """
     Look at how operator describes route (route_short_name,
     route_long_name) and tag express / rapid / local / rail routes.
     """
-    df = helpers.import_scheduled_trips(
+    # Aready have route_type so let's merge in the route name columns
+    route_name_df = helpers.import_scheduled_trips(
         analysis_date,
         columns = ["gtfs_dataset_key", "name", 
-                   "route_type", "route_id", 
+                   "shape_id", 
                    "route_long_name", "route_short_name"],
         get_pandas = True
+    ).rename(columns = {"shape_id": "common_shape_id"})
+    
+    df = pd.merge(
+        route_typology_df,
+        route_name_df,
+        on = ["schedule_gtfs_dataset_key", "common_shape_id"],
+        how = "inner"
     )
     
     # Fill in missing values
@@ -72,7 +82,7 @@ def categorize_routes_by_name(
     )
     
     typology_tags = df.apply(
-        lambda x: tag_rapid_express_rail(
+        lambda x: tag_rapid_express_rail_ferry(
             x.combined_name, x.route_type), axis=1
     )
     
@@ -82,15 +92,14 @@ def categorize_routes_by_name(
         is_local = df2.apply(
             lambda x: 
             1 if (x.is_express==0) and (x.is_rapid==0) and 
-            (x.is_rail==0)
+            (x.is_rail==0) and (x.is_ferry==0)
             else 0, axis=1).astype(int)
     )
     
     return df2
 
-
-def tag_rapid_express_rail(
-    route_name_string: str, route_type_string: str
+def tag_rapid_express_rail_ferry(
+    route_name: str, route_type: str
 ) -> pd.Series:
     """
     Use the combined route_name and see if we can 
@@ -101,25 +110,28 @@ def tag_rapid_express_rail(
     For local routes, we'll pass that through NACTO to see
     if we can better categorize as downtown_local, local, or coverage.
     """
-    route_name_string = route_name_string.lower()
+    route_name_lower = route_name.lower()
     
     express = 0
     rapid = 0
     rail = 0
+    ferry = 0
     
-    if any(substring in route_name_string for substring in 
+    if any(substring in route_name_lower for substring in 
            ["express", "limited"]):
         express = 1
-    if "rapid" in route_name_string:
+    if "rapid" in route_name_lower:
         rapid = 1
     
-    rail_types = ['0', '1', '2', '5', '6', '7', '11', '12']
-    if route_type_string in rail_types:
+    if route_type in RAIL_ROUTE_TYPES:
         rail = 1
     
+    if route_type == "4":
+        ferry = 1
+    
     return pd.Series(
-            [express, rapid, rail], 
-            index=['is_express', 'is_rapid', 'is_rail']
+            [express, rapid, rail, ferry], 
+            index=['is_express', 'is_rapid', 'is_rail', 'is_ferry']
         )
 
 
@@ -184,7 +196,43 @@ def nacto_stop_frequency(
     # the route name side
 
     
+def categorize_non_bus_typologies(
+    df: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    For non-bus typologies, we'll use route_type and tag it.
+    These do not need to be filtered against a threshold (since it's likely
+    that rail tracks are not roads, so they'd get filtered out too aggressively).
+    """
+    route_dir_sort_cols = [
+        "schedule_gtfs_dataset_key", 
+        "route_id", "direction_id", 
+        "route_name", "route_type"
+    ]
+
+    df2 = df.sort_values(
+        route_dir_sort_cols + ["pct_typology"],
+        ascending = [True for c in route_dir_sort_cols] + [False]
+    ).drop_duplicates(
+        subset = route_dir_sort_cols
+    )
+    
+    typology_tags = df2.apply(
+        lambda x: tag_rapid_express_rail_ferry(
+            x.route_name, x.route_type), axis=1
+    )
+    
+    df3 = pd.concat([df2, typology_tags], axis=1)  
+    
+    return df3
+
+    
 def prep_roads(dict_inputs: dict) -> gpd.GeoDataFrame:
+    """
+    Uses aggregated sjoin to count stop arrivals on roads
+    from stop_arrivals_in_roads.py.
+    Assigns service frequency to road segment (across operators).
+    """
     road_stats = pd.read_parquet(
         f"{SCHED_GCS}arrivals_by_road_segment.parquet"
     )
@@ -221,12 +269,13 @@ def overlay_shapes_to_roads(
     analysis_date: str,
     buffer_meters: int
 ) -> gpd.GeoDataFrame:
-    
-    # AH: removed pipe b/c it erases routes from Amtrak
-    #common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
-    #    analysis_date
-    #).pipe(helpers.remove_shapes_outside_ca)
-
+    """
+    Get overlay of shapes to roads so we can 
+    attach road's typology back to transit (shape).
+    For the most common shape for each route-direction,
+    count the number of meters and percentage of shape's total meters
+    that is assigned to each typology to use as plurality later.  
+    """
     common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
         analysis_date
     )
@@ -234,11 +283,19 @@ def overlay_shapes_to_roads(
     common_shape = common_shape.assign(
         route_meters = common_shape.geometry.length,
     )
-        
+    
+    inside_ca_shapes = helpers.remove_shapes_outside_ca(common_shape)
+    outside_ca_shapes = common_shape[
+        ~common_shape.common_shape_id.isin(inside_ca_shapes.common_shape_id)
+    ]
+    
     # use sjoin first to find where we want to calculate overlay
+    # roads are only for CA, so overlay will show incorrect results anyway
+    # if we include Amtrak because there will be only a small portion that overlaps
+    # we'll concatenate back outside_ca_shapes after (leave pct_typology as NaN)
     s1 = gpd.sjoin(
         roads,
-        common_shape,
+        inside_ca_shapes,
         how = "inner",
         predicate = "intersects"
     ).drop(columns = ["index_right"]).reset_index(drop=True)
@@ -278,7 +335,27 @@ def overlay_shapes_to_roads(
             .reset_index()
     )
     
-    return gdf3  
+    # Add back outside CA shapes and then add route_type
+    gdf4 = pd.concat(
+        [gdf3, outside_ca_shapes.drop(columns = "geometry")],
+        axis=0, ignore_index=True
+    )
+    
+    # Add back route_type
+    route_types_by_shape = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = ["gtfs_dataset_key", "shape_id", "route_type"],
+        get_pandas = True
+    ).rename(columns = {"shape_id": "common_shape_id"})
+    
+    gdf5 = pd.merge(
+        gdf4,
+        route_types_by_shape,
+        on = ["schedule_gtfs_dataset_key", "common_shape_id"],
+        how = "inner"
+    )
+   
+    return gdf5  
 
 
 def primary_secondary_typology(
@@ -287,17 +364,19 @@ def primary_secondary_typology(
     """
     Instead of leaving combinations with typology-freq_category,
     aggregate by typology and select the top 2.
-    """     
-    df2 = (df.groupby(route_dir_cols + ["typology"])
+    """ 
+    group_cols = route_dir_cols + ["route_type"]
+    
+    df2 = (df.groupby(group_cols + ["typology"])
            .agg({"pct_typology": "sum"})
            .reset_index()
           )
     
     df2 = df2.assign(
         obs = (df2
-           .sort_values(route_dir_cols + ["pct_typology"], 
-                        ascending=[True for i in route_dir_cols] + [False])
-           .groupby(route_dir_cols)
+           .sort_values(group_cols + ["pct_typology"], 
+                        ascending=[True for i in group_cols] + [False])
+           .groupby(group_cols)
            .cumcount() + 1
           )
     )
@@ -315,7 +394,7 @@ def primary_secondary_typology(
     # allow this so we can just keep one route-dir as a row
     max_cols = [c for c in df3.columns if "typology_" in c]
 
-    df4 = (df3.groupby(route_dir_cols)
+    df4 = (df3.groupby(group_cols)
            .agg({**{c: "max" for c in max_cols}})
            .reset_index()
            .rename(columns = {c: c.replace('typology', 'is_nacto') for c in max_cols})
@@ -357,34 +436,6 @@ def reconcile_route_and_nacto_typologies(
     
     return df2
 
-def add_rail_back(
-    categorize_routes_df: pd.DataFrame, overlay_shapes_to_roads_df: pd.DataFrame
-) -> pd.DataFrame:
-    """
-    categorize_routes_df: df created by categorize_routes_by_name()
-    overlay_shapes_to_roads_df: df created by overlay_shapes_to_roads() 
-    """
-    # Filter out for only rail routes and drop duplicates.
-    rail_routes = categorize_routes_df.loc[categorize_routes_df.is_rail == 1][
-        ["route_id", "schedule_gtfs_dataset_key"]
-    ].drop_duplicates()
-
-    # Merge with route_typologies_df to retain the details for
-    # columns such as typology, freq_category, etc
-    m1 = pd.merge(gdf, rail_routes, how="inner")
-
-    # Retain only one row for each route-direction-operator
-    # keeping the row with the highest pct_typology
-    m1 = m1.sort_values(
-        by=["route_id", "direction_id", "schedule_gtfs_dataset_key", "pct_typology"],
-        ascending=[True, True, True, False],
-    ).drop_duplicates(subset=["route_id", "direction_id", "schedule_gtfs_dataset_key"])
-    
-    # Apply primary_secondary_typology() function which adds
-    # columns like is_nacto_rapid, is_nacto_coverage
-    m1 = primary_secondary_typology(m1)
-
-    return m1
 
 if __name__ == "__main__":
     
@@ -397,7 +448,7 @@ if __name__ == "__main__":
     roads = delayed(prep_roads)(GTFS_DATA_DICT)
     ROAD_BUFFER_METERS = 20
     TYPOLOGY_THRESHOLD = 0.09
-    
+ 
     for analysis_date in analysis_date_list:
         
         time0 = datetime.datetime.now()
@@ -407,41 +458,40 @@ if __name__ == "__main__":
         )    
         gdf = compute(gdf)[0]
         
-        # Only keep significant typologies, but leave as typology-freq_category
-        route_typology_df = gdf.loc[gdf.pct_typology >= TYPOLOGY_THRESHOLD]
+        gdf.to_parquet(
+            f"{SCHED_GCS}{EXPORT}_long_{analysis_date}.parquet"
+        )        
         
-        route_typology_df.to_parquet(
-            f"{SCHED_GCS}{EXPORT}_long_{analysis_date}.parquet")
+        # Only keep significant typologies, but leave as typology-freq_category, 
+        # then aggregate to route-dir for the top 2 frequent typologies
+        bus_route_typology_df = gdf.loc[
+            (gdf.route_type == "3") & 
+            (gdf.pct_typology >= TYPOLOGY_THRESHOLD)
+        ].pipe(primary_secondary_typology)
         
-        # Aggregate to route-dir-typology
-        route_typology_df2 = primary_secondary_typology(route_typology_df)
-        
-        # Tag if the route is express, rapid, or rail
-        route_tagged = categorize_routes_by_name(analysis_date)
-        
-        # Incorporate back rail routes that disappear if the routs
-        # dont't meet the minimum set in typology_threshold.
-        rail_routes_df = add_rail_back(route_tagged, gdf)
-        all_routes = pd.concat([route_typology_df2, rail_routes_df])
-        
-        
-        # Merge 
-        df3 = pd.merge(
-            route_tagged,
-            all_routes,
-            on = ["schedule_gtfs_dataset_key", "route_id"],
+        bus_route_typology_df2 = categorize_routes_by_name(
+            analysis_date, 
+            bus_route_typology_df
         ).pipe(reconcile_route_and_nacto_typologies)
         
+        non_bus_route_typology_df = gdf.loc[
+            gdf.route_type != "3"
+        ].pipe(
+            categorize_non_bus_typologies
+        )
         
-        # Drop duplicates because some rail routes are found both
-        # route_typology_df2 and rail_routes_df
-        df3 = (df3.drop_duplicates(
-            subset = ["schedule_gtfs_dataset_key",
-                      "route_id", 
-                      "route_long_name", 
-                      "direction_id"])
-                      )
-        df3.to_parquet(
+        # Combine bus and non-bus
+        # Drop duplicates if there are multiple common_shape_id values
+        combined_route_typology = pd.concat(
+            [bus_route_typology_df2, non_bus_route_typology_df],
+            axis=0, ignore_index=True
+        )[route_dir_cols + [
+            f"is_{t}" for t in route_typologies]
+         ].sort_values(route_dir_cols).drop_duplicates(
+            subset = ["schedule_gtfs_dataset_key", "route_id", "direction_id"]
+        ).reset_index(drop=True)
+        
+        combined_route_typology.to_parquet(
             f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet")
         
         time1 = datetime.datetime.now()

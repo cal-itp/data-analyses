@@ -14,10 +14,10 @@ from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
 route_time_cols = [
     "schedule_gtfs_dataset_key", 
     "route_id", "direction_id", 
-     "time_period"
+    "time_period"
 ]
 
-sort_cols = route_time_cols + ["service_date"]
+route_time_date_cols = route_time_cols + ["service_date"]
 
 """
 Concatenating Functions 
@@ -31,29 +31,57 @@ def concatenate_schedule_by_route_direction(
     for all the dates we have.
     """
     FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_route_direction_metrics
-    
-    route_time_dir_cols = route_time_cols + ["route_primary_direction"]
-    
+        
     df = time_series_utils.concatenate_datasets_across_dates(
         RT_SCHED_GCS,
         FILE,
         date_list,
         data_type = "df",
-        columns = route_time_dir_cols + [
+        columns = route_time_cols + [
             "avg_scheduled_service_minutes", 
             "avg_stop_miles",
+            "route_primary_direction",
             "n_trips", "frequency", 
             "is_express", "is_rapid",  "is_rail",
             "is_coverage", "is_downtown_local", "is_local",
         ],
-    ).sort_values(route_time_dir_cols + ["service_date"]).rename(
+    ).sort_values(route_time_date_cols).rename(
         columns = {
             # rename so we understand data source
             "n_trips": "n_scheduled_trips",
         }
     ).reset_index(drop=True)    
     
-    return df
+    primary_typology = set_primary_typology(df)
+    
+    # Deal with changing cardinal direction across time
+    df2 = pd.merge(
+        df,
+        primary_typology,
+        on = route_time_cols,
+        how = "inner" 
+    ).pipe(
+        merge_in_standardized_route_names
+    )
+    
+    # TODO: double check it's for route-direction across dates
+    route_cols = ["schedule_gtfs_dataset_key", 
+                  "route_combined_name", "direction_id"]
+    
+    top_cardinal_direction = gtfs_schedule_wrangling.mode_by_group(
+        df2,
+        group_cols = route_cols,
+        value_cols = ["route_primary_direction"]
+    )
+    
+    df3 = pd.merge(
+        df2.drop(columns = ["route_primary_direction"]),
+        top_cardinal_direction,
+        on = route_cols,
+        how = "inner"
+    )
+    
+    return df2
 
 
 def concatenate_speeds_by_route_direction(
@@ -72,7 +100,7 @@ def concatenate_speeds_by_route_direction(
         date_list,
         data_type = "df",
         columns = route_time_cols + ["speed_mph"],
-    ).sort_values(sort_cols).reset_index(drop=True)
+    ).sort_values(route_time_date_cols).reset_index(drop=True)
     
     return df
 
@@ -92,13 +120,18 @@ def concatenate_rt_vs_schedule_by_route_direction(
         FILE,
         date_list,
         data_type = "df",
-    ).sort_values(sort_cols).reset_index(drop=True)
+    ).sort_values(
+        route_time_date_cols
+    ).reset_index(drop=True).astype(
+        {"direction_id": "float"}
+    )
     
     # We'll add this back in after merging
     # because these would be NaN if it's not in schedule
     drop_cols = [
         "base64_url", "organization_source_record_id",
-        "organization_name", "caltrans_district"
+        "organization_name", "caltrans_district",
+        "schedule_source_record_id", "name"
     ]
     
     df = df.drop(columns = drop_cols)
@@ -180,8 +213,11 @@ def merge_in_standardized_route_names(
     # After merging, we can replace route_id with recent_route_id2 
     drop_cols = ["route_desc", "combined_name", "route_id2"]
     
-    df3 = time_series_utils.parse_route_combined_name(df2).drop(
-        columns = drop_cols).drop_duplicates().reset_index(drop=True)
+    df3 = time_series_utils.parse_route_combined_name(
+        df2
+    ).drop(
+        columns = drop_cols
+    ).drop_duplicates().reset_index(drop=True)
     
     return df3
 
@@ -219,54 +255,9 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
         typology = df2.typology.fillna("unknown")
     )[route_time_cols + ["typology"]]
     
-    
     return df2
-"""
-Quarterly Rollup Functions
-"""
-def quarterly_rollup(df:pd.DataFrame, metric_columns:list)->pd.DataFrame:
-    """
-    roll up months to each quarter for certain metrics.
-    """
-    quarterly_metrics = segment_calcs.calculate_weighted_averages(
-    
-    df=df,
-    group_cols=[
-        "quarter",
-        "Period",
-        "Organization",
-        "Route",
-        "dir_0_1",
-        "Direction",
-    ],
-    metric_cols= metric_columns,
-    weight_col="# Trips with VP",
-    )
-    return quarterly_metrics
 
-def rollup_schd_qtr(peak_offpeak_df:pd.DataFrame)->pd.DataFrame:
-    """
-    Roll up # Scheduled Trips to be on a quarterly basis
-    since this metric doesn't change very often. 
-    """
-    # Aggregate
-    agg1 = (
-    peak_offpeak_df.groupby(
-        ["quarter", "Period", "Organization", "Route", "dir_0_1", "Direction"]
-    )
-    .agg({"Date":"nunique","# scheduled trips": "sum"})
-    .reset_index()
-    )
-    
-    # If a quarter is complete with all 3 months, divide by 3
-    agg1.loc[agg1["Date"] == 3, "# scheduled trips"] = (
-    agg1.loc[agg1["Date"] == 3, "# scheduled trips"] / 3)
-    
-    # If a quarter is incomplete with only 2 months, divide by 2 
-    agg1.loc[agg1["Date"] == 2, "# scheduled trips"] = (
-    agg1.loc[agg1["Date"] == 2, "# scheduled trips"] / 2
-)
-    return agg1
+
 """
 Merging Functions
 """
@@ -280,41 +271,26 @@ def merge_data_sources_by_route_direction(
     Merge schedule, rt_vs_schedule, and speeds data, 
     which are all at route-direction-time_period-date grain.
     This merged dataset will be used in GTFS digest visualizations.
-    """
-    # Get primary route type
-    primary_typology = set_primary_typology(df_schedule)
-    
-    df_schedule2 = pd.merge(
-        df_schedule,
-        primary_typology,
-        on = route_time_cols,
-        how = "left"
-    )
-    
+    """    
     df = pd.merge(
-        df_schedule2,
+        df_schedule,
         df_rt_sched,
-        on = route_time_cols + ["service_date"],
+        on = route_time_date_cols,
         how = "outer",
         indicator = "sched_rt_category"
     ).merge(
         df_avg_speeds,
-        on = route_time_cols + ["service_date"],
+        on = route_time_date_cols,
         how = "outer",
     )
     
     df = df.assign(
         sched_rt_category = df.sched_rt_category.map(
             gtfs_schedule_wrangling.sched_rt_category_dict)
-    ).pipe(
-        merge_in_standardized_route_names,
     ).merge(
         df_crosswalk,
-        on = ["schedule_gtfs_dataset_key", "service_date"],
+        on = ["schedule_gtfs_dataset_key", "name", "service_date"],
         how = "left"
-    ).pipe(
-        # Find the most common cardinal direction
-        gtfs_schedule_wrangling.top_cardinal_direction
     )
      
     integrify = [
@@ -326,13 +302,6 @@ def merge_data_sources_by_route_direction(
     
     df[integrify] = df[integrify].fillna(0).astype("int")
     
-    # Clean up repeated columns
-    df["name"] = df.name_x.fillna(df.name_y)
-    df["schedule_source_record_id"] = df.schedule_source_record_id_x.fillna(df.schedule_source_record_id_y)
-    df = df.drop(columns = ["name_x",
-                           "name_y",
-                           "schedule_source_record_id_x",
-                           "schedule_source_record_id_y"])
     return df
 
 
@@ -346,37 +315,22 @@ if __name__ == "__main__":
     )
     
     DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
-    DIGEST_SEGMENT_SPEEDS = GTFS_DATA_DICT.digest_tables.route_segment_speeds
     
     # These are public schedule_gtfs_dataset_keys
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
     
-    # Get cardinal direction for each route
-    df_sched = concatenate_schedule_by_route_direction(analysis_date_list).pipe(
-        # Drop any private datasets before exporting
-        publish_utils.exclude_private_datasets, 
-        public_gtfs_dataset_keys = public_feeds
-    )
+    df_sched = concatenate_schedule_by_route_direction(analysis_date_list)
+    
     df_avg_speeds = concatenate_speeds_by_route_direction(
         analysis_date_list
-    ).pipe(
-        publish_utils.exclude_private_datasets, 
-        public_gtfs_dataset_keys = public_feeds
     )
-    df_rt_sched = (
-        concatenate_rt_vs_schedule_by_route_direction(
-            analysis_date_list
-        ).pipe(
-            publish_utils.exclude_private_datasets, 
-            public_gtfs_dataset_keys = public_feeds
-        ).astype({"direction_id": "float"})
+    
+    df_rt_sched = concatenate_rt_vs_schedule_by_route_direction(
+        analysis_date_list
     )
     
     df_crosswalk = concatenate_crosswalk_organization(
         analysis_date_list
-    ).pipe(
-        publish_utils.exclude_private_datasets, 
-        public_gtfs_dataset_keys = public_feeds
     )
     
     df = merge_data_sources_by_route_direction(
@@ -384,33 +338,13 @@ if __name__ == "__main__":
         df_rt_sched,
         df_avg_speeds,
         df_crosswalk
+    ).pipe(
+        publish_utils.exclude_private_datasets, 
+        public_gtfs_dataset_keys = public_feeds
     )
     
     # Save metrics on a monthly candence.
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
-   
-    # Roll up monthly metrics to quarterly
-    # Filter for only rows that are "all day" statistics
-    all_day = df.loc[df["Period"] == "all_day"].reset_index(drop=True)
-    
-    # Filter for only rows that are "peak/offpeak" statistics
-    peak_offpeak_df = df.loc[df["Period"] != "all_day"].reset_index(drop=True)
-    
-    # Roll up some metrics that don't change too much
-    # to be quarterly instead of monthly
-    quarter_rollup_all_day = quarterly_rollup(all_day, [
-        "Average VP per Minute",
-        "% VP within Scheduled Shape",
-        "Average Scheduled Service (trip minutes)",
-        "ruler_100_pct",
-        "ruler_for_vp_per_min"
-    ]) 
-    
-    total_scheduled_trips = rollup_schd_qtr(peak_offpeak_df)
-    
-    # Merge these 2 
-    m1 = pd.merge(quarter_rollup_all_day, total_scheduled_trips)
-    print("Saved Digest RT")
-    
+    print("Saved GTFS digest")

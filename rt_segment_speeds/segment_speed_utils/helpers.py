@@ -216,7 +216,8 @@ def exclude_unusable_trips(
 
 
 def remove_shapes_outside_ca(
-    shapes: Union[gpd.GeoDataFrame, dg.GeoDataFrame]
+    shapes: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
+    use_buffer: bool = False
 ) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
     """
     Remove shapes that are too far outside CA.
@@ -244,8 +245,9 @@ def remove_shapes_outside_ca(
         'STATE_ABBR in @border_states'
     ).dissolve()[["geometry"]].to_crs(SHAPE_CRS)
     
-    # Buffer to keep the bay in the Bay Area
-    ca.geometry = ca.buffer(10_000)
+    # Buffer to keep the bay in the Bay Area & turn this back to geodataframe
+    if use_buffer:
+        ca = ca.buffer(10_000).to_frame('geometry')
     
     # Be aggressive and keep if shape
     # is within (does not cross CA + border state boundaries)
