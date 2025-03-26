@@ -52,5 +52,5 @@ if __name__ == "__main__":
     df = all_categories[["sched_rt_category","organization_name",]]
     
     # Save to YAML
-    SITE_YML = "schd_vp_cats.yml"
+    SITE_YML = "../_shared_utils/shared_utils/schd_vp_cats.yml"
     df_to_yaml(df, SITE_YML)

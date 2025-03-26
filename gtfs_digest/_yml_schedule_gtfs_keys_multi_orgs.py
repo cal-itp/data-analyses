@@ -13,6 +13,7 @@ import sys
 import pandas as pd
 import yaml
 
+import _operators_prep
 #sys.path.append(os.path.abspath("../../gtfs_digest/"))
 #_operators_prep = importlib.import_module("_operators_prep")
 
@@ -47,8 +48,8 @@ def find_schd_keys_multi_ops() -> dict:
 
     # This dataframe displays the relationship of 1 schedule dataset key to many
     # organization names
-    one_to_many_df = one_to_many_df[subset_cols]
-    one_to_many_df = one_to_many_df.rename(columns={"organization_name": "repeated_organization_name"})
+    all_categories = all_categories[subset_cols]
+    all_categories = all_categories.rename(columns={"organization_name": "repeated_organization_name"})
 
     # This dataframe displays the relationship of 1 schedule dataset key to 1
     # organization name
@@ -57,7 +58,7 @@ def find_schd_keys_multi_ops() -> dict:
     # Merge the two dataframes
     m1 = pd.merge(
         one_to_one_df,
-        one_to_many_df,
+        all_categories,
         on=["schedule_gtfs_dataset_key", "caltrans_district"],
     )
 
@@ -79,7 +80,7 @@ def find_schd_keys_multi_ops() -> dict:
     return my_dict
 
 
-SITE_YML = "./_shared_utils/shared_utils/schedule_gtfs_dataset_key_multi_operator.yml"
+SITE_YML = "../_shared_utils/shared_utils/schedule_gtfs_dataset_key_multi_operator.yml"
 
 if __name__ == "__main__":
     my_dict = find_schd_keys_multi_ops()
