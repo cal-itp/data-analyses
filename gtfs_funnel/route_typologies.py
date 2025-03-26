@@ -283,11 +283,19 @@ def overlay_shapes_to_roads(
     common_shape = common_shape.assign(
         route_meters = common_shape.geometry.length,
     )
-        
+    
+    inside_ca_shapes = helpers.remove_shapes_outside_ca(common_shape)
+    outside_ca_shapes = common_shape[
+        ~common_shape.common_shape_id.isin(inside_ca_shapes.common_shape_id)
+    ]
+    
     # use sjoin first to find where we want to calculate overlay
+    # roads are only for CA, so overlay will show incorrect results anyway
+    # if we include Amtrak because there will be only a small portion that overlaps
+    # we'll concatenate back outside_ca_shapes after (leave pct_typology as NaN)
     s1 = gpd.sjoin(
         roads,
-        common_shape,
+        inside_ca_shapes,
         how = "inner",
         predicate = "intersects"
     ).drop(columns = ["index_right"]).reset_index(drop=True)
@@ -327,6 +335,12 @@ def overlay_shapes_to_roads(
             .reset_index()
     )
     
+    # Add back outside CA shapes and then add route_type
+    gdf4 = pd.concat(
+        [gdf3, outside_ca_shapes.drop(columns = "geometry")],
+        axis=0, ignore_index=True
+    )
+    
     # Add back route_type
     route_types_by_shape = helpers.import_scheduled_trips(
         analysis_date,
@@ -334,14 +348,14 @@ def overlay_shapes_to_roads(
         get_pandas = True
     ).rename(columns = {"shape_id": "common_shape_id"})
     
-    gdf4 = pd.merge(
-        gdf3,
+    gdf5 = pd.merge(
+        gdf4,
         route_types_by_shape,
         on = ["schedule_gtfs_dataset_key", "common_shape_id"],
         how = "inner"
     )
    
-    return gdf4  
+    return gdf5  
 
 
 def primary_secondary_typology(
