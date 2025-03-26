@@ -18,7 +18,7 @@ from segment_speed_utils.project_vars import (
 
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 
-ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['feb2025'])
+ANALYSIS_DATE = dt.date.fromisoformat(rt_dates.DATES['mar2025'])
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE}.parquet'
 GEOJSON_SUBFOLDER = f'segment_speeds_{ANALYSIS_DATE}/'
 
@@ -28,7 +28,7 @@ def build_speedmaps_index(analysis_date: dt.date) -> pd.DataFrame:
     Note that in limited cases, multiple orgs may share the same datasets
     (VCTC combined feeds, SD Airport and SDMTS...)
     '''
-    path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{analysis_date}.parquet'
+    path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.segment_timeofday}_{analysis_date}.parquet'
     speedmap_segs = gpd.read_parquet(path) >> distinct(
         _.organization_name, _.organization_source_record_id, _.name, _.base64_url)
     districts = schedule_rt_utils.filter_dim_county_geography(analysis_date)

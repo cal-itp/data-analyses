@@ -60,6 +60,7 @@ DATES = {
     "dec2024": "2024-12-11",
     "jan2025": "2025-01-15",
     "feb2025": "2025-02-12",
+    "mar2025": "2025-03-12",
 }
 
 years_available = list(range(2023, datetime.datetime.now().year + 1))
