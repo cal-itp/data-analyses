@@ -10,7 +10,6 @@ from typing import Literal, Union
 
 import branca
 import dask_geopandas as dg
-import folium
 import geopandas as gpd
 import numpy as np
 import pandas as pd
