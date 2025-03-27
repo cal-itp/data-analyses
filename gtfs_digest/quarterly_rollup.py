@@ -2,8 +2,9 @@
 Quarterly Rollup Functions
 """
 import pandas as pd
-from segment_speed_utils import gtfs_schedule_wrangling, helpers, segment_calcs
+from segment_speed_utils import segment_calcs, metrics
 from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
+from shared_utils import time_helpers
 
 schd_metric_cols = [
     "avg_scheduled_service_minutes",
@@ -14,7 +15,7 @@ schd_metric_cols = [
 
 groupby_cols = [
     "schedule_gtfs_dataset_key",
-    "quarter",
+    "year_quarter",
     "direction_id",
     "time_period",
     "route_id",
@@ -53,9 +54,11 @@ crosswalk_cols = [
     "route_long_name",
     "route_short_name",
     "route_combined_name",
+    'year', 
+    'quarter'
 ]
 group_cols = [
-    "quarter",
+    "year_quarter",
     "schedule_gtfs_dataset_key",
     "route_id",
     "direction_id",
@@ -70,7 +73,10 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     """
     # Create quarters
     # Turn date to quarters
-    df["quarter"] = pd.PeriodIndex(df.service_date, freq="Q").astype("str")
+    df = time_helpers.add_quarter(df, 'service_date')
+    
+    # Remove underscore
+    df.year_quarter = df.year_quarter.str.replace("_", " ")
     
     # Create copies of the original df before aggregating because I noticed applying
     #  segment_calcs.calculate_weighted_averages impacts the original df
@@ -115,27 +121,33 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Re-calculate certain columns
-    m1["pct_in_shape"] = m1.vp_in_shape / m1.total_vp
-    m1["pct_rt_journey_atleast1_vp"] = (
-        m1.minutes_atleast1_vp / m1.total_rt_service_minutes
+    # Have to temporarily rm total to some of the columns
+    m1 = m1.rename(
+    columns={
+        "total_rt_service_minutes": "rt_service_minutes",
+        "total_scheduled_service_minutes": "scheduled_service_minutes",
+    }
     )
-    m1["pct_rt_journey_atleast2_vp"] = (
-        m1.minutes_atleast2_vp / m1.total_rt_service_minutes
-    )
-    m1["pct_sched_journey_atleast1_vp"] = (
-        m1.minutes_atleast1_vp / m1.total_scheduled_service_minutes
-    )
-    m1["pct_sched_journey_atleast2_vp"] = (
-        m1.minutes_atleast2_vp / m1.total_scheduled_service_minutes
-    )
-    m1["vp_per_minute"] = m1.total_vp / m1.total_rt_service_minutes
+    m1 = metrics.calculate_rt_vs_schedule_metrics(m1)
+    
+    # Rename back
+    m1 = m1.rename(
+    columns={
+        "rt_service_minutes": "total_rt_service_minutes",
+        "scheduled_service_minutes": "total_scheduled_service_minutes"
+    }
+    ) 
+    
+    
+    # Have to recalculate rt sched journey ratio
     m1["rt_sched_journey_ratio"] = (
         m1.total_rt_service_minutes / m1.total_scheduled_service_minutes
     )
-
+    
     # Rearrange columns to match original df
-    m1 = m1[list(df.columns)]
-
+    col_proper_order = list(df.columns) 
+    m1 = m1[col_proper_order]
+    
     # Drop service_date & duplicates
     m1 = (m1
           .drop(columns=["service_date"])
