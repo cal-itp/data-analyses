@@ -3,9 +3,9 @@ import pandas as pd
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
     
-def operators_schd_vp_rt()->pd.DataFrame:
+def load_schd_vp_df(filter_schd_both:bool=True)->pd.DataFrame:
     """
-    Generate the yaml for our portfolio.
+    Load and sort route_schedule_vp
     """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
@@ -23,9 +23,15 @@ def operators_schd_vp_rt()->pd.DataFrame:
         caltrans_district = schd_vp_df.caltrans_district.map(portfolio_utils.CALTRANS_DISTRICT_DICT)
     )
     
-    # Sort/drop duplicates for only the most current row for each operator.
-    agg1 = (
-    schd_vp_df.dropna(subset="caltrans_district")
+    # Manually filter out certain operators for schedule_gtfs_dataset_keys
+    # that have multiple operators because keeping another value is preferable. 
+    operators_to_exclude = ["City of Alameda"]
+    schd_vp_df =schd_vp_df.loc[~schd_vp_df
+                               .organization_name.isin
+                               (operators_to_exclude)].reset_index(drop = True)
+    
+    # Sort 
+    schd_vp_df = (schd_vp_df.dropna(subset="caltrans_district")
     .sort_values(
         by=[
             "caltrans_district",
@@ -34,30 +40,42 @@ def operators_schd_vp_rt()->pd.DataFrame:
         ],
         ascending=[True, True, False],
     )
-    .drop_duplicates(
-        subset=[
-            "organization_name",
-            "caltrans_district",
-        ]
-    )
-    .reset_index(drop=True)
-    )
-    # Manually filter out certain operators for schedule_gtfs_dataset_keys
-    # that have multiple operators because keeping another value is preferable. 
-    operators_to_exclude = ["City of Alameda"]
-    agg1 = agg1.loc[~agg1.organization_name.isin(operators_to_exclude)].reset_index(drop = True)
-    
-    # Filter out any operators that are vp_only
-    # This df retains multi orgs to one schedule gtfs dataset key
-    one_to_many_df = (agg1
-                     .loc[agg1.sched_rt_category
+                 )
+        
+    if filter_schd_both == True:
+        schd_vp_df = (schd_vp_df
+                     .loc[schd_vp_df.sched_rt_category
                      .isin(["schedule_and_vp","schedule_only"])]
                      .reset_index(drop = True)
                     )
 
-    # Keep only one instance of a schedule_gtfs_dataset_key & subset
+    return schd_vp_df
+
+def remove_duplicative_names(filter_schd_both:bool=True)->pd.DataFrame:
+    """
+    This df retains multi orgs to one schedule gtfs dataset key
+    """
+    df = load_schd_vp_df(filter_schd_both)
+   
+    df2 = df.drop_duplicates(
+        subset=[
+            "organization_name",
+            "caltrans_district",
+        ]
+    ).reset_index(drop=True)
+    
+    return df2 
+        
+def generate_operator_grain_yml(filter_schd_both:bool=True)->pd.DataFrame:
+    """
+    Generate the YML for the district level portfolio
+    """
+    # Load original df
+    df = remove_duplicative_names(filter_schd_both)
+        
+    # Remove duplicative names
     final = (
-    one_to_many_df.drop_duplicates(
+    df.drop_duplicates(
         subset=[
             "schedule_gtfs_dataset_key",
         ]
@@ -65,4 +83,4 @@ def operators_schd_vp_rt()->pd.DataFrame:
     .reset_index(drop=True)
     )[["caltrans_district","organization_name"]]
     
-    return agg1, one_to_many_df, final
+    return final 
