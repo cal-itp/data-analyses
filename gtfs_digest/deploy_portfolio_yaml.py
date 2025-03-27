@@ -6,12 +6,12 @@ import pandas as pd
 import yaml
 
 from shared_utils import portfolio_utils
-from _operators_prep import operators_schd_vp_rt
+from _operators_prep import generate_operator_grain_yml
 
 SITE_YML = "../portfolio/sites/gtfs_digest.yml"
 
 if __name__ == "__main__":
-    all_categories, one_to_one_df, final = operators_schd_vp_rt()
+    final = generate_operator_grain_yml()
 
     portfolio_utils.create_portfolio_yaml_chapters_with_sections(
         SITE_YML,
