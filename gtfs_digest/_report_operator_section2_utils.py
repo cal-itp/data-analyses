@@ -320,13 +320,13 @@ def grouped_bar_chart(
             )
         )
     else:
-        tooltip_cols.append("quarter")
+        tooltip_cols.append("year_quarter")
         chart = (
             alt.Chart(df)
             .mark_bar(size=5)
             .encode(
                 x=alt.X(
-                    "quarter",
+                    "year_quarter",
                     title=["Quarter"],
                     axis=alt.Axis(labelAngle=-45),
                 ),
@@ -528,13 +528,13 @@ def stacked_bar_chart(
     )
     
     else:
-        tooltip_cols.append("quarter")
+        tooltip_cols.append("year_quarter")
         chart = (
         alt.Chart(df)
         .mark_bar(size=7, clip=True)
         .encode(
             x=alt.X(
-                "quarter",
+                "year_quarter",
                 title=["Quarter"],
                 axis=alt.Axis(labelAngle=-45),
             ),
@@ -622,13 +622,13 @@ def base_facet_with_ruler_chart(
             )
         )
     else:
-        tooltip_cols.append("quarter")
+        tooltip_cols.append("year_quarter")
         chart = (
             alt.Chart(df)
             .mark_bar(size=7, clip=True)
             .encode(
                 x=alt.X(
-                    "quarter",
+                    "year_quarter",
                     title="Quarter",
                     axis=alt.Axis(labelAngle=-45),
                 ),
