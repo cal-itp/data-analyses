@@ -1,0 +1,27 @@
+# organization_name values that are excluded from the GTFS Digest portfolio
+
+? 1 schedule_gtfs_dataset_key:m organization_name, only 1st organization_name by alphabetical
+  order is displayed in the portfolio
+: - City of Eureka
+  - City of Moorpark
+  - City of Ojai
+  - City of Simi Valley
+  - City of Thousand Oaks
+  - Commute.org
+  - Foothill Transit
+  - Gold Coast Transit District
+  - Greyhound
+  - Humboldt Transit Authority
+  - Sacramento Regional Transit District
+  - San Diego International Airport
+  - San Diego Metropolitan Transit System
+  - San Joaquin Joint Powers Authority
+  - Shasta County
+  - Solano Transportation Authority
+  - Sonoma County
+  - Tahoe Truckee Area Regional Transportation
+  - Tehama County
+  - University of California, Santa Cruz
+  - Ventura County Transportation Commission
+Prefer using San Francisco Bay Area Water Emergency Transportation Authority (WETA) when displaying in our portflio.:
+- City of Alameda
