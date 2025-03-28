@@ -6,162 +6,161 @@ parts:
         params:
           district: 01 - Eureka
         sections:
-          - organization_source_record_id: recaaoqEDvwhcmIVT
-          - organization_source_record_id: recynxkqEoo9dJEvw
-          - organization_source_record_id: recaa3naoNR4a5RsJ
-          - organization_source_record_id: recPwXKbGLL4aIqXV
-          - organization_source_record_id: recpWBEjXzLHqCjhE
-          - organization_source_record_id: recOnKhqF25crJt4q
+          - organization_name: City of Arcata
+          - organization_name: City of Eureka
+          - organization_name: Humboldt Transit Authority
+          - organization_name: Lake Transit Authority
+          - organization_name: Mendocino Transit Authority
+          - organization_name: Redwood Coast Transit Authority
       - caption: District 02 - Redding
         params:
           district: 02 - Redding
         sections:
-          - organization_source_record_id: recI1fuNpr306H0hw
-          - organization_source_record_id: recx4ZG2lvZb7kGAL
-          - organization_source_record_id: recKN0Q28cOQdsy5L
-          - organization_source_record_id: recEtov4XTJZDjtuj
-      - caption: District 03 - Marysville
+          - organization_name: Redding Area Bus Authority
+          - organization_name: Tehama County
+      - caption: District 03 - Marysville / Sacramento
         params:
-          district: 03 - Marysville
+          district: 03 - Marysville / Sacramento
         sections:
-          - organization_source_record_id: recf7l9tozKXOmqqZ
-          - organization_source_record_id: rec43oyrfhtPDdRHj
-          - organization_source_record_id: reczUcQgqgtMpkpKC
-          - organization_source_record_id: recX9lccSE1jmjsmG
-          - organization_source_record_id: rec3u4aMplqObcoTR
-          - organization_source_record_id: recS1JKEz73Hev8pJ
-          - organization_source_record_id: recH2FdHvrL7nIpHA
-      - caption: District 04 - Oakland
+          - organization_name: Butte County Association of Governments
+          - organization_name: City of Elk Grove
+          - organization_name: City of Rancho Cordova
+          - organization_name: Nevada County
+          - organization_name: Sacramento Regional Transit District
+          - organization_name: Tahoe Transportation District
+          - organization_name: 'University of California, Davis'
+          - organization_name: Yolo County Transportation District
+      - caption: District 04 - Bay Area / Oakland
         params:
-          district: 04 - Oakland
+          district: 04 - Bay Area / Oakland
         sections:
-          - organization_source_record_id: recOZgevYf7Jimm9L
-          - organization_source_record_id: recvEBkSBc7UxlarC
-          - organization_source_record_id: recjnaKVDEgulsko3
-          - organization_source_record_id: rechaapWbeffO33OX
-          - organization_source_record_id: reczluQLW1y5oQqF8
-          - organization_source_record_id: recot6qBamlOoLcrM
-          - organization_source_record_id: recUbGDXhPdx3494b
-          - organization_source_record_id: recsNvWvLQwGsoxlE
-          - organization_source_record_id: recmB4uxrVLRXYF3L
-          - organization_source_record_id: recRM3c9Zfaft4V2B
-          - organization_source_record_id: recn8zTmGbYZv1qxV
-          - organization_source_record_id: recEEJVeGrHGoTwgj
-          - organization_source_record_id: rec75nESVRqpwNiLv
-          - organization_source_record_id: recoX7qMhlPrgfuz3
-          - organization_source_record_id: recANs4M9yDhvDyob
-          - organization_source_record_id: recNOb7pqBRlQVG5e
-          - organization_source_record_id: rec9RGrya9SjWYp2p
-          - organization_source_record_id: rec2ErIfztLMJ4rgG
-          - organization_source_record_id: recsBfXgev9ICDCY1
-          - organization_source_record_id: recmatCuQAUrNcs8j
-          - organization_source_record_id: recw3mRsmKDTNnVlT
-          - organization_source_record_id: recC5CT95EufmQCXr
-          - organization_source_record_id: reclLbvvKE1V4zsZg
-          - organization_source_record_id: rec7ShjfgRPLU0yjY
-          - organization_source_record_id: recDupUxInMUgxeiz
-          - organization_source_record_id: recUmm4gcNXaqrwpn
-          - organization_source_record_id: recD9x7GHPrN46v6m
-          - organization_source_record_id: recIKnsnTdKQ0vsiv
-      - caption: District 05 - San Luis Obispo
+          - organization_name: Alameda-Contra Costa Transit District
+          - organization_name: Capitol Corridor Joint Powers Authority
+          - organization_name: Central Contra Costa Transit Authority
+          - organization_name: City and County of San Francisco
+          - organization_name: City of Alameda
+          - organization_name: City of Fairfield
+          - organization_name: City of Petaluma
+          - organization_name: City of Santa Rosa
+          - organization_name: City of Union City
+          - organization_name: City of Vacaville
+          - organization_name: Cloverdale Transit
+          - organization_name: Dumbarton Bridge Regional Operations Consortium
+          - organization_name: Eastern Contra Costa Transit Authority
+          - organization_name: Emeryville Transportation Management Agency
+          - organization_name: 'Golden Gate Bridge, Highway and Transportation District'
+          - organization_name: Livermore-Amador Valley Transit Authority
+          - organization_name: Marin County Transit District
+          - organization_name: Mountain View Transportation Management Association
+          - organization_name: Napa Valley Transportation Authority
+          - organization_name: Peninsula Corridor Joint Powers Board
+          - organization_name: Presidio Trust
+          - organization_name: San Francisco Bay Area Water Emergency Transit Authority
+          - organization_name: San Mateo County Transit District
+          - organization_name: Santa Clara Valley Transportation Authority
+          - organization_name: Solano County Transit
+          - organization_name: Solano Transportation Authority
+          - organization_name: Sonoma County
+          - organization_name: Sonoma-Marin Area Rail Transit District
+          - organization_name: 'University of California, Berkeley'
+          - organization_name: Western Contra Costa Transit Authority
+      - caption: District 05 - San Luis Obispo / Santa Barbara
         params:
-          district: 05 - San Luis Obispo
+          district: 05 - San Luis Obispo / Santa Barbara
         sections:
-          - organization_source_record_id: recMM99msxjmc6PPv
-          - organization_source_record_id: rec9zGMJgNnes75K1
-          - organization_source_record_id: reckp33bhAuZlmO1M
-          - organization_source_record_id: receZJ9sEnP9vy3g0
-          - organization_source_record_id: reciakGBN1DP9dK9N
-          - organization_source_record_id: recswCrw6a6htmXJ4
-          - organization_source_record_id: recDFXyxaWQpiY4mw
-      - caption: District 06 - Fresno
+          - organization_name: City of Santa Maria
+          - organization_name: Monterey-Salinas Transit
+          - organization_name: San Luis Obispo Regional Transit Authority
+          - organization_name: Santa Barbara Metropolitan Transit District
+          - organization_name: Santa Cruz Metropolitan Transit District
+      - caption: District 06 - Fresno / Bakersfield
         params:
-          district: 06 - Fresno
+          district: 06 - Fresno / Bakersfield
         sections:
-          - organization_source_record_id: rec0bKUhHAajTNIlf
-          - organization_source_record_id: rec6gNibVKjDVy4aX
-          - organization_source_record_id: recIh3vq8jwuuJlvL
-          - organization_source_record_id: reczIiFqdL5AXTpm1
-          - organization_source_record_id: rec5MLJKrAgeM8f6H
-          - organization_source_record_id: recWLwvtjXhiVWjKt
-          - organization_source_record_id: rec4YWVqVwJ9XqDbq
+          - organization_name: City of Fresno
+          - organization_name: City of Visalia
+          - organization_name: Golden Empire Transit District
+          - organization_name: Kern County
+          - organization_name: Kings County Area Public Transit Agency
+          - organization_name: Madera County
+          - organization_name: Tulare County Regional Transit Agency
       - caption: District 07 - Los Angeles / Ventura
         params:
           district: 07 - Los Angeles / Ventura
         sections:
-          - organization_source_record_id: recxsWR0KRrQTdjmg
-          - organization_source_record_id: recjaoK08lDmhjQga
-          - organization_source_record_id: rec6z2ivjTxc8Sag3
-          - organization_source_record_id: recD4Vzt0EDC3VY7I
-          - organization_source_record_id: recXYM27Lts8XF98x
-          - organization_source_record_id: recd0hxcumVMausDU
-          - organization_source_record_id: rec5ome04BbA9uf4y
-          - organization_source_record_id: recZm8PD8WIdcDL0M
-          - organization_source_record_id: recX4nQfupRQf3xGD
-          - organization_source_record_id: recj8LXdeSurpSRNU
-          - organization_source_record_id: rec4pgjrmdhCh4z01
-          - organization_source_record_id: recohwwty1Jn4lnsb
-          - organization_source_record_id: reccAVEcMntkbh6aY
-          - organization_source_record_id: recojKzQsBzE1hjVu
-          - organization_source_record_id: recPkUZgzjCjk5GrV
-          - organization_source_record_id: reckQmUdXUzHFmlVf
-          - organization_source_record_id: reczF5Y8R9CUJmfSy
-          - organization_source_record_id: rec8zhnCPETu6qEiH
-          - organization_source_record_id: recKA7jKmdhFnj2ki
-          - organization_source_record_id: recImm5SmW2zq9rMT
-          - organization_source_record_id: recJHFDLpGRMIFgnL
-          - organization_source_record_id: rec1ErIn9gG1Isk5W
-          - organization_source_record_id: recPJULRJk1Yn824N
-          - organization_source_record_id: recvzE9NXgGMmqcTH
-          - organization_source_record_id: rec2LbE0IBKBAkvQr
-          - organization_source_record_id: recSqgaa8QiQ8CRjl
-          - organization_source_record_id: recS7GnKTcQVX20HE
-          - organization_source_record_id: rec00qSzZL8KqiXAo
-          - organization_source_record_id: recPnGkwdpnr8jmHB
-          - organization_source_record_id: recBW9vkDYWIKPIu4
-          - organization_source_record_id: rec7EN71rsZxDFxZd
-      - caption: District 08 - San Bernardino
+          - organization_name: Antelope Valley Transit Authority
+          - organization_name: City of Arcadia
+          - organization_name: City of Burbank
+          - organization_name: City of Camarillo
+          - organization_name: City of Cerritos
+          - organization_name: City of Commerce
+          - organization_name: City of Culver City
+          - organization_name: City of Duarte
+          - organization_name: City of Gardena
+          - organization_name: City of Lawndale
+          - organization_name: City of Los Angeles
+          - organization_name: City of Montebello
+          - organization_name: City of Monterey Park
+          - organization_name: City of Moorpark
+          - organization_name: City of Norwalk
+          - organization_name: City of Ojai
+          - organization_name: City of Pasadena
+          - organization_name: City of Redondo Beach
+          - organization_name: City of Rosemead
+          - organization_name: City of Santa Clarita
+          - organization_name: City of Santa Monica
+          - organization_name: City of Simi Valley
+          - organization_name: City of Thousand Oaks
+          - organization_name: City of Torrance
+          - organization_name: City of West Hollywood
+          - organization_name: Foothill Transit
+          - organization_name: Gold Coast Transit District
+          - organization_name: Long Beach Transit
+          - organization_name: Los Angeles County Metropolitan Transportation Authority
+          - organization_name: 'University of California, Los Angeles'
+          - organization_name: Ventura County Transportation Commission
+      - caption: District 08 - San Bernardino / Riverside
         params:
-          district: 08 - San Bernardino
+          district: 08 - San Bernardino / Riverside
         sections:
-          - organization_source_record_id: recniaSbsXcRSLsWe
-          - organization_source_record_id: recuGkFhN2WXGK67H
-          - organization_source_record_id: reciWrBgYsAIm9eKK
-          - organization_source_record_id: recHbquam1bWEwC3P
-          - organization_source_record_id: recG5aXxDPI645S86
-          - organization_source_record_id: recGcv4NidDjwVSiN
-          - organization_source_record_id: recYgajd92VLqio1p
-          - organization_source_record_id: recAsbHMwQWB7cri8
-          - organization_source_record_id: recJcXMNC5MUm2uDe
+          - organization_name: Basin Transit
+          - organization_name: City of Banning
+          - organization_name: City of Beaumont
+          - organization_name: Mountain Area Regional Transit Authority
+          - organization_name: OmniTrans
+          - organization_name: Palo Verde Valley Transit Agency
+          - organization_name: Riverside Transit Agency
+          - organization_name: SunLine Transit Agency
+          - organization_name: Victor Valley Transit Authority
       - caption: District 09 - Bishop
         params:
           district: 09 - Bishop
         sections:
-          - organization_source_record_id: recRajLNJI206nnAr
+          - organization_name: Eastern Sierra Transit Authority
       - caption: District 10 - Stockton
         params:
           district: 10 - Stockton
         sections:
-          - organization_source_record_id: recNeVOEwWUtYe8xm
-          - organization_source_record_id: recmQVsPDG6sLtD6j
-          - organization_source_record_id: recpgYVeU3VePMeWx
-          - organization_source_record_id: recZgWVXkpix390of
-          - organization_source_record_id: recSiaaMmBXW7fUZS
-          - organization_source_record_id: reclbzT9trIiGwjBB
+          - organization_name: City of Escalon
+          - organization_name: City of Turlock
+          - organization_name: San Joaquin Regional Rail Commission
+          - organization_name: San Joaquin Regional Transit District
+          - organization_name: Stanislaus Regional Transit Authority
+          - organization_name: Tuolumne County Transit Agency
       - caption: District 11 - San Diego
         params:
           district: 11 - San Diego
         sections:
-          - organization_source_record_id: rech5YtfjpQvVIBAF
-          - organization_source_record_id: recRBcrX4ZvTyvSnm
-          - organization_source_record_id: recfbLFdDnCxgIfAB
-          - organization_source_record_id: recZALk4vysuoTVjF
-      - caption: District 12 - Irvine
+          - organization_name: Flagship Cruises and Events Inc.
+          - organization_name: North County Transit District
+          - organization_name: San Diego International Airport
+          - organization_name: San Diego Metropolitan Transit System
+      - caption: District 12 - Orange County
         params:
-          district: 12 - Irvine
+          district: 12 - Orange County
         sections:
-          - organization_source_record_id: recsrIZdx5Wt6n3ol
-          - organization_source_record_id: recK4si1uIoj6HfrO
-          - organization_source_record_id: recfma7GNR5lQTTTg
+          - organization_name: Anaheim Transportation Network
+          - organization_name: City of Irvine
+          - organization_name: Orange County Transportation Authority
 readme: ./ca_transit_speed_maps/README.md
 title: California Transit Speed Maps
