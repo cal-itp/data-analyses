@@ -1,4 +1,4 @@
-2025-02-12:
+2025-03-12:
   - Alhambra Schedule
   - Amador Schedule
   - Amtrak Schedule
@@ -29,9 +29,9 @@
   - Bay Area 511 Marin Schedule
   - Bay Area 511 Mission Bay Schedule
   - Bay Area 511 Mountain View Community Shuttle Schedule
-  - Bay Area 511 Muni Schedule
   - Bay Area 511 Petaluma Schedule
   - Bay Area 511 PresidiGo Schedule
+  - Bay Area 511 Rio Vista Delta Breeze Schedule
   - Bay Area 511 SFO AirTrain Schedule
   - Bay Area 511 SamTrans Schedule
   - Bay Area 511 San Francisco Bay Ferry Schedule
@@ -76,8 +76,8 @@
   - Eastern Sierra Schedule
   - El Dorado Schedule
   - El Monte Schedule
+  - Elk Grove Schedule
   - Flixbus Schedule
-  - Foothill Schedule
   - Fresno County Schedule
   - Fresno Schedule
   - G Trans Schedule
@@ -114,7 +114,6 @@
   - Long Beach Schedule
   - Lynwood Schedule IPS
   - MV Shuttle Schedule
-  - Madera County Connection Schedule
   - Madera Metro Schedule
   - Maywood Schedule
   - Mendocino Schedule
@@ -137,6 +136,7 @@
   - Palos Verdes PTA Schedule
   - Pasadena Schedule
   - Placer Schedule
+  - Plumas Schedule
   - Redding Schedule
   - Redwood Coast Schedule
   - Riverside Schedule
@@ -171,8 +171,10 @@
   - Torrance Schedule
   - Tracy Schedule
   - Trinity Schedule
+  - Triton Transit Schedule
   - Tuolumne Remix Schedule
   - Turlock Schedule
+  - UCSC Schedule
   - Unitrans Schedule
   - VCTC GMV Schedule
   - Victor Valley GMV Schedule
@@ -185,15 +187,15 @@
   - Yuma Schedule
   - Yurok Schedule
   - eTrans Schedule
+2025-02-12:
+  - Bay Area 511 Muni Schedule
+  - Foothill Schedule
+  - Madera County Connection Schedule
 2025-01-15:
   - Auburn Schedule
-  - Bay Area 511 Rio Vista Delta Breeze Schedule
   - Golden Gate Park Shuttle Schedule
-  - Plumas Schedule
-  - UCSC Schedule
 2024-12-11:
   - Calabasas Schedule
-  - Elk Grove Schedule
   - Huntington Schedule
   - La Puente Schedule
   - Roseville Schedule

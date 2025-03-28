@@ -61,9 +61,10 @@ rt_vs_schedule_tables:
 
 digest_tables:
   dir: ${gcs_paths.RT_SCHED_GCS}
+  # Amanda: delete route_schedule_vp later
   route_schedule_vp: "digest/schedule_vp_metrics"
-  route_segment_speeds: "digest/segment_speeds"
-  route_segment_geometry: "digest/segment_speeds_geom"
+  monthly_route_schedule_vp: "digest/schedule_vp_metrics"
+  quarterly_route_schedule_vp: "digest/quarterly_schedule_vp_metrics"
   operator_profiles: "digest/operator_profiles"
   operator_routes_map: "digest/operator_routes"
   operator_sched_rt: "digest/operator_schedule_rt_category"
@@ -85,7 +86,8 @@ rt_stop_times:
   trip_speeds_single_summary: "rollup_singleday/speeds_trip"
   route_dir_timeofday: "rollup_singleday/speeds_route_dir"
   segment_peakoffpeak_weekday_month: "rollup_singleday/month_speeds_route_dir_peak_segments" # NEW? what to name
-  segment_timeofday_weekday_year: "rollup_multiday/year_weekday_speeds_route_dir_segments"
+  segment_timeofday_weekday_year: "rollup_multiday/weekday_speeds_route_dir_segments"
+  segments_year_file: "rollup_multiday/stop_segments"
   min_trip_minutes: ${speed_vars.time_min_cutoff}
   max_trip_minutes: 180
   max_speed: ${speed_vars.max_speed}

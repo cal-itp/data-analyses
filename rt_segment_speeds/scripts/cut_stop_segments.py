@@ -38,9 +38,10 @@ def stop_times_with_shape(
                    "stop_id", "stop_sequence", "geometry"],
         filters = [[("trip_instance_key", "in", rt_trips)]],
         with_direction = True,
-        get_pandas = False,
+        get_pandas = True,
         crs = WGS84
     )
+    stop_times = dg.from_geopandas(stop_times, npartitions=4)
     
     shapes = helpers.import_scheduled_shapes(
         analysis_date,
@@ -154,6 +155,15 @@ if __name__ == "__main__":
             shape_to_route,
             on = "shape_array_key",
             how = "inner"
+        )
+        
+        # Create uuid by concatenating several columns
+        # Can be easier to use if we want to do segment-specific things
+        # and find our way back to the full columns later
+        segments = segments.assign(
+            segment_uuid = segments.schedule_gtfs_dataset_key.str.cat(
+                segments[["route_id", "direction_id", "segment_id"]].astype(str), 
+                sep = "__")
         )
                 
         utils.geoparquet_gcs_export(

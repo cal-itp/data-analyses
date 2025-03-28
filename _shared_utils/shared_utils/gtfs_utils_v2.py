@@ -19,6 +19,22 @@ from siuba import *
 
 GCS_PROJECT = "cal-itp-data-infra"
 
+ROUTE_TYPE_DICT = {
+    # https://gtfs.org/documentation/schedule/reference/#routestxt
+    "0": "Tram, Streetcar, Light rail",
+    "1": "Subway, Metro",
+    "2": "Rail",
+    "3": "Bus",
+    "4": "Ferry",
+    "5": "Cable tram",
+    "6": "Aerial lift, suspecnded cable car",
+    "7": "Funicular",
+    "11": "Trolleybus",
+    "12": "Monorail",
+}
+
+RAIL_ROUTE_TYPES = [k for k, v in ROUTE_TYPE_DICT.items() if k not in ["3", "4"]]
+
 # ----------------------------------------------------------------#
 # Convenience siuba filtering functions for querying
 # ----------------------------------------------------------------#

@@ -8,24 +8,24 @@ parts:
     -   file: district_02-redding.md
         sections:
         -   glob: district_02-redding/*
-    -   file: district_03-marysville.md
+    -   file: district_03-marysville-sacramento.md
         sections:
-        -   glob: district_03-marysville/*
-    -   file: district_04-oakland.md
+        -   glob: district_03-marysville-sacramento/*
+    -   file: district_04-bay-area-oakland.md
         sections:
-        -   glob: district_04-oakland/*
-    -   file: district_05-san-luis-obispo.md
+        -   glob: district_04-bay-area-oakland/*
+    -   file: district_05-san-luis-obispo-santa-barbara.md
         sections:
-        -   glob: district_05-san-luis-obispo/*
-    -   file: district_06-fresno.md
+        -   glob: district_05-san-luis-obispo-santa-barbara/*
+    -   file: district_06-fresno-bakersfield.md
         sections:
-        -   glob: district_06-fresno/*
+        -   glob: district_06-fresno-bakersfield/*
     -   file: district_07-los-angeles-ventura.md
         sections:
         -   glob: district_07-los-angeles-ventura/*
-    -   file: district_08-san-bernardino.md
+    -   file: district_08-san-bernardino-riverside.md
         sections:
-        -   glob: district_08-san-bernardino/*
+        -   glob: district_08-san-bernardino-riverside/*
     -   file: district_09-bishop.md
         sections:
         -   glob: district_09-bishop/*
@@ -35,7 +35,7 @@ parts:
     -   file: district_11-san-diego.md
         sections:
         -   glob: district_11-san-diego/*
-    -   file: district_12-irvine.md
+    -   file: district_12-orange-county.md
         sections:
-        -   glob: district_12-irvine/*
+        -   glob: district_12-orange-county/*
 root: README
