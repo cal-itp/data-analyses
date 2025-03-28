@@ -11,14 +11,13 @@ import pandas as pd
 from siuba import *
 
 import datetime as dt
-from rt_analysis import rt_parser
 from shared_utils import rt_utils
 
 import os
 
 import pyaml
 import yaml
-from update_vars_index import ANALYSIS_DATE, PROGRESS_PATH
+from update_vars_index import PROGRESS_PATH
 
 def make_rt_site_yml(speedmaps_index_joined,
                        rt_site_path = '../portfolio/sites/rt.yml'):
@@ -43,7 +42,7 @@ def make_rt_site_yml(speedmaps_index_joined,
         chapter_dict['caption'] = f'District {district}'
         chapter_dict['params'] = {'district': district}
         chapter_dict['sections'] = \
-            [{'organization_source_record_id': organization_source_record_id} for organization_source_record_id in filtered.organization_source_record_id.to_list()]
+            [{'organization_name': organization_name} for organization_name in filtered.organization_name.to_list()]
         chapters_list += [chapter_dict]   
         
     parts_list = [{'chapters': chapters_list}]

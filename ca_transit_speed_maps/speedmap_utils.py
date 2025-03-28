@@ -2,7 +2,6 @@ import pandas as pd
 from siuba import *
 import numpy as np
 import geopandas as gpd
-import update_vars_index
 from shared_utils import rt_utils, catalog_utils
 from segment_speed_utils import helpers
 from calitp_data_analysis.geography_utils import CA_NAD83Albers_m
@@ -10,26 +9,29 @@ import datetime as dt
 import altair as alt
 from IPython.display import display, Markdown, IFrame
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
+from update_vars_index import SPEED_SEGS_PATH, ANALYSIS_DATE_LIST, GEOJSON_SUBFOLDER
 
-def read_segments_shn(organization_source_record_id: str) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
+def read_segments_shn(organization_name: str) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
     '''
     Get filtered detailed speedmap segments for an organization, and relevant district SHN.
     '''
-    path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.shape_stop_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
-    # path = f'{catalog.stop_segments.dir}{catalog.stop_segments.route_dir_single_segment_detail}_{update_vars_index.ANALYSIS_DATE}.parquet'
-    speedmap_segs = gpd.read_parquet(path, filters=[['organization_source_record_id', '==', organization_source_record_id]]) #  aggregated
+    ix_df = pd.read_parquet(f'./_rt_progress_{ANALYSIS_DATE_LIST[0]}.parquet')
+    this_org_ix = ix_df.query('organization_name == @organization_name')
+    analysis_date = this_org_ix.analysis_date.iloc[0]
+    path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
+    speedmap_segs = gpd.read_parquet(path, filters=[['organization_name', '==', organization_name]]) #  aggregated
     assert (speedmap_segs
     >> select(-_.route_short_name, -_.direction_id)).isna().any().any() == False, 'no cols besides route_short_name, direction_id should be nan'
-    speedmap_segs = prepare_segment_gdf(speedmap_segs)
+    speedmap_segs = prepare_segment_gdf(speedmap_segs).assign(analysis_date = analysis_date)
     shn = gpd.read_parquet(rt_utils.SHN_PATH)
     this_shn = shn >> filter(_.District.isin([int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]))
     
     return (speedmap_segs, this_shn)
 
 def read_shapes(speedmap_segs: gpd.GeoDataFrame):
-
-    shapes = helpers.import_scheduled_shapes(update_vars_index.ANALYSIS_DATE, columns=['shape_array_key', 'geometry'])
-    trips = helpers.import_scheduled_trips(update_vars_index.ANALYSIS_DATE, columns=['shape_array_key', 'shape_id', 'route_id',
+    analysis_date = speedmap_segs.analysis_date.iloc[0]
+    shapes = helpers.import_scheduled_shapes(analysis_date, columns=['shape_array_key', 'geometry'])
+    trips = helpers.import_scheduled_trips(analysis_date, columns=['shape_array_key', 'shape_id', 'route_id',
                                                                    'route_short_name', 'gtfs_dataset_key']).drop_duplicates()
     shapes = shapes.merge(trips, on='shape_array_key')
     org_shapes = shapes.merge(speedmap_segs[['schedule_gtfs_dataset_key']].drop_duplicates(),
@@ -74,7 +76,7 @@ def map_shn(district_gdf: gpd.GeoDataFrame):
     filename = f'{dist}_SHN'
     title = f"D{dist} State Highway Network"
     
-    export_result = rt_utils.set_state_export(district_gdf, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename = filename,
+    export_result = rt_utils.set_state_export(district_gdf, subfolder = GEOJSON_SUBFOLDER, filename = filename,
                         map_type = 'state_highway_network', map_title = title)
     spa_map_state = export_result['state_dict']
     return spa_map_state
@@ -84,7 +86,7 @@ def map_excluded_shapes(existing_state: dict, speedmap_segs: gpd.GeoDataFrame, s
     '''
     
     '''
-    display_date = analysis_date.strftime('%B %d %Y (%A)')
+    display_date = dt.date.fromisoformat(analysis_date).strftime('%B %d %Y (%A)')
     filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_excluded_shapes_{time_of_day}"
     title = f"{speedmap_segs.organization_name.iloc[0]} {display_date} Excluded Shapes {time_of_day}"
 
@@ -98,7 +100,7 @@ def map_excluded_shapes(existing_state: dict, speedmap_segs: gpd.GeoDataFrame, s
     
     if excluded_shapes.empty:
         return {}
-    export_result = rt_utils.set_state_export(excluded_shapes, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename = filename,
+    export_result = rt_utils.set_state_export(excluded_shapes, subfolder = GEOJSON_SUBFOLDER, filename = filename,
                         map_title = title, existing_state = existing_state)
     
     return export_result['state_dict']
@@ -118,7 +120,7 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
     excluded_shapes_state = map_excluded_shapes(shn_state, speedmap_segs, org_shapes,
                                                 time_of_day, analysis_date)
     
-    display_date = analysis_date.strftime('%B %d %Y (%A)')
+    display_date = dt.date.fromisoformat(analysis_date).strftime('%B %d %Y (%A)')
     filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_{map_type}_{time_of_day}"
     title = f"{speedmap_segs.organization_name.iloc[0]} {display_date} {time_of_day}"
     
@@ -130,7 +132,7 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
         legend_url = rt_utils.VARIANCE_LEGEND_URL
         
     export_result = rt_utils.set_state_export(
-        speedmap_segs, subfolder = update_vars_index.GEOJSON_SUBFOLDER, filename=filename,
+        speedmap_segs, subfolder = GEOJSON_SUBFOLDER, filename=filename,
         map_type=map_type,
         color_col=color_col, cmap=cmap, legend_url=legend_url,
         map_title=title,
