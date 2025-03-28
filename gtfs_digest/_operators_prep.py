@@ -50,37 +50,3 @@ def load_schd_vp_df(filter_schd_both:bool=True)->pd.DataFrame:
                     )
 
     return schd_vp_df
-
-def remove_duplicative_names(filter_schd_both:bool=True)->pd.DataFrame:
-    """
-    This df retains multi orgs to one schedule gtfs dataset key
-    """
-    df = load_schd_vp_df(filter_schd_both)
-   
-    df2 = df.drop_duplicates(
-        subset=[
-            "organization_name",
-            "caltrans_district",
-        ]
-    ).reset_index(drop=True)
-    
-    return df2 
-        
-def generate_operator_grain_yml(filter_schd_both:bool=True)->pd.DataFrame:
-    """
-    Generate the YML for the district level portfolio
-    """
-    # Load original df
-    df = remove_duplicative_names(filter_schd_both)
-        
-    # Remove duplicative names
-    final = (
-    df.drop_duplicates(
-        subset=[
-            "schedule_gtfs_dataset_key",
-        ]
-    )
-    .reset_index(drop=True)
-    )[["caltrans_district","organization_name"]]
-    
-    return final 

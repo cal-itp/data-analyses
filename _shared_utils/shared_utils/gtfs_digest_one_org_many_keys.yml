@@ -1,0 +1,64 @@
+# 1 organization_name: m schedule_gtfs_dataset-key, all values below are encompassed under one organization_name
+
+Basin Transit:
+- Basin Transit GMV Schedule
+- Morongo Basin Schedule
+City and County of San Francisco:
+- Bay Area 511 Muni Schedule
+- Bay Area 511 Golden Gate Park Shuttle Schedule
+- Golden Gate Park Shuttle Schedule
+City of Beaumont:
+- Beaumont Transit Schedule
+- Beaumont Pass Schedule
+City of Downey:
+- DowneyLink Avail Schedule
+- DowneyLINK GMV Schedule
+- DowneyLINK Schedule
+City of Huntington Park:
+- Huntington Park Schedule
+- Huntington Schedule
+City of Lawndale:
+- Lawndale Beat GMV Schedule
+- Lawndale Schedule
+City of Roseville:
+- Roseville Transit GMV Schedule
+- Roseville Schedule
+City of San Luis Obispo:
+- SLO Schedule
+- SLO Peak Transit Schedule
+Golden Gate Bridge, Highway and Transportation District:
+- Bay Area 511 Golden Gate Transit Schedule
+- Bay Area 511 Golden Gate Ferry Schedule
+Los Angeles County Metropolitan Transportation Authority:
+- LA Metro Bus Schedule
+- LA Metro Rail Schedule
+Mission Bay Transportation Management Agency:
+- Bay Area 511 Mission Bay Schedule
+- Mission Bay Schedule
+Mountain Area Regional Transit Authority:
+- Mountain Transit GMV Schedule
+- Mountain Transit Schedule
+Palo Verde Valley Transit Agency:
+- Desert Roadrunner GMV Schedule
+- Desert Roadrunner Schedule
+Presidio Trust:
+- Bay Area 511 PresidiGo Schedule
+- PresidiGo Schedule
+Redwood Coast Transit Authority:
+- Redwood Coast Schedule
+- Redwood Coast Schedulel
+San Luis Obispo Regional Transit Authority:
+- SLORTA Schedule
+- SLO Schedule
+Tahoe Transportation District:
+- Tahoe Transportation District Schedule
+- Tahoe Transportation District GMV Schedule
+Transit Joint Powers Authority for Merced County:
+- Merced Schedule
+- Merced GMV Schedule
+Victor Valley Transit Authority:
+- Victor Valley GMV Schedule
+- Victor Valley Schedule
+Yosemite National Park:
+- Yosemite Valley Shuttle Schedule
+- Mariposa Grove Shuttle Schedule
