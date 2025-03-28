@@ -1,15 +1,21 @@
 """
-Create the GTFS Digest yaml that 
-sets the parameterization for the analysis site.
+Return a crosswalk with organization names that correspond with one another.
+There are instances in which  schedule_gtfs_dataset_keys
+have more than one organization_name that corresponds to it.
+We only want to publish a page for a schedule_gtfs_dataset_key once,
+so we need a crosswalk to show something like City of Simi Valley is published
+under City of Camarillo.
 """
+import importlib
+import os
+import sys
+
 import pandas as pd
 import yaml
 
-from shared_utils import portfolio_utils
+sys.path.append(os.path.abspath("../../gtfs_digest/"))
+_operators_prep = importlib.import_module("_operators_prep")
 
-import sys
-sys.path.append("../../gtfs_digest/")
-from update_vars import GTFS_DATA_DICT
 
 def count_orgs(df: pd.DataFrame) -> list:
     """
@@ -17,106 +23,71 @@ def count_orgs(df: pd.DataFrame) -> list:
     to schedule_gtfs_dataset_keys. Filter out any
     schedule_gtfs_dataset_keys with less than 2 unique
     organization_names. Return these schedule_gtfs_dataset_keys
-    in a list. 
+    in a list.
     """
     agg1 = (
         df.groupby(["caltrans_district", "schedule_gtfs_dataset_key"])
-        .agg({"organization_name": "nunique"})
+        .agg({"repeated_organization_name": "nunique"})
         .reset_index()
     )
 
     # Filter out rows with more than 1 organization_name
-    agg1 = agg1.loc[agg1.organization_name > 1].reset_index(drop=True)
+    agg1 = agg1.loc[agg1.repeated_organization_name > 1].reset_index(drop=True)
     # Grab schedule_gtfs_datset_key into a list
     multi_org_list = list(agg1.schedule_gtfs_dataset_key.unique())
     return multi_org_list
 
-def find_schd_keys_multi_ops() -> pd.DataFrame:
-    """
-    Return a dataframe with all the schedule_gtfs_dataset_keys
-    that have more than one organization_name that corresponds to it. 
-    This way, we won't include duplicate organizations when publishing
-    our GTFS products. 
-    """
-    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
 
-    subset = [
-        "caltrans_district",
-        "schedule_gtfs_dataset_key",
-        "organization_name",
-        "service_date",
-    ]
+def find_schd_keys_multi_ops() -> dict:
+    # Load in the various dataframes that create the GTFS Digest portfolio site yaml
+    one_to_many_df, one_to_one_df, final = _operators_prep.operators_schd_vp_rt()
 
-    sort_cols = [
-        "caltrans_district",
-        "service_date",
-        "schedule_gtfs_dataset_key",
-    ]
+    # Subset and clean the dataframes
+    subset_cols = ["schedule_gtfs_dataset_key", "caltrans_district", "organization_name"]
 
-    schd_vp_df = pd.read_parquet(
-        schd_vp_url,
-        filters=[[("sched_rt_category", "in", ["schedule_and_vp", "schedule_only"])]],
-        columns=subset,
+    # This dataframe displays the relationship of 1 schedule dataset key to many
+    # organization names
+    one_to_many_df = one_to_many_df[subset_cols]
+    one_to_many_df = one_to_many_df.rename(columns={"organization_name": "repeated_organization_name"})
+
+    # This dataframe displays the relationship of 1 schedule dataset key to 1
+    # organization name
+    one_to_one_df = one_to_one_df[subset_cols]
+    one_to_one_df = one_to_one_df.rename(columns={"organization_name": "kept_organization_name"})
+    # Merge the two dataframes
+    m1 = pd.merge(
+        one_to_one_df,
+        one_to_many_df,
+        on=["schedule_gtfs_dataset_key", "caltrans_district"],
     )
 
-    # Sort dataframe to keep the  row for district/gtfs_key for the most
-    # current date 
-    schd_vp_df2 = schd_vp_df.dropna(subset="caltrans_district").sort_values(
-        by=sort_cols, ascending=[True, False, True]
-    )
-    schd_vp_df3 = schd_vp_df2.drop_duplicates(
-        subset=[
-            "organization_name",
-            "schedule_gtfs_dataset_key",
-            "caltrans_district",
-        ]
-    )
+    # Find the schedule_dataset_keys with more than one organization_name
+    # and filter out any rows that don't meet this criteria.
+    multiple_organizations_list = count_orgs(m1)
+    m2 = m1.loc[m1.schedule_gtfs_dataset_key.isin(multiple_organizations_list)]
 
-    # Aggregate the dataframe to find schedule_gtfs_dataset_keys
-    # With multiple organization_names.
-    multi_orgs_list = count_orgs(schd_vp_df3)
+    # Delete the rows that house the organization name we use for the portfolio
+    m2["kept_name_bool"] = m2.kept_organization_name == m2.repeated_organization_name
+    m3 = m2.loc[m2.kept_name_bool == False]
 
-    # Filter out the dataframe to only include schedule_gtfs_keys with multiple orgs
-    schd_vp_df4 = schd_vp_df3.loc[
-        schd_vp_df3.schedule_gtfs_dataset_key.isin(multi_orgs_list)
-    ].reset_index(drop=True)
+    # Clean and sort
+    final_cols = ["kept_organization_name", "repeated_organization_name"]
+    m3 = m3.sort_values(by=final_cols)[final_cols]
 
-    # Drop duplicates for organization_name
-    schd_vp_df5 = schd_vp_df4.drop_duplicates(
-        subset=["caltrans_district", "organization_name"]
-    ).reset_index(drop=True)
+    # Turn it into a dictionary
+    my_dict = m3.set_index("repeated_organization_name").T.to_dict("list")
+    return my_dict
 
-    # Aggregate the dataframe to find schedule_gtfs_dataset_keys
-    # with multiple organization_names once more.
-    multi_orgs_list2 = count_orgs(schd_vp_df5)
-
-    # Filter one last time to only include schedule_gtfs_keys with multiple orgs
-    schd_vp_df6 = schd_vp_df5.loc[
-        schd_vp_df5.schedule_gtfs_dataset_key.isin(multi_orgs_list2)
-    ].reset_index(drop=True)
-
-    # Clean
-    schd_vp_df6= schd_vp_df6.drop(columns = ["service_date"])
-    schd_vp_df6["combo"] = schd_vp_df6.caltrans_district  + " (" + schd_vp_df6.schedule_gtfs_dataset_key + ")"
-    
-    return schd_vp_df6
 
 SITE_YML = "./schedule_gtfs_dataset_key_multi_operator.yml"
 
 if __name__ == "__main__":
-    df = find_schd_keys_multi_ops()
+    my_dict = find_schd_keys_multi_ops()
 
-    portfolio_utils.create_portfolio_yaml_chapters_with_sections(
-        SITE_YML,
-        df,
-        chapter_info =  {
-            "column": "combo",
-            "name": "District/Key",
-            "caption_prefix": "",
-            "caption_suffix": "",
-        },
-        section_info = {
-            "column": "organization_name",
-            "name": "organization_name",
-        },
-    )
+    with open(SITE_YML) as f:
+        site_yaml_dict = yaml.load(f, yaml.Loader)
+
+    output = yaml.dump(my_dict)
+
+    with open(SITE_YML, "w") as f:
+        f.write(output)

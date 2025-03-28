@@ -3,3 +3,5 @@
 2025-03-04 16:32:50.092 | INFO     | __main__:assemble_stop_times_with_direction:267 - scheduled stop times with direction 2025-02-12: 0:07:04.975833
 2025-03-04 16:40:09.079 | INFO     | __main__:assemble_stop_times_with_direction:267 - scheduled stop times with direction 2025-01-15: 0:07:18.386827
 2025-03-10 15:22:24.688 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-02-12: 0:07:10.382385
+2025-03-13 13:27:53.024 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-03-13: 0:07:22.896623
+2025-03-17 10:19:05.973 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-03-12: 0:07:26.377485

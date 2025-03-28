@@ -198,7 +198,7 @@ def collinear_filter_feed(
     '''
     
     st_could_qual, qualify_pairs = feed_level_filter(gtfs_dataset_key, multi_only_explode, qualify_dict, st_prepped, frequency_thresholds)
-    st_qual_filter_1 = st_could_qual.groupby('stop_id').apply(filter_qualifying_stops, qualify_pairs=qualify_pairs)
+    st_qual_filter_1 = st_could_qual.groupby('stop_id',  group_keys=False).apply(filter_qualifying_stops, qualify_pairs=qualify_pairs)
     st_qual_filter_1 = st_qual_filter_1.reset_index(drop=True)
     if st_qual_filter_1.empty: return
     trips_per_peak_qual_1 = stop_times_aggregation_max_by_stop(st_qual_filter_1, analysis_date, single_route_dir=False)
