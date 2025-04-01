@@ -17,7 +17,10 @@ def check_defined_elsewhere(row, df):
     row['service_any_feed'] = is_defined
     return row
 
+    
+
 TARGET_DATE = conveyal_vars.TARGET_DATE
+REGIONAL_SUBFEED_NAME = "Regional Subfeed"
 
 def get_feeds_check_service():
     feeds_on_target = gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(selected_date=TARGET_DATE)
@@ -42,15 +45,22 @@ def attach_transit_services(feeds_on_target: pd.DataFrame):
     target_dt = dt.datetime.combine(dt.date.fromisoformat(TARGET_DATE), dt.time(0))
 
     services = (tbls.mart_transit_database.dim_gtfs_service_data()
-        >> filter(_._valid_from <= target_dt, _._valid_to > target_dt)
+        >> filter(
+            _._valid_from <= target_dt, _._valid_to > target_dt
+        )
         # >> filter(_.gtfs_dataset_key == 'da7e9e09d3eec6c7686adc21c8b28b63') # test with BCT
         # >> filter(_.service_key == '5bc7371dca26d74a99be945b18b3174e')
-        >> select(_.service_key, _.gtfs_dataset_key)
+        >> select(_.service_key, _.gtfs_dataset_key, _.customer_facing)
         >> collect()
     )
 
-    feeds_on_target = feeds_on_target >> left_join(_, services, on='gtfs_dataset_key')
-    return feeds_on_target           
+    feeds_services_merged = feeds_on_target.merge(
+        services, how="left", on='gtfs_dataset_key', validate="one_to_many"
+    )           
+    feeds_services_filtered = feeds_services_merged.loc[
+        feeds_services_merged["customer_facing"] | (feeds_services_merged["regional_feed_type"] == REGIONAL_SUBFEED_NAME)
+    ].copy()
+    return feeds_services_filtered
         
 def report_undefined(feeds_on_target: pd.DataFrame):
     fname = 'no_apparent_service.csv'
