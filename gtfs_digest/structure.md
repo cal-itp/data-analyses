@@ -102,3 +102,12 @@ m:m (this would be a really weird case...let's double check there are none of th
                                          df.scheduled_service_minutes),
     )
     ```
+    
+### 4/1/2025 Comments
+I see a couple lines from structure.md not included: 
+-using publish_utils.filter_to_recent_date - I want you to work on making use of functions that are there. That's a skill in writing less redundant code.
+- can you define def load_schd_vp(url)this way? this allows anyone to input the url for the df they want to do a similar selection for which operators to include. Ex: if you wanted to use this for district digest, you would not be using the same df, you would be using the operator grain file. 
+-I noticed the vp_only operators are not coming up correctly...did you notice this? Can you make sure the yaml can find the "problem" operators and make those known?
+-can you mark out the actual desired name to use within gtfs_digest_one_key_many_orgs.yml? Right now, yes, it's picking the first one, but can you do a pass through to see if that's actually the preferred one for the portfolio? First glance, Foothill/Duarte, City of Duarte is being selected. Ask Evan if you need to, with the yaml that you prepared, and see if he can pick out the name we're going with publicly.
+-with the step above, you're going to want to rewrite your function to select the preferred ones. i doubt there's a way to sort, it's not always the first one alphabetically, so make that selection explicitly defined. make sure this function can be used to create the table of contents for broader use in speedmaps/district digest/legis district digest too!
+-if the many:many didn't have anything, remove that! i wanted you to check for it.
