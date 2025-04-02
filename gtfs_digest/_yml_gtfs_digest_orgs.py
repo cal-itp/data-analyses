@@ -1,16 +1,23 @@
 import pandas as pd
 import yaml
-from shared_utils import catalog_utils, portfolio_utils
-import deploy_portfolio_yaml
+from shared_utils import catalog_utils, portfolio_utils, publish_utils
+import _portfolio_names_dict
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 """
-Dictionary
+Columns & URLs for operator grain digest
 """
-reason_for_exclusion = {
-    "City of Alameda": "Prefer using San Francisco Bay Area Water Emergency Transportation Authority (WETA) when displaying in our portflio."
-}
+operator_digest_cols = [
+    "schedule_gtfs_dataset_key",
+    "caltrans_district",
+    "organization_name",
+    "name",
+    "sched_rt_category",
+    "service_date",
+]
+
+schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
 
 """
 General Functions
@@ -69,48 +76,49 @@ def count_orgs(df: pd.DataFrame, groupby_col: str, nunique_col: str) -> list:
 """
 Functions to create YMLs
 """
-def load_schd_vp() -> pd.DataFrame:
-    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
-
-    # Drop any duplicates
-    schd_vp_df = (
-        pd.read_parquet(
-            schd_vp_url,
-            columns=[
-                "schedule_gtfs_dataset_key",
-                "organization_name",
-                "name",
-                "sched_rt_category",
-                "service_date",
-            ],
-        )
-    ).drop_duplicates()
-
-    # Sort values so the most current row stays at the top
-    schd_vp_df = schd_vp_df.sort_values(
-        by=[
-            "organization_name",
-            "service_date",
-        ],
-        ascending=[True, False],
+def load_df_for_yml(url: str, columns_to_keep=list) -> pd.DataFrame:
+    # Keep only organizations with RT and schedule OR only schedule.
+    df = pd.read_parquet(
+        url,
+        columns=columns_to_keep,
     )
-    
-    # Drop duplicates again
-    schd_vp_df = schd_vp_df.drop_duplicates(subset=["organization_name", "name"])
 
-    # Drop service_date
-    schd_vp_df = schd_vp_df.drop(columns=["service_date"]).reset_index(drop=True)
+    df = (
+        df.drop_duplicates(subset=columns_to_keep)
+        .reset_index(drop=True)
+        .dropna(subset=["caltrans_district"])
+    )
 
-    # Fillna rows with None.
-    schd_vp_df = schd_vp_df.fillna("None")
-    
-    # Filter out organization_names that are None.
-    schd_vp_df = schd_vp_df.loc[schd_vp_df.organization_name != "None"].reset_index(
-    drop=True
-)
-    return schd_vp_df
+    # Get the most recent date using publish_utils
+    recent_date = publish_utils.filter_to_recent_date(df)
 
+    # Merge to get the most recent row for each organization
+    df.service_date = df.service_date.astype(str)
+    m1 = pd.merge(df, recent_date)
 
+    # Map portfolio names
+    m1["portfolio_name"] = m1.organization_name.map(
+        _portfolio_names_dict.combined_names_dict
+    )
+
+    m1.portfolio_name = m1.portfolio_name.fillna(m1.organization_name)
+
+    m1 = (
+        m1.sort_values(
+            by=[
+                "service_date",
+                "caltrans_district",
+                "organization_name",
+                "portfolio_name",
+            ],
+            ascending=[False, True, True, True],
+        )
+        .drop_duplicates(
+            subset=["caltrans_district", "organization_name", "name", "portfolio_name"]
+        )
+        .reset_index(drop=True)
+    )
+    return m1
 
 def generate_key_org_ymls(df: pd.DataFrame):
     """
@@ -144,7 +152,7 @@ def generate_key_org_ymls(df: pd.DataFrame):
     m1 = pd.merge(
         one_org_m_keys_df,
         one_key_many_orgs_df,
-        on=["schedule_gtfs_dataset_key", "organization_name", "name"],
+        on=["schedule_gtfs_dataset_key", "organization_name", "portfolio_name","name"],
         how="outer",
         indicator=True,
     )
@@ -165,23 +173,23 @@ def generate_key_org_ymls(df: pd.DataFrame):
     # Save to yml
     df_to_yaml(
         df=one_org_m_keys_df,
-        nest1_column="organization_name",
+        nest1_column="portfolio_name",
         nest2_column="name",
         SITE_YML= "../_shared_utils/shared_utils/gtfs_digest_one_org_many_keys.yml",
-        title="1 organization_name: m schedule_gtfs_dataset-key, all values below are encompassed under one organization_name",
+        title="1 organization_name: m schedule_gtfs_dataset-key, all values below are encompassed under one portfolio_name",
     )
 
-    # One `organization_name` to many `schedule_gtfs_dataset_key`
+    # One `schedule_gtfs_dataset_key` to many `organization_name`
     one_org_m_keys_df = m1.loc[
         m1._merge == "1 organization_name:m schedule_gtfs_dataset_key"
     ]
     # Save to yml
     df_to_yaml(
         df=one_key_many_orgs_df,
-        nest1_column="name",
+        nest1_column="portfolio_name",
         nest2_column="organization_name",
         SITE_YML="../_shared_utils/shared_utils/gtfs_digest_one_key_many_orgs.yml",
-        title="1 schedule_gtfs_dataset_key:m organization_name, only the 1st value is displayed in the portfolio",
+        title="1 schedule_gtfs_dataset_key:m organization_name: m organization_names are captured under portfolio_name",
     )
     # Many organization_name to many schedule_gtfs_datset_keys"
     m_org_m_keys_df = m1.loc[
@@ -255,7 +263,6 @@ def generate_org_gtfs_status_yml(df: pd.DataFrame):
     )
     
 if __name__ == "__main__":
-    df = load_schd_vp()
+    df = load_df_for_yml(schd_vp_url, operator_digest_cols)
     generate_key_org_ymls(df)
-    generate_excluded_orgs_yml(df)
     generate_org_gtfs_status_yml(df)
