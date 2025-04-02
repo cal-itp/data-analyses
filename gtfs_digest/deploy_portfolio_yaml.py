@@ -56,11 +56,11 @@ def generate_operator_grain_yaml()->pd.DataFrame:
     
     # Drop duplicates again & sort
     final_cols = ["caltrans_district",
-        "portfolio_name",]
+        "portfolio_name", "organization_name"]
     
     m2 = m1.drop_duplicates(
     subset= final_cols
-    ).sort_values(by = final_cols, ascending = [True, True])
+    ).sort_values(by = final_cols, ascending = [True, True, True])
     
     final = m2[final_cols]
     
