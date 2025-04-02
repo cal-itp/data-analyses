@@ -2,9 +2,9 @@
 Create the GTFS Digest yaml that 
 sets the parameterization for the analysis site.
 """
-from shared_utils import catalog_utils, portfolio_utils
+from shared_utils import catalog_utils, portfolio_utils,  publish_utils
 import pandas as pd
-
+import _portfolio_names_dict
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 SITE_YML = "../portfolio/sites/gtfs_digest.yml"
@@ -15,7 +15,9 @@ def generate_operator_grain_yaml()->pd.DataFrame:
     """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
-    schd_vp_df = (pd.read_parquet(schd_vp_url,
+    # Keep only organizations with RT and schedule OR only schedule.
+    schd_vp_df = (pd.read_parquet(schd_vp_url, 
+                       filters=[[("sched_rt_category", "in", ["schedule_and_vp", "schedule_only"])]],
                        columns = [ "schedule_gtfs_dataset_key",
                                     "caltrans_district",
                                     "organization_name",
@@ -25,51 +27,42 @@ def generate_operator_grain_yaml()->pd.DataFrame:
                                      )
                      )
 
-    schd_vp_df = schd_vp_df.assign(
-        caltrans_district = schd_vp_df.caltrans_district.map(portfolio_utils.CALTRANS_DISTRICT_DICT)
-    )
     
-    # Sort/drop duplicates for only the most current row for each operator.
-    agg1 = (
-    schd_vp_df.dropna(subset="caltrans_district")
-    .sort_values(
-        by=[
-            "caltrans_district",
-            "organization_name",
-            "service_date",
-        ],
-        ascending=[True, True, False],
-    )
-    .drop_duplicates(
-        subset=[
-            "organization_name",
-            "caltrans_district",
-        ]
-    )
-    .reset_index(drop=True)
-    )
-    # Manually filter out certain operators for schedule_gtfs_dataset_keys
-    # that have multiple operators because keeping another value is preferable. 
-    operators_to_exclude = ["City of Alameda"]
-    agg1 = agg1.loc[~agg1.organization_name.isin(operators_to_exclude)].reset_index(drop = True)
-    
-    # Filter out any operators that are vp_only
-    # This df retains multi orgs to one schedule gtfs dataset key
-    one_to_many_df = (agg1
-                     .loc[agg1.sched_rt_category
-                     .isin(["schedule_and_vp","schedule_only"])]
-                     .reset_index(drop = True)
-                    )
-
-    # Keep only one instance of a schedule_gtfs_dataset_key & subset
-    final = (
-    one_to_many_df.drop_duplicates(
-        subset=[
+    # Drop duplicates & drop any rows without CT district values
+    schd_vp_df = (schd_vp_df
+                  .drop_duplicates(subset=[
             "schedule_gtfs_dataset_key",
+            "caltrans_district",
+            "organization_name",
+            "name",
+            "sched_rt_category",
         ]
-    )
-    .reset_index(drop=True)
-    )[["caltrans_district","organization_name"]]
+    ).dropna(subset="caltrans_district")
+     .reset_index(drop = True)
+                 )
+    
+    # Get the most recent date using publish_utils
+    recent_date = publish_utils.filter_to_recent_date(schd_vp_df)
+    
+    # Merge to get the most recent row for each organization
+    schd_vp_df.service_date = schd_vp_df.service_date.astype(str)
+    m1 = pd.merge(schd_vp_df, recent_date)
+    
+    # Map certain organizations for the portfolio name 
+    m1["portfolio_name"] = m1.organization_name.map(_portfolio_names_dict.combined_names_dict)
+    
+    # Fill NA in new column with organization_name 
+    m1.portfolio_name = m1.portfolio_name.fillna(m1.organization_name)
+    
+    # Drop duplicates again & sort
+    final_cols = ["caltrans_district",
+        "portfolio_name",]
+    
+    m2 = m1.drop_duplicates(
+    subset= final_cols
+    ).sort_values(by = final_cols, ascending = [True, True])
+    
+    final = m2[final_cols]
     
     return final
 
@@ -86,7 +79,7 @@ if __name__ == "__main__":
             "caption_suffix": "",
         },
         section_info = {
-            "column": "organization_name",
-            "name": "organization_name",
+            "column": "portfolio_name",
+            "name": "portfolio_name",
         },
     )

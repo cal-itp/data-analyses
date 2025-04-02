@@ -80,13 +80,13 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     
     # Create copies of the original df before aggregating because I noticed applying
     #  segment_calcs.calculate_weighted_averages impacts the original df
-    rt_df = df.copy()
-    schd_df = df.copy()
-    timeliness_df = df.copy()
+    #rt_df = df.copy()
+    #schd_df = df.copy()
+    #timeliness_df = df.copy()
 
     # Calculate RT Metrics that need to have a weighted average
     rt_metrics = segment_calcs.calculate_weighted_averages(
-        df=rt_df,
+        df=df[groupby_cols+rt_metric_cols+["n_vp_trips"]],
         group_cols=groupby_cols,
         metric_cols=rt_metric_cols,
         weight_col="n_vp_trips",
@@ -94,7 +94,7 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
 
     # Calculate Scheduled Metrics that need to have a weighted average
     schd_metrics = segment_calcs.calculate_weighted_averages(
-        df=schd_df,
+        df=df[groupby_cols + schd_metric_cols + ["n_scheduled_trips"]],
         group_cols=groupby_cols,
         metric_cols=schd_metric_cols,
         weight_col="n_scheduled_trips",
@@ -102,7 +102,7 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     
 
     # Calculate trips by timeliness which doesn't need weighted average
-    timeliness_df = timeliness_df[groupby_cols + rt_metric_no_weighted_avg]
+    timeliness_df = df[groupby_cols + rt_metric_no_weighted_avg]
     timeliness_df2 = (
         timeliness_df.groupby(groupby_cols)
         .agg({"is_early": "sum", "is_ontime": "sum", "is_late": "sum"})
@@ -122,38 +122,34 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
 
     # Re-calculate certain columns
     # Have to temporarily rm total to some of the columns
-    m1 = m1.rename(
+    m2 = m1.rename(
     columns={
         "total_rt_service_minutes": "rt_service_minutes",
         "total_scheduled_service_minutes": "scheduled_service_minutes",
-    }
-    )
-    m1 = metrics.calculate_rt_vs_schedule_metrics(m1)
-    
-    # Rename back
-    m1 = m1.rename(
-    columns={
+    }).pipe(
+     metrics.calculate_rt_vs_schedule_metrics
+    ).rename(
+       columns={
         "rt_service_minutes": "total_rt_service_minutes",
         "scheduled_service_minutes": "total_scheduled_service_minutes"
-    }
-    ) 
-    
-    
+
+    })
+ 
     # Have to recalculate rt sched journey ratio
-    m1["rt_sched_journey_ratio"] = (
-        m1.total_rt_service_minutes / m1.total_scheduled_service_minutes
+    m2["rt_sched_journey_ratio"] = (
+        m2.total_rt_service_minutes / m2.total_scheduled_service_minutes
     )
     
     # Rearrange columns to match original df
     col_proper_order = list(df.columns) 
-    m1 = m1[col_proper_order]
+    m2 = m2[col_proper_order]
     
     # Drop service_date & duplicates
-    m1 = (m1
+    m2 = (m2
           .drop(columns=["service_date"])
           .drop_duplicates(subset = group_cols)
           .reset_index(drop=True))
-    return m1
+    return m2
 
 if __name__ == "__main__":
     
