@@ -7,7 +7,6 @@ from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, RT_SCHED_GCS, SCHED_GCS)
 from shared_utils import catalog_utils, rt_dates, rt_utils
 import _report_utils 
-import _operators_prep as op_prep
 from segment_speed_utils import helpers
 
 # Readable Dictionary
