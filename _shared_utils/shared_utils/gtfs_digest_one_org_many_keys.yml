@@ -1,4 +1,4 @@
-# 1 organization_name: m schedule_gtfs_dataset-key, all values below are encompassed under one organization_name
+# 1 organization_name: m schedule_gtfs_dataset-key, all values below are encompassed under one portfolio_name
 
 Basin Transit:
 - Basin Transit GMV Schedule
@@ -14,9 +14,6 @@ City of Downey:
 - DowneyLink Avail Schedule
 - DowneyLINK GMV Schedule
 - DowneyLINK Schedule
-City of Huntington Park:
-- Huntington Park Schedule
-- Huntington Schedule
 City of Lawndale:
 - Lawndale Beat GMV Schedule
 - Lawndale Schedule
@@ -47,9 +44,6 @@ Presidio Trust:
 Redwood Coast Transit Authority:
 - Redwood Coast Schedule
 - Redwood Coast Schedulel
-San Luis Obispo Regional Transit Authority:
-- SLORTA Schedule
-- SLO Schedule
 Tahoe Transportation District:
 - Tahoe Transportation District Schedule
 - Tahoe Transportation District GMV Schedule
