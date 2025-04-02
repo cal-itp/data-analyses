@@ -1,21 +1,9 @@
-# 1 schedule_gtfs_dataset_key:m organization_name, only the 1st value is displayed in the portfolio
+# 1 schedule_gtfs_dataset_key:m organization_name: m organization_names are captured under portfolio_name
 
-Amtrak Schedule:
-- Amtrak
-- San Joaquin Joint Powers Authority
-Bay Area 511 Commute.org Schedule:
+Commute.org and Menlo Park Community Shuttles Schedule:
 - City of Menlo Park
 - Commute.org
-Bay Area 511 San Francisco Bay Ferry Schedule:
-- City of Alameda
-- San Francisco Bay Area Water Emergency Transit Authority
-Bay Area 511 SolTrans Schedule:
-- Solano County Transit
-- Solano Transportation Authority
-Bay Area 511 Sonoma County Transit Schedule:
-- Cloverdale Transit
-- Sonoma County
-Flixbus Schedule:
+FlixBus and Greyhound Schedule:
 - FlixBus
 - Greyhound
 Foothill Schedule:
@@ -25,9 +13,6 @@ Humboldt Schedule:
 - City of Arcata
 - City of Eureka
 - Humboldt Transit Authority
-Redding Schedule:
-- Redding Area Bus Authority
-- Shasta County
 Sacramento Schedule:
 - City of Rancho Cordova
 - Sacramento Regional Transit District
@@ -35,16 +20,22 @@ San Diego Schedule:
 - Flagship Cruises and Events Inc.
 - San Diego International Airport
 - San Diego Metropolitan Transit System
+San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule:
+- City of Alameda
+- San Francisco Bay Area Water Emergency Transit Authority
+SolTrans Schedule:
+- Solano County Transit
+- Solano Transportation Authority
+Sonoma County Transit Schedule:
+- Cloverdale Transit
+- Sonoma County
 TART, North Lake Tahoe Schedule:
 - North Lake Tahoe Express
 - Tahoe Truckee Area Regional Transportation
-Tehama Schedule:
-- Susanville Indian Rancheria
-- Tehama County
-UCSC Schedule:
+UCSC and City of Santa Cruz Beach Shuttle Schedule:
 - City of Santa Cruz
 - University of California, Santa Cruz
-VCTC GMV Schedule:
+Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai, Simi Valley, Thousand Oaks) Schedule:
 - City of Camarillo
 - City of Moorpark
 - City of Ojai
