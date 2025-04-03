@@ -164,7 +164,7 @@ def draw_line_between_points(gdf: gpd.GeoDataFrame, group_cols: list) -> gpd.Geo
     # Grab the subsequent point geometry
     # We can drop whenever the last point is missing within
     # a group. If we have 3 points, we can draw 2 lines.
-    gdf = gdf.assign(end_geometry=(gdf.groupby(group_cols, group_keys=False).geometry.shift(-1))).dropna(
+    gdf = gdf.assign(end_geometry=(gdf.groupby(group_cols, group_keys=False, dropna=False).geometry.shift(-1))).dropna(
         subset="end_geometry"
     )
 

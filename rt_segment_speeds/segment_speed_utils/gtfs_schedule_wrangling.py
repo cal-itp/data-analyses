@@ -99,7 +99,7 @@ def stop_arrivals_per_stop(
         agg_dict = {count_col: 'count'}
     arrivals_by_stop = (stop_times
                         .groupby(group_cols, 
-                                 observed=True, group_keys=False)
+                                 observed=True, group_keys=False, dropna=False)
                         .agg(agg_dict)
                         .reset_index()
                         .rename(columns = {count_col: "n_arrivals"})          
@@ -571,6 +571,7 @@ def fill_missing_stop_sequence1(df: pd.DataFrame) -> pd.DataFrame:
     )
     return df
 
+
 def mode_by_group(
     df: pd.DataFrame, 
     group_cols: list, 
@@ -580,69 +581,10 @@ def mode_by_group(
     Get the most common value by grouping.
     """
     df2 = (df
-           .groupby(group_cols)
+           .groupby(group_cols, group_keys=False, dropna=False)
            .agg({
                **{c: lambda x: x.mode().iloc[0] for c in value_cols}
            }).reset_index()
           )
     
     return df2
-
-def top_cardinal_direction(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Some routes don't change their geographies over time,
-    but their cardinal direction changes. This function finds
-    the most common direction across all the dates for a route-
-    direction_id and keeps only that value.
-    
-    Ex: Route A going Direction 0 is Southbound from the beginning of 
-    the time series to Jnauary 2023. Starting April 2023, 
-    this route-direction combo has starts being coded as Northbound consistently. 
-    Since there are more instances of Northbound, go back to the 
-    prior rows and replace Southbound with Northbound. 
-    """
-    # Count the # of  times a route_primary_direction appears
-    # across all dates.
-    agg1 = (
-        df.groupby(
-            [
-                "organization_name",
-                "route_combined_name",
-                "direction_id",
-                "route_primary_direction",
-            ]
-        )
-        .agg({"service_date": "nunique"})
-        .reset_index()
-        .sort_values(
-            by=[
-                "organization_name",
-                "route_combined_name",
-                "direction_id",
-                "service_date",
-            ],
-            ascending=[True, True, True, False],
-        )
-    )
-
-    # Keep only the most common route_primary_direction
-    # for direction_id 0 and 1. Drop service-date since it's
-    # no logner needed.
-    merge_dup_cols = ["organization_name", 
-                      "route_combined_name", 
-                      "direction_id"]
-    
-    agg2 = (
-        agg1.drop_duplicates(
-            subset=merge_dup_cols
-        ).reset_index(drop=True)
-    ).drop(columns=["service_date"])
-
-    # Left merge to the original dataframe
-    m1 = pd.merge(
-        df.drop(columns=["route_primary_direction"]),
-        agg2,
-        on=merge_dup_cols,
-        how="left",
-    )
-    return m1
