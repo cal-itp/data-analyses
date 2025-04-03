@@ -40,8 +40,8 @@ schedule_tables:
   dir: ${gcs_paths.SCHED_GCS}
   gtfs_key_crosswalk: "crosswalk/gtfs_key_organization"
   route_identification: "standardized_route_ids"
-  route_typologies: "nacto_typologies/route_typologies"
-  monthly_scheduled_service: "scheduled_service_by_route"
+  route_typologies: "nacto_typologies/route_typologies" # file for each year at route grain
+  monthly_scheduled_service: "scheduled_service_by_route" # file for each year at month-route grain
   operator_scheduled_stats: "operator_profiles/operator_scheduled_stats"
   operator_routes: "operator_profiles/operator_routes"
 
