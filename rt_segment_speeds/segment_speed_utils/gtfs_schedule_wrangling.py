@@ -371,7 +371,10 @@ def standardize_route_id(
     return word
 
 
-def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame:
+def most_common_shape_by_route_direction(
+    analysis_date: str,
+    trip_filters: tuple = None
+) -> gpd.GeoDataFrame:
     """
     Find shape_id with most trips for that route-direction.
     Merge in shape geometry.
@@ -385,17 +388,17 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
     trips = helpers.import_scheduled_trips(
         analysis_date, 
         columns = keep_trip_cols,
-        get_pandas = True
+        get_pandas = True,
+        filters = trip_filters
     ).rename(columns = {"schedule_gtfs_dataset_key": "gtfs_dataset_key"})                 
-    sorting_order = [True for i in route_dir_cols]
-    
+        
     most_common_shape = (
         trips.groupby(route_dir_cols + ["shape_id", "shape_array_key"], 
-                      observed=True, group_keys = False, dropna= False)
+                      observed=True, group_keys = False, dropna = False)
         .agg({"trip_instance_key": "count"})
         .reset_index()
         .sort_values(route_dir_cols + ["trip_instance_key"], 
-                     ascending = sorting_order + [False])
+                     ascending = [True for i in route_dir_cols] + [False])
         .drop_duplicates(subset=route_dir_cols)
         .reset_index(drop=True)
         [route_dir_cols + ["shape_id", "shape_array_key"]]
@@ -403,10 +406,11 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
         "gtfs_dataset_key": "schedule_gtfs_dataset_key", 
         "shape_id": "common_shape_id"
     })  
-    
+        
     shape_geom = helpers.import_scheduled_shapes(
         analysis_date,
         columns = ["shape_array_key", "geometry"],
+        get_pandas = True
     )
     
     common_shape_geom = pd.merge(
@@ -416,25 +420,7 @@ def most_common_shape_by_route_direction(analysis_date: str) -> gpd.GeoDataFrame
         how = "inner"
     ).drop(columns = "shape_array_key")
     
-    route_info = helpers.import_scheduled_trips(
-        analysis_date,
-        columns = ["gtfs_dataset_key", "route_id", 
-                   "route_long_name", "route_short_name", "route_desc"]
-    ).drop_duplicates().pipe(
-        portfolio_utils.add_route_name
-    ).drop(columns = ["route_long_name", "route_short_name", "route_desc"])
-    
-    del shape_geom, most_common_shape
-    
-    common_shape_geom2 = pd.merge(
-        common_shape_geom,
-        route_info.rename(columns = {"route_name_used": "route_name"}),
-        on = ["schedule_gtfs_dataset_key", "route_id"]
-    )
-    
-    # Amanda: test
-    common_shape_geom2.direction_id = common_shape_geom2.direction_id.fillna(0)
-    return common_shape_geom2
+    return common_shape_geom
  
     
 def longest_shape_by_route_direction(

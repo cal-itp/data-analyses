@@ -11,7 +11,7 @@ from calitp_data_analysis import utils
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from shared_utils.rt_utils import METERS_PER_MILE
 from update_vars import GTFS_DATA_DICT, SCHED_GCS
-from route_typologies import route_typologies
+from nacto_utils import route_typology_types
 
 def schedule_stats_by_operator(
     analysis_date: str,
@@ -41,7 +41,8 @@ def schedule_stats_by_operator(
     ]
     trip_stats = (
         trips
-        .groupby(group_cols, observed=True, group_keys=False)
+        .groupby(group_cols, 
+                 observed=True, group_keys=False, dropna=False)
         .agg({
             **{c: "nunique" for c in nunique_cols}
         }).reset_index()
@@ -54,7 +55,8 @@ def schedule_stats_by_operator(
     
     stop_time_stats = (
         stop_times
-        .groupby(group_cols, observed=True, group_keys=False)
+        .groupby(group_cols, 
+                 observed=True, group_keys=False, dropna=False)
         .agg({
             "stop_id": "nunique",
             "trip_instance_key": "count"
@@ -66,9 +68,11 @@ def schedule_stats_by_operator(
     )
     
     longest_shape = longest_shape_by_route(analysis_date)
+    
     shape_stats = (
         longest_shape
-        .groupby(group_cols, observed=True, group_keys=False)
+        .groupby(group_cols, 
+                 observed=True, group_keys=False, dropna=False)
         .agg({"route_length_miles": "sum"})
         .reset_index()
         .rename(columns = {
@@ -121,20 +125,19 @@ def operator_typology_breakdown(df: pd.DataFrame) -> pd.DataFrame:
     """
     Get a count of how many routes (not route-dir) 
     have a certain primary typology.
+    Rename columns following this pattern: is_rapid to n_rapid_routes
     """    
-    typology_values = [
-        f"is_{i}" for i in route_typologies
-    ]
     
-    df_wide = (df.groupby("schedule_gtfs_dataset_key")
-               .agg({**{c: "sum" for c in typology_values}})
+    df_wide = (df.groupby("schedule_gtfs_dataset_key", group_keys=False)
+               .agg({
+                   **{f"is_{c}": "sum" for c in route_typology_types}
+               })
                .reset_index()
+               .rename(columns = {
+                   **{f"is_{c}": f"n_{c.replace('is_', '')}_routes" 
+                      for c in route_typology_types}
+               })
               )
-        
-    rename_dict = {old_name: f"n_{old_name.replace('is_', '')}_routes" 
-                   for old_name in typology_values}
-    
-    df_wide = df_wide.rename(columns = rename_dict)
     
     return df_wide
 
@@ -150,13 +153,15 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
         
+        year = pd.to_datetime(analysis_date).year
+        
         crosswalk = helpers.import_schedule_gtfs_key_organization_crosswalk(
             analysis_date
         )[["schedule_gtfs_dataset_key", 
            "name", "organization_source_record_id", "organization_name"]]
         
         route_typology = pd.read_parquet(
-            f"{SCHED_GCS}{ROUTE_TYPOLOGY}_{analysis_date}.parquet"
+            f"{SCHED_GCS}{ROUTE_TYPOLOGY}_{year}.parquet"
         )
            
         operator_typology_counts = operator_typology_breakdown(route_typology)
@@ -178,12 +183,12 @@ if __name__ == "__main__":
             f"{SCHED_GCS}{OPERATOR_EXPORT}_{analysis_date}.parquet"
         )
         
-        # route typology is by route-direction 
-        # aggregate this to route
+        # route typology is by route, but there are some rows that are duplicated
+        # because of differences in route_long_name, route_short_name
         route_typology_grouped = (
             route_typology
             .groupby(["schedule_gtfs_dataset_key", "route_id"])
-            .agg({**{f"is_{c}": "sum" for c in route_typologies}})
+            .agg({**{f"is_{c}": "max" for c in route_typology_types}})
             .reset_index()
         )
         

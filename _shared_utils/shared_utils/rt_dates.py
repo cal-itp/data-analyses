@@ -64,6 +64,7 @@ DATES = {
 }
 
 years_available = list(range(2023, datetime.datetime.now().year + 1))
+current_year = max(years_available)
 
 y2023_dates = [
     v for k, v in DATES.items() if k.endswith("2023") and not any(substring in k for substring in ["jan", "feb"])
@@ -71,6 +72,12 @@ y2023_dates = [
 
 y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["oct2024g"]]
 y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
+
+DATES_BY_YEAR_DICT = {
+    2023: y2023_dates,
+    2024: y2024_dates,
+    2025: y2025_dates,
+}
 
 valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
 
