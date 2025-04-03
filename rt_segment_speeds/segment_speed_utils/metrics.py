@@ -19,7 +19,8 @@ def weighted_average_speeds_across_segments(
     instead of mean(speed_mph), since segments can be varying lengths.
     """
     avg_speeds = (
-        df.groupby(group_cols, observed=True, group_keys=False, dropna=False)
+        df.groupby(group_cols, 
+                   observed=True, group_keys=False, dropna=False)
         .agg(
             {
                 "meters_elapsed": "sum",
@@ -131,8 +132,12 @@ def calculate_weighted_average_vp_schedule_metrics(
     count_cols = ["trip_instance_key"]
 
     df2 = (
-        df.groupby(group_cols, observed=True, group_keys=False, dropna=False)
-        .agg({**{e: "sum" for e in sum_cols}, **{e: "count" for e in count_cols}})
+        df.groupby(group_cols, 
+                   observed=True, group_keys=False, dropna=False)
+        .agg({
+            **{e: "sum" for e in sum_cols}, 
+            **{e: "count" for e in count_cols}}
+        )
         .reset_index()
         .rename(columns={"trip_instance_key": "n_vp_trips"})
     )
