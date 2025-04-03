@@ -289,7 +289,16 @@ if __name__ == "__main__":
     route_typology_df = pd.concat(
         [non_bus_routes, bus_routes_typologies], 
         axis=0, ignore_index=True
-    ).sort_values(route_cols).reset_index(drop=True)
+    ).sort_values(
+        route_cols
+    ).reset_index(
+        drop=True
+    ).fillna({
+        **{f"is_{c}":0 for c in nacto_utils.route_typology_types}
+    }
+    ).astype({
+        **{f"is_{c}": int for c in nacto_utils.route_typology_types}
+    })
 
     route_typology_df.to_parquet(f"{SCHED_GCS}{EXPORT}_{year}.parquet")
         
