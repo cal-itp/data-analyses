@@ -245,9 +245,9 @@ def remove_shapes_outside_ca(
         'STATE_ABBR in @border_states'
     ).dissolve()[["geometry"]].to_crs(SHAPE_CRS)
     
-    # Buffer to keep the bay in the Bay Area & turn this back to geodataframe
+    # Buffer 10,000 meters to keep the bay in the Bay Area & turn this back to geodataframe
     if use_buffer:
-        ca = ca.buffer(10_000).to_frame('geometry')
+        ca = ca.to_crs("EPSG:3310").buffer(10_000).to_frame('geometry').to_crs(SHAPE_CRS)
     
     # Be aggressive and keep if shape
     # is within (does not cross CA + border state boundaries)
