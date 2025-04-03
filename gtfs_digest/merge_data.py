@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
-from shared_utils import gtfs_utils_v2, publish_utils
+from shared_utils import gtfs_utils_v2, portfolio_utils, publish_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
 
 route_time_cols = [
@@ -170,6 +170,11 @@ def concatenate_crosswalk_organization(
         columns = crosswalk_cols
     )
     
+    df = df.assign(
+        caltrans_district = df.caltrans_district.map(
+            portfolio_utils.CALTRANS_DISTRICT_DICT)
+    )
+    
     return df
 
 """
@@ -208,7 +213,6 @@ def merge_in_standardized_route_names(
         how = "left",
     ).drop_duplicates()
     
-    # Clean up
     
     # After merging, we can replace route_id with recent_route_id2 
     drop_cols = ["route_desc", "combined_name", "route_id2"]
