@@ -10,7 +10,7 @@ from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from shared_utils.rt_utils import METERS_PER_MILE
-from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
+from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
 def cardinal_direction_by_trip(
     stop_times: gpd.GeoDataFrame, 
@@ -147,7 +147,7 @@ def schedule_metrics_by_route_direction(
     
     common_shape = gtfs_schedule_wrangling.most_common_shape_by_route_direction(
         analysis_date
-    ).pipe(helpers.remove_shapes_outside_ca)
+    ).pipe(helpers.remove_shapes_outside_ca, use_buffer=True)
 
 
     df = pd.merge(
@@ -170,7 +170,6 @@ if __name__ == "__main__":
     
     TRIP_EXPORT = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_trip_metrics
     ROUTE_DIR_EXPORT = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_route_direction_metrics
-    ROUTE_TYPOLOGIES = GTFS_DATA_DICT.schedule_tables.route_typologies
     
     for date in analysis_date_list:
         start = datetime.datetime.now()
@@ -181,6 +180,7 @@ if __name__ == "__main__":
         trip_metrics.to_parquet(
             f"{RT_SCHED_GCS}{TRIP_EXPORT}_{date}.parquet")
         
+        
         route_dir_cols = [
             "schedule_gtfs_dataset_key", 
             "route_id", 
@@ -188,26 +188,11 @@ if __name__ == "__main__":
         ]
         
         route_dir_metrics = schedule_metrics_by_route_direction(
-            trip_metrics, date, route_dir_cols)
-        
-        route_typologies = pd.read_parquet(
-            f"{SCHED_GCS}{ROUTE_TYPOLOGIES}_{date}.parquet",
-            columns = route_dir_cols + [
-                "is_coverage", "is_downtown_local", 
-                "is_local", "is_rapid", "is_express", "is_rail"]
-        )
-        
-        
-        # Merge cardinal direction & typology work
-        route_dir_metrics2 = pd.merge(
-            route_dir_metrics,
-            route_typologies,
-            on = route_dir_cols,
-            how = "left"
-        )
+            trip_metrics, date, route_dir_cols
+        ).to_crs(WGS84)
         
         utils.geoparquet_gcs_export(
-            route_dir_metrics2,
+            route_dir_metrics,
             RT_SCHED_GCS,
             f"{ROUTE_DIR_EXPORT}_{date}"
         )

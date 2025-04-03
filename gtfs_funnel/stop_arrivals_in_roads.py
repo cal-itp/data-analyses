@@ -135,18 +135,26 @@ def spatial_join_stop_arrivals_to_roads(
     return
 
 
-def corridor_frequency_for_multiple_dates(
-    analysis_date_list: list
+def corridor_frequency_by_year(
+    year: int
 ) -> pd.DataFrame:
     """
     Average the road segment's n_arrivals, n_stops, etc
     across multiple dates.
     """
+    files_in_folder = fs.ls(
+        f"{SCHED_GCS}corridor_frequency/"
+    )
+    
+    files_to_use = [
+        f for f in files_in_folder if str(year) in f
+    ]
+    
+    # Read in all the frequency for that year and concatenate
     df = pd.concat([
         pd.read_parquet(
-            f"{SCHED_GCS}corridor_frequency/"
-            f"arrivals_by_road_segment_{d}.parquet") 
-        for d in analysis_date_list
+            f"gs://{f}") 
+        for f in files_to_use
     ], axis=0, ignore_index=True)
     
     # Take the mean across dates
@@ -183,6 +191,7 @@ if __name__ == "__main__":
         if f"{m}{y}" in rt_dates.DATES.keys()
     ]
 
+    # Only run this script for a new quarterly date when needed
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
 
@@ -200,5 +209,12 @@ if __name__ == "__main__":
         print(f"attach peak stop arrivals to roads: {end - start}")
 
     
-    road_stats = corridor_frequency_for_multiple_dates(analysis_date_list)
-    road_stats.to_parquet(f"{SCHED_GCS}arrivals_by_road_segment.parquet")
+    for year in rt_dates.current_year:
+        
+        start = datetime.datetime.now()
+        
+        road_stats = corridor_frequency_by_year(year)
+        road_stats.to_parquet(f"{SCHED_GCS}arrivals_by_road_segment_{year}.parquet")
+        
+        end = datetime.datetime.now()
+        print(f"road stats for year {year}: {end - start}")
