@@ -1,5 +1,5 @@
 """
-Generate RT vs schedule metrics for agency-level.
+Generate RT vs schedule metrics for operator grain.
 """
 import datetime
 import pandas as pd
@@ -43,7 +43,7 @@ def operator_metrics(analysis_date: str, dict_inputs: dict) -> pd.DataFrame:
     )
 
     end = datetime.datetime.now()
-    logger.info(f"agency aggregation {analysis_date}: {end - start}")
+    logger.info(f"operator aggregation {analysis_date}: {end - start}")
 
     return agg1
 
