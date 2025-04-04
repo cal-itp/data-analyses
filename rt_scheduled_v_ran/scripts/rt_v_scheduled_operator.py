@@ -1,5 +1,5 @@
 """
-Generate RT vs schedule metrics for agency-level.
+Generate RT vs schedule metrics for operator grain.
 """
 import datetime
 import pandas as pd
@@ -16,10 +16,12 @@ def operator_metrics(analysis_date: str, dict_inputs: dict) -> pd.DataFrame:
     start = datetime.datetime.now()
 
     TRIP_EXPORT = dict_inputs.vp_trip_metrics
-    OP_EXPORT = dict_inputs.vp_operator_metrics
+    OPERATOR_EXPORT = dict_inputs.vp_operator_metrics
 
     # Read in dataframe.
-    df = pd.read_parquet(f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet")
+    df = pd.read_parquet(
+        f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet"
+    )
   
     # Aggregate
     groupby_cols = [
@@ -36,10 +38,12 @@ def operator_metrics(analysis_date: str, dict_inputs: dict) -> pd.DataFrame:
     agg1 = agg1.drop(columns=sum_cols)
     
     # Save
-    agg1.to_parquet(f"{RT_SCHED_GCS}{OP_EXPORT}_{analysis_date}.parquet")
+    agg1.to_parquet(
+        f"{RT_SCHED_GCS}{OPERATOR_EXPORT}_{analysis_date}.parquet"
+    )
 
     end = datetime.datetime.now()
-    logger.info(f"agency aggregation {analysis_date}: {end - start}")
+    logger.info(f"operator aggregation {analysis_date}: {end - start}")
 
     return agg1
 

@@ -35,7 +35,7 @@ def condense_point_geom_to_line(
     if len(sort_cols) == 0:
         sort_cols = group_cols
         
-    valid_groups = (df.groupby(group_cols, group_keys=False)
+    valid_groups = (df.groupby(group_cols, group_keys=False, dropna=False)
                     .agg({geom_col: "count"})
                     .reset_index()
                     .query(f'{geom_col} > 1')
@@ -48,7 +48,7 @@ def condense_point_geom_to_line(
     check_me = df[group_cols + array_cols]
     geo_cols = list(check_me.columns[check_me.dtypes == "geometry"])
     
-    valid_groups = (df.groupby(group_cols)
+    valid_groups = (df.groupby(group_cols, group_keys=False, dropna=False)
                     .agg({
                         **{c: "count" for c in geo_cols}}
                     )

@@ -65,15 +65,17 @@ def clean_standardized_route_names(
 
     return df2
 
-def parse_route_combined_name(df):
+def parse_route_combined_name(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean up the double underscores and replace with a space.
+    """
     df = df.assign(
-        recent_combined_name = df.recent_combined_name.str.replace("__", " ")
-    ).drop(
-        columns = ["route_id"]
+        recent_combined_name = df.recent_combined_name.str.replace("__", " "),
     ).rename(
         columns = {
-            "recent_route_id2": "route_id",
-            "recent_combined_name": "route_combined_name"
+            # route_id2 has been cleaned within a single day (LA Metro removes suffix -191xx)
+            # recent_route_id2 means it's the most recently observed route_id2
+            "recent_route_id2": "recent_route_id",
         }
     )
     

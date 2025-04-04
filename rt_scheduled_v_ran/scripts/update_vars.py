@@ -9,8 +9,6 @@ oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 
 analysis_date_list = [rt_dates.DATES["mar2025"]]
 
-# analysis_date_list = rt_dates.y2024_dates + rt_dates.y2023_dates
-
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS

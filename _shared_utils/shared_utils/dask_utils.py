@@ -114,6 +114,7 @@ def import_df_func(
     one_date: str,
     data_type: Literal["df", "gdf"] = "df",
     add_date: bool = False,
+    add_year: bool = False,
     **kwargs,
 ):
     """
@@ -138,7 +139,8 @@ def import_df_func(
 
     if add_date:
         df = time_helpers.add_service_date(df, one_date)
-
+    if add_year:
+        df = df.assign(year=int(one_date))
     return df
 
 
