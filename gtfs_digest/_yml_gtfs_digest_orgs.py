@@ -131,9 +131,7 @@ def generate_key_org_ymls(df: pd.DataFrame):
         df, "organization_name", "schedule_gtfs_dataset_key"
     )
     # Filter
-    one_org_m_keys_df = df.loc[df.organization_name.isin(one_org_m_keys_list)].drop(
-        columns=["sched_rt_category"]
-    )
+    one_org_m_keys_df = df.loc[df.organization_name.isin(one_org_m_keys_list)]
 
     # One `schedule_gtfs_dataset_key` to many `organization_name`
     one_key_many_orgs_list = count_orgs(
@@ -203,47 +201,7 @@ def generate_key_org_ymls(df: pd.DataFrame):
         SITE_YML="../_shared_utils/shared_utils/gtfs_digest_many_keys_many_orgs.yml",
         title="m schedule_gtfs_dataset_key:m organization_name",
     )
-    
-def generate_excluded_orgs_yml(df: pd.DataFrame):
-    """
-    Generate YML for excluded operators and explain why
-    they aren't included.
-    """
-    # Manual list of operators we exclude
-    operators_to_exclude = ["City of Alameda"]
-    
-    # Load in dataframe of organization_name values we display in our GTFS
-    # Digest operator grain portfolio 
-    orgs_in_portfolio = deploy_portfolio_yaml.generate_operator_grain_yaml()
-    
-    # Merge
-    m1 = pd.merge(df, orgs_in_portfolio, how="outer", indicator=True)
-    
-    # Any left only values are excluded organizations 
-    excluded_orgs = m1.loc[m1._merge == "left_only"]
-    
-    # Map dictionary of excluded operators
-    excluded_orgs["reason_for_exclusion"] = excluded_orgs["organization_name"].map(
-        reason_for_exclusion
-    )
-    
-    # Subset
-    excluded_orgs = excluded_orgs[["organization_name", "reason_for_exclusion"]]
-    
-    # Any organization without a manual value in the reason_for_exclusion dictionary
-    # is excluded because it has another organization_name values that came before it 
-    excluded_orgs = excluded_orgs.fillna(
-        "1 schedule_gtfs_dataset_key:m organization_name, only 1st organization_name by alphabetical order is displayed in the portfolio"
-    )
 
-    # Generate YML
-    df_to_yaml(
-        df=excluded_orgs,
-        nest1_column="reason_for_exclusion",
-        nest2_column="organization_name",
-        SITE_YML="../_shared_utils/shared_utils/gtfs_digest_excluded_orgs.yml",
-        title="organization_name values that are excluded from the GTFS Digest portfolio",
-    )
     
 def generate_org_gtfs_status_yml(df: pd.DataFrame):
     # Subset
