@@ -52,17 +52,15 @@ def route_metrics(
         f"{RT_SCHED_GCS}{TRIP_EXPORT}_{analysis_date}.parquet"
     )
     
-    # Fill in trip_export with direction_id here temporarily
-    trip_df.direction_id = trip_df.direction_id.fillna(0)
-    
     crosswalk_cols = [
-    "schedule_gtfs_dataset_key",
-    "name",
-    "schedule_source_record_id",
-    "base64_url",
-    "organization_source_record_id",
-    "organization_name",
-    "caltrans_district",]
+        "schedule_gtfs_dataset_key",
+        "name",
+        "schedule_source_record_id",
+        "base64_url",
+        "organization_source_record_id",
+        "organization_name",
+        "caltrans_district"
+    ]
     
     route_df = metrics.concatenate_peak_offpeak_allday_averages(
         trip_df,

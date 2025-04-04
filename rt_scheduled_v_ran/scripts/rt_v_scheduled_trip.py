@@ -270,8 +270,9 @@ def rt_schedule_trip_metrics(
     start = datetime.datetime.now()
 
     # number of minutes to determine trip lateness    
-    early = dict_inputs.early_trip_minutes
-    late = dict_inputs.late_trip_minutes
+    early_minutes_cutoff = dict_inputs.early_trip_minutes
+    late_minutes_cutoff = dict_inputs.late_trip_minutes
+    
     TRIP_EXPORT = dict_inputs.vp_trip_metrics
     
     basic_counts_by_vp_trip(analysis_date)
@@ -317,7 +318,8 @@ def rt_schedule_trip_metrics(
     ).pipe(
         metrics.derive_rt_vs_schedule_metrics
     ).pipe(
-        metrics.derive_trip_comparison_metrics, early, late
+        metrics.derive_trip_comparison_metrics, 
+        early_minutes_cutoff, late_minutes_cutoff
     )
     
     order_first = ["schedule_gtfs_dataset_key", 
