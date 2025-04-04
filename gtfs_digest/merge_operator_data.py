@@ -14,10 +14,14 @@ from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
 sort_cols = ["schedule_gtfs_dataset_key", "service_date"]
 
+"""
+Concatenating Functions 
+"""
 def concatenate_rt_vs_schedule_operator_metrics(
     date_list: list
 ) -> pd.DataFrame:
-    FILE = GTFS_DATA_DICT.schedule_tables.operator_scheduled_stats
+    
+    FILE = f"{GTFS_DATA_DICT.rt_vs_schedule_tables.vp_operator_metrics}"
     
     df = time_series_utils.concatenate_datasets_across_dates(
         SCHED_GCS,
@@ -83,7 +87,7 @@ def concatenate_schedule_operator_metrics(
     Get spatial accuracy and vehicle positions per minute metrics on the
     operator-service_date grain for certain dates.
     """
-    FILE = f"{GTFS_DATA_DICT.rt_vs_schedule_tables.vp_operator_metrics}"
+    FILE = GTFS_DATA_DICT.schedule_tables.operator_scheduled_stats
     
     df = time_series_utils.concatenate_datasets_across_dates(
         RT_SCHED_GCS,
@@ -195,7 +199,6 @@ if __name__ == "__main__":
     
     # Drop duplicates created after merging
     # Add more strigent drop duplicate criteria
-    
     duplicate_cols = ["schedule_gtfs_dataset_key",
                      "vp_per_min_agency",
                      "spatial_accuracy_agency",
