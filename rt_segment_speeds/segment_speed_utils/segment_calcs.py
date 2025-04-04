@@ -262,7 +262,7 @@ def calculate_weighted_averages(
     for c in metric_cols:
         df[c] = df[c] * df[weight_col]    
     
-    df2 = (df.groupby(group_cols, group_keys=False)
+    df2 = (df.groupby(group_cols, group_keys=False, dropna=False)
            .agg({c: "sum" for c in metric_cols + [weight_col]})
            .reset_index()
           )

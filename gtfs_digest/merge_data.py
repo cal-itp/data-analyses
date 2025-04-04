@@ -3,13 +3,12 @@ Merge datasets across dates to create time-series data
 for GTFS digest.
 Grain is operator-service_date-route-direction-time_period.
 """
-import geopandas as gpd
 import pandas as pd
-import numpy as np
 
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
-from shared_utils import gtfs_utils_v2, portfolio_utils, publish_utils
+from shared_utils import dask_utils, gtfs_utils_v2, portfolio_utils, publish_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
+from shared_utils import rt_dates
 
 route_time_cols = [
     "schedule_gtfs_dataset_key", 
@@ -31,7 +30,8 @@ def concatenate_schedule_by_route_direction(
     for all the dates we have.
     """
     FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_route_direction_metrics
-        
+    ROUTE_TYPOLOGIES_FILE = GTFS_DATA_DICT.schedule_tables.route_typologies
+
     df = time_series_utils.concatenate_datasets_across_dates(
         RT_SCHED_GCS,
         FILE,
@@ -42,31 +42,54 @@ def concatenate_schedule_by_route_direction(
             "avg_stop_miles",
             "route_primary_direction",
             "n_trips", "frequency", 
-            "is_express", "is_rapid",  "is_rail",
-            "is_coverage", "is_downtown_local", "is_local",
         ],
     ).sort_values(route_time_date_cols).rename(
         columns = {
             # rename so we understand data source
             "n_trips": "n_scheduled_trips",
         }
-    ).reset_index(drop=True)    
+    ).reset_index(drop=True)   
     
-    primary_typology = set_primary_typology(df)
+    # Create a year column to use for merging with route typologies
+    df = df.assign(
+        year = df.service_date.dt.year
+    )
     
-    # Deal with changing cardinal direction across time
+    route_typology_paths = [
+        f"{SCHED_GCS}{ROUTE_TYPOLOGIES_FILE}" 
+        for year in rt_dates.years_available
+    ]
+
+    route_typology_df = dask_utils.get_ddf(
+        route_typology_paths, 
+        rt_dates.years_available, 
+        data_type = "df",
+        get_pandas = True,
+        columns = [
+            "schedule_gtfs_dataset_key", "route_id", 
+            "is_express", "is_ferry", "is_rail",
+            "is_coverage", "is_local", "is_downtown_local", "is_rapid"
+        ],
+        add_date = False, 
+        add_year = True
+    )  
+        
     df2 = pd.merge(
         df,
-        primary_typology,
-        on = route_time_cols,
-        how = "inner" 
+        route_typology_df,
+        on = ["schedule_gtfs_dataset_key", "route_id", "year"],
+        how = "left" 
+    ).drop(
+        columns = "year"
+    ).pipe(
+        set_primary_typology
     ).pipe(
         merge_in_standardized_route_names
     )
     
     # TODO: double check it's for route-direction across dates
     route_cols = ["schedule_gtfs_dataset_key", 
-                  "route_combined_name", "direction_id"]
+                  "recent_combined_name", "direction_id"]
     
     top_cardinal_direction = gtfs_schedule_wrangling.mode_by_group(
         df2,
@@ -81,7 +104,7 @@ def concatenate_schedule_by_route_direction(
         how = "inner"
     )
     
-    return df2
+    return df3
 
 
 def concatenate_speeds_by_route_direction(
@@ -172,7 +195,8 @@ def concatenate_crosswalk_organization(
     
     df = df.assign(
         caltrans_district = df.caltrans_district.map(
-            portfolio_utils.CALTRANS_DISTRICT_DICT)
+            portfolio_utils.CALTRANS_DISTRICT_DICT
+        )
     )
     
     return df
@@ -196,10 +220,7 @@ def merge_in_standardized_route_names(
     
     route_names_df = pd.read_parquet(
         f"{SCHED_GCS}{CLEAN_ROUTES}.parquet"
-    )
-    
-    route_names_df = time_series_utils.clean_standardized_route_names(
-        route_names_df).drop_duplicates()
+    ).pipe(time_series_utils.clean_standardized_route_names).drop_duplicates()
     
     if "name" in df.columns:
         df = df.drop(columns = "name")
@@ -214,14 +235,19 @@ def merge_in_standardized_route_names(
     ).drop_duplicates()
     
     
-    # After merging, we can replace route_id with recent_route_id2 
-    drop_cols = ["route_desc", "combined_name", "route_id2"]
+    # After merging, only route_id reflects that original scheduled trips column
+    # the other recent_combined_name, recent_route_id reflect the last observed value
+    drop_cols = [
+        "route_id2", 
+        "route_short_name", "route_long_name",
+        "route_desc"
+    ]
     
     df3 = time_series_utils.parse_route_combined_name(
         df2
     ).drop(
         columns = drop_cols
-    ).drop_duplicates().reset_index(drop=True)
+    )
     
     return df3
 
@@ -230,15 +256,7 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
     """
     Choose a primary typology, and we'll be more generous if 
     multiple typologies are found.
-    """
-    subset_cols = [c for c in df.columns if "is_" in c and 
-                   c not in ["is_ontime", "is_early", "is_late"]]
-    keep_cols = route_time_cols + subset_cols
-    
-    df2 = df[keep_cols].sort_values(
-        route_time_cols + subset_cols
-    ).drop_duplicates(subset=route_time_cols)
-    
+    """ 
     ranks = {
         "coverage": 1,
         "local": 2, 
@@ -250,16 +268,19 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
     
     # Find the max "score" / typology type, and use that
     for c in ranks.keys():
-        df2[f"{c}_score"] = df2[f"is_{c}"] * ranks[c]
+        df[f"{c}_score"] = df[f"is_{c}"] * ranks[c]
     
-    df2["max_score"] = df2[[c for c in df2.columns if "_score" in c]].max(axis=1)
-    df2["typology"] = df2.max_score.map({v: k for k, v in ranks.items()})
+    df["max_score"] = df[[c for c in df.columns if "_score" in c]].max(axis=1)
+    df["typology"] = df.max_score.map({v: k for k, v in ranks.items()})
     
-    df2 = df2.assign(
-        typology = df2.typology.fillna("unknown")
-    )[route_time_cols + ["typology"]]
+    drop_cols = [c for c in df.columns if "_score" in c]
+    
+    df2 = df.assign(
+        typology = df.typology.fillna("unknown")
+    ).drop(columns = drop_cols)
     
     return df2
+
 
 
 """
@@ -290,7 +311,8 @@ def merge_data_sources_by_route_direction(
     
     df = df.assign(
         sched_rt_category = df.sched_rt_category.map(
-            gtfs_schedule_wrangling.sched_rt_category_dict)
+            gtfs_schedule_wrangling.sched_rt_category_dict
+        )
     ).merge(
         df_crosswalk,
         on = ["schedule_gtfs_dataset_key", "name", "service_date"],
@@ -301,7 +323,9 @@ def merge_data_sources_by_route_direction(
         "n_scheduled_trips", "n_vp_trips",
         "minutes_atleast1_vp", "minutes_atleast2_vp",
         "total_vp", "vp_in_shape",
-        "is_early", "is_ontime", "is_late"
+        "is_early", "is_ontime", "is_late",
+        # fillna only before visualizing, doing it before prevents the merges from succeeding
+        "direction_id"
     ]
     
     df[integrify] = df[integrify].fillna(0).astype("int")
