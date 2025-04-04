@@ -1,5 +1,8 @@
 # 1 schedule_gtfs_dataset_key:m organization_name: m organization_names are captured under portfolio_name
 
+Amtrak Schedule:
+- Amtrak
+- San Joaquin Joint Powers Authority
 Commute.org and Menlo Park Community Shuttles Schedule:
 - City of Menlo Park
 - Commute.org
@@ -16,6 +19,8 @@ Humboldt Schedule:
 Sacramento Schedule:
 - City of Rancho Cordova
 - Sacramento Regional Transit District
+San Bernardino County Transportation Authority:
+- San Bernardino County Transportation Authority
 San Diego Schedule:
 - Flagship Cruises and Events Inc.
 - San Diego International Airport
@@ -29,6 +34,8 @@ SolTrans Schedule:
 Sonoma County Transit Schedule:
 - Cloverdale Transit
 - Sonoma County
+Southern California Regional Rail Authority:
+- Southern California Regional Rail Authority
 TART, North Lake Tahoe Schedule:
 - North Lake Tahoe Express
 - Tahoe Truckee Area Regional Transportation
