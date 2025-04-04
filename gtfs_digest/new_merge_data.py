@@ -83,10 +83,10 @@ def concatenate_schedule_by_route_direction(
         columns = "year"
     ).pipe(
         set_primary_typology
-    ).pipe(
-        merge_in_standardized_route_names
-    )
-    
+    )#.pipe(
+     #   merge_in_standardized_route_names
+    #)
+    '''
     # TODO: double check it's for route-direction across dates
     route_cols = ["schedule_gtfs_dataset_key", 
                   "route_combined_name", "direction_id"]
@@ -103,8 +103,8 @@ def concatenate_schedule_by_route_direction(
         on = route_cols,
         how = "inner"
     )
-    
-    return df3
+    '''
+    return df2
 
 
 def concatenate_speeds_by_route_direction(
@@ -311,7 +311,9 @@ def merge_data_sources_by_route_direction(
             gtfs_schedule_wrangling.sched_rt_category_dict)
     ).merge(
         df_crosswalk,
-        on = ["schedule_gtfs_dataset_key", "name", "service_date"],
+        on = ["schedule_gtfs_dataset_key", 
+              #"name", 
+              "service_date"],
         how = "left"
     )
      
