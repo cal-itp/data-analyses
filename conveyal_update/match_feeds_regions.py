@@ -26,6 +26,7 @@ def create_region_gdf():
     return region_gdf
 
 def get_stops_dates(feeds_on_target: pd.DataFrame, feed_key_column_name: str = "feed_key", date_column_name: str = "date"):
+    """Get stops for the feeds in feeds_on_target based on their date"""
     all_stops = feeds_on_target.groupby(date_column_name)[feed_key_column_name].apply(
         lambda feed_key_column: gtfs_utils_v2.get_stops(
             selected_date=feed_key_column.name,

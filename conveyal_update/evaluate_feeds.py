@@ -1,17 +1,25 @@
 import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
-from shared_utils import gtfs_utils_v2
 
+from shared_utils import gtfs_utils_v2
 from calitp_data_analysis.tables import tbls
 from calitp_data_analysis.sql import query_sql
 from siuba import *
 import pandas as pd
 import datetime as dt
-
 import conveyal_vars
 
 TARGET_DATE = conveyal_vars.TARGET_DATE
 REGIONAL_SUBFEED_NAME = "Regional Subfeed"
+INT_TO_GTFS_WEEKDAY = {
+    0: "monday",
+    1: "tuesday",
+    2: "wednesday",
+    3: "thursday",
+    4: "friday",
+    5: "saturday",
+    6: "sunday"
+}
 
 def check_defined_elsewhere(row, df):
     '''
@@ -40,7 +48,7 @@ def get_feeds_check_service():
     return feeds_on_target
     
 def attach_transit_services(feeds_on_target: pd.DataFrame):
-
+    """Associate each feed in feeds_on_target.gtfs_dataset_key with a transit service"""
     target_dt = dt.datetime.combine(dt.date.fromisoformat(TARGET_DATE), dt.time(0))
 
     services = (tbls.mart_transit_database.dim_gtfs_service_data()
@@ -62,20 +70,12 @@ def attach_transit_services(feeds_on_target: pd.DataFrame):
     return feeds_services_filtered
         
 def get_undefined_feeds(feeds_on_target: pd.DataFrame) -> pd.DataFrame:
+    """Return feeds in feeds_on_target that do not have service and where service is not defined in another feed"""
     undefined = feeds_on_target.apply(check_defined_elsewhere, axis=1, args=[feeds_on_target]) >> filter(-_.service_any_feed)
     return undefined
-    
-INT_TO_GTFS_WEEKDAY = {
-    0: "monday",
-    1: "tuesday",
-    2: "wednesday",
-    3: "thursday",
-    4: "friday",
-    5: "saturday",
-    6: "sunday"
-}
 
-def report_unavailable_feeds(feeds, fname):
+def report_unavailable_feeds(feeds: pd.DataFrame, fname: str) -> None:
+    """Create a csv report of unavailable or backdated feeds at the paths specified in fname"""
     undefined = feeds.loc[
         feeds["valid_date_other_than_service_date"] | feeds["no_schedule_feed_found"]
     ].copy()
@@ -92,12 +92,31 @@ def report_unavailable_feeds(feeds, fname):
 ISO_DATE_ONLY_FORMAT = "%y-%m-%d"
 
 def get_old_feeds(undefined_feeds_base64_urls: pd.Series, target_date: dt.date | dt.datetime, max_lookback_timedelta: dt.timedelta) -> pd.Series:
+    """
+    Search the warehouse for feeds downloaded within the time before target_date 
+    defined by max_lookback_timedelta that have service as defined in calendar.txt 
+    on target_date. These feeds will not be valid on target_date, but will be accepted by Conveyal.
+    This should not be used if the feeds are valid on the target_date, since this will provide needlessly
+    invalid feeds. Note that this does not check calendar_dates.txt at present
+
+    Parameters:
+    undefined_feeds_base64_urls: a Pandas series containing base64 urls to feeds in the warehouse
+    target_date: a date or datetime where the feeds should be valid based on calendar.txt
+    max_lookback_timedelta: a timedelta defining the amount of time before target_date that a feed must have been available for
     
+    Returns:
+    A DataFrame with the following index and columns:
+        index: The base64 url of the feed, will match entries in undefined_feeds_base64_urls
+        feed_key: A key to dim_schedule_feeds matching the feed on the date it was last valid in the warehouse
+        date_processed: A datetime date matching the date on which the feed was last valid in the warehosue
+    """
     base_64_urls_str = "('" + "', '".join(undefined_feeds_base64_urls) + "')"
     day_of_the_week = INT_TO_GTFS_WEEKDAY[target_date.weekday()]
     max_lookback_date = target_date - max_lookback_timedelta
     target_date_iso = target_date.strftime(ISO_DATE_ONLY_FORMAT)
-
+    # Query feeds for the newest feed where service is defined on the target_date,
+    # that have service on the day of the week of the target date, and
+    # that are valid before (inclusive) the target date and after (inclusive) the max look back date,
     query = f"""
     SELECT 
       `mart_gtfs.dim_schedule_feeds`.base64_url AS base64_url,
@@ -127,12 +146,28 @@ def get_old_feeds(undefined_feeds_base64_urls: pd.Series, target_date: dt.date |
     return feed_info_by_url.drop("valid_feed_date", axis=1)
 
 def merge_old_feeds(df_all_feeds: pd.DataFrame, df_undefined_feeds: pd.DataFrame, target_date: dt.date, max_lookback_timedelta: dt.timedelta) -> pd.DataFrame:
+    """
+    Merge feeds from df_all_feeds with old feeds found as a result of calling get_old_feeds with df_undefined_feeds.base64_url
+    
+    Params:
+    df_all_feeds: A DataFrame of feeds, must have feed_key, date, and base64_url as columns and must include the base64_urls in df_undefined_feeds
+    df_undefined_feeds: A DataFrame of feeds that are not valid on target_date, where an old feed should be searched for.
+        Must have base64_url as a column
+    target_date: a date or datetime where the feed should be valid based on its target date
+    max_lookback_timedelta: a timedelta defining the amount of time before target_date that a feed must have been available for   
+    
+    Returns:
+    A DataFrame identical to df_all_feeds except with the following columns changed or added:
+        feed_key: Updated for the found feeds
+        date: Updated for the found feeds:
+        no_schedule_feed_found: True if a schedule feed was present in df_undefined_feeds but was not associated with an older feed, otherwise false 
+        valid_date_other_than_service_date: True if a new feed was found, otherwise false
+    """
     feed_search_result = get_old_feeds(
         df_undefined_feeds["base64_url"], 
         target_date,
         max_lookback_timedelta
     )
-    print(feed_search_result)
     feeds_merged = df_all_feeds.merge(
         feed_search_result,
         how="left",
@@ -140,7 +175,6 @@ def merge_old_feeds(df_all_feeds: pd.DataFrame, df_undefined_feeds: pd.DataFrame
         right_index=True,
         validate="many_to_one"
     ) 
-    print(list(feeds_merged.columns))
     feeds_merged["feed_key"] = feeds_merged["feed_key_y"].fillna(feeds_merged["feed_key_x"])
     feeds_merged["no_schedule_feed_found"] = (
         (feeds_merged["base64_url"].isin(df_undefined_feeds["base64_url"])) & (~feeds_merged["base64_url"].isin(feed_search_result.index))
