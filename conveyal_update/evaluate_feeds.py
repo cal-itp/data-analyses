@@ -77,13 +77,13 @@ INT_TO_GTFS_WEEKDAY = {
 
 def report_unavailable_feeds(feeds, fname):
     undefined = feeds.loc[
-        feeds["valid_date_other_than_service_date"] | ~feeds["usable_schedule_feed_exists"]
+        feeds["valid_date_other_than_service_date"] | feeds["no_schedule_feed_found"]
     ].copy()
     if undefined.empty:
         print('no undefined service feeds')
     else:
         print('these feeds have no service defined on target date, nor are their services captured in other feeds:')
-        print(undefined.loc[~undefined["usable_schedule_feed_exists"], "gtfs_dataset_name"].drop_duplicates())
+        print(undefined.loc[undefined["no_schedule_feed_found"], "gtfs_dataset_name"].drop_duplicates())
         print('these feeds have defined service, but only in a feed defined on a prior day')
         print(undefined.loc[undefined["valid_date_other_than_service_date"], "gtfs_dataset_name"].drop_duplicates())
         print(f'saving detailed csv to {fname}')
@@ -102,21 +102,19 @@ def get_old_feeds(undefined_feeds_base64_urls: pd.Series, target_date: dt.date |
     SELECT 
       `mart_gtfs.dim_schedule_feeds`.base64_url AS base64_url,
       `mart_gtfs.dim_schedule_feeds`.key as feed_key,
-      `mart_gtfs.dim_calendar`.{day_of_the_week} AS target_day_of_the_week,
-      MAX(`mart_gtfs.dim_schedule_feeds`._valid_to) AS valid_feed_date,
+      MAX(`mart_gtfs.dim_schedule_feeds`._valid_to) AS valid_feed_date
     from `mart_gtfs.dim_schedule_feeds`
     LEFT JOIN `mart_gtfs.dim_calendar`
     ON `mart_gtfs.dim_schedule_feeds`.key = `mart_gtfs.dim_calendar`.feed_key
     WHERE `mart_gtfs.dim_schedule_feeds`.base64_url IN {base_64_urls_str}
-      AND `mart_gtfs.dim_schedule_feeds`._valid_to <= '{target_date}'
       AND `mart_gtfs.dim_schedule_feeds`._valid_to >= '{max_lookback_date}'
-       AND `mart_gtfs.dim_calendar`.start_date <= '{target_date}'
+      AND `mart_gtfs.dim_schedule_feeds`._valid_to <= '{target_date}'
+      AND `mart_gtfs.dim_calendar`.{day_of_the_week} = 1
+      AND `mart_gtfs.dim_calendar`.start_date <= '{target_date}'
       AND `mart_gtfs.dim_calendar`.end_date >= '{target_date}'
     GROUP BY 
         `mart_gtfs.dim_schedule_feeds`.base64_url, 
-        `mart_gtfs.dim_schedule_feeds`.key,
-        `mart_gtfs.dim_calendar`.{day_of_the_week}
-    ORDER BY target_day_of_the_week DESC
+        `mart_gtfs.dim_schedule_feeds`.key
     LIMIT 1000
     """
     response = query_sql(
@@ -124,11 +122,9 @@ def get_old_feeds(undefined_feeds_base64_urls: pd.Series, target_date: dt.date |
     )
     response_grouped = response.groupby("base64_url")
     feed_info_by_url = response_grouped[["valid_feed_date", "feed_key"]].first()
-    print(feed_info_by_url)
-    feed_info_by_url["valid_feed_date"] = feed_info_by_url["valid_feed_date"].dt.date - dt.timedelta(days=1) 
+    feed_info_by_url["date_processed"] = feed_info_by_url["valid_feed_date"].dt.date - dt.timedelta(days=1) 
     # we have the day the feed becomes invalid, so the day we are interested in where the feed *is* valid is the day after
-    feed_info_by_url["no_operations_on_target_day_of_the_week"] = ~(response_grouped["target_day_of_the_week"].any())
-    return feed_info_by_url
+    return feed_info_by_url.drop("valid_feed_date", axis=1)
 
 def merge_old_feeds(df_all_feeds: pd.DataFrame, df_undefined_feeds: pd.DataFrame, target_date: dt.date, max_lookback_timedelta: dt.timedelta) -> pd.DataFrame:
     feed_search_result = get_old_feeds(
@@ -136,6 +132,7 @@ def merge_old_feeds(df_all_feeds: pd.DataFrame, df_undefined_feeds: pd.DataFrame
         target_date,
         max_lookback_timedelta
     )
+    print(feed_search_result)
     feeds_merged = df_all_feeds.merge(
         feed_search_result,
         how="left",
@@ -143,22 +140,16 @@ def merge_old_feeds(df_all_feeds: pd.DataFrame, df_undefined_feeds: pd.DataFrame
         right_index=True,
         validate="many_to_one"
     ) 
+    print(list(feeds_merged.columns))
     feeds_merged["feed_key"] = feeds_merged["feed_key_y"].fillna(feeds_merged["feed_key_x"])
     feeds_merged["no_schedule_feed_found"] = (
         (feeds_merged["base64_url"].isin(df_undefined_feeds["base64_url"])) & (~feeds_merged["base64_url"].isin(feed_search_result.index))
-    )
-    feeds_merged["no_operations_on_target_date_but_valid_feed_exists"] = (feeds_merged["no_operations_on_target_day_of_the_week"].fillna(False))
-    feeds_merged["usable_schedule_feed_exists"] = (
-        ~(feeds_merged["no_schedule_feed_found"] | feeds_merged["no_operations_on_target_date_but_valid_feed_exists"])
-    )
-    feeds_merged["date"] = feeds_merged.loc[
-        ~feeds_merged["no_operations_on_target_date_but_valid_feed_exists"], "valid_feed_date"
-    ]
-    feeds_merged["date"] = feeds_merged["date"].fillna(target_date)
+    ).fillna(False)
+    feeds_merged["date"] = feeds_merged["date_processed"].fillna(target_date)
     feeds_merged["valid_date_other_than_service_date"] = feeds_merged["date"] != target_date
 
     return feeds_merged.drop(
-        ["valid_feed_date", "no_operations_on_target_day_of_the_week", "feed_key_x", "feed_key_y"], axis=1
+        ["date_processed", "feed_key_x", "feed_key_y"], axis=1
     )
 
 if __name__ == '__main__':
