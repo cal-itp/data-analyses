@@ -14,19 +14,22 @@ import shutil
 regions = conveyal_vars.conveyal_regions
 TARGET_DATE = conveyal_vars.TARGET_DATE
 
-regions_and_feeds = pd.read_parquet(f'{conveyal_vars.GCS_PATH}regions_feeds_{TARGET_DATE}.parquet')
 
 def download_feed(row):
     # need wildcard for file too -- not all are gtfs.zip!
-    uri = f'gs://calitp-gtfs-schedule-raw-v2/schedule/dt={row.date.strftime("%Y-%m-%d")}/*/base64_url={row.base64_url}/*.zip'
-    fs.get(uri, f'{row.path}/{row.gtfs_dataset_name.replace(" ", "_")}_{row.feed_key}_gtfs.zip')
-    # print(f'downloaded {row.path}/{row.feed_key}_gtfs.zip')
+    try:
+        uri = f'gs://calitp-gtfs-schedule-raw-v2/schedule/dt={row.date.strftime("%Y-%m-%d")}/*/base64_url={row.base64_url}/*.zip'
+        fs.get(uri, f'{row.path}/{row.gtfs_dataset_name.replace(" ", "_")}_{row.feed_key}_gtfs.zip')
+        # print(f'downloaded {row.path}/{row.feed_key}_gtfs.zip')
+    except Exception as e:
+        print(f'\n could not download feed at {e}')
     
 def download_region(feeds_df, region: str):
     
     assert region in regions.keys()
     path = f'./feeds_{feeds_df.date.iloc[0].strftime("%Y-%m-%d")}/{region}'
-    if not os.path.exists(path): os.makedirs(path)
+    if not os.path.exists(path): 
+        os.makedirs(path)
     region = (feeds_df >> filter(_.region == region)).copy()
     region['path'] = path
     region.progress_apply(download_feed, axis = 1)
@@ -43,6 +46,7 @@ def generate_script(regions):
         f.write('\n'.join(cmds))      
         
 if __name__ == '__main__':
+    regions_and_feeds = pd.read_parquet(f'{conveyal_vars.GCS_PATH}regions_feeds_{TARGET_DATE}.parquet')
     
     for region in tqdm(regions.keys()):
         download_region(regions_and_feeds, region)
