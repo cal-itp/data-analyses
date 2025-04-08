@@ -576,7 +576,6 @@ def base_facet_with_ruler_chart(
 ) -> alt.Chart:
 
     tooltip_cols = [
-        "Route",
         "Direction",
         y_col,
     ]
