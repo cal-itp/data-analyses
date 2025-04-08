@@ -13,7 +13,6 @@ import conveyal_vars
 
 regions = conveyal_vars.conveyal_regions
 TARGET_DATE = conveyal_vars.TARGET_DATE
-feeds_on_target = pd.read_parquet(f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE}.parquet')
 
 def create_region_gdf():
     # https://shapely.readthedocs.io/en/stable/reference/shapely.box.html#shapely.box
@@ -23,17 +22,28 @@ def create_region_gdf():
     df['bbox'] = df.apply(to_bbox, axis=1)
     df['geometry'] = df.apply(lambda x: shapely.geometry.box(*x.bbox), axis = 1)
     df = df >> select(-_.bbox)
-    region_gdf = gpd.GeoDataFrame(df, crs=geography_utils.WGS84).to_crs(geography_utils.CA_NAD83Albers)
+    region_gdf = gpd.GeoDataFrame(df, crs=geography_utils.WGS84).to_crs(geography_utils.CA_NAD83Albers_m)
     return region_gdf
 
+def get_stops_dates(feeds_on_target: pd.DataFrame, feed_key_column_name: str = "feed_key", date_column_name: str = "date"):
+    """Get stops for the feeds in feeds_on_target based on their date"""
+    all_stops = feeds_on_target.groupby(date_column_name)[feed_key_column_name].apply(
+        lambda feed_key_column: gtfs_utils_v2.get_stops(
+            selected_date=feed_key_column.name,
+            operator_feeds=feed_key_column
+        )
+    )
+    return all_stops
+
 def join_stops_regions(region_gdf: gpd.GeoDataFrame, feeds_on_target: pd.DataFrame):
-    all_stops = gtfs_utils_v2.get_stops(selected_date=TARGET_DATE, operator_feeds=feeds_on_target.feed_key).to_crs(geography_utils.CA_NAD83Albers)
+    #all_stops = gtfs_utils_v2.get_stops(selected_date=TARGET_DATE, operator_feeds=feeds_on_target.feed_key)
+    all_stops = get_stops_dates(feeds_on_target).to_crs(geography_utils.CA_NAD83Albers_m)
     region_join = gpd.sjoin(region_gdf, all_stops)
     regions_and_feeds = region_join >> distinct(_.region, _.feed_key)
     return regions_and_feeds
 
 if __name__ == '__main__':
-    
+    feeds_on_target = pd.read_parquet(f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE}.parquet')
     region_gdf = create_region_gdf()
     regions_and_feeds = join_stops_regions(region_gdf, feeds_on_target)
     regions_and_feeds = regions_and_feeds >> inner_join(_, feeds_on_target >> select(_.feed_key, _.gtfs_dataset_name, _.base64_url,
