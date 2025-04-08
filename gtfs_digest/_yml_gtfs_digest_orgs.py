@@ -220,6 +220,7 @@ def generate_org_gtfs_status_yml(df: pd.DataFrame):
         "Operators who have RT (vp_only), Schedule, or Both (schedule_and_vp)",
     )
     
+    return df2
 if __name__ == "__main__":
     df = load_df_for_yml(schd_vp_url, operator_digest_cols)
     generate_key_org_ymls(df)
