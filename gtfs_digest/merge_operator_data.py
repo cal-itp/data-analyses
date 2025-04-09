@@ -98,62 +98,6 @@ def concatenate_schedule_operator_metrics(
     
     return df
 
-def operator_category_counts_by_date() -> pd.DataFrame:
-    """
-    Take the merged digest df with schedule vs RT metrics
-    and count how many trips are 
-    schedule_only, vp_only, and schedule_and_vp.
-    
-    Make sure that we only select 1 time period 
-    and for schedule_and_vp, we select n_vp_trips (because not all
-    scheduled trips may have vp).
-    """
-    INPUT = GTFS_DATA_DICT.digest_tables.route_schedule_vp
-    
-    operator_category_cols = [
-        "schedule_gtfs_dataset_key", "service_date",
-        "sched_rt_category"
-    ]
-
-    df = pd.read_parquet(
-        f"{RT_SCHED_GCS}{INPUT}.parquet",
-        filters = [[("time_period", "==", "all_day")]],
-        columns = operator_category_cols + ["route_id", "direction_id", 
-             "n_scheduled_trips", "n_vp_trips"]
-    )
-    
-    # Sum by operator (across route-dir rows, and count how many trips)
-    df2 = (df.groupby(operator_category_cols)
-           .agg({"n_scheduled_trips": "sum",
-                "n_vp_trips": "sum"})
-           .reset_index()
-    )
-    
-    # schedule only and vp only are straightforward, take
-    # their corresponding n_scheduled_trips or n_vp_trips column
-    sched_or_vp_only = df2.loc[
-        df2.sched_rt_category!="schedule_and_vp"
-    ]
-
-    sched_or_vp_only = sched_or_vp_only.assign(
-        n_trips = sched_or_vp_only[
-            ["n_scheduled_trips", "n_vp_trips"]].sum(axis=1)
-    )
-
-    # for both, we'll only count the trips with vp (<= n_scheduled_trips)
-    sched_rt = df2.loc[
-        df2.sched_rt_category== "schedule_and_vp"
-    ].rename(
-        columns = {"n_vp_trips": "n_trips"})
-
-    operator_category_counts = pd.concat(
-        [sched_or_vp_only, sched_rt], 
-        axis=0, ignore_index=True
-    ).sort_values(
-        operator_category_cols
-    )[operator_category_cols + ["n_trips"]].reset_index(drop=True)
-    
-    return operator_category_counts
 
 if __name__ == "__main__":
 
@@ -166,7 +110,6 @@ if __name__ == "__main__":
     
     OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
-    SCHED_RT_CATEGORY = GTFS_DATA_DICT.digest_tables.operator_sched_rt
     
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
     
@@ -235,16 +178,3 @@ if __name__ == "__main__":
         RT_SCHED_GCS,
         OPERATOR_ROUTE
     )
-    
-    # Load in dataset that displays how many trips were schedule vs realtime only.
-    operator_category_counts = operator_category_counts_by_date().pipe(
-        publish_utils.exclude_private_datasets, 
-        col = "schedule_gtfs_dataset_key", 
-        public_gtfs_dataset_keys = public_feeds    
-    )
-    
-    operator_category_counts.to_parquet(
-        f"{RT_SCHED_GCS}{SCHED_RT_CATEGORY}.parquet"
-    )
-    
-    

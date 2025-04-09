@@ -1,0 +1,3536 @@
+# testing
+
+Alameda-Contra Costa Transit District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 130.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Amador Regional Transit System:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 6.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Amtrak Schedule:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Anaheim Transportation Network:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 18.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Angel Island-Tiburon Ferry Company:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2024-10-16'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2024-10-16'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+Antelope Valley Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 20.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Basin Transit:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 14.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Butte County Association of Governments:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 20.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Calaveras Transit Agency:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Capitol Corridor Joint Powers Authority:
+  avg_speeds_service_date:
+  - '2025-02-12'
+  nunique_routes:
+  - 3.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Central Contra Costa Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 42.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Chemehuevi Indian Tribe:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City and County of San Francisco:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - 2024-10
+City of Alhambra:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Arcadia:
+  avg_speeds_service_date:
+  - '2024-12-11'
+  nunique_routes:
+  - 3.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Artesia:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Arvin:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Auburn:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-01-15'
+  route_maps_service_date:
+  - '2025-01-15'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-01-15'
+  schd_vp_service_date:
+  - '2025-01-15'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Avalon:
+  avg_speeds_service_date:
+  - '2024-03-13'
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - '2024-03-13'
+  route_maps_service_date:
+  - '2024-03-13'
+  rt_vs_sched_service_date:
+  - '2024-03-13'
+  schd_service_date:
+  - '2024-03-13'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+City of Baldwin Park:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Banning:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Beaumont:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 8.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - Not Available
+City of Bell:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Bell Gardens:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Bellflower:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Burbank:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Calabasas:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - '2024-12-11'
+  route_maps_service_date:
+  - '2024-12-11'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2024-12-11'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+City of Cerritos:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 8.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Clovis:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Commerce:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Corona:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Cudahy:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Culver City:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 11.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Dana Point:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Delano:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Downey:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 6.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of El Monte:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of El Segundo:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - '2024-05-22'
+  route_maps_service_date:
+  - '2024-05-22'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2024-05-22'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+City of Elk Grove:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2024-12-11'
+  route_maps_service_date:
+  - '2024-12-11'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Escalon:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Fairfield:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Fresno:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 18.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Gardena:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 6.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-04
+City of Glendale:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 11.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Glendora:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Guadalupe:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Huntington Park:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Inglewood:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Irvine:
+  avg_speeds_service_date:
+  - '2024-12-11'
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of La Puente:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - '2024-12-11'
+  route_maps_service_date:
+  - '2024-12-11'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2024-12-11'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+City of Laguna Beach:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 3.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Lawndale:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Lodi:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 11.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Lompoc:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Los Angeles:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 63.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Lynwood:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Madera:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Manteca:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - '2024-06-12'
+  route_maps_service_date:
+  - '2024-06-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2024-06-12'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+City of Maywood:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Mission Viejo:
+  avg_speeds_service_date:
+  - '2024-11-13'
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2024-11-13'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Montebello:
+  avg_speeds_service_date:
+  - '2024-12-11'
+  nunique_routes:
+  - 8.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Monterey Park:
+  avg_speeds_service_date:
+  - '2024-12-11'
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Morro Bay:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Mountain View:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Needles:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Norwalk:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 6.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Pasadena:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 11.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Petaluma:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 10.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Redondo Beach:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Rio Vista:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-01-15'
+  route_maps_service_date:
+  - '2025-01-15'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Ripon:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - '2023-08-15'
+  route_maps_service_date:
+  - '2023-08-15'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2023-08-15'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+City of Rosemead:
+  avg_speeds_service_date:
+  - '2024-12-11'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Roseville:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 23.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of San Clemente:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - '2024-11-13'
+  route_maps_service_date:
+  - '2024-11-13'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2024-11-13'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+City of San Fernando:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of San Juan Capistrano:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of San Luis Obispo:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 17.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Santa Clarita:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 38.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Santa Maria:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 15.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Santa Monica:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 19.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Santa Rosa:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 16.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Sierra Madre:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2024-12-11'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2024-12-11'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+City of Solvang:
+  avg_speeds_service_date:
+  - '2025-02-12'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-02-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of South Gate:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of South San Francisco:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 6.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Torrance:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 12.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Tracy:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 14.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of Turlock:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Union City:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Vacaville:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of Visalia:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 13.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+City of West Covina:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 3.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+City of West Hollywood:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 3.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Commute.org and Menlo Park Community Shuttles Schedule:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 23.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Curry Public Transit:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Dumbarton Bridge Regional Operations Consortium:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2024-12-11'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Eastern Contra Costa Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 15.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Eastern Sierra Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 14.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+El Dorado County Transit Authority:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Emeryville Transportation Management Agency:
+  avg_speeds_service_date:
+  - '2024-12-11'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+FlixBus and Greyhound Schedule:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 21.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Foothill Schedule:
+  avg_speeds_service_date:
+  - '2025-02-12'
+  nunique_routes:
+  - 35.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-02-12'
+  schd_service_date:
+  - '2025-02-12'
+  schd_vp_service_date:
+  - '2025-02-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - Not Available
+Fresno County Rural Transit Agency:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Glenn County:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Golden Empire Transit District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 15.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Golden Gate Bridge, Highway and Transportation District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 16.0
+  operator_profile_service_date:
+  - '2024-12-11'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Humboldt Schedule:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 12.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - Not Available
+Imperial County Transportation Commission:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 13.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Kern County:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 12.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Kings County Area Public Transit Agency:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 15.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Lake Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 9.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Lassen Transit Service Agency:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Livermore-Amador Valley Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 32.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Long Beach Transit:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 36.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Los Angeles County:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 19.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Los Angeles County Metropolitan Transportation Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 115.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Los Angeles World Airports:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 8.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2024-11-13'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Madera County:
+  avg_speeds_service_date:
+  - '2025-02-12'
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-02-12'
+  schd_service_date:
+  - '2025-02-12'
+  schd_vp_service_date:
+  - '2025-02-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Marin County Transit District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 19.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Mendocino Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 9.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Mission Bay Transportation Management Agency:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Modoc Transportation Agency:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Monterey-Salinas Transit:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 37.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Mountain Area Regional Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 14.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Mountain View Transportation Management Association:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Napa Valley Transportation Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 12.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Nevada County:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+North County Transit District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 47.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Not Available:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - Not Available
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+OmniTrans:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 29.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Orange County Transportation Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 56.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+POINT:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Palo Verde Valley Transit Agency:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Palos Verdes Peninsula Transit Authority:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Peninsula Corridor Joint Powers Board:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Placer County:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 8.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Plumas Transit Systems:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 3.0
+  operator_profile_service_date:
+  - '2025-01-15'
+  route_maps_service_date:
+  - '2025-01-15'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Presidio Trust:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - Not Available
+Redding Schedule:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 12.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Redwood Coast Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Riverside Transit Agency:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 35.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Sacramento County:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 3.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Sacramento Schedule:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 65.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+San Benito County Local Transportation Authority:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 2.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+San Diego Schedule:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 101.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+San Francisco Bay Area Rapid Transit District:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 6.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - Not Available
+San Francisco International Airport:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+San Joaquin Regional Rail Commission:
+  avg_speeds_service_date:
+  - '2024-06-12'
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+San Joaquin Regional Transit District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 41.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+San Luis Obispo Regional Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 15.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+San Mateo County Transit District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 75.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Santa Barbara County Association of Governments:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Santa Barbara Metropolitan Transit District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 36.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Santa Clara Valley Transportation Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 68.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Santa Cruz Metropolitan Transit District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 20.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Siskiyou County:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+SolTrans Schedule:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 17.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - Not Available
+Sonoma County Transit Schedule:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 23.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Sonoma-Marin Area Rail Transit District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Stanford University:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 22.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Stanislaus Regional Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 27.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+SunLine Transit Agency:
+  avg_speeds_service_date:
+  - '2024-12-11'
+  nunique_routes:
+  - 19.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+TART, North Lake Tahoe Schedule:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 9.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Tahoe Transportation District:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 9.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - 2024-10
+Tehama Schedule:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 9.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Transit Joint Powers Authority for Merced County:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 30.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Treasure Island Community Development:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Trinity County:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Tulare County Regional Transit Agency:
+  avg_speeds_service_date:
+  - '2024-12-11'
+  nunique_routes:
+  - 24.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Tuolumne County Transit Agency:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+UCSC and City of Santa Cruz Beach Shuttle Schedule:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 5.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-01-15'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+University of California, Berkeley:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 7.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+University of California, Davis:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 19.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+University of California, Irvine:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - '2024-06-12'
+  route_maps_service_date:
+  - '2024-06-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2024-06-12'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+University of California, Los Angeles:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 4.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+University of California, San Diego:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 6.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - Not Available
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - Not Available
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai, Simi Valley, Thousand Oaks) Schedule:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 44.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Victor Valley Transit Authority:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 60.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Western Contra Costa Transit Authority:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 11.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Yolo County Transportation District:
+  avg_speeds_service_date:
+  - '2025-03-12'
+  nunique_routes:
+  - 15.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - '2025-03-12'
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_and_vp
+  scheduled_service_month_year:
+  - 2024-10
+Yosemite Area Regional Transportation System:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Yosemite National Park:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - Not Available
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2024-12-11'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2024-12-11'
+  schd_vp_service_date:
+  - Not Available
+  sched_rt_category:
+  - Not Available
+  scheduled_service_month_year:
+  - Not Available
+Yuba-Sutter Transit Authority:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 14.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Yuma County Intergovernmental Public Transportation Authority:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 9.0
+  operator_profile_service_date:
+  - '2025-02-12'
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
+Yurok Tribe:
+  avg_speeds_service_date:
+  - Not Available
+  nunique_routes:
+  - 1.0
+  operator_profile_service_date:
+  - Not Available
+  route_maps_service_date:
+  - '2025-02-12'
+  rt_vs_sched_service_date:
+  - Not Available
+  schd_service_date:
+  - '2025-03-12'
+  schd_vp_service_date:
+  - '2025-03-12'
+  sched_rt_category:
+  - schedule_only
+  scheduled_service_month_year:
+  - Not Available
