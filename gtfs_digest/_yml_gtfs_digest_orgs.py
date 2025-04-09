@@ -216,6 +216,7 @@ def generate_org_gtfs_status_yml(df: pd.DataFrame):
     df2 = df[
         [
             "sched_rt_category",
+            "portfolio_name",
             "organization_name",
         ]
     ]
