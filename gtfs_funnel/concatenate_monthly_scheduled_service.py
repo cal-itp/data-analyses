@@ -73,7 +73,7 @@ if __name__ == "__main__":
         time_series_utils.parse_route_combined_name
     )[["schedule_gtfs_dataset_key",
          "route_long_name", "route_short_name", 
-         "route_id", "route_combined_name"]
+         "route_id", "recent_combined_name"]
     ].drop_duplicates()
 
     # Merge monthly service with crosswalk to get schedule_gtfs_dataset_key
