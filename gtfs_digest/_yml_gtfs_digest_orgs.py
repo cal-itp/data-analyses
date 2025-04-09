@@ -23,7 +23,11 @@ schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.
 General Functions
 """
 def df_to_yaml(
-    df: pd.DataFrame, nest1_column: str, nest2_column: str, SITE_YML: str, title: str
+    df: pd.DataFrame, 
+    nest1_column: str, 
+    nest2_column: str, 
+    SITE_YML: str, 
+    title: str
 ):
     """
     Dump Pandas Dataframe to a YAML.
@@ -204,6 +208,10 @@ def generate_key_org_ymls(df: pd.DataFrame):
 
     
 def generate_org_gtfs_status_yml(df: pd.DataFrame):
+    """
+    Generate which operators have realtime data,
+    schedule and realtime data, or realtime only.
+    """
     # Subset
     df2 = df[
         [
