@@ -1,13 +1,14 @@
+GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
+
+
 """
 functions for the new transit metrics portfolio
 """
 import pandas as pd
-import new_transit_metrics
+import altair as alt
 from calitp_data_analysis.tables import tbls
 from siuba import _, collect, count, filter, show_query
-import sys
-sys.path.append("../")
-from update_vars import GCS_FILE_PATH
+
 
 def make_new_transit_metrics_data():
     year_list=["2018","2019","2020","2021","2022","2023"]
@@ -274,7 +275,9 @@ def make_line(
             color=alt.Color(color),
             tooltip=[x_col, y_col,color]
         )
-    )
+    ).properties(
+        width=350, height=350
+    ).interactive()
     
     # median, horizontal bar
     rule = alt.Chart(df).mark_rule().encode(
@@ -306,6 +309,6 @@ def make_line(
         
     return chart_rule_facet
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     df = make_new_transit_metrics_data()
     df.to_parquet(f"{GCS_FILE_PATH}raw_transit_performance_metrics_data.parquet")
