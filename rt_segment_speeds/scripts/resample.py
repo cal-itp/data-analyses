@@ -1,3 +1,8 @@
+"""
+Project vp point geometry onto shape.
+Condense vp into linestring.
+Resample every 5 seconds.
+"""
 import datetime
 import numpy as np
 import pandas as pd
@@ -6,19 +11,76 @@ import shapely
 import sys
 
 from loguru import logger
-
-from calitp_data_analysis import utils
 from numba import jit
+from calitp_data_analysis import utils
 
-from segment_speed_utils import helpers
+from segment_speed_utils import helpers, vp_transform
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT, PROJECT_CRS
-from shared_utils import rt_dates
+from shared_utils import rt_dates, geo_utils
 
+subset_trips = [
+    '00000ec4ec4f4cee317f06c981d4965f',
+    '0000c1d4e6dddb9d472eba4dd5bff75e',
+    '0001245feefb9de38772db6d349324c9',
+    '000151b853273d961473d771438c943f',
+    '00018c6b262a45ef8ce0e8126d96c96e'
+]
 
-def set_dataset(analysis_date: str):
+def determine_batches(analysis_date: str) -> dict:
+    vp = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_usable_{analysis_date}/",
+        columns = ["gtfs_dataset_name"],
+    ).drop_duplicates()
     
-    VP_CONDENSED = GTFS_DATA_DICT.speeds_tables.vp_condensed_line
+    large_operators = [
+        "LA Metro Bus",
+        "LA Metro Rail",
+        "Bay Area 511"
+    ]
+  
+    # If any of the large operator name substring is 
+    # found in our list of names, grab those
+    # be flexible bc "Vehicle Positions" and "VehiclePositions" present
+    matching1 = [i for i in vp.gtfs_dataset_name 
+                if any(name in i for name in large_operators)]
+    
+    remaining = [i for i in vp.gtfs_dataset_name if 
+                 i not in matching1]
+    
+    # Batch large operators together and run remaining in 2nd query
+    batch_dict = {}
+    
+    batch_dict[0] = matching1
+    batch_dict[1] = remaining
+    
+    return batch_dict
 
+
+def get_trips_by_batches(operator_list: list) -> list:
+    
+    subset_trips = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_usable_{analysis_date}/",
+        filters = [["gtfs_dataset_name", "in", operator_list]],
+        columns = ["trip_instance_key"],
+    ).trip_instance_key.unique().tolist()
+    
+    return subset_trips
+    
+
+def create_vp_with_shape_and_project(analysis_date: str) -> gpd.GeoDataFrame:
+    """
+    """
+    VP_USABLE = GTFS_DATA_DICT.speeds_tables.usable_vp 
+    
+    vp = pd.read_parquet(
+        f"{SEGMENT_GCS}vp_usable_{analysis_date}/",
+        columns = ["trip_instance_key", "location_timestamp_local", "x", "y"],
+
+    ).pipe(
+        geo_utils.vp_as_gdf, 
+        crs = PROJECT_CRS
+    )
+    
     trips = helpers.import_scheduled_trips(
         analysis_date,
         columns = ["trip_id", "trip_instance_key", "shape_array_key"],
@@ -38,96 +100,156 @@ def set_dataset(analysis_date: str):
         how = "inner"
     )
     
-    vp = gpd.read_parquet(
-        f"{SEGMENT_GCS}{VP_CONDENSED}_{analysis_date}.parquet",
-        columns = ["trip_instance_key", "location_timestamp_local", "geometry"],
-        filters = [[("trip_instance_key", "in", trips.trip_instance_key.tolist())]]
-    ).to_crs(PROJECT_CRS).rename(
-        columns = {"geometry": "vp_geometry"}
-    ).set_geometry("vp_geometry")
-
-    gdf = pd.merge(
-        vp,
+    vp_gdf = pd.merge(
+        vp.rename(columns = {"geometry": "vp_geometry"}),
         shapes.rename(columns = {"geometry": "shape_geometry"}),
         on = "trip_instance_key",
         how = "inner"
+    ).set_geometry("vp_geometry")
+    
+    vp_gdf = project_point_onto_shape(
+        vp_gdf, 
+        "shape_geometry", 
+        "vp_geometry"
+    ).rename(columns = {"projected_meters": "vp_meters"})
+    
+    return vp_gdf
+
+
+def project_point_onto_shape(
+    gdf: gpd.GeoDataFrame, 
+    line_geom: str, 
+    point_geom: str,
+    crs: str = PROJECT_CRS
+) -> gpd.GeoDataFrame:
+    """
+    """
+    gdf = gdf.assign(
+        projected_meters = gdf[line_geom].to_crs(crs).project(
+            gdf[point_geom].to_crs(crs)
+        )
     )
-        
+    
     return gdf
 
 
-def project_vp_on_shape(gdf: gpd.GeoDataFrame):
-    # Get a version where we take the array of timestamps, convert it to seconds,
-    # resample it and get it at a higher frequency (5-10 seconds), and get the distance against shape
-    # that's our vp_meters
-    # for vp paths that follow shapes that are simple, this should work ok
-    vp_meters_series = []
-
-    for row in gdf.itertuples():
-        vp_points = np.asarray(getattr(row, "vp_geometry").coords)
-        vp_meters = np.asarray(
-            [getattr(row, "shape_geometry").project(shapely.Point(p)) 
-             for p in vp_points])
-        
-        vp_meters_series.append(vp_meters)
-        
-
-    gdf2 = gdf.assign(
-        interpolated_distances = vp_meters_series,
-        timestamps = gdf.apply(
-            lambda x: 
-            np.asarray(x.location_timestamp_local).astype("datetime64[s]").astype("float64"), 
-            axis=1)
-    )[["trip_instance_key", "vp_geometry", "interpolated_distances", "timestamps"]]
-    
-    return gdf2
+@jit(nopython=True)
+def resample_timestamps(
+    timestamp_arr: np.ndarray, 
+    seconds_step: int
+) -> np.ndarray:
+    """
+    resample timestamp array by every X seconds
+    """
+    return np.arange(min(timestamp_arr), max(timestamp_arr), step=seconds_step)
 
 
 @jit(nopython=True)
-def resample_vp_timestamps(timestamp_array, seconds_step: int):
-    return np.arange(min(timestamp_array), max(timestamp_array), step=seconds_step)
-
-
-@jit(nopython=True)
-def interpolate_step(timestamp_resampled, timestamp_orig, vp_meters):
-    return np.interp(timestamp_resampled, timestamp_orig, vp_meters)
-
-
-def resample_with_numba(gdf):
+def interpolate_distances_for_resampled_timestamps(
+    resampled_timestamp_arr: np.ndarray, 
+    original_timestamp_arr: np.ndarray, 
+    projected_meters_arr: np.ndarray
+) -> np.ndarray:
     """
-    Split apart steps that are not shapely and use numba on it.
+    Interpolate and get (modeled/interpolated) Y's against X's.
+    We have original X array, resampled X with more observations,
+    and now we want to fill in those Y's in between with 
+    numpy linear interpolation.
     """
-    gdf2 = project_vp_on_shape(gdf)
-    vp_meters_series = gdf2.interpolated_distances
-    timestamps_series = gdf2.timestamps
-    resampled_timestamps = [resample_vp_timestamps(t, 5) for t in timestamps_series]
-    vp_meters_new = [interpolate_step(timestamps_new, timestamps, vp_meters) 
-                 for timestamps_new, timestamps, vp_meters 
-                 in zip(resampled_timestamps, timestamps_series, vp_meters_series)]
+    return np.interp(
+        resampled_timestamp_arr, 
+        original_timestamp_arr,
+        projected_meters_arr
+    )
 
-
-    gdf2 = gdf2.assign(
-        resampled_timestamps = resampled_timestamps,
-        new_distances = vp_meters_new
+def get_resampled_vp_points(
+    gdf: gpd.GeoDataFrame,
+    resampling_seconds_interval: int = 5
+) -> gpd.GeoDataFrame:
+    """
+    Resample vp timestamps every 5 seconds to start,
+    then interpolate the distances and fill in between.
+    Return a gdf with 
+    - resampled timestamps (array of timestamps coerced to seconds, then floats)
+    - interpolated distances (array, meters along shape geometry)
+    - geometry (convert distances to interpolated points along vp linestring
+    (existing vp points condensed to linestring)
+    """
+    # Get timestamps that are datetime, change to display up to seconds, then convert to floats
+    # This will be easier to use when we're visually inspecting
+    timestamps_series = gdf.apply(
+        lambda x: 
+        x.location_timestamp_local.astype("datetime64[s]").astype("float64"), 
+        axis=1
     )
     
-    vp_geom_series = []
-    for row in gdf2.itertuples():
-        vp_meters_new = getattr(row, "new_distances")
-        new_vp_positions = shapely.LineString(
-            [getattr(row, "vp_geometry").interpolate(d) for d in vp_meters_new]) 
-        vp_geom_series.append(new_vp_positions)       
-
-    gdf3 = gdf2.assign(
-        geometry = gpd.GeoSeries(vp_geom_series, crs = PROJECT_CRS),
-    ).drop(columns = "vp_geometry").set_geometry("geometry")
+    vp_meters_series = gdf.vp_meters
+    vp_line_geometry = gdf.vp_geometry
+    
+    resampled_timestamps = [
+        resample_timestamps(t, resampling_seconds_interval) 
+        for t in timestamps_series
+    ]
+    
+    interpolated_vp_meters = [
+        interpolate_distances_for_resampled_timestamps(
+            new_timestamps, orig_timestamps, vp_meters) 
+            for new_timestamps, orig_timestamps, vp_meters 
+            in zip(resampled_timestamps, timestamps_series, vp_meters_series)
+    ]
+    '''
+    new_vp_points = [
+        shapely.LineString(
+            [vp_path.interpolate(one_vp_point) 
+             for one_vp_point in vp_meters_arr]
+        ) for vp_meters_arr, vp_path 
+        in zip(interpolated_vp_meters, vp_line_geometry)
+    ]    
+    '''
+    # Instead of coercing it to be a linestring, keep as array of points
+    # that can be exploded
+    new_vp_points = [
+            [vp_path.interpolate(one_vp_point).coords[0]
+             for one_vp_point in vp_meters_arr]
+         for vp_meters_arr, vp_path 
+        in zip(interpolated_vp_meters, vp_line_geometry)
+    ]
+    
+    new_vp_x = [
+        [one_point[0] for one_point in individual_trip] 
+        for individual_trip in new_vp_points
+    ]
+    
+    new_vp_y = [
+        [one_point[1] for one_point in individual_trip] 
+        for individual_trip in new_vp_points
+    ]
+     
+    gdf2 = gdf.assign(
+        resampled_timestamps = resampled_timestamps,
+        interpolated_distances = interpolated_vp_meters,
+        interpolated_vp_x = new_vp_x, 
+        interpolated_vp_y = new_vp_y
+        #new_vp_coords = new_vp_points,
+        #geometry = gpd.GeoSeries(new_vp_points, crs = PROJECT_CRS)
+    ).drop(
+        columns = [
+            "vp_geometry"
+    ])
+    
+    modeled_cols = [
+        "resampled_timestamps", 
+        "interpolated_distances", 
+        "interpolated_vp_x", 
+        "interpolated_vp_y"
+    ]
+    
+    gdf3 = gdf2[["trip_instance_key"] + modeled_cols]
     
     return gdf3
 
 
-
 if __name__ == "__main__":
-
     
     LOG_FILE = "../logs/resampling.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -138,21 +260,50 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
-    analysis_date = rt_dates.DATES["oct2024"]
+    analysis_date = rt_dates.DATES["oct2024"]    
     
-    gdf = set_dataset(analysis_date)
-
-    results = resample_with_numba(gdf)
-  
+    gdf = create_vp_with_shape_and_project(
+        analysis_date
+    ).pipe(
+        vp_transform.condense_point_geom_to_line,
+        group_cols = ["trip_instance_key"],
+        geom_col = "vp_geometry",
+        array_cols = ["vp_meters", "location_timestamp_local"],
+        sort_cols = ["trip_instance_key", "location_timestamp_local"]
+    ).set_geometry("vp_geometry").set_crs(PROJECT_CRS)
+    
     utils.geoparquet_gcs_export(
-        results,
+        gdf,
         SEGMENT_GCS,
-        f"vp_condensed/vp_resampled2_{analysis_date}"
+        f"vp_condensed/vp_projected_{analysis_date}"
     )
+    
+    del gdf
+    
+    time1 = datetime.datetime.now()
+    logger.info(f"project vp against shape and condense: {time1 - start}")
+    
+    
+    batch_dict = determine_batches(analysis_date)
+    
+    for batch_number, subset_operators in batch_dict.items():
+        
+        subset_trips = get_trips_by_batches(subset_operators)    
+   
+        gdf = gpd.read_parquet(
+            f"{SEGMENT_GCS}vp_condensed/vp_projected_{analysis_date}.parquet",
+            filters = [[("trip_instance_key", "in", subset_trips)]]
+        )
+    
+        results = get_resampled_vp_points(gdf)
+
+        results.to_parquet(
+            f"{SEGMENT_GCS}vp_condensed/vp_resampled_batch{batch_number}_{analysis_date}.parquet",
+        )
+        
+        del results
 
     
     end = datetime.datetime.now()
-    logger.info(f"{analysis_date} resampling: {end - start}")
-
-    # 2024-10-16 resampling: 0:55:21.954823 when we use itertuples + keep 1 geometry column  
-    # 2024-10-16 resampling: 0:39:07.934167 use numba 
+    logger.info(f"resample and interpolate: {end - time1}")
+    logger.info(f"{analysis_date}: project, condense, resample, interpolate: {end - start}")
