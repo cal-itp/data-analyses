@@ -7,7 +7,6 @@ from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils.project_vars import (COMPILED_CACHED_VIEWS, RT_SCHED_GCS, SCHED_GCS)
 from shared_utils import catalog_utils, rt_dates, rt_utils
 import _report_utils 
-import _operators_prep as op_prep
 from segment_speed_utils import helpers
 
 # Readable Dictionary
@@ -37,18 +36,18 @@ def organization_name_crosswalk(organization_name: str) -> str:
     )
     
     # Get most recent name.
-    df = df.sort_values(by = ['service_date'], ascending = False)
-    name = df.name.values[0]
-    return name
+    df = df.sort_values(by = ['service_date'], ascending = False).drop_duplicates()
+    names = list(df.name.unique())
+    return names
 
-def load_operator_map(name:str)->gpd.GeoDataFrame:
+def load_operator_map(names:list)->gpd.GeoDataFrame:
     """
     Load geodataframe with all of the operator's routes.
     """
     op_routes_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_routes_map}.parquet"
     op_routes_gdf = gpd.read_parquet(
     op_routes_url,
-    filters=[[("name", "==", name)]])
+    filters=[[("name", "in", names)]])
     
     # Find the most recent geography for each route.
     op_routes_gdf = op_routes_gdf.sort_values(by = ["service_date"], ascending = False)
@@ -84,13 +83,13 @@ def load_operator_ntd_profile(organization_name:str)->pd.DataFrame:
     filters=[[("organization_name", "==", organization_name)]])
     
     # Keep only the most recent row
-    op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date'], ascending = False).head(1)
+    op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date', "operator_n_routes"], ascending = [False, False]).head(1)
     
     # Rename dataframe
     op_profiles_df1 = _report_utils.replace_column_names(op_profiles_df1)
     return op_profiles_df1
 
-def load_operator_service_hours(name:str)->pd.DataFrame:
+def load_operator_service_hours(names:list)->pd.DataFrame:
     """
     Load dataframe with the total scheduled service hours 
     a transit operator.
@@ -98,7 +97,7 @@ def load_operator_service_hours(name:str)->pd.DataFrame:
     url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.scheduled_service_hours}.parquet"
 
     df = pd.read_parquet(url,
-    filters=[[(("name", "==", name))]])
+    filters=[[(("name", "in", names))]])
     
     # Rename dataframe
     df = _report_utils.replace_column_names(df)

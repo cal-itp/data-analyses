@@ -1,0 +1,48 @@
+# 1 schedule_gtfs_dataset_key:m organization_name: m organization_names are captured under portfolio_name
+
+Amtrak Schedule:
+- Amtrak
+- San Joaquin Joint Powers Authority
+Commute.org and Menlo Park Community Shuttles Schedule:
+- City of Menlo Park
+- Commute.org
+FlixBus and Greyhound Schedule:
+- FlixBus
+- Greyhound
+Foothill Schedule:
+- City of Duarte
+- Foothill Transit
+Humboldt Schedule:
+- City of Arcata
+- City of Eureka
+- Humboldt Transit Authority
+Sacramento Schedule:
+- City of Rancho Cordova
+- Sacramento Regional Transit District
+San Diego Schedule:
+- Flagship Cruises and Events Inc.
+- San Diego International Airport
+- San Diego Metropolitan Transit System
+San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule:
+- City of Alameda
+- San Francisco Bay Area Water Emergency Transit Authority
+SolTrans Schedule:
+- Solano County Transit
+- Solano Transportation Authority
+Sonoma County Transit Schedule:
+- Cloverdale Transit
+- Sonoma County
+TART, North Lake Tahoe Schedule:
+- North Lake Tahoe Express
+- Tahoe Truckee Area Regional Transportation
+UCSC and City of Santa Cruz Beach Shuttle Schedule:
+- City of Santa Cruz
+- University of California, Santa Cruz
+Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai, Simi Valley, Thousand Oaks) Schedule:
+- City of Camarillo
+- City of Moorpark
+- City of Ojai
+- City of Simi Valley
+- City of Thousand Oaks
+- Gold Coast Transit District
+- Ventura County Transportation Commission
