@@ -7,8 +7,10 @@ functions for the new transit metrics portfolio
 import pandas as pd
 import altair as alt
 from calitp_data_analysis.tables import tbls
-from siuba import _, collect, count, filter, show_query
-
+from siuba import _, collect, count, filter, show_query, select
+import sys
+sys.path.append("../")  # up one level
+from update_vars import NTD_MODES, NTD_TOS
 
 def make_new_transit_metrics_data():
     year_list=["2018","2019","2020","2021","2022","2023"]
@@ -170,6 +172,8 @@ def make_new_transit_metrics_data():
     )
     
     merge_metrics_rtpa["opexp_total"] = merge_metrics_rtpa["opexp_total"].astype("int64")
+    merge_metrics_rtpa["mode"] = merge_metrics_rtpa["mode"].map(NTD_MODES)
+    merge_metrics_rtpa["service"] = merge_metrics_rtpa["service"].map(NTD_TOS)
     
     return merge_metrics_rtpa
 
@@ -249,7 +253,7 @@ def make_scatter(data, x_ax, y_ax, color=None, column_num=None, log_scale=None, 
         print(f"{excluded_count} rows with zero or negative values excluded due to log scale.")
 
     chart = chart.properties(
-        title=f"{x_ax} vs. {y_ax}", width=500, height=500
+        title=f"{x_ax} vs. {y_ax}", width=350, height=150
     ).interactive()
 
     return chart + chart.transform_regression(x_ax, y_ax).mark_line()
@@ -276,7 +280,7 @@ def make_line(
             tooltip=[x_col, y_col,color]
         )
     ).properties(
-        width=350, height=350
+        width=350, height=150
     ).interactive()
     
     # median, horizontal bar
