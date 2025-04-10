@@ -18,7 +18,7 @@ groupby_cols = [
     "year_quarter",
     "direction_id",
     "time_period",
-    "route_id",
+    "recent_route_id",
 ]
 rt_metric_cols = [
     "minutes_atleast1_vp",
@@ -45,22 +45,23 @@ crosswalk_cols = [
     "is_express",
     "is_rapid",
     "is_rail",
+    "is_ferry",
     "is_coverage",
     "is_downtown_local",
     "is_local",
     "service_date",
     "typology",
     "sched_rt_category",
-    "route_long_name",
-    "route_short_name",
-    "route_combined_name",
+    "combined_name",
+    'route_id',
+    "recent_combined_name",
     'year', 
     'quarter'
 ]
 group_cols = [
     "year_quarter",
     "schedule_gtfs_dataset_key",
-    "route_id",
+    "recent_route_id",
     "direction_id",
     "time_period",
 ]

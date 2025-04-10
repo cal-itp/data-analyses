@@ -10,6 +10,7 @@ frequency: Trips per Hour
 total_scheduled_service_minutes: "Aggregate Scheduled Service Minutes (all trips)"
 route_id: "Route ID"
 recent_combined_name: Route
+route_combined_name: Route
 n_trips: "# trips"
 
 # GTFS vehicle positions

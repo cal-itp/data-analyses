@@ -90,6 +90,8 @@ parts:
       district: 05 - San Luis Obispo / Santa Barbara
     sections:
     - portfolio_name: City of Guadalupe
+    - portfolio_name: City of Lompoc
+    - portfolio_name: City of Morro Bay
     - portfolio_name: City of San Luis Obispo
     - portfolio_name: City of Santa Maria
     - portfolio_name: City of Solvang
@@ -148,11 +150,13 @@ parts:
     - portfolio_name: City of Los Angeles
     - portfolio_name: City of Lynwood
     - portfolio_name: City of Maywood
+    - portfolio_name: City of Montebello
     - portfolio_name: City of Monterey Park
     - portfolio_name: City of Norwalk
     - portfolio_name: City of Pasadena
     - portfolio_name: City of Redondo Beach
     - portfolio_name: City of Rosemead
+    - portfolio_name: City of San Fernando
     - portfolio_name: City of Santa Clarita
     - portfolio_name: City of Santa Monica
     - portfolio_name: City of Sierra Madre
@@ -175,6 +179,7 @@ parts:
       district: 08 - San Bernardino / Riverside
     sections:
     - portfolio_name: Basin Transit
+    - portfolio_name: Chemehuevi Indian Tribe
     - portfolio_name: City of Banning
     - portfolio_name: City of Beaumont
     - portfolio_name: City of Corona
@@ -183,6 +188,7 @@ parts:
     - portfolio_name: OmniTrans
     - portfolio_name: Palo Verde Valley Transit Agency
     - portfolio_name: Riverside Transit Agency
+    - portfolio_name: SunLine Transit Agency
     - portfolio_name: Victor Valley Transit Authority
   - caption: District 09 - Bishop
     params:
@@ -222,7 +228,13 @@ parts:
     params:
       district: 12 - Santa Ana
     sections:
+    - portfolio_name: Anaheim Transportation Network
+    - portfolio_name: City of Dana Point
+    - portfolio_name: City of Irvine
     - portfolio_name: City of Laguna Beach
+    - portfolio_name: City of Mission Viejo
+    - portfolio_name: City of San Clemente
+    - portfolio_name: City of San Juan Capistrano
     - portfolio_name: Orange County Transportation Authority
     - portfolio_name: University of California, Irvine
 readme: ./gtfs_digest/README.md
