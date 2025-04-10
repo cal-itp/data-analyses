@@ -1,0 +1,372 @@
+# testing
+
+'False':
+  Butte County Association of Governments:
+  - '2_months_ago: 20.0'
+  - '1_months_ago: 21.0'
+  - 'current_month: 20.0'
+  City and County of San Francisco:
+  - '2_months_ago: 70.0'
+  - '1_months_ago: 70.0'
+  - 'current_month: 1.0'
+  City of Culver City:
+  - '2_months_ago: 0.0'
+  - '1_months_ago: 11.0'
+  - 'current_month: 11.0'
+  City of Elk Grove:
+  - '2_months_ago: 0.0'
+  - '1_months_ago: 0.0'
+  - 'current_month: 17.0'
+  City of Pasadena:
+  - '2_months_ago: 6.0'
+  - '1_months_ago: 11.0'
+  - 'current_month: 11.0'
+  Emeryville Transportation Management Agency:
+  - '2_months_ago: 1.0'
+  - '1_months_ago: 2.0'
+  - 'current_month: 2.0'
+  Foothill Schedule:
+  - '2_months_ago: 35.0'
+  - '1_months_ago: 35.0'
+  - 'current_month: 0.0'
+  Madera County:
+  - '2_months_ago: 4.0'
+  - '1_months_ago: 4.0'
+  - 'current_month: 0.0'
+  Monterey-Salinas Transit:
+  - '2_months_ago: 35.0'
+  - '1_months_ago: 36.0'
+  - 'current_month: 37.0'
+  Napa Valley Transportation Authority:
+  - '2_months_ago: 11.0'
+  - '1_months_ago: 12.0'
+  - 'current_month: 12.0'
+  Orange County Transportation Authority:
+  - '2_months_ago: 58.0'
+  - '1_months_ago: 56.0'
+  - 'current_month: 56.0'
+  Palo Verde Valley Transit Agency:
+  - '2_months_ago: 10.0'
+  - '1_months_ago: 10.0'
+  - 'current_month: 9.0'
+  San Diego Schedule:
+  - '2_months_ago: 100.0'
+  - '1_months_ago: 101.0'
+  - 'current_month: 101.0'
+  Santa Barbara Metropolitan Transit District:
+  - '2_months_ago: 35.0'
+  - '1_months_ago: 36.0'
+  - 'current_month: 36.0'
+  SolTrans Schedule:
+  - '2_months_ago: 17.0'
+  - '1_months_ago: 15.0'
+  - 'current_month: 17.0'
+  Tulare County Regional Transit Agency:
+  - '2_months_ago: 25.0'
+  - '1_months_ago: 24.0'
+  - 'current_month: 24.0'
+  Tuolumne County Transit Agency:
+  - '2_months_ago: 3.0'
+  - '1_months_ago: 3.0'
+  - 'current_month: 4.0'
+  University of California, Los Angeles:
+  - '2_months_ago: 0.0'
+  - '1_months_ago: 4.0'
+  - 'current_month: 4.0'
+  Yolo County Transportation District:
+  - '2_months_ago: 17.0'
+  - '1_months_ago: 17.0'
+  - 'current_month: 15.0'
+'True':
+  Alameda-Contra Costa Transit District:
+  - '2_months_ago: 130.0'
+  - '1_months_ago: 130.0'
+  - 'current_month: 130.0'
+  Anaheim Transportation Network:
+  - '2_months_ago: 18.0'
+  - '1_months_ago: 18.0'
+  - 'current_month: 18.0'
+  Antelope Valley Transit Authority:
+  - '2_months_ago: 20.0'
+  - '1_months_ago: 20.0'
+  - 'current_month: 20.0'
+  Basin Transit:
+  - '2_months_ago: 14.0'
+  - '1_months_ago: 14.0'
+  - 'current_month: 14.0'
+  Capitol Corridor Joint Powers Authority:
+  - '2_months_ago: 3.0'
+  - '1_months_ago: 3.0'
+  - 'current_month: 3.0'
+  Central Contra Costa Transit Authority:
+  - '2_months_ago: 42.0'
+  - '1_months_ago: 42.0'
+  - 'current_month: 42.0'
+  City of Arcadia:
+  - '2_months_ago: 3.0'
+  - '1_months_ago: 3.0'
+  - 'current_month: 3.0'
+  City of Banning:
+  - '2_months_ago: 2.0'
+  - '1_months_ago: 2.0'
+  - 'current_month: 2.0'
+  City of Beaumont:
+  - '2_months_ago: 8.0'
+  - '1_months_ago: 8.0'
+  - 'current_month: 8.0'
+  City of Burbank:
+  - '2_months_ago: 2.0'
+  - '1_months_ago: 2.0'
+  - 'current_month: 2.0'
+  City of Cerritos:
+  - '2_months_ago: 8.0'
+  - '1_months_ago: 8.0'
+  - 'current_month: 8.0'
+  City of Commerce:
+  - '2_months_ago: 7.0'
+  - '1_months_ago: 7.0'
+  - 'current_month: 7.0'
+  City of Escalon:
+  - '2_months_ago: 1.0'
+  - '1_months_ago: 1.0'
+  - 'current_month: 1.0'
+  City of Fairfield:
+  - '2_months_ago: 5.0'
+  - '1_months_ago: 5.0'
+  - 'current_month: 5.0'
+  City of Fresno:
+  - '2_months_ago: 18.0'
+  - '1_months_ago: 18.0'
+  - 'current_month: 18.0'
+  City of Gardena:
+  - '2_months_ago: 6.0'
+  - '1_months_ago: 6.0'
+  - 'current_month: 6.0'
+  City of Irvine:
+  - '2_months_ago: 1.0'
+  - '1_months_ago: 1.0'
+  - 'current_month: 1.0'
+  City of Lawndale:
+  - '2_months_ago: 4.0'
+  - '1_months_ago: 4.0'
+  - 'current_month: 4.0'
+  City of Los Angeles:
+  - '2_months_ago: 64.0'
+  - '1_months_ago: 64.0'
+  - 'current_month: 64.0'
+  City of Montebello:
+  - '2_months_ago: 8.0'
+  - '1_months_ago: 8.0'
+  - 'current_month: 8.0'
+  City of Monterey Park:
+  - '2_months_ago: 5.0'
+  - '1_months_ago: 5.0'
+  - 'current_month: 5.0'
+  City of Norwalk:
+  - '2_months_ago: 6.0'
+  - '1_months_ago: 6.0'
+  - 'current_month: 6.0'
+  City of Petaluma:
+  - '2_months_ago: 10.0'
+  - '1_months_ago: 10.0'
+  - 'current_month: 10.0'
+  City of Redondo Beach:
+  - '2_months_ago: 2.0'
+  - '1_months_ago: 2.0'
+  - 'current_month: 2.0'
+  City of Rosemead:
+  - '2_months_ago: 2.0'
+  - '1_months_ago: 2.0'
+  - 'current_month: 2.0'
+  City of Santa Clarita:
+  - '2_months_ago: 38.0'
+  - '1_months_ago: 38.0'
+  - 'current_month: 38.0'
+  City of Santa Maria:
+  - '2_months_ago: 16.0'
+  - '1_months_ago: 16.0'
+  - 'current_month: 16.0'
+  City of Santa Monica:
+  - '2_months_ago: 19.0'
+  - '1_months_ago: 19.0'
+  - 'current_month: 19.0'
+  City of Santa Rosa:
+  - '2_months_ago: 16.0'
+  - '1_months_ago: 16.0'
+  - 'current_month: 16.0'
+  City of Torrance:
+  - '2_months_ago: 12.0'
+  - '1_months_ago: 12.0'
+  - 'current_month: 12.0'
+  City of Turlock:
+  - '2_months_ago: 7.0'
+  - '1_months_ago: 7.0'
+  - 'current_month: 7.0'
+  City of Union City:
+  - '2_months_ago: 5.0'
+  - '1_months_ago: 5.0'
+  - 'current_month: 5.0'
+  City of Vacaville:
+  - '2_months_ago: 5.0'
+  - '1_months_ago: 5.0'
+  - 'current_month: 5.0'
+  City of Visalia:
+  - '2_months_ago: 13.0'
+  - '1_months_ago: 13.0'
+  - 'current_month: 13.0'
+  City of West Hollywood:
+  - '2_months_ago: 3.0'
+  - '1_months_ago: 3.0'
+  - 'current_month: 3.0'
+  Dumbarton Bridge Regional Operations Consortium:
+  - '2_months_ago: 2.0'
+  - '1_months_ago: 2.0'
+  - 'current_month: 2.0'
+  Eastern Contra Costa Transit Authority:
+  - '2_months_ago: 15.0'
+  - '1_months_ago: 15.0'
+  - 'current_month: 15.0'
+  Eastern Sierra Transit Authority:
+  - '2_months_ago: 14.0'
+  - '1_months_ago: 14.0'
+  - 'current_month: 14.0'
+  Golden Empire Transit District:
+  - '2_months_ago: 15.0'
+  - '1_months_ago: 15.0'
+  - 'current_month: 15.0'
+  Golden Gate Bridge, Highway and Transportation District:
+  - '2_months_ago: 16.0'
+  - '1_months_ago: 16.0'
+  - 'current_month: 16.0'
+  Humboldt Schedule:
+  - '2_months_ago: 12.0'
+  - '1_months_ago: 12.0'
+  - 'current_month: 12.0'
+  Kern County:
+  - '2_months_ago: 12.0'
+  - '1_months_ago: 12.0'
+  - 'current_month: 12.0'
+  Kings County Area Public Transit Agency:
+  - '2_months_ago: 15.0'
+  - '1_months_ago: 15.0'
+  - 'current_month: 15.0'
+  Lake Transit Authority:
+  - '2_months_ago: 9.0'
+  - '1_months_ago: 9.0'
+  - 'current_month: 9.0'
+  Livermore-Amador Valley Transit Authority:
+  - '2_months_ago: 32.0'
+  - '1_months_ago: 32.0'
+  - 'current_month: 32.0'
+  Long Beach Transit:
+  - '2_months_ago: 36.0'
+  - '1_months_ago: 36.0'
+  - 'current_month: 36.0'
+  Los Angeles County Metropolitan Transportation Authority:
+  - '2_months_ago: 115.0'
+  - '1_months_ago: 115.0'
+  - 'current_month: 115.0'
+  Marin County Transit District:
+  - '2_months_ago: 19.0'
+  - '1_months_ago: 19.0'
+  - 'current_month: 19.0'
+  Mountain Area Regional Transit Authority:
+  - '2_months_ago: 14.0'
+  - '1_months_ago: 14.0'
+  - 'current_month: 14.0'
+  Mountain View Transportation Management Association:
+  - '2_months_ago: 8.0'
+  - '1_months_ago: 8.0'
+  - 'current_month: 8.0'
+  Nevada County:
+  - '2_months_ago: 7.0'
+  - '1_months_ago: 7.0'
+  - 'current_month: 7.0'
+  North County Transit District:
+  - '2_months_ago: 47.0'
+  - '1_months_ago: 47.0'
+  - 'current_month: 47.0'
+  OmniTrans:
+  - '2_months_ago: 29.0'
+  - '1_months_ago: 29.0'
+  - 'current_month: 29.0'
+  Peninsula Corridor Joint Powers Board:
+  - '2_months_ago: 4.0'
+  - '1_months_ago: 4.0'
+  - 'current_month: 4.0'
+  Presidio Trust:
+  - '2_months_ago: 2.0'
+  - '1_months_ago: 2.0'
+  - 'current_month: 2.0'
+  Redding Schedule:
+  - '2_months_ago: 12.0'
+  - '1_months_ago: 12.0'
+  - 'current_month: 12.0'
+  Redwood Coast Transit Authority:
+  - '2_months_ago: 7.0'
+  - '1_months_ago: 7.0'
+  - 'current_month: 7.0'
+  Riverside Transit Agency:
+  - '2_months_ago: 35.0'
+  - '1_months_ago: 35.0'
+  - 'current_month: 35.0'
+  Sacramento Schedule:
+  - '2_months_ago: 65.0'
+  - '1_months_ago: 65.0'
+  - 'current_month: 65.0'
+  San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule:
+  - '2_months_ago: 7.0'
+  - '1_months_ago: 7.0'
+  - 'current_month: 7.0'
+  San Joaquin Regional Rail Commission:
+  - '2_months_ago: 1.0'
+  - '1_months_ago: 1.0'
+  - 'current_month: 1.0'
+  San Luis Obispo Regional Transit Authority:
+  - '2_months_ago: 15.0'
+  - '1_months_ago: 15.0'
+  - 'current_month: 15.0'
+  Santa Cruz Metropolitan Transit District:
+  - '2_months_ago: 20.0'
+  - '1_months_ago: 20.0'
+  - 'current_month: 20.0'
+  Sonoma-Marin Area Rail Transit District:
+  - '2_months_ago: 1.0'
+  - '1_months_ago: 1.0'
+  - 'current_month: 1.0'
+  Stanislaus Regional Transit Authority:
+  - '2_months_ago: 27.0'
+  - '1_months_ago: 27.0'
+  - 'current_month: 27.0'
+  SunLine Transit Agency:
+  - '2_months_ago: 19.0'
+  - '1_months_ago: 19.0'
+  - 'current_month: 19.0'
+  Tahoe Transportation District:
+  - '2_months_ago: 5.0'
+  - '1_months_ago: 5.0'
+  - 'current_month: 5.0'
+  Tehama Schedule:
+  - '2_months_ago: 9.0'
+  - '1_months_ago: 9.0'
+  - 'current_month: 9.0'
+  University of California, Berkeley:
+  - '2_months_ago: 7.0'
+  - '1_months_ago: 7.0'
+  - 'current_month: 7.0'
+  University of California, Davis:
+  - '2_months_ago: 19.0'
+  - '1_months_ago: 19.0'
+  - 'current_month: 19.0'
+  Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai, Simi Valley, Thousand Oaks) Schedule:
+  - '2_months_ago: 61.0'
+  - '1_months_ago: 61.0'
+  - 'current_month: 61.0'
+  Victor Valley Transit Authority:
+  - '2_months_ago: 66.0'
+  - '1_months_ago: 66.0'
+  - 'current_month: 66.0'
+  Western Contra Costa Transit Authority:
+  - '2_months_ago: 11.0'
+  - '1_months_ago: 11.0'
+  - 'current_month: 11.0'

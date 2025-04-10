@@ -1,0 +1,4554 @@
+# Displaying the availability and count of unique routes for each dataset that goes into creating the operator grain GTFS Digest
+
+'Alameda-Contra Costa Transit District: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 120 routes'
+  - '2025-02-12: 121 routes'
+  - '2025-03-12: 117 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 128 routes'
+  - '2025-02-12: 129 routes'
+  - '2025-03-12: 128 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 130 routes'
+  - '2025-02-12: 130 routes'
+  - '2025-03-12: 130 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 130 routes'
+  - '2025-02-12: 130 routes'
+  - '2025-03-12: 130 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 130.0 routes'
+  - '2025-02-12: 130.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 130 routes'
+  - '2025-02-12: 130 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 24 hours'
+  - '2023-10: 24 hours'
+  - '2024-04: 24 hours'
+  - '2024-10: 24 hours'
+'Amador Regional Transit System: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 6.0 routes'
+  - '2025-02-12: 6.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'Amtrak Schedule: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 43 routes'
+  - '2025-02-12: 40 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 24 hours'
+  - '2023-10: 24 hours'
+  - '2024-10: 24 hours'
+'Anaheim Transportation Network: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  - '2025-03-12: 18 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  - '2025-03-12: 18 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  - '2025-03-12: 18 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 18.0 routes'
+  - '2025-02-12: 18.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 24 hours'
+  - '2023-10: 21 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 24 hours'
+'Angel Island-Tiburon Ferry Company: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 6 hours'
+  - '2023-10: 6 hours'
+  - '2024-04: 6 hours'
+  - '2024-10: 6 hours'
+'Antelope Valley Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 17 routes'
+  - '2025-03-12: 17 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 20 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 20 routes'
+  - '2025-03-12: 20 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 20 routes'
+  - '2025-03-12: 20 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 20.0 routes'
+  - '2025-02-12: 20.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 20 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 21 hours'
+  - '2023-10: 21 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 21 hours'
+'Basin Transit: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'Butte County Association of Governments: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 21 routes'
+  - '2025-03-12: 20 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 21 routes'
+  - '2025-03-12: 20 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 21 routes'
+  - '2025-03-12: 20 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 21 routes'
+  - '2025-03-12: 20 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 20.0 routes'
+  - '2025-02-12: 21.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 21 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'Calaveras Transit Agency: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'Capitol Corridor Joint Powers Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-02-12: 1 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 3.0 routes'
+  - '2025-02-12: 3.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 19 hours'
+  - '2023-10: 19 hours'
+  - '2024-04: 19 hours'
+  - '2024-10: 19 hours'
+'Central Contra Costa Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 41 routes'
+  - '2025-02-12: 40 routes'
+  - '2025-03-12: 41 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 42 routes'
+  - '2025-02-12: 42 routes'
+  - '2025-03-12: 42 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 42 routes'
+  - '2025-02-12: 42 routes'
+  - '2025-03-12: 42 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 42 routes'
+  - '2025-02-12: 42 routes'
+  - '2025-03-12: 42 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 42.0 routes'
+  - '2025-02-12: 42.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 42 routes'
+  - '2025-02-12: 42 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 19 hours'
+  - '2023-10: 19 hours'
+  - '2024-04: 19 hours'
+  - '2024-10: 19 hours'
+'Chemehuevi Indian Tribe: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'City and County of San Francisco: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 45 routes'
+  - '2025-02-12: 45 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 68 routes'
+  - '2025-02-12: 69 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 70 routes'
+  - '2025-02-12: 70 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 70 routes'
+  - '2025-02-12: 70 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-01-15: 70.0 routes'
+  - '2025-02-12: 1.0 routes'
+  - '2025-02-12: 69.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 70 routes'
+  - '2025-02-12: 70 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 24 hours'
+  - '2023-10: 24 hours'
+  - '2024-04: 24 hours'
+  - '2024-10: 24 hours'
+'City of Alhambra: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'City of Arcadia: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 3.0 routes'
+  - '2025-02-12: 3.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'City of Artesia: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 9 hours'
+  - '2023-10: 9 hours'
+  - '2024-04: 9 hours'
+  - '2024-10: 9 hours'
+'City of Arvin: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 11 hours'
+  - '2024-04: 11 hours'
+  - '2024-10: 11 hours'
+'City of Auburn: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 8 hours'
+  - '2023-10: 8 hours'
+  - '2024-04: 8 hours'
+  - '2024-10: 8 hours'
+'City of Avalon: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 10 hours'
+  - '2023-10: 10 hours'
+'City of Baldwin Park: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 15 hours'
+'City of Banning: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'City of Beaumont: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 8.0 routes'
+  - '2025-02-12: 8.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'City of Bell Gardens: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 11 hours'
+  - '2023-10: 11 hours'
+  - '2024-04: 11 hours'
+  - '2024-10: 11 hours'
+'City of Bell: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 12 hours'
+  - '2024-04: 12 hours'
+  - '2024-10: 12 hours'
+'City of Bellflower: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 10 hours'
+  - '2023-10: 10 hours'
+  - '2024-04: 10 hours'
+  - '2024-10: 10 hours'
+'City of Burbank: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'City of Calabasas: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'City of Cerritos: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-01-15: 6.0 routes'
+  - '2025-02-12: 2.0 routes'
+  - '2025-02-12: 6.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 8 hours'
+  - '2023-10: 8 hours'
+  - '2024-04: 8 hours'
+  - '2024-10: 8 hours'
+'City of Clovis: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'City of Commerce: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'City of Corona: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'City of Cudahy: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 11 hours'
+  - '2024-04: 11 hours'
+  - '2024-10: 12 hours'
+'City of Culver City: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 10 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  nunique_routes_service_date_routes:
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-02-12: 11.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-02-12: 11 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 19 hours'
+  - '2023-10: 19 hours'
+  - '2024-04: 19 hours'
+  - '2024-10: 20 hours'
+'City of Dana Point: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-10: 1 hours'
+'City of Delano: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 10 hours'
+  - '2023-10: 10 hours'
+  - '2024-04: 10 hours'
+  - '2024-10: 10 hours'
+'City of Downey: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 6.0 routes'
+  - '2025-02-12: 6.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 10 hours'
+  - '2024-04: 10 hours'
+'City of El Monte: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'City of El Segundo: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 3 hours'
+  - '2024-04: 3 hours'
+'City of Elk Grove: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-03-12: 17 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-03-12: 17 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-03-12: 17 routes'
+  nunique_routes_service_date_routes:
+  - '2025-03-12: 17 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'City of Escalon: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 3 hours'
+  - '2023-10: 3 hours'
+  - '2024-04: 3 hours'
+  - '2024-10: 3 hours'
+'City of Fairfield: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'City of Fresno: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  - '2025-03-12: 18 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  - '2025-03-12: 18 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  - '2025-03-12: 18 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 18.0 routes'
+  - '2025-02-12: 18.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 19 hours'
+  - '2023-10: 19 hours'
+  - '2024-04: 19 hours'
+  - '2024-10: 19 hours'
+'City of Gardena: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 6.0 routes'
+  - '2025-02-12: 6.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2024-04: 18 hours'
+'City of Glendale: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 11.0 routes'
+  - '2025-02-12: 11.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'City of Glendora: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'City of Guadalupe: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'City of Huntington Park: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'City of Inglewood: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 6 hours'
+  - '2024-10: 6 hours'
+'City of Irvine: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-10: 16 hours'
+'City of La Puente: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'City of Laguna Beach: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 3.0 routes'
+  - '2025-02-12: 3.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'City of Lawndale: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 12 hours'
+  - '2024-04: 12 hours'
+  - '2024-10: 12 hours'
+'City of Lodi: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 11.0 routes'
+  - '2025-02-12: 11.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'City of Lompoc: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-10: 13 hours'
+'City of Los Angeles: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 45 routes'
+  - '2025-02-12: 46 routes'
+  - '2025-03-12: 44 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 64 routes'
+  - '2025-02-12: 64 routes'
+  - '2025-03-12: 64 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 64 routes'
+  - '2025-02-12: 64 routes'
+  - '2025-03-12: 64 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 64 routes'
+  - '2025-02-12: 64 routes'
+  - '2025-03-12: 64 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 64.0 routes'
+  - '2025-02-12: 64.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 63 routes'
+  - '2025-02-12: 63 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'City of Lynwood: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 12 hours'
+  - '2024-04: 12 hours'
+  - '2024-10: 12 hours'
+'City of Madera: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 12 hours'
+  - '2023-10: 12 hours'
+  - '2024-04: 12 hours'
+  - '2024-10: 12 hours'
+'City of Manteca: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+'City of Maywood: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 10 hours'
+  - '2024-04: 10 hours'
+  - '2024-10: 10 hours'
+'City of Mission Viejo: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-10: 12 hours'
+'City of Montebello: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 8.0 routes'
+  - '2025-02-12: 8.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'City of Monterey Park: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 10 hours'
+  - '2023-10: 10 hours'
+  - '2024-04: 12 hours'
+  - '2024-10: 12 hours'
+'City of Morro Bay: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-10: 13 hours'
+'City of Mountain View: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - Not Available
+'City of Needles: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 12 hours'
+  - '2023-10: 12 hours'
+  - '2024-04: 12 hours'
+  - '2024-10: 12 hours'
+'City of Norwalk: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 4 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 6.0 routes'
+  - '2025-02-12: 6.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'City of Pasadena: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 9 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 6.0 routes'
+  - '2025-02-12: 11.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 11 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'City of Petaluma: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 6 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 10 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 10 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 10.0 routes'
+  - '2025-02-12: 10.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'City of Redondo Beach: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'City of Rio Vista: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 6 hours'
+  - '2023-10: 6 hours'
+  - '2024-04: 6 hours'
+  - '2024-10: 6 hours'
+'City of Ripon: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 4 hours'
+  - '2023-10: 4 hours'
+  - '2024-04: 4 hours'
+  - '2024-10: 4 hours'
+'City of Rosemead: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 15 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'City of Roseville: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 23 routes'
+  - '2025-02-12: 23 routes'
+  - '2025-03-12: 23 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 23 routes'
+  - '2025-02-12: 23 routes'
+  - '2025-03-12: 23 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 23.0 routes'
+  - '2025-02-12: 23.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 23 routes'
+  - '2025-02-12: 23 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'City of San Clemente: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2024-10: 13 hours'
+'City of San Fernando: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-10: 6 hours'
+'City of San Juan Capistrano: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-10: 12 hours'
+'City of San Luis Obispo: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  - '2025-03-12: 18 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  - '2025-03-12: 18 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 9.0 routes'
+  - '2025-02-12: 9.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 18 routes'
+  - '2025-02-12: 18 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'City of Santa Clarita: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 33 routes'
+  - '2025-02-12: 34 routes'
+  - '2025-03-12: 34 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 38 routes'
+  - '2025-02-12: 38 routes'
+  - '2025-03-12: 38 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 38 routes'
+  - '2025-02-12: 38 routes'
+  - '2025-03-12: 38 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 38 routes'
+  - '2025-02-12: 38 routes'
+  - '2025-03-12: 38 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 38.0 routes'
+  - '2025-02-12: 38.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 38 routes'
+  - '2025-02-12: 38 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'City of Santa Maria: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 16 routes'
+  - '2025-03-12: 16 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 16 routes'
+  - '2025-03-12: 16 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 16 routes'
+  - '2025-03-12: 16 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 16.0 routes'
+  - '2025-02-12: 16.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 16 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'City of Santa Monica: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 14 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 38 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 19.0 routes'
+  - '2025-02-12: 19.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'City of Santa Rosa: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 16 routes'
+  - '2025-03-12: 15 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 16 routes'
+  - '2025-03-12: 16 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 16 routes'
+  - '2025-03-12: 16 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 16 routes'
+  - '2025-03-12: 16 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 16.0 routes'
+  - '2025-02-12: 16.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 16 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 16 hours'
+'City of Sierra Madre: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 3 hours'
+  - '2024-04: 3 hours'
+  - '2024-10: 3 hours'
+'City of Solvang: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'City of South Gate: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'City of South San Francisco: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 3.0 routes'
+  - '2025-02-12: 3.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 6 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 12 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 12 hours'
+'City of Torrance: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 12 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 12.0 routes'
+  - '2025-02-12: 12.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-10: 18 hours'
+'City of Tracy: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 14.0 routes'
+  - '2025-02-12: 14.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'City of Turlock: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'City of Union City: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 19 hours'
+  - '2023-10: 19 hours'
+  - '2024-04: 19 hours'
+  - '2024-10: 19 hours'
+'City of Vacaville: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-03-12: 5 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-03-12: 5 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'City of Visalia: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 10 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 11 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 13 routes'
+  - '2025-02-12: 13 routes'
+  - '2025-03-12: 13 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 13 routes'
+  - '2025-02-12: 13 routes'
+  - '2025-03-12: 13 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 13.0 routes'
+  - '2025-02-12: 13.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 13 routes'
+  - '2025-02-12: 13 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'City of West Covina: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 3.0 routes'
+  - '2025-02-12: 3.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'City of West Hollywood: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 3.0 routes'
+  - '2025-02-12: 3.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-10: 20 hours'
+'Commute.org and Menlo Park Community Shuttles Schedule: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 23 routes'
+  - '2025-02-12: 23 routes'
+  - '2025-03-12: 23 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 23 routes'
+  - '2025-02-12: 23 routes'
+  - '2025-03-12: 23 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 23.0 routes'
+  - '2025-02-12: 23.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 23 routes'
+  - '2025-02-12: 23 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'Curry Public Transit: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 8 hours'
+  - '2023-10: 8 hours'
+  - '2024-04: 8 hours'
+  - '2024-10: 8 hours'
+'Dumbarton Bridge Regional Operations Consortium: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 15 hours'
+'Eastern Contra Costa Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 15.0 routes'
+  - '2025-02-12: 15.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 22 hours'
+  - '2023-10: 22 hours'
+  - '2024-04: 22 hours'
+  - '2024-10: 22 hours'
+'Eastern Sierra Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 13 routes'
+  - '2025-03-12: 10 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 13 routes'
+  - '2025-03-12: 13 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 14.0 routes'
+  - '2025-02-12: 14.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 17 hours'
+'El Dorado County Transit Authority: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'Emeryville Transportation Management Agency: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'FlixBus and Greyhound Schedule: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 25 routes'
+  - '2025-02-12: 22 routes'
+  - '2025-03-12: 21 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 25 routes'
+  - '2025-02-12: 22 routes'
+  - '2025-03-12: 21 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 199.0 routes'
+  - '2025-02-12: 199.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 199 routes'
+  - '2025-02-12: 199 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 24 hours'
+  - '2024-04: 24 hours'
+  - '2024-10: 24 hours'
+'Foothill Schedule: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 24 routes'
+  - '2025-02-12: 24 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 34 routes'
+  - '2025-02-12: 35 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 35 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 35 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 35.0 routes'
+  - '2025-02-12: 35.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 35 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 24 hours'
+  - '2023-10: 24 hours'
+  - '2024-04: 24 hours'
+  - '2024-10: 24 hours'
+'Fresno County Rural Transit Agency: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 11 hours'
+  - '2023-10: 11 hours'
+  - '2024-04: 11 hours'
+  - '2024-10: 11 hours'
+'Glenn County: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 12 hours'
+  - '2024-04: 12 hours'
+  - '2024-10: 12 hours'
+'Golden Empire Transit District: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 15.0 routes'
+  - '2025-02-12: 15.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 17 hours'
+'Golden Gate Bridge, Highway and Transportation District: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 16 routes'
+  - '2025-03-12: 16 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 16 routes'
+  - '2025-03-12: 16 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 16 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 21 hours'
+  - '2023-10: 21 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 21 hours'
+'Humboldt Schedule: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 9 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 12.0 routes'
+  - '2025-02-12: 12.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'Imperial County Transportation Commission: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 13 routes'
+  - '2025-02-12: 13 routes'
+  - '2025-03-12: 13 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 13 routes'
+  - '2025-02-12: 13 routes'
+  - '2025-03-12: 13 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 13.0 routes'
+  - '2025-02-12: 13.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 13 routes'
+  - '2025-02-12: 13 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'Kern County: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 12.0 routes'
+  - '2025-02-12: 12.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 19 hours'
+  - '2023-10: 19 hours'
+  - '2024-04: 19 hours'
+  - '2024-10: 19 hours'
+'Kings County Area Public Transit Agency: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 13 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 11 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 15.0 routes'
+  - '2025-02-12: 15.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'Lake Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 8 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 9.0 routes'
+  - '2025-02-12: 9.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 14 hours'
+'Lassen Transit Service Agency: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'Livermore-Amador Valley Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 30 routes'
+  - '2025-02-12: 29 routes'
+  - '2025-03-12: 31 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 31 routes'
+  - '2025-02-12: 31 routes'
+  - '2025-03-12: 31 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 32 routes'
+  - '2025-02-12: 32 routes'
+  - '2025-03-12: 32 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 32 routes'
+  - '2025-02-12: 32 routes'
+  - '2025-03-12: 32 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 32.0 routes'
+  - '2025-02-12: 32.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 32 routes'
+  - '2025-02-12: 32 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 19 hours'
+  - '2023-10: 19 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'Long Beach Transit: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 32 routes'
+  - '2025-02-12: 31 routes'
+  - '2025-03-12: 31 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 36 routes'
+  - '2025-02-12: 36 routes'
+  - '2025-03-12: 36 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 36 routes'
+  - '2025-02-12: 36 routes'
+  - '2025-03-12: 36 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 36 routes'
+  - '2025-02-12: 36 routes'
+  - '2025-03-12: 36 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 36.0 routes'
+  - '2025-02-12: 36.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 36 routes'
+  - '2025-02-12: 36 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 19 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'Los Angeles County Metropolitan Transportation Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 77 routes'
+  - '2025-02-12: 70 routes'
+  - '2025-03-12: 74 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 114 routes'
+  - '2025-02-12: 114 routes'
+  - '2025-03-12: 115 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 115 routes'
+  - '2025-02-12: 115 routes'
+  - '2025-03-12: 115 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 115 routes'
+  - '2025-02-12: 115 routes'
+  - '2025-03-12: 115 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 109.0 routes'
+  - '2025-01-15: 6.0 routes'
+  - '2025-02-12: 109.0 routes'
+  - '2025-02-12: 6.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 115 routes'
+  - '2025-02-12: 115 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 24 hours'
+  - '2023-10: 24 hours'
+  - '2024-04: 24 hours'
+  - '2024-10: 24 hours'
+'Los Angeles County: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 19.0 routes'
+  - '2025-02-12: 19.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'Los Angeles World Airports: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 10 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 10 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 23 hours'
+  - '2023-10: 23 hours'
+  - '2024-04: 24 hours'
+  - '2024-10: 24 hours'
+'Madera County: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'Marin County Transit District: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 18 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 16 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 18 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 19.0 routes'
+  - '2025-02-12: 19.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 22 hours'
+  - '2023-10: 22 hours'
+  - '2024-04: 22 hours'
+  - '2024-10: 22 hours'
+'Mendocino Transit Authority: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 8 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 8 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 9.0 routes'
+  - '2025-02-12: 9.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 17 hours'
+'Mission Bay Transportation Management Agency: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 12 hours'
+'Modoc Transportation Agency: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 4 hours'
+  - '2023-10: 4 hours'
+  - '2024-04: 4 hours'
+  - '2024-10: 4 hours'
+'Monterey-Salinas Transit: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 33 routes'
+  - '2025-02-12: 35 routes'
+  - '2025-03-12: 35 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 36 routes'
+  - '2025-03-12: 37 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 36 routes'
+  - '2025-03-12: 37 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 36 routes'
+  - '2025-03-12: 37 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 35.0 routes'
+  - '2025-02-12: 36.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 36 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 18 hours'
+'Mountain Area Regional Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 17 hours'
+'Mountain View Transportation Management Association: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-03-12: 5 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-03-12: 8 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 8.0 routes'
+  - '2025-02-12: 8.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 11 hours'
+  - '2023-10: 11 hours'
+  - '2024-04: 10 hours'
+  - '2024-10: 10 hours'
+'Napa Valley Transportation Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 9 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 11 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 11.0 routes'
+  - '2025-02-12: 12.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 12 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'Nevada County: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 6 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 6 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 14 hours'
+'North County Transit District: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 44 routes'
+  - '2025-02-12: 43 routes'
+  - '2025-03-12: 44 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 47 routes'
+  - '2025-02-12: 47 routes'
+  - '2025-03-12: 47 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 47 routes'
+  - '2025-02-12: 47 routes'
+  - '2025-03-12: 47 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 47 routes'
+  - '2025-02-12: 47 routes'
+  - '2025-03-12: 47 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 47.0 routes'
+  - '2025-02-12: 47.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 47 routes'
+  - '2025-02-12: 47 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'OmniTrans: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 21 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 24 routes'
+  - '2025-02-12: 23 routes'
+  - '2025-03-12: 23 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 29 routes'
+  - '2025-02-12: 29 routes'
+  - '2025-03-12: 29 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 29 routes'
+  - '2025-02-12: 29 routes'
+  - '2025-03-12: 29 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 29.0 routes'
+  - '2025-02-12: 29.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 29 routes'
+  - '2025-02-12: 29 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 21 hours'
+  - '2023-10: 21 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 21 hours'
+'Orange County Transportation Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 44 routes'
+  - '2025-02-12: 41 routes'
+  - '2025-03-12: 40 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 58 routes'
+  - '2025-02-12: 56 routes'
+  - '2025-03-12: 56 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 58 routes'
+  - '2025-02-12: 56 routes'
+  - '2025-03-12: 56 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 58 routes'
+  - '2025-02-12: 56 routes'
+  - '2025-03-12: 56 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 58.0 routes'
+  - '2025-02-12: 56.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 58 routes'
+  - '2025-02-12: 56 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 22 hours'
+  - '2023-10: 22 hours'
+  - '2024-04: 22 hours'
+  - '2024-10: 22 hours'
+'POINT: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 10 hours'
+  - '2023-10: 10 hours'
+  - '2024-04: 8 hours'
+  - '2024-10: 8 hours'
+'Palo Verde Valley Transit Agency: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 4 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 9 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 9 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'Palos Verdes Peninsula Transit Authority: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'Peninsula Corridor Joint Powers Board: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 21 hours'
+  - '2023-10: 21 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 21 hours'
+'Placer County: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  - '2025-03-12: 8 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 8.0 routes'
+  - '2025-02-12: 8.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 8 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'Plumas Transit Systems: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-03-12: 3 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-03-12: 3 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 3.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 3 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'Presidio Trust: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 2.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 2 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'Redding Schedule: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 10 routes'
+  - '2025-03-12: 10 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 12.0 routes'
+  - '2025-02-12: 12.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 18 hours'
+'Redwood Coast Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 13 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'Riverside Transit Agency: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 35 routes'
+  - '2025-03-12: 33 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 35 routes'
+  - '2025-03-12: 35 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 35 routes'
+  - '2025-03-12: 35 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 35 routes'
+  - '2025-03-12: 35 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 35.0 routes'
+  - '2025-02-12: 35.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 35 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 21 hours'
+  - '2023-10: 21 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 21 hours'
+'Sacramento County: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 3 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 3.0 routes'
+  - '2025-02-12: 3.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'Sacramento Schedule: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 61 routes'
+  - '2025-02-12: 59 routes'
+  - '2025-03-12: 61 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 62 routes'
+  - '2025-02-12: 60 routes'
+  - '2025-03-12: 62 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 65 routes'
+  - '2025-02-12: 65 routes'
+  - '2025-03-12: 65 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 65 routes'
+  - '2025-02-12: 65 routes'
+  - '2025-03-12: 65 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 65.0 routes'
+  - '2025-02-12: 65.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 65 routes'
+  - '2025-02-12: 65 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 21 hours'
+  - '2023-10: 21 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 21 hours'
+'San Benito County Local Transportation Authority: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 2.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 2 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'San Diego Schedule: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 86 routes'
+  - '2025-02-12: 85 routes'
+  - '2025-03-12: 83 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 99 routes'
+  - '2025-02-12: 100 routes'
+  - '2025-03-12: 100 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 100 routes'
+  - '2025-02-12: 101 routes'
+  - '2025-03-12: 101 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 100 routes'
+  - '2025-02-12: 101 routes'
+  - '2025-03-12: 101 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 101.0 routes'
+  - '2025-02-12: 102.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 100 routes'
+  - '2025-02-12: 101 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 24 hours'
+  - '2023-10: 24 hours'
+  - '2024-04: 24 hours'
+  - '2024-10: 24 hours'
+'San Francisco Bay Area Rapid Transit District: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 12 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 12.0 routes'
+  - '2025-02-12: 12.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 22 hours'
+  - '2023-10: 22 hours'
+  - '2024-04: 22 hours'
+  - '2024-10: 22 hours'
+'San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'San Francisco International Airport: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 24 hours'
+  - '2023-10: 24 hours'
+  - '2024-04: 24 hours'
+  - '2024-10: 24 hours'
+'San Joaquin Regional Rail Commission: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 8 hours'
+  - '2023-10: 8 hours'
+  - '2024-04: 8 hours'
+  - '2024-10: 9 hours'
+'San Joaquin Regional Transit District: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 28 routes'
+  - '2025-02-12: 27 routes'
+  - '2025-03-12: 27 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 28 routes'
+  - '2025-02-12: 27 routes'
+  - '2025-03-12: 27 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 41 routes'
+  - '2025-02-12: 41 routes'
+  - '2025-03-12: 41 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 41 routes'
+  - '2025-02-12: 41 routes'
+  - '2025-03-12: 41 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 41.0 routes'
+  - '2025-02-12: 41.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 41 routes'
+  - '2025-02-12: 41 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'San Luis Obispo Regional Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 13 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 15 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 15.0 routes'
+  - '2025-02-12: 15.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 15 routes'
+  - '2025-02-12: 15 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 17 hours'
+'San Mateo County Transit District: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 72 routes'
+  - '2025-02-12: 71 routes'
+  - '2025-03-12: 68 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 74 routes'
+  - '2025-02-12: 75 routes'
+  - '2025-03-12: 73 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 75 routes'
+  - '2025-02-12: 75 routes'
+  - '2025-03-12: 75 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 75 routes'
+  - '2025-02-12: 75 routes'
+  - '2025-03-12: 75 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 75.0 routes'
+  - '2025-02-12: 75.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 75 routes'
+  - '2025-02-12: 75 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 24 hours'
+  - '2023-10: 24 hours'
+  - '2024-04: 24 hours'
+  - '2024-10: 24 hours'
+'Santa Barbara County Association of Governments: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 5 hours'
+  - '2023-10: 5 hours'
+  - '2024-04: 5 hours'
+  - '2024-10: 5 hours'
+'Santa Barbara Metropolitan Transit District: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 30 routes'
+  - '2025-02-12: 32 routes'
+  - '2025-03-12: 33 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 33 routes'
+  - '2025-02-12: 34 routes'
+  - '2025-03-12: 35 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 36 routes'
+  - '2025-03-12: 36 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 36 routes'
+  - '2025-03-12: 36 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 35.0 routes'
+  - '2025-02-12: 36.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 35 routes'
+  - '2025-02-12: 36 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 19 hours'
+  - '2023-10: 19 hours'
+  - '2024-04: 19 hours'
+  - '2024-10: 19 hours'
+'Santa Clara Valley Transportation Authority: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 46 routes'
+  - '2025-02-12: 45 routes'
+  - '2025-03-12: 4 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 64 routes'
+  - '2025-02-12: 63 routes'
+  - '2025-03-12: 9 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 68 routes'
+  - '2025-02-12: 68 routes'
+  - '2025-03-12: 68 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 68 routes'
+  - '2025-02-12: 68 routes'
+  - '2025-03-12: 68 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 68.0 routes'
+  - '2025-02-12: 68.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 68 routes'
+  - '2025-02-12: 68 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 23 hours'
+  - '2023-10: 23 hours'
+  - '2024-04: 23 hours'
+  - '2024-10: 23 hours'
+'Santa Cruz Metropolitan Transit District: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 13 routes'
+  - '2025-02-12: 12 routes'
+  - '2025-03-12: 13 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 20 routes'
+  - '2025-03-12: 20 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 20 routes'
+  - '2025-03-12: 20 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 20 routes'
+  - '2025-03-12: 20 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 20.0 routes'
+  - '2025-02-12: 20.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 20 routes'
+  - '2025-02-12: 20 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 21 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 20 hours'
+'Siskiyou County: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'SolTrans Schedule: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 17 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 17 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 17 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 17 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 17 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 17 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 17 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 17 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 17.0 routes'
+  - '2025-02-12: 15.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 17 routes'
+  - '2025-02-12: 15 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'Sonoma County Transit Schedule: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 2 routes'
+  - '2025-03-12: 2 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 23 routes'
+  - '2025-02-12: 23 routes'
+  - '2025-03-12: 23 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 23 routes'
+  - '2025-02-12: 23 routes'
+  - '2025-03-12: 23 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 23.0 routes'
+  - '2025-02-12: 23.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 23 routes'
+  - '2025-02-12: 23 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'Sonoma-Marin Area Rail Transit District: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'Stanford University: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 22 routes'
+  - '2025-02-12: 22 routes'
+  - '2025-03-12: 22 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 22 routes'
+  - '2025-02-12: 22 routes'
+  - '2025-03-12: 22 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 22.0 routes'
+  - '2025-02-12: 22.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 22 routes'
+  - '2025-02-12: 22 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 21 hours'
+  - '2023-10: 21 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 20 hours'
+'Stanislaus Regional Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 27 routes'
+  - '2025-02-12: 26 routes'
+  - '2025-03-12: 26 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 27 routes'
+  - '2025-02-12: 27 routes'
+  - '2025-03-12: 27 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 27 routes'
+  - '2025-02-12: 27 routes'
+  - '2025-03-12: 27 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 27 routes'
+  - '2025-02-12: 27 routes'
+  - '2025-03-12: 27 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 27.0 routes'
+  - '2025-02-12: 27.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 27 routes'
+  - '2025-02-12: 27 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 21 hours'
+  - '2024-10: 21 hours'
+'SunLine Transit Agency: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 12 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 16 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 19.0 routes'
+  - '2025-02-12: 19.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 18 hours'
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'TART, North Lake Tahoe Schedule: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 9.0 routes'
+  - '2025-02-12: 9.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 15 hours'
+'Tahoe Transportation District: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-01-15: 5.0 routes'
+  - '2025-02-12: 4.0 routes'
+  - '2025-02-12: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-02-12: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 16 hours'
+'Tehama Schedule: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 6 routes'
+  - '2025-02-12: 6 routes'
+  - '2025-03-12: 6 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 8 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 8 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 9.0 routes'
+  - '2025-02-12: 9.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 12 hours'
+  - '2023-10: 12 hours'
+  - '2024-04: 12 hours'
+  - '2024-10: 12 hours'
+'Transit Joint Powers Authority for Merced County: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 30 routes'
+  - '2025-02-12: 30 routes'
+  - '2025-03-12: 30 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 30 routes'
+  - '2025-02-12: 30 routes'
+  - '2025-03-12: 30 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 15.0 routes'
+  - '2025-02-12: 15.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 30 routes'
+  - '2025-02-12: 30 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 15 hours'
+  - '2023-10: 15 hours'
+  - '2024-04: 15 hours'
+  - '2024-10: 15 hours'
+'Treasure Island Community Development: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 13 hours'
+  - '2024-04: 13 hours'
+  - '2024-10: 13 hours'
+'Trinity County: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 4.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-10: 11 hours'
+  - '2024-04: 10 hours'
+  - '2024-10: 10 hours'
+'Tulare County Regional Transit Agency: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 25 routes'
+  - '2025-02-12: 24 routes'
+  - '2025-03-12: 24 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 25 routes'
+  - '2025-02-12: 24 routes'
+  - '2025-03-12: 24 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 25 routes'
+  - '2025-02-12: 24 routes'
+  - '2025-03-12: 24 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 25.0 routes'
+  - '2025-02-12: 24.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 25 routes'
+  - '2025-02-12: 24 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'Tuolumne County Transit Agency: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 4 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 4 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 3 routes'
+  - '2025-02-12: 3 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 13 hours'
+'UCSC and City of Santa Cruz Beach Shuttle Schedule: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-03-12: 5 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 5 routes'
+  - '2025-03-12: 5 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 5.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 5 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2024-04: 18 hours'
+  - '2024-10: 18 hours'
+'University of California, Berkeley: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 6 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 4 routes'
+  - '2025-02-12: 5 routes'
+  - '2025-03-12: 6 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  - '2025-03-12: 7 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 7.0 routes'
+  - '2025-02-12: 7.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 7 routes'
+  - '2025-02-12: 7 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 22 hours'
+  - '2023-10: 22 hours'
+  - '2024-04: 22 hours'
+  - '2024-10: 22 hours'
+'University of California, Davis: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 18 routes'
+  - '2025-03-12: 19 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  - '2025-03-12: 19 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 19.0 routes'
+  - '2025-02-12: 19.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 19 routes'
+  - '2025-02-12: 19 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 18 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 17 hours'
+'University of California, Los Angeles: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  nunique_routes_service_date_routes:
+  - '2025-02-12: 4 routes'
+  - '2025-03-12: 4 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-02-12: 4.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-02-12: 4 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'University of California, San Diego: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-03-12: 6 routes'
+  nunique_routes_service_date_routes:
+  - '2025-03-12: 6 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - Not Available
+? 'Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai, Simi Valley,
+  Thousand Oaks) Schedule: schedule_and_vp'
+: merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 52 routes'
+  - '2025-02-12: 49 routes'
+  - '2025-03-12: 47 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 56 routes'
+  - '2025-02-12: 53 routes'
+  - '2025-03-12: 55 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 61 routes'
+  - '2025-02-12: 61 routes'
+  - '2025-03-12: 61 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 61 routes'
+  - '2025-02-12: 61 routes'
+  - '2025-03-12: 61 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 61.0 routes'
+  - '2025-02-12: 61.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 61 routes'
+  - '2025-02-12: 61 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'Victor Valley Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 31 routes'
+  - '2025-02-12: 31 routes'
+  - '2025-03-12: 31 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 33 routes'
+  - '2025-02-12: 33 routes'
+  - '2025-03-12: 33 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 66 routes'
+  - '2025-02-12: 66 routes'
+  - '2025-03-12: 66 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 66 routes'
+  - '2025-02-12: 66 routes'
+  - '2025-03-12: 66 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 33.0 routes'
+  - '2025-02-12: 33.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 66 routes'
+  - '2025-02-12: 66 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 17 hours'
+  - '2023-10: 17 hours'
+  - '2024-04: 17 hours'
+  - '2024-10: 18 hours'
+'Western Contra Costa Transit Authority: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 10 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 10 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  - '2025-03-12: 11 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 11.0 routes'
+  - '2025-02-12: 11.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 11 routes'
+  - '2025-02-12: 11 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'Yolo County Transportation District: schedule_and_vp':
+  merge_data_average_speeds_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 15 routes'
+  - '2025-03-12: 13 routes'
+  merge_data_rt_vs_schedule_service_date_routes:
+  - '2025-01-15: 17 routes'
+  - '2025-02-12: 17 routes'
+  - '2025-03-12: 15 routes'
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 17 routes'
+  - '2025-02-12: 17 routes'
+  - '2025-03-12: 15 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 17 routes'
+  - '2025-02-12: 17 routes'
+  - '2025-03-12: 15 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 17.0 routes'
+  - '2025-02-12: 17.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 17 routes'
+  - '2025-02-12: 17 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 20 hours'
+  - '2023-10: 20 hours'
+  - '2024-04: 20 hours'
+  - '2024-10: 20 hours'
+'Yosemite Area Regional Transportation System: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 1.0 routes'
+  - '2025-02-12: 1.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 7 hours'
+  - '2023-10: 8 hours'
+  - '2024-04: 7 hours'
+  - '2024-10: 5 hours'
+'Yosemite National Park: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - Not Available
+  nunique_routes_service_date_routes:
+  - Not Available
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - Not Available
+  scheduled_service_hours_service_date_routes:
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'Yuba-Sutter Transit Authority: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  - '2025-03-12: 14 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 14.0 routes'
+  - '2025-02-12: 14.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 14 routes'
+  - '2025-02-12: 14 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 14 hours'
+  - '2023-10: 14 hours'
+  - '2024-04: 14 hours'
+  - '2024-10: 14 hours'
+'Yuma County Intergovernmental Public Transportation Authority: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  - '2025-03-12: 9 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - '2025-01-15: 9.0 routes'
+  - '2025-02-12: 9.0 routes'
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 9 routes'
+  - '2025-02-12: 9 routes'
+  scheduled_service_hours_service_date_routes:
+  - '2023-04: 16 hours'
+  - '2023-10: 16 hours'
+  - '2024-04: 16 hours'
+  - '2024-10: 16 hours'
+'Yurok Tribe: schedule_only':
+  merge_data_average_speeds_service_date_routes:
+  - Not Available
+  merge_data_rt_vs_schedule_service_date_routes:
+  - Not Available
+  merge_data_schedule_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  nunique_routes_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  - '2025-03-12: 1 routes'
+  operator_profile_ntd_info_service_date_routes:
+  - Not Available
+  routes_geometry_service_date_routes:
+  - '2025-01-15: 1 routes'
+  - '2025-02-12: 1 routes'
+  scheduled_service_hours_service_date_routes:
+  - Not Available

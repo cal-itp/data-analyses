@@ -32,14 +32,10 @@ def weighted_average_speeds_across_segments(
 
     return avg_speeds
     
-
-def derive_rt_vs_schedule_metrics(df: pd.DataFrame) -> pd.DataFrame:
+def calculate_rt_vs_schedule_metrics(df:pd.DataFrame)->pd.DataFrame:
     """
-    Add metrics comparing RT vs schedule and do some numeric rounding.
+    Calculate RT vs schedule metrics
     """
-    integrify = ["vp_in_shape", "total_vp"]
-    df[integrify] = df[integrify].fillna(0).astype("int")
-    
     df = df.assign(
         vp_per_minute = df.total_vp / df.rt_service_minutes,
         pct_in_shape = df.vp_in_shape / df.total_vp,
@@ -51,6 +47,19 @@ def derive_rt_vs_schedule_metrics(df: pd.DataFrame) -> pd.DataFrame:
                                          df.scheduled_service_minutes),
     )
     
+    return df 
+
+def derive_rt_vs_schedule_metrics(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Add metrics comparing RT vs schedule and do some numeric rounding.
+    """
+    integrify = ["vp_in_shape", "total_vp"]
+    df[integrify] = df[integrify].fillna(0).astype("int")
+    
+    # Calculate out metric
+    df = calculate_rt_vs_schedule_metrics(df)
+    
+    # Do some neatening 
     two_decimal_cols = [
         "vp_per_minute", "rt_service_minutes", 
     ]
