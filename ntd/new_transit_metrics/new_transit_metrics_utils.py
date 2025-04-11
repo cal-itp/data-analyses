@@ -12,6 +12,7 @@ import sys
 sys.path.append("../")  # up one level
 from update_vars import NTD_MODES, NTD_TOS
 
+
 def make_new_transit_metrics_data():
     year_list=["2018","2019","2020","2021","2022","2023"]
     col_list=['agency_name',
@@ -177,6 +178,7 @@ def make_new_transit_metrics_data():
     
     return merge_metrics_rtpa
 
+
 def sum_by_group(
     df: pd.DataFrame,
     group_cols: list) -> pd.DataFrame:
@@ -208,6 +210,7 @@ def sum_by_group(
     
     return grouped_df  
 
+
 def make_long(df: pd.DataFrame, group_cols: list, value_cols: list):
     """
     melts dataframes to get all the metrics into a single column for better charting
@@ -219,7 +222,8 @@ def make_long(df: pd.DataFrame, group_cols: list, value_cols: list):
     
     return df_long
 
-def make_scatter(data, x_ax, y_ax, color=None, column_num=None, log_scale=None, x_scale=None, y_scale=None):
+
+def make_scatter(data, x_ax, y_ax, chart_title, color=None, column_num=None, log_scale=None, lin_x_ax=None, lin_y_ax=None):
     """
     makes scatterplot from designated z and y axis.
     if scale is enabled, filters x and y axis cols for greater than zero to make log scale work
@@ -243,8 +247,8 @@ def make_scatter(data, x_ax, y_ax, color=None, column_num=None, log_scale=None, 
     if log_scale:
         filtered_df = data[(data[x_ax]>0) & (data[y_ax]>0)]
         chart = alt.Chart(filtered_df).mark_point().encode(
-            x=alt.X(x_ax) if x_scale else alt.X(x_ax).scale(type="log"),
-            y=alt.Y(y_ax) if y_scale else alt.Y(y_ax).scale(type="log"),
+            x=alt.X(x_ax) if lin_x_ax else alt.X(x_ax).scale(type="log"),
+            y=alt.Y(y_ax) if lin_y_ax else alt.Y(y_ax).scale(type="log"),
             color= color if color else None,
             tooltip=[x_ax, y_ax, "agency_name"]
         )
@@ -253,10 +257,11 @@ def make_scatter(data, x_ax, y_ax, color=None, column_num=None, log_scale=None, 
         print(f"{excluded_count} rows with zero or negative values excluded due to log scale.")
 
     chart = chart.properties(
-        title=f"{x_ax} vs. {y_ax}", width=350, height=150
+        title=chart_title, width=350, height=150
     ).interactive()
 
     return chart + chart.transform_regression(x_ax, y_ax).mark_line()
+
 
 def make_line(
     df,
@@ -264,7 +269,7 @@ def make_line(
     y_col,
     color,
     facet,
-    title,
+    chart_title=None,
     ind_axis=None,
 ):
     """
@@ -280,7 +285,7 @@ def make_line(
             tooltip=[x_col, y_col,color]
         )
     ).properties(
-        width=350, height=150
+        title=chart_title, width=350, height=150
     ).interactive()
     
     # median, horizontal bar
@@ -301,7 +306,6 @@ def make_line(
     chart_rule_facet = chart_w_rule.facet(
         facet=alt.Facet(
                 facet,
-                title=title,
         ),columns=3
                )
     
