@@ -189,3 +189,12 @@ CALTRANS_DISTRICT_DICT = {
         ]
     },
 }
+
+
+def standardize_portfolio_organization_names(df: pd.DataFrame, preferred_organization_name_dict: dict) -> pd.DataFrame:
+    """
+    Map the preferred organization name using schedule_gtfs_dataset_name.
+    """
+    df = df.assign(portfolio_organization_name=df.name.map(preferred_organization_name_dict))
+
+    return df
