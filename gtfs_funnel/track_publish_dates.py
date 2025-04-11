@@ -87,7 +87,7 @@ if __name__ == "__main__":
     operators = time_series_utils.concatenate_datasets_across_dates(
         COMPILED_CACHED_VIEWS,
         TABLE,
-        rt_dates.y2025_dates + rt_dates.y2024_dates,
+        rt_dates.y2025_dates + rt_dates.y2024_dates + rt_dates.y2023_dates,
         data_type = "df",
         get_pandas = True,
         filters = [[("gtfs_dataset_key", "in", public_feeds)]],
