@@ -1,3 +1,2 @@
 -e .
-memory_profiler==0.61.0 # this one is not maintained anymore
-profiling-decorator
+rdp
