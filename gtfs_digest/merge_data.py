@@ -4,6 +4,7 @@ for GTFS digest.
 Grain is operator-service_date-route-direction-time_period.
 """
 import pandas as pd
+import yaml
 
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
 from shared_utils import dask_utils, gtfs_utils_v2, portfolio_utils, publish_utils
@@ -17,6 +18,13 @@ route_time_cols = [
 ]
 
 route_time_date_cols = route_time_cols + ["service_date"]
+
+
+with open(
+    "../_shared_utils/shared_utils/portfolio_organization_name.yml", "r"
+) as f:
+    PORTFOLIO_ORGANIZATIONS_DICT = yaml.safe_load(f)
+
 
 """
 Concatenating Functions 
@@ -197,7 +205,14 @@ def concatenate_crosswalk_organization(
         caltrans_district = df.caltrans_district.map(
             portfolio_utils.CALTRANS_DISTRICT_DICT
         )
+    ).pipe(
+        portfolio_utils.standardize_portfolio_organization_names, 
+        PORTFOLIO_ORGANIZATIONS_DICT
     )
+    
+    # to aggregate up to organization, 
+    # group by name-service_date-portfolio_organization_name
+    # because name indicates different feeds, so we want to sum those.
     
     return df
 
@@ -291,7 +306,7 @@ def merge_data_sources_by_route_direction(
     df_rt_sched: pd.DataFrame,
     df_avg_speeds: pd.DataFrame,
     df_crosswalk: pd.DataFrame
-):
+) -> pd.DataFrame:
     """
     Merge schedule, rt_vs_schedule, and speeds data, 
     which are all at route-direction-time_period-date grain.
