@@ -306,7 +306,7 @@ def merge_data_sources_by_route_direction(
     df_rt_sched: pd.DataFrame,
     df_avg_speeds: pd.DataFrame,
     df_crosswalk: pd.DataFrame
-):
+) -> pd.DataFrame:
     """
     Merge schedule, rt_vs_schedule, and speeds data, 
     which are all at route-direction-time_period-date grain.
