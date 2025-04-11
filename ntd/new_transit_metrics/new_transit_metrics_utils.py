@@ -306,7 +306,7 @@ def make_line(
     chart_rule_facet = chart_w_rule.facet(
         facet=alt.Facet(
                 facet,
-        ),columns=3
+        ),columns=2
                )
     
     if ind_axis:
