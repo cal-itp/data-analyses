@@ -1,6 +1,6 @@
-# Addtional Transit Performance Metrics
+# Additional Transit Performance Metrics
 
-In 2023, UCLA Institue of Transportation Studies published a white paper titled ["Options for the Future of State Funding for Transit Operations in CaliforniaInforming the Future of the Transportation Development Act"](https://escholarship.org/uc/item/2zb6z5rm)
+In 2023, UCLA Institute of Transportation Studies published a white paper titled ["Options for the Future of State Funding for Transit Operations in California Informing the Future of the Transportation Development Act"](https://escholarship.org/uc/item/2zb6z5rm)
 
 UCLA concluded that current transit performance metrics like "farebox recovery ratios" are:
 
@@ -15,6 +15,7 @@ UCLA concluded that current transit performance metrics like "farebox recovery r
 The paper continues on to propose the use of other common metrics used in transportation management. Also explains how each metrics:
 
 >[has] different implicit goals, which makes some metrics better for use in some areas than others.
+
 
 ![image.png](https://private-user-images.githubusercontent.com/47205245/403160701-cbe50780-03d2-4b26-9a9b-5c30792020b2.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDI5Mzg5MDgsIm5iZiI6MTc0MjkzODYwOCwicGF0aCI6Ii80NzIwNTI0NS80MDMxNjA3MDEtY2JlNTA3ODAtMDNkMi00YjI2LTlhOWItNWMzMDc5MjAyMGIyLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAzMjUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMzI1VDIxMzY0OFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWU4Y2ZkMzMxN2E0OTM4MDIzZWU0ZWE0MzFhZTM1YjNiMzM5OWM1ZDAzNjc1ZGJiZDRjNGQ4ODhhNWYwMzRmZjYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.b0jr0WcmE9zAtcGyJpwB-PfoUGIzhs5r781LWJiMSsM)
 
@@ -32,18 +33,29 @@ This report intends to explores these metrics with data submitted to the NTD for
 
 
 ## Definitions
-- **UCLA Institue of Transportation**:
-- **Transportation Development Act (TDA)**:
-- 
+**Regional Transportation Planning Authorities (RTPA)**:
+- A county or multi-county entity charged to meet state transportation planning and programming requirements.
 
+**Transportation Development Act (TDA)**:
+- law [that] provides funding to be allocated to transit and non-transit related purposes that comply with regional transportation plans.
+
+**Type of Service (TOS)**: 
+- Describes how public transportation services are provided by the transit agency: directly operated (DO) or purchased transportation (PT) services.
+
+**UCLA Institute of Transportation Studies**:
+- serves as the transportation research arm of the state with branches at UC Berkeley, UCLA, UC Davis, and UC Irvine.
+
+**Unlined Passenger Trips (UPT)**:
+- The number of passengers who board public transportation vehicles. Passengers are counted each time they board vehicles no matter how many vehicles they use to travel from their origin to their destination. 
+
+**Vehicle Revenue Hours (VRH)**:
+- The hours that vehicles are scheduled to or actually travel while in revenue service.
+
+**Vehicle Revenue Miles (VRM)**: 
+- The miles that vehicles are scheduled to or actually travel while in revenue service.
 
 ## Methodology
- 
-
-## Frequently Asked Questions
- 
-    
-## Data Sources
+UPT, VRM, VRH and operating expense data was extracted from the NTD "Service Data and Operating Expenses Time Series" dataset. Rows were aggregated by Agency, mode, TOS, and report year. RTPA data was added.
  
 
 ## Who We Are
