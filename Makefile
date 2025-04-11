@@ -39,8 +39,8 @@ build_ntd_annual_report:
 	cd ntd/annual_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
 	make build_portfolio_site
 
-build_new_transit_metrics_report
-	$(eval export site = new_transit_metrics_report
+build_new_transit_metrics_report:
+	$(eval export site = new_transit_metrics)
 	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	cd ntd/new_transit_metrics/ && python deploy_portfolio_yaml.py && cd ..
 	make build_portfolio_site
