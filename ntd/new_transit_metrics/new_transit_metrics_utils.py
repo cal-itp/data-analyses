@@ -318,5 +318,8 @@ def make_line(
     return chart_rule_facet
 
 if __name__ == "__main__":
+    print('make_new_transit_metrics_data()')
     df = make_new_transit_metrics_data()
+    print("saving data to GCS")
     df.to_parquet(f"{GCS_FILE_PATH}raw_transit_performance_metrics_data.parquet")
+    print("script complete")
