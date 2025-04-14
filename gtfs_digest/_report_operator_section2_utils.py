@@ -49,10 +49,6 @@ def clean_schedule_vp_df(df:pd.DataFrame)->pd.DataFrame:
     df["ruler_100_pct"] = 100
     df["ruler_for_vp_per_min"] = 2
     
-    # Add a column that flips frequency to be every X minutes instead
-    # of every hour.
-    df["headway_in_minutes"] = 60/df.frequency
-    
     # Replace column names
     df = _report_utils.replace_column_names(df)
     return df

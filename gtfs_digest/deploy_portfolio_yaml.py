@@ -4,10 +4,13 @@ sets the parameterization for the analysis site.
 """
 from shared_utils import catalog_utils, portfolio_utils,  publish_utils
 import pandas as pd
-import _portfolio_names_dict
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 SITE_YML = "../portfolio/sites/gtfs_digest.yml"
+
+import sys
+sys.path.append("../_shared_utils/shared_utils")
+import create_portfolio_display_yaml
 
 def generate_operator_grain_yaml()->pd.DataFrame:
     """
@@ -49,18 +52,14 @@ def generate_operator_grain_yaml()->pd.DataFrame:
     m1 = pd.merge(schd_vp_df, recent_date)
     
     # Map certain organizations for the portfolio name 
-    m1["portfolio_name"] = m1.organization_name.map(_portfolio_names_dict.combined_names_dict)
-    
-    # Fill NA in new column with organization_name 
-    m1.portfolio_name = m1.portfolio_name.fillna(m1.organization_name)
+    m1['organization_name'] = m1['organization_name'].replace(create_portfolio_display_yaml.PORTFOLIO_ORGANIZATION_NAMES)
     
     # Drop duplicates again & sort
-    final_cols = ["caltrans_district",
-        "portfolio_name", "organization_name"]
+    final_cols = ["caltrans_district", "organization_name"]
     
     m2 = m1.drop_duplicates(
     subset= final_cols
-    ).sort_values(by = final_cols, ascending = [True, True, True])
+    ).sort_values(by = final_cols, ascending = [True, True])
     
     final = m2[final_cols]
     
@@ -79,7 +78,7 @@ if __name__ == "__main__":
             "caption_suffix": "",
         },
         section_info = {
-            "column": "portfolio_name",
-            "name": "portfolio_name",
+            "column": "organization_name",
+            "name": "organization_name",
         },
     )
