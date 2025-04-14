@@ -11,5 +11,5 @@ LONGITUDE = "Longitude"
 AGENCY_NAME = "Agency Name"
 FACILITY_TYPE = "Facility Type"
 FACILITY_NAME = "Facility Name"
-NTD_ADDRESS_FIELDS = [STREET_ADDRESS, CITY, STATE, ZIP_CODE]
-DEFAULT_TOOLTIP_FIELDS = [AGENCY_NAME, FACILITY_NAME, FACILITY_TYPE, "Square Feet", "Number of Parking Spaces", "Section of a Larger Facility", "Administrative/Maintenance Facility Flag", "Notes", "Primary Mode Served", "geometry_geocoded", "geocode_success"]
+NTD_ADDRESS_FIELDS = (STREET_ADDRESS, CITY, STATE, ZIP_CODE)
+DEFAULT_TOOLTIP_FIELDS = (AGENCY_NAME, FACILITY_NAME, FACILITY_TYPE, "Square Feet", "Number of Parking Spaces", "Section of a Larger Facility", "Administrative/Maintenance Facility Flag", "Notes", "Primary Mode Served", "geometry_geocoded", "geocode_success")
