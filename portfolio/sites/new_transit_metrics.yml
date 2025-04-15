@@ -1,5 +1,5 @@
-directory: ./ntd/new_performance_metrics
-notebook: ./ntd/new_performance_metrics/new_transit_metrics.ipynb
+directory: ./ntd/new_transit_metrics
+notebook: ./ntd/new_transit_metrics/new_transit_metrics.ipynb
 parts:
 - caption: Introduction
 - chapters:
@@ -87,5 +87,5 @@ parts:
       rtpa: Tulare County Association of Governments
   - params:
       rtpa: Tuolumne County Transportation Council
-readme: ./ntd/new_performance_metrics/README.md
+readme: ./ntd/new_transit_metrics/README.md
 title: New Transit Performance Metrics
