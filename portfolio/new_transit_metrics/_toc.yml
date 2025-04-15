@@ -2,31 +2,15 @@ format: jb-book
 parts:
 -   caption: null
     chapters:
-    -   file: rtpa_alpine-county-local-transportation-commission/00__new_transit_metrics__rtpa_alpine-county-local-transportation-commission.ipynb
-    -   file: rtpa_amador-county-transportation-commission/00__new_transit_metrics__rtpa_amador-county-transportation-commission.ipynb
     -   file: rtpa_butte-county-association-of-governments/00__new_transit_metrics__rtpa_butte-county-association-of-governments.ipynb
-    -   file: rtpa_calaveras-council-of-governments/00__new_transit_metrics__rtpa_calaveras-council-of-governments.ipynb
-    -   file: rtpa_colusa-county-transportation-commission/00__new_transit_metrics__rtpa_colusa-county-transportation-commission.ipynb
-    -   file: rtpa_council-of-san-benito-county-governments/00__new_transit_metrics__rtpa_council-of-san-benito-county-governments.ipynb
-    -   file: rtpa_del-norte-local-transportation-commission/00__new_transit_metrics__rtpa_del-norte-local-transportation-commission.ipynb
     -   file: rtpa_el-dorado-county-transportation-commission/00__new_transit_metrics__rtpa_el-dorado-county-transportation-commission.ipynb
     -   file: rtpa_fresno-council-of-governments/00__new_transit_metrics__rtpa_fresno-council-of-governments.ipynb
-    -   file: rtpa_glenn-county-transportation-commission/00__new_transit_metrics__rtpa_glenn-county-transportation-commission.ipynb
-    -   file: rtpa_humboldt-county-association-of-governments/00__new_transit_metrics__rtpa_humboldt-county-association-of-governments.ipynb
-    -   file: rtpa_inyo-county-local-transportation-commission/00__new_transit_metrics__rtpa_inyo-county-local-transportation-commission.ipynb
     -   file: rtpa_kern-council-of-governments/00__new_transit_metrics__rtpa_kern-council-of-governments.ipynb
     -   file: rtpa_kings-county-association-of-governments/00__new_transit_metrics__rtpa_kings-county-association-of-governments.ipynb
-    -   file: rtpa_lake-county-city-area-planning-council/00__new_transit_metrics__rtpa_lake-county-city-area-planning-council.ipynb
-    -   file: rtpa_lassen-county-transportation-commission/00__new_transit_metrics__rtpa_lassen-county-transportation-commission.ipynb
     -   file: rtpa_madera-county-transportation-commission/00__new_transit_metrics__rtpa_madera-county-transportation-commission.ipynb
-    -   file: rtpa_mariposa-county-local-transportation-commission/00__new_transit_metrics__rtpa_mariposa-county-local-transportation-commission.ipynb
-    -   file: rtpa_mendocino-council-of-governments/00__new_transit_metrics__rtpa_mendocino-council-of-governments.ipynb
     -   file: rtpa_merced-county-association-of-governments/00__new_transit_metrics__rtpa_merced-county-association-of-governments.ipynb
     -   file: rtpa_metropolitan-transportation-commission/00__new_transit_metrics__rtpa_metropolitan-transportation-commission.ipynb
-    -   file: rtpa_modoc-county-transportation-commission/00__new_transit_metrics__rtpa_modoc-county-transportation-commission.ipynb
-    -   file: rtpa_nevada-county-transportation-commission/00__new_transit_metrics__rtpa_nevada-county-transportation-commission.ipynb
     -   file: rtpa_placer-county-transportation-planning-agency/00__new_transit_metrics__rtpa_placer-county-transportation-planning-agency.ipynb
-    -   file: rtpa_plumas-county-transportation-commission/00__new_transit_metrics__rtpa_plumas-county-transportation-commission.ipynb
     -   file: rtpa_sacramento-area-council-of-governments/00__new_transit_metrics__rtpa_sacramento-area-council-of-governments.ipynb
     -   file: rtpa_san-diego-association-of-governments/00__new_transit_metrics__rtpa_san-diego-association-of-governments.ipynb
     -   file: rtpa_san-joaquin-council-of-governments/00__new_transit_metrics__rtpa_san-joaquin-council-of-governments.ipynb
@@ -34,14 +18,8 @@ parts:
     -   file: rtpa_santa-barbara-county-association-of-governments/00__new_transit_metrics__rtpa_santa-barbara-county-association-of-governments.ipynb
     -   file: rtpa_santa-cruz-county-regional-transportation-commission/00__new_transit_metrics__rtpa_santa-cruz-county-regional-transportation-commission.ipynb
     -   file: rtpa_shasta-regional-transportation-agency/00__new_transit_metrics__rtpa_shasta-regional-transportation-agency.ipynb
-    -   file: rtpa_sierra-county-local-transportation-commission/00__new_transit_metrics__rtpa_sierra-county-local-transportation-commission.ipynb
-    -   file: rtpa_siskiyou-county-local-transportation-commission/00__new_transit_metrics__rtpa_siskiyou-county-local-transportation-commission.ipynb
     -   file: rtpa_southern-california-association-of-governments/00__new_transit_metrics__rtpa_southern-california-association-of-governments.ipynb
     -   file: rtpa_stanislaus-council-of-governments/00__new_transit_metrics__rtpa_stanislaus-council-of-governments.ipynb
-    -   file: rtpa_tahoe-regional-planning-agency/00__new_transit_metrics__rtpa_tahoe-regional-planning-agency.ipynb
-    -   file: rtpa_tehama-county-transportation-commission/00__new_transit_metrics__rtpa_tehama-county-transportation-commission.ipynb
     -   file: rtpa_transportation-agency-for-monterey-county/00__new_transit_metrics__rtpa_transportation-agency-for-monterey-county.ipynb
-    -   file: rtpa_trinity-county-transportation-commission/00__new_transit_metrics__rtpa_trinity-county-transportation-commission.ipynb
     -   file: rtpa_tulare-county-association-of-governments/00__new_transit_metrics__rtpa_tulare-county-association-of-governments.ipynb
-    -   file: rtpa_tuolumne-county-transportation-council/00__new_transit_metrics__rtpa_tuolumne-county-transportation-council.ipynb
 root: README
