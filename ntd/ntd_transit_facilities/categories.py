@@ -48,7 +48,7 @@ TYPES_BY_CATEGORY = {
     ],
     CATEGORIES.ADMINISTRATIVE: ["Administrative Office / Sales Office", "Revenue Collection Facility"],
     CATEGORIES.MAINTENANCE: [
-        "General Purpose Maintenance Facility / Depot",
+        "General Purpose Maintenance Facility/Depot",
         "Maintenance Facility (Service and Inspection)",
         "Vehicle Washing Facility",
         "Heavy Maintenance & Overhaul (Backshop)",
