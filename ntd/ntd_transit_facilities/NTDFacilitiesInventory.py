@@ -3,13 +3,14 @@ import geopandas as gpd
 import pandas as pd
 from constants import *
 import categories
-from calitp_data_analysis.utils import read_geojson, geojson_gcs_export
+from calitp_data_analysis.utils import read_geojson, geojson_gcs_export, make_zipped_shapefile
 import folium
 from collections import defaultdict
 import pathlib
 from urllib.parse import urlparse
 import dotenv
 import os
+import gcsfs
 
 class NTDFacilitiesInventory:
     
@@ -24,7 +25,7 @@ class NTDFacilitiesInventory:
         """
         A wrapper for downloading and geocoding information from the National Transit Database facilities inventory
         
-        params:
+        Params:
         url: A url or GCS uri where the 2023 Facility Inventory can be found
         output_file_uri: A uri (GCS or local path) where the facilities inventory should be saved
         address_filter: A filter in the format {ntd_column: name} to filter addresses by. Only values that need to be geocoded will be filtered
@@ -162,6 +163,46 @@ class NTDFacilitiesInventory:
         # Return a Folium GeoJson that can be added to a map
         return folium.GeoJson(data=gdf_to_plot, **args_with_default)
     
+    def save_shapefile(self, output_uri: str, keep_fields = DEFAULT_TOOLTIP_FIELDS, column_rename_mapper = SHAPEFILE_MAP, temp_folder = ".temp") -> None:
+        """
+        Save the gdf as a shapefile to the specified path, either locally or in GCS (as a zip).
+        
+        Params:
+        output_uri: A string containing a uri, either a local path or a GCS url
+        keep_fields: The complete fields to keep
+        column_rename_mapper: A dict or function to pass to pd.rename to rename column names before they are truncated to 10 characters or fewer
+        temp_folder: A temp folder to store the zipped shapefile in if output_uri is a GCS url
+        """
+        # Format the GeoDataFrame so it can be saved as a shapefile
+        gdf_shortened_columns = self.gdf[[*keep_fields, self.gdf.geometry.name]]
+        if column_rename_mapper is not None:
+            gdf_shortened_columns = gdf_shortened_columns.rename(
+                columns=column_rename_mapper
+            )
+        gdf_shortened_columns = gdf_shortened_columns.rename(
+            columns=(lambda s: s if len(s) <= 10 else s[:10])
+        )
+        
+        # Save shapefile
+        if check_is_gs_uri(output_uri):
+            # Get the name of the file to be saved
+            _, name = split_gs_uri(output_uri)
+            name_stem = pathlib.Path(name).stem
+            name_as_zip = name_stem + ".zip"
+            # Get the temp path where the file should be stored
+            local_path = str((pathlib.Path(temp_folder) / (name_stem)).resolve())
+            print(local_path)
+            # Get a zipped shapefile locally (will save to the home directory)
+            make_zipped_shapefile(gdf_shortened_columns, local_path, gcs_folder=None)
+            # Upload the zipped shapefile to GCS
+            fs = gcsfs.GCSFileSystem()
+            fs.put(name_as_zip, output_uri)
+            # Remove the temp zipped shapefile
+            pathlib.Path(name_as_zip).unlink()
+        else:
+            # Save the file using the default gpd command
+            gdf_shortened_columns.to_file(output_uri)
+            
 def check_is_gs_uri(uri_or_path):
     """Check whether a uri is a gs:// url"""
     return uri_or_path[:5] == "gs://"
@@ -194,7 +235,7 @@ def geocode_series(
     warn: Whether the user should be warned how many queries will be made to the geocoding api, defaults to True
     
     Returns:
-    A GeoDataFrame with the returned addresses and geeometries from the geocoder 
+    A GeoDataFrame with the returned addresses and geometries from the geocoder 
     """
     # Get the api key
     if dotenv is not None:

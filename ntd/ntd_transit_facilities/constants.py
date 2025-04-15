@@ -1,7 +1,7 @@
 NTD_FACILITIES_INVENTORY_URL = "https://www.transit.dot.gov/sites/fta.dot.gov/files/2024-10/2023%20Facility%20Inventory.xlsx"
 NTD_CRS = "EPSG: 4326"
 
-# This should be accessible to the user
+# Define NTD Field Names
 STREET_ADDRESS = "Street Address"
 CITY = "City"
 STATE = "State"
@@ -11,8 +11,44 @@ LONGITUDE = "Longitude"
 AGENCY_NAME = "Agency Name"
 FACILITY_TYPE = "Facility Type"
 FACILITY_NAME = "Facility Name"
+SQUARE_FEET = "Square Feet"
+NUMBER_PARKING_SPACES = "Number of Parking Spaces"
+LARGER_FACILITY_FLAG = "Section of a Larger Facility"
+ADMINISTRATIVE_MAINTENANCE_FLAG = "Administrative/Maintenance Facility Flag"
+NOTES = "Notes"
+PRIMARY_MODE_SERVED = "Primary Mode Served"
+
+# Added field names
+GEOMETRY_GEOCODED = "Geometry Geocoded"
+GEOCODE_RESULT_ADDRESS = "Geocode Result Address"
+
 NTD_ADDRESS_FIELDS = (STREET_ADDRESS, CITY, STATE, ZIP_CODE)
-DEFAULT_TOOLTIP_FIELDS = (AGENCY_NAME, FACILITY_NAME, FACILITY_TYPE, "Square Feet", "Number of Parking Spaces", "Section of a Larger Facility", "Administrative/Maintenance Facility Flag", "Notes", "Primary Mode Served", "Geometry Geocoded", "Geocode Result Address")
+DEFAULT_TOOLTIP_FIELDS = (
+    AGENCY_NAME, 
+    FACILITY_NAME, 
+    FACILITY_TYPE, 
+    SQUARE_FEET, 
+    NUMBER_PARKING_SPACES, 
+    LARGER_FACILITY_FLAG, 
+    ADMINISTRATIVE_MAINTENANCE_FLAG, 
+    NOTES, 
+    PRIMARY_MODE_SERVED, 
+    GEOMETRY_GEOCODED, 
+    GEOCODE_RESULT_ADDRESS,
+)
+SHAPEFILE_MAP = {
+    AGENCY_NAME: "AGENCY",
+    FACILITY_NAME: "FAC_NAME",
+    FACILITY_TYPE: "FAC_TYPE",
+    SQUARE_FEET: "SQUARE_FT",
+    NUMBER_PARKING_SPACES: "NUM_SPACES",
+    LARGER_FACILITY_FLAG: "SECT_FLG",
+    ADMINISTRATIVE_MAINTENANCE_FLAG: "ADM_MT_FLG",
+    NOTES: "NOTES",
+    PRIMARY_MODE_SERVED: "MAIN_MODE",
+    GEOMETRY_GEOCODED: "GEOCODED",
+    GEOCODE_RESULT_ADDRESS: "ADDRESS",
+}
 
 # Geocoding parameters
 DOTENV_PATH = "_env"
