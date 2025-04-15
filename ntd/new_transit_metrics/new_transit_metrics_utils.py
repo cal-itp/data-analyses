@@ -13,8 +13,8 @@ sys.path.append("../")  # up one level
 from update_vars import NTD_MODES, NTD_TOS
 
 
-def make_new_transit_metrics_data():
-    year_list=["2018","2019","2020","2021","2022","2023"]
+def make_new_transit_metrics_data(year_list):
+    
     col_list=['agency_name',
           'agency_status',
           'city','ntd_id',
@@ -237,7 +237,7 @@ def make_scatter(data, x_ax, y_ax, chart_title, color=None, column_num=None, log
             , 
             y=alt.Y(y_ax)
             , 
-            tooltip=[x_ax, y_ax, "agency_name","year"])
+            tooltip=[x_ax, y_ax, "agency_name","year","service","mode"])
     )
 
     if color:
@@ -250,7 +250,7 @@ def make_scatter(data, x_ax, y_ax, chart_title, color=None, column_num=None, log
             x=alt.X(x_ax) if lin_x_ax else alt.X(x_ax).scale(type="log"),
             y=alt.Y(y_ax) if lin_y_ax else alt.Y(y_ax).scale(type="log"),
             color= color if color else None,
-            tooltip=[x_ax, y_ax, "agency_name"]
+            tooltip=[x_ax, y_ax, "agency_name","year","service","mode"]
         )
         
         excluded_count = len(data) - len(filtered_df)
@@ -318,8 +318,12 @@ def make_line(
     return chart_rule_facet
 
 if __name__ == "__main__":
+    
     print('make_new_transit_metrics_data()')
-    df = make_new_transit_metrics_data()
+    year_list=["2018","2019","2020","2021","2022","2023"]
+    df = make_new_transit_metrics_data(year_list)
+    
     print("saving data to GCS")
     df.to_parquet(f"{GCS_FILE_PATH}raw_transit_performance_metrics_data.parquet")
+    
     print("script complete")

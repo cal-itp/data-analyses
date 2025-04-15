@@ -17,8 +17,6 @@ The paper continues on to propose the use of other common metrics used in transp
 >[has] different implicit goals, which makes some metrics better for use in some areas than others.
 
 
-![image.png](https://private-user-images.githubusercontent.com/47205245/403160701-cbe50780-03d2-4b26-9a9b-5c30792020b2.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDI5Mzg5MDgsIm5iZiI6MTc0MjkzODYwOCwicGF0aCI6Ii80NzIwNTI0NS80MDMxNjA3MDEtY2JlNTA3ODAtMDNkMi00YjI2LTlhOWItNWMzMDc5MjAyMGIyLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAzMjUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMzI1VDIxMzY0OFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWU4Y2ZkMzMxN2E0OTM4MDIzZWU0ZWE0MzFhZTM1YjNiMzM5OWM1ZDAzNjc1ZGJiZDRjNGQ4ODhhNWYwMzRmZjYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.b0jr0WcmE9zAtcGyJpwB-PfoUGIzhs5r781LWJiMSsM)
-
 | Metric type          | Metric example                  | Implicit Goal(s)                       | Advantages                                   | Limitations                                  |
 |----------------------|---------------------------------|---------------------------------------|----------------------------------------------|----------------------------------------------|
 | Cost-efficiency      | Operating cost per revenue hour | Reduce costs*                         | Useful in both financial and service planning | Favors high labor productivity in dense, congested areas; does not track use |
@@ -33,29 +31,22 @@ This report intends to explores these metrics with data submitted to the NTD for
 
 
 ## Definitions
-**Regional Transportation Planning Authorities (RTPA)**:
-- A county or multi-county entity charged to meet state transportation planning and programming requirements.
+**Regional Transportation Planning Authorities (RTPA)**: A county or multi-county entity charged to meet state transportation planning and programming requirements.
 
-**Transportation Development Act (TDA)**:
-- law [that] provides funding to be allocated to transit and non-transit related purposes that comply with regional transportation plans.
+**Transportation Development Act (TDA)**: law [that] provides funding to be allocated to transit and non-transit related purposes that comply with regional transportation plans.
 
-**Type of Service (TOS)**: 
-- Describes how public transportation services are provided by the transit agency: directly operated (DO) or purchased transportation (PT) services.
+**Type of Service (TOS)**: Describes how public transportation services are provided by the transit agency: directly operated (DO) or purchased transportation (PT) services.
 
-**UCLA Institute of Transportation Studies**:
-- serves as the transportation research arm of the state with branches at UC Berkeley, UCLA, UC Davis, and UC Irvine.
+**UCLA Institute of Transportation Studies**: serves as the transportation research arm of the state with branches at UC Berkeley, UCLA, UC Davis, and UC Irvine.
 
-**Unlined Passenger Trips (UPT)**:
-- The number of passengers who board public transportation vehicles. Passengers are counted each time they board vehicles no matter how many vehicles they use to travel from their origin to their destination. 
+**Unlined Passenger Trips (UPT)**: The number of passengers who board public transportation vehicles. Passengers are counted each time they board vehicles no matter how many vehicles they use to travel from their origin to their destination. 
 
-**Vehicle Revenue Hours (VRH)**:
-- The hours that vehicles are scheduled to or actually travel while in revenue service.
+**Vehicle Revenue Hours (VRH)**: The hours that vehicles are scheduled to or actually travel while in revenue service.
 
-**Vehicle Revenue Miles (VRM)**: 
-- The miles that vehicles are scheduled to or actually travel while in revenue service.
+**Vehicle Revenue Miles (VRM)**: The miles that vehicles are scheduled to or actually travel while in revenue service.
 
 ## Methodology
-UPT, VRM, VRH and operating expense data was extracted from the NTD "Service Data and Operating Expenses Time Series" dataset. Rows were aggregated by Agency, mode, TOS, and report year. RTPA data was added.
+UPT, VRM, VRH and operating expense data was extracted from the [NTD Service Data and Operating Expenses Time Series](https://www.transit.dot.gov/ntd/data-product/ts22-service-data-and-operating-expenses-time-series-system-0) dataset. Rows were aggregated by Agency, mode, TOS, and report year. RTPA data was added.
  
 
 ## Who We Are
