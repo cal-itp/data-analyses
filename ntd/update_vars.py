@@ -4,7 +4,7 @@ import ntd_dates
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
-current_month = "jan2025"
+current_month = "feb2025"
 YEAR, MONTH = ntd_dates.parse_monthyear_string(current_month)
 PUBLIC_FILENAME = ntd_dates.get_public_filename(current_month)
 MONTH_CREATED = ntd_dates.DATES[current_month]
@@ -12,7 +12,7 @@ MONTH_CREATED = ntd_dates.DATES[current_month]
 # Check this url each month
 # https://www.transit.dot.gov/ntd/data-product/monthly-module-adjusted-data-release
 # Depending on if they fixed the Excel, there may be an additional suffix
-suffix = "_250303"
+suffix = "_250401"
 FULL_URL = (
     "https://www.transit.dot.gov/sites/fta.dot.gov/files/"
     f"{MONTH_CREATED}/{MONTH}%20{YEAR}%20"
@@ -36,8 +36,7 @@ NTD_MODES = {
     "VP": "Vanpool",
     "YR": "Hybrid Rail",
     "DT": "Demand Response Taxi",
-    "JT": "Jitney"
-    ""
+    "JT": "Jitney",
 }
 
 NTD_TOS = {
