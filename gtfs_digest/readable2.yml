@@ -87,4 +87,3 @@ data_quality_graph:
     title: "The charts below describe the quality of GTFS data collected for this route."
 summary_graph:
     title: "Below are some of the summary statistics collected for this route."
-
