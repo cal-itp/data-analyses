@@ -201,10 +201,10 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         start = datetime.datetime.now()
   
-        # pare_down_to_valid_trips(
-        #     analysis_date,
-        #     GTFS_DATA_DICT
-        # )
+        pare_down_to_valid_trips(
+            analysis_date,
+            GTFS_DATA_DICT
+        )
         
         merge_in_vp_direction(
             analysis_date,
