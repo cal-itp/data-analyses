@@ -160,3 +160,12 @@
 2025-03-17 10:07:15.538 | INFO     | __main__:<module>:114 - export concatenated vp: 0:04:05.066482
 2025-03-17 10:11:09.816 | INFO     | __main__:<module>:136 - remove batched parquets
 2025-03-17 10:11:09.824 | INFO     | __main__:<module>:139 - execution time: 0:08:09.314411
+2025-04-17 10:27:26.585 | INFO     | __main__:<module>:172 - Analysis date: 2025-04-16
+2025-04-17 10:29:21.566 | INFO     | __main__:loop_through_batches_and_download_vp:135 - exported batch 0 to GCS: 0:01:54.956152
+2025-04-17 10:30:26.137 | INFO     | __main__:loop_through_batches_and_download_vp:135 - exported batch 1 to GCS: 0:01:04.570945
+2025-04-17 10:34:21.700 | INFO     | __main__:loop_through_batches_and_download_vp:135 - exported batch 2 to GCS: 0:03:55.562479
+2025-04-17 10:36:04.387 | INFO     | __main__:loop_through_batches_and_download_vp:135 - exported batch 3 to GCS: 0:01:42.656962
+2025-04-17 10:36:04.388 | INFO     | __main__:<module>:179 - execution time: 0:08:37.778853
+2025-04-17 10:36:56.397 | INFO     | __main__:<module>:99 - Analysis date: 2025-04-16
+2025-04-17 10:37:06.001 | INFO     | __main__:<module>:107 - concat and filter batched data: 0:00:09.603306
+2025-04-17 10:40:36.570 | INFO     | __main__:<module>:114 - export concatenated vp: 0:03:30.569211
