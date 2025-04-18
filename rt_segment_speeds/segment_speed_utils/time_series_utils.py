@@ -70,7 +70,7 @@ def parse_route_combined_name(df: pd.DataFrame) -> pd.DataFrame:
     Clean up the double underscores and replace with a space.
     """
     df = df.assign(
-        recent_combined_name = df.recent_combined_name.str.replace("__", " "),
+        recent_combined_name = df.recent_combined_name.str.replace("__", " ").str.strip(),
     ).rename(
         columns = {
             # route_id2 has been cleaned within a single day (LA Metro removes suffix -191xx)
