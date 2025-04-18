@@ -14,7 +14,7 @@ GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
 
 # get data from warehouse
-def get_ntd_agencies():
+def get_ntd_agencies(min_year:str) -> pd.DataFrame:
     """
     reads in ntd data from warehouse, filters for CA agencies since 2018.
     groups data by agency and sum their UPT.
@@ -23,7 +23,7 @@ def get_ntd_agencies():
         tbls.mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt()
         >> filter(_.state.str.contains("CA") | 
                   _.state.str.contains("NV"), # to get lake Tahoe Transportation back
-                  _.year >= "2018",
+                  _.year >= min_year,
                   _.city != None,
                   _.primary_uza_name.str.contains(", CA") | 
                   _.primary_uza_name.str.contains("CA-NV") |
@@ -69,25 +69,25 @@ def get_ntd_agencies():
     return ntd_time_series
 
 
-def get_cdp_to_rtpa_map():
+def get_cdp_to_rtpa_map(rtpa_url:str, cdp_url:str) -> pd.DataFrame:
     """
     reads in map of CA census designated places (CDPs)(polygon) and CA RTPA (polygon).
     Get centraiod of CDPS, then sjoin to RTPA map.
     Do some manual cleaning.
     """
     # RTPA map
-    rtpa_url = "https://cecgis-caenergy.opendata.arcgis.com/api/download/v1/items/3a83743378be4e7f84c8230889c01dea/geojson?layers=0"
-    rtpa_map = gpd.read_file(rtpa_url)[
+    rtpa_path = rtpa_url
+    rtpa_map = gpd.read_file(rtpa_path)[
         ["RTPA", "LABEL_RTPA", "geometry"]
     ]
     
     rtpa_map = rtpa_map.to_crs("ESRI:102600")  # for sjoin later
 
     # California Census Designated Places (2010), includes cities and CDPs
-    cdp_url = "https://services6.arcgis.com/YBp5dUuxCMd8W1EI/arcgis/rest/services/California_Census_Designated_Places_2010/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson"
+    cdp_path = cdp_url
     keep_cdp_col = ["FID", "NAME10", "NAMELSAD10", "geometry"]
     
-    cdp_map = gpd.read_file(cdp_url)[keep_cdp_col].rename(
+    cdp_map = gpd.read_file(cdp_path)[keep_cdp_col].rename(
         columns={"NAME10": "cdp_name", "NAMELSAD10": "name_lsad"}
     ) 
 
@@ -120,14 +120,14 @@ def get_cdp_to_rtpa_map():
     return city_to_rtpa
 
 
-def merge_agencies_to_rtpa_map():
+def merge_agencies_to_rtpa_map(ntd_df:pd.DataFrame, city_rtpa_df:pd.DataFrame) -> pd.DataFrame:
     """
     merges the ntd data and rtpa data from `get_ntd_agencies` and `get_cdp_to_rtpa_map`.
     does some manual updating. 
     """
     # merge 
-    alt_ntd_to_rtpa = ntd_time_series.merge(
-        city_to_rtpa[["cdp_name", "RTPA"]],
+    alt_ntd_to_rtpa = ntd_df.merge(
+        city_rtpa_df[["cdp_name", "RTPA"]],
         left_on=("city"),
         right_on=("cdp_name"),
         how="left",
@@ -167,7 +167,7 @@ def merge_agencies_to_rtpa_map():
     return alt_ntd_to_rtpa
 
 
-def make_export_clean_crosswalk():
+def make_export_clean_crosswalk(df:pd.DataFrame) -> pd.DataFrame:
     # final crosswalk
     ntd_data_to_rtpa_cleaned = alt_ntd_to_rtpa[
         ["ntd_id","agency_name","reporter_type","agency_status","city","state","RTPA"]
@@ -179,15 +179,23 @@ def make_export_clean_crosswalk():
 
 if __name__ == "__main__":
     print("get list of ntd agencies")
-    ntd_time_series = get_ntd_agencies()
+    ntd_time_series = get_ntd_agencies(min_year="2018")
     
     print("get list census designated places to rtpa map")
-    city_to_rtpa = get_cdp_to_rtpa_map()
+    city_to_rtpa = get_cdp_to_rtpa_map(
+        rtpa_url="https://cecgis-caenergy.opendata.arcgis.com/api/download/v1/items/3a83743378be4e7f84c8230889c01dea/geojson?layers=0",
+        cdp_url="https://services6.arcgis.com/YBp5dUuxCMd8W1EI/arcgis/rest/services/California_Census_Designated_Places_2010/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson"
+    )
     
     print("merge ntd agencies to cdp/rtpa map")
-    alt_ntd_to_rtpa = merge_agencies_to_rtpa_map()
+    alt_ntd_to_rtpa = merge_agencies_to_rtpa_map(
+        ntd_df=ntd_time_series, 
+        city_rtpa_df=city_to_rtpa
+    )
     
     print("make clean crosswalk, export to GCS")
-    make_export_clean_crosswalk()
+    make_export_clean_crosswalk(
+        df=alt_ntd_to_rtpa
+    )
     
     print("end script")
