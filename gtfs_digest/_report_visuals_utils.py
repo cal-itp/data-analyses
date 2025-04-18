@@ -12,9 +12,8 @@ from shared_utils import catalog_utils, rt_dates, rt_utils
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 # Yaml
-import yaml
-with open("readable2.yml") as f:
-    readable_dict = yaml.safe_load(f)
+from omegaconf import OmegaConf
+readable_dict = OmegaConf.load("readable2.yml")
 
 """
 Configure
@@ -35,33 +34,25 @@ def configure_chart(
     )
     return chart2
 
-def facet_chart(
-    chart: alt.Chart, facet_col: str, title: str, subtitle: str
-) -> alt.Chart:
-    chart2 = chart.facet(
-        column=alt.Column(
-            f"{facet_col}:N",
-        )
-    ).properties(
-        title={
-            "text": title,
-            "subtitle": subtitle,
-        }
-    )
-    return chart2
 
 """
 Charts
 """
-def ruler_chart(df: pd.DataFrame, ruler_value: int) -> pd.DataFrame:
-    # Add the ruler column
-
-    df["ruler"] = ruler_value
+def ruler_chart(
+    df: pd.DataFrame, 
+    ruler_value: int
+) -> pd.DataFrame:
+    # Add column with ruler value, use .assign to avoid warning
+    df = df.assign(
+        ruler = ruler_value
+    )
+    
     chart = (
         alt.Chart(df)
         .mark_rule(color="red", strokeDash=[10, 7])
         .encode(y="mean(ruler):Q")
     )
+    
     return chart
 
 def pie_chart(
@@ -84,7 +75,6 @@ def pie_chart(
     return chart
 
 def bar_chart(
-    df: pd.DataFrame,
     x_col: str,
     y_col: str,
     color_col: str,
@@ -94,7 +84,7 @@ def bar_chart(
 ) -> alt.Chart:
 
     chart = (
-        alt.Chart(df)
+        alt.Chart()
         .mark_bar()
         .encode(
             x=alt.X(
@@ -202,12 +192,13 @@ def grouped_bar_chart(
     offset_col: str,
 ) -> alt.Chart:
     chart = bar_chart(
-        df, x_col, y_col, color_col, color_scheme, tooltip_cols, date_format
+        x_col, y_col, color_col, color_scheme, tooltip_cols, date_format
     )
     # Add Offset
     chart2 = chart.mark_bar(size=5).encode(
         xOffset=alt.X(offset_col, title=offset_col),
-    )
+    ).properties(data=df)
+    
     return chart
 
 def circle_chart(
