@@ -199,7 +199,7 @@ def grouped_bar_chart(
         xOffset=alt.X(offset_col, title=offset_col),
     ).properties(data=df)
     
-    return chart
+    return chart2
 
 def circle_chart(
     df: pd.DataFrame,
@@ -234,3 +234,57 @@ def circle_chart(
     )
     
     return chart 
+
+
+def sample_spatial_accuracy_chart(df):
+    specific_chart_dict = readable_dict.spatial_accuracy_graph
+
+    ruler = ruler_chart(df, 100)
+
+    bar = bar_chart(
+        x_col = "Date", 
+        y_col = "% VP within Scheduled Shape", 
+        color_col = "% VP within Scheduled Shape", 
+        color_scheme = [*specific_chart_dict.color], 
+        tooltip_cols = [*specific_chart_dict.tooltip], 
+        date_format="%b %Y"
+    )
+   
+    # write this way so that the df is inherited by .facet
+    chart = alt.layer(bar, ruler, data = df).properties(width=200, height=250)
+    chart = chart.facet(
+        column=alt.Column(
+            "Direction:N",
+        )
+    ).properties(
+        title={
+            "text": specific_chart_dict.title,
+            "subtitle": specific_chart_dict.subtitle,
+        }
+    )
+    
+    return chart
+
+
+def sample_avg_scheduled_min_chart(df):
+    specific_chart_dict = readable_dict.avg_scheduled_min_graph
+    
+    chart = grouped_bar_chart(
+        df,
+        x_col = "Date:T",
+        y_col="Average Scheduled Service (trip minutes)",
+        color_col="Direction:N",
+        color_scheme = [*specific_chart_dict.colors],
+        tooltip_cols = [*specific_chart_dict.tooltip],
+        date_format = "%b %Y",
+        offset_col="Direction:N",
+    )
+        
+    chart = configure_chart(
+        chart,
+        width = 400, height = 250, 
+        title = specific_chart_dict.title, 
+        subtitle = specific_chart_dict.subtitle
+    )    
+    
+    return chart
