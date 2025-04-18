@@ -89,7 +89,7 @@ def sum_by_group(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
 
     return grouped_df
 
-def produce_annual_ntd_ridership_data_by_rtpa():
+def produce_annual_ntd_ridership_data_by_rtpa(min_year:str):
     """
     Function that ingest ridership data from `dim_annual_service_agencies`, filters for CA agencies.
     Merges in ntd_id_to_RTPA_crosswalk. Aggregates by agency, mode and TOS. calculates change in UPT.
@@ -102,7 +102,7 @@ def produce_annual_ntd_ridership_data_by_rtpa():
     tbls.mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt()
     >> filter(_.state.str.contains("CA") | 
               _.state.str.contains("NV"), # to get lake Tahoe Transportation back
-              _.year >= "2018",
+              _.year >= min_year,
               _.city != None,
               _.primary_uza_name.str.contains(", CA") | 
               _.primary_uza_name.str.contains("CA-NV") |
@@ -319,8 +319,9 @@ def remove_local_outputs(
 
     
 if __name__ == "__main__":
+    min_year="2018"
     
-    df = produce_annual_ntd_ridership_data_by_rtpa()
+    df = produce_annual_ntd_ridership_data_by_rtpa(min_year)
     print("saving parqut to private GCS")
     
     df.to_parquet(f"{GCS_FILE_PATH}annual_ridership_report_data.parquet")
