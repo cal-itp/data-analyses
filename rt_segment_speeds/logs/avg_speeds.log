@@ -27,3 +27,7 @@
 2025-03-14 13:34:30.155 | INFO     | __main__:annual_time_of_day_averages:171 - rt_stop_times: weekday/time-of-day averages for 2023 execution time: 0:02:23.782640
 2025-03-14 13:36:37.069 | INFO     | __main__:annual_time_of_day_averages:171 - rt_stop_times: weekday/time-of-day averages for 2024 execution time: 0:02:06.806331
 2025-03-14 13:36:50.516 | INFO     | __main__:annual_time_of_day_averages:171 - rt_stop_times: weekday/time-of-day averages for 2025 execution time: 0:00:13.404898
+2025-04-17 16:17:31.355 | INFO     | __main__:trip_summary_speeds_by_time_of_day:92 - rt_stop_times summary speed averaging by time-of-day 2025-03-12 execution time: 0:00:07.235142
+2025-04-17 16:17:42.946 | INFO     | __main__:summary_speeds_by_peak_offpeak:158 - rt_stop_times summary speed averaging by peak/offpeak for 2025-03-12 execution time: 0:00:11.549204
+2025-04-21 16:54:35.114 | INFO     | __main__:trip_summary_speeds_by_time_of_day:92 - rt_stop_times summary speed averaging by time-of-day 2025-04-16 execution time: 0:00:08.807911
+2025-04-21 16:54:48.219 | INFO     | __main__:summary_speeds_by_peak_offpeak:158 - rt_stop_times summary speed averaging by peak/offpeak for 2025-04-16 execution time: 0:00:13.094640

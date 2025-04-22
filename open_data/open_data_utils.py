@@ -169,6 +169,7 @@ RENAME_HQTA = {
     "base64_u_1": "base64_url_secondary",  
     "org_id_pri": "org_id_primary",
     "org_id_sec": "org_id_secondary",
+    "avg_trips_": "avg_trips_per_peak_hr"
 }
 
 RENAME_SPEED = {

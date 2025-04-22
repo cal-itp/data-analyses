@@ -47,7 +47,7 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     # Combine AM max and PM max into 1 column   
     # if am_max_trips = 4 and pm_max_trips = 5, we'll choose 4.
     max_arrivals = max_arrivals.assign(
-        peak_trips = max_arrivals[trip_count_cols].min(axis=1)
+        avg_trips_per_peak_hr = max_arrivals[trip_count_cols].min(axis=1)
     ).drop(columns = trip_count_cols)
     
     hqta_points_combined = pd.concat([
@@ -62,12 +62,12 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
         max_arrivals,
         on = ["schedule_gtfs_dataset_key_primary", "stop_id"],
         how = "left"
-    ).fillna({"peak_trips": 0}).astype({"peak_trips": "int"})
+    ).fillna({"avg_trips_per_peak_hr": 0}).astype({"avg_trips_per_peak_hr": "int"})
     
     keep_stop_cols = [
         "schedule_gtfs_dataset_key_primary", "schedule_gtfs_dataset_key_secondary",
         "stop_id", "geometry",
-        "hqta_type", "peak_trips", "hqta_details"
+        "hqta_type", "avg_trips_per_peak_hr", "hqta_details"
     ]
     
     with_stops = with_stops.assign(
@@ -164,7 +164,7 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # include these as stable IDs?
         "base64_url_primary", "base64_url_secondary", 
         "org_id_primary", "org_id_secondary",
-        "peak_trips",
+        "avg_trips_per_peak_hr",
         "geometry"
     ]
     
