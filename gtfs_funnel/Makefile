@@ -13,7 +13,7 @@ preprocess_schedule_vp_dependency:
     
 preprocess_vp:
 	python vp_keep_usable.py
-#	python cleanup.py
+	python cleanup.py
 	python vp_dwell_time.py    
 	python vp_condenser.py
 
@@ -47,11 +47,11 @@ funnel_gtfs_single_day:
 	#make monthly_scheduled_data    
 
 all:
-#	make funnel_gtfs_single_day
+	make funnel_gtfs_single_day
     # update open_data/update_vars.py        
-#	cd ../open_data/ && make create_gtfs_schedule_geospatial_open_data -f Makefile
+	cd ../open_data/ && make create_gtfs_schedule_geospatial_open_data -f Makefile
     # update high_quality_transit_areas/update_vars.py    
-#	cd ../high_quality_transit_areas/ && make hqta_data -f Makefile    
+	cd ../high_quality_transit_areas/ && make hqta_data -f Makefile    
     # update rt_segment_speeds/segment_speed_utils/project_vars.py
 	cd ../rt_segment_speeds/scripts/ && make all_speeds_pipeline -f Makefile && cd ../../
     # update rt_scheduled_v_ran/scripts/update_vars.py
