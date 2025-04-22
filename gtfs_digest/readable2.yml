@@ -68,8 +68,8 @@ vp_per_min_graph:
 sched_vp_per_min_graph:
   title: "Percentage of Scheduled Trip Journey with 1+/2+ Vehicle Positions"
   subtitle: "The goal is for ~100% of a trip's duration to have 2 or more Vehicle Positions per minute."
-  tooltip: ["Date","Route","Direction", "% Scheduled Trip w/ 1+ VP/Minute", "% Scheduled Trip w/ 2+ VP/Minute",]
-  colors: tri_color
+  tooltip: ["Date","Route","Direction", "Category", "% of Trip Duration",]
+  colors: ${color_palettes.tri_color}
 
 spatial_accuracy_graph:
   title: "Spatial Accuracy"
@@ -81,7 +81,7 @@ spatial_accuracy_graph:
   colors: ["#dd217d","#fc5c04","#ff9c42","#fcb40e", "#e9d868","#ccbb44"]
 
 # Divider Charts
-ride_quality_graph:
+rider_quality_graph:
   title: "The charts below measure the quality of the rider experience for this route."
 data_quality_graph:
   title: "The charts below describe the quality of GTFS data collected for this route."

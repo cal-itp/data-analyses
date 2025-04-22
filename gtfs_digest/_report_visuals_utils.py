@@ -34,7 +34,68 @@ def configure_chart(
     )
     return chart2
 
+"""
+Functions to Reshape DF
+"""
+def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Reshape dataframe for the charts that illustrate
+    how timely a route's trips are.
+    """
+    melted_df = df.melt(
+        id_vars=[
+            "Date",
+            "Portfolio Organization Name",
+            "Route",
+            "Period",
+            "Direction",
+            "Direction (0/1)",
+            "# Realtime Trips",
+        ],
+        value_vars=[
+            "# Early Arrival Trips",
+            "# On-Time Trips",
+            "# Late Trips",
+        ],
+    )
 
+    melted_df["Percentage"] = (melted_df.value / melted_df["# Realtime Trips"]) * 100
+
+    return melted_df
+
+def reshape_pct_journey_with_vp(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Reshape the data for the charts that display the % of
+    a journey that recorded 2+ vehicle positions/minute.
+    """
+    to_keep = [
+        "Date",
+        "Portfolio Organization Name",
+        "Direction",
+        "% Scheduled Trip w/ 1+ VP/Minute",
+        "% Scheduled Trip w/ 2+ VP/Minute",
+        "Route",
+        "Period",
+    ]
+    df2 = df[to_keep]
+
+    df3 = df2.melt(
+        id_vars=[
+            "Date",
+            "Portfolio Organization Name",
+            "Route",
+            "Direction",
+            "Period",
+        ],
+        value_vars=[
+            "% Scheduled Trip w/ 1+ VP/Minute",
+            "% Scheduled Trip w/ 2+ VP/Minute",
+        ],
+    )
+
+    df3 = df3.rename(columns={"variable": "Category", "value": "% of Trip Duration"})
+
+    return df3
 """
 Charts
 """
@@ -163,21 +224,12 @@ def text_table(df: pd.DataFrame) -> alt.Chart:
 
     # Create the chart
     text_chart = (
-        alt.Chart(df2)
+        alt.Chart(df)
         .mark_text()
         .encode(x=alt.X("Zero:Q", axis=None), y=alt.Y("combo_col", axis=None))
     )
 
     text_chart = text_chart.encode(text="combo_col:N")
-
-    # Configure this
-    text_chart = configure_chart(
-        text_chart,
-        width=400,
-        height=250,
-        title=readable_dict["text_graph"]["title"],
-        subtitle=readable_dict["text_graph"]["subtitle"],
-    )
 
     return text_chart
 
@@ -287,4 +339,114 @@ def sample_avg_scheduled_min_chart(df):
         subtitle = specific_chart_dict.subtitle
     )    
     
+    return chart
+
+def vp_per_minute_chart(df: pd.DataFrame) -> alt.Chart:
+    specific_chart_dict = readable_dict.vp_per_min_graph
+    ruler = ruler_chart(df, 3)
+
+    bar = bar_chart(
+        x_col="Date",
+        y_col="Average VP per Minute",
+        color_col="Average VP per Minute",
+        color_scheme=[*specific_chart_dict.colors],
+        tooltip_cols=[*specific_chart_dict.tooltip],
+        date_format="%b %Y",
+    )
+
+    # write this way so that the df is inherited by .facet
+    chart = alt.layer(bar, ruler, data=df).properties(width=200, height=250)
+    chart = chart.facet(
+        column=alt.Column(
+            "Direction:N",
+        )
+    ).properties(
+        title={
+            "text": specific_chart_dict.title,
+            "subtitle": specific_chart_dict.subtitle,
+        }
+    )
+    return chart
+
+def timeliness_chart(df) -> alt.Chart:
+
+    # Reshape dataframe from wide to long
+    df2 = reshape_timeliness_trips(df)
+
+    specific_chart_dict = readable_dict.timeliness_trips_graph
+
+    chart = line_chart(
+        df=df2,
+        x_col="Date",
+        y_col="Percentage",
+        color_col="variable",
+        color_scheme=[*specific_chart_dict.colors],
+        tooltip_cols=[*specific_chart_dict.tooltip],
+    ).properties(width=200, height=250)
+
+    chart = chart.facet(
+        column=alt.Column(
+            "Direction:N",
+        )
+    ).properties(
+        title={
+            "text": specific_chart_dict.title,
+            "subtitle": specific_chart_dict.subtitle,
+        }
+    )
+    return chart
+
+def speed_chart(df) -> alt.Chart:
+    specific_chart_dict = readable_dict.speed_graph
+
+    chart = line_chart(
+        df=df,
+        x_col="Date",
+        y_col="Speed (MPH)",
+        color_col="Period",
+        color_scheme=[*specific_chart_dict.colors],
+        tooltip_cols=[*specific_chart_dict.tooltip],
+    ).properties(width=200, height=250)
+
+    chart = chart.facet(
+        column=alt.Column(
+            "Direction:N",
+        )
+    ).properties(
+        title={
+            "text": specific_chart_dict.title,
+            "subtitle": specific_chart_dict.subtitle,
+        }
+    )
+    return chart
+
+def sched_vp_per_min_chart(df) -> alt.Chart:
+
+    # Change df from wide to long
+    pct_journey_with_vp_df = reshape_pct_journey_with_vp(df)
+    specific_chart_dict = readable_dict.sched_vp_per_min_graph
+
+    ruler = ruler_chart(pct_journey_with_vp_df,100)
+    
+    circle = circle_chart(
+        df=pct_journey_with_vp_df,
+        x_col="Date",
+        y_col="% of Trip Duration",
+        color_col="Category",
+        color_scheme=[*specific_chart_dict.colors],
+        tooltip_cols=[*specific_chart_dict.tooltip],
+    )
+
+    chart = alt.layer(circle, ruler, data= pct_journey_with_vp_df).properties(width=200, height=250)
+    
+    chart = chart.facet(
+        column=alt.Column(
+            "Direction:N",
+        )
+    ).properties(
+        title={
+            "text": specific_chart_dict.title,
+            "subtitle": specific_chart_dict.subtitle,
+        }
+    )
     return chart
