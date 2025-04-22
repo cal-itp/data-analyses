@@ -13,7 +13,7 @@ preprocess_schedule_vp_dependency:
     
 preprocess_vp:
 	python vp_keep_usable.py
-#	python cleanup.py
+	python cleanup.py
 	python vp_dwell_time.py    
 	python vp_condenser.py
 
