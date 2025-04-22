@@ -2,3 +2,5 @@
 2025-02-27 17:54:06.533 | INFO     | __main__:operator_metrics:42 - agency aggregation 2025-01-15: 0:00:01.441289
 2025-03-17 17:45:11.026 | INFO     | __main__:operator_metrics:42 - agency aggregation 2025-03-12: 0:00:01.856944
 2025-03-20 12:58:16.439 | INFO     | __main__:operator_metrics:42 - agency aggregation 2025-03-12: 0:00:01.834267
+2025-04-17 17:03:43.842 | INFO     | __main__:operator_metrics:46 - operator aggregation 2025-04-16: 0:00:01.800221
+2025-04-21 17:48:25.824 | INFO     | __main__:operator_metrics:46 - operator aggregation 2025-04-16: 0:00:01.777235
