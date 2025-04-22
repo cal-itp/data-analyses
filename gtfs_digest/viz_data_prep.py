@@ -22,7 +22,8 @@ route_direction_cols_for_viz = [
     "speed_mph",
     "portfolio_organization_name",
     "headway_in_minutes",
- "sched_rt_category" # added this
+ "sched_rt_category",
+    'avg_stop_miles'# added this
 ]
 
 readable_col_names = {
@@ -47,6 +48,8 @@ readable_col_names = {
     "speed_mph": "Speed (MPH)",
     "portfolio_organization_name": "Portfolio Organization Name",
     "headway_in_minutes": "Headway (Minutes)",
+    'avg_stop_miles':"Average Stop Distance (Miles)",
+    "sched_rt_category":"GTFS Availability",
 }
 
 
