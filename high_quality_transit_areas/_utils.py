@@ -19,7 +19,7 @@ def add_hqta_details(row) -> str:
             return "intersection_2_bus_routes_same_operator"  
     
     elif row.hqta_type == "hq_corridor_bus":
-        if row.peak_trips >= 4:
+        if row.avg_trips_per_peak_hr >= 4:
             return "corridor_frequent_stop"
         else:
             return "corridor_other_stop"
