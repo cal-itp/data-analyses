@@ -5,6 +5,7 @@ route_direction_cols_for_viz = [
     "time_period",
     "avg_scheduled_service_minutes",
     "n_scheduled_trips",
+    'n_vp_trips',
     "service_date",
     "recent_combined_name",
     "route_primary_direction",
@@ -29,6 +30,7 @@ readable_col_names = {
     "time_period": "Period",
     "avg_scheduled_service_minutes": "Average Scheduled Service (trip minutes)",
     "n_scheduled_trips": "# Scheduled Trips",
+    'n_vp_trips': "# Realtime Trips",
     "service_date": "Date",
     "recent_combined_name": "Route",
     "route_primary_direction": "Direction",
@@ -67,6 +69,7 @@ def data_wrangling_for_visualizing(
     
     # these show up as floats but should be integers
     # also these aren't kept...
+    # AH: delete this out? 
     route_typology_cols = [
         f"is_{c}" for c in 
         ["express", "rapid",
@@ -85,6 +88,7 @@ def data_wrangling_for_visualizing(
     # is that what you want? or you want it rounded to the nearest integer?
     # whatever you decide, it should be obvious bc of the code, not because 
     # of the order of the code execution
+    # AH: Think it should be at the nearest integer since any decimal points would be too much detail
     pct_cols = [c for c in df.columns if "pct" in c]
     df[pct_cols] = df[pct_cols] * 100
 
@@ -94,6 +98,8 @@ def data_wrangling_for_visualizing(
     # the subset columns is missing sched_rt_category, and it needs an
     # entry in the rename dict if it's used within text table as combo column?
     
+    # AH: we publish schedule only operators as well and they only have 
+    # info for the first section, so filtering it out should be ok. 
     df2 = df.assign(
         time_period = df.time_period.str.replace("_", " ").str.title()
     )[subset].query(
