@@ -105,7 +105,7 @@ tables:
     org_id_primary: *org_id
     org_id_secondary: 
       definition: Organization identifier for the secondary agency
-    peak_trips:
+    avg_trips_per_peak_hr:
       definition: |- 
         The number of AM and PM hourly trips. Where AM and PM peak trips differ, the lesser value is used.
         

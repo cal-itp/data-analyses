@@ -100,7 +100,7 @@
 				<attrdef>Organization identifier for the secondary agency</attrdef>
 			</attr>
 			<attr>
-				<attrlabl>peak_trips</attrlabl>
+				<attrlabl>avg_trips_per_peak_hr</attrlabl>
 				<attrdef>The number of AM and PM hourly trips. Where AM and PM peak trips differ, the lesser value is used.</attrdef>
 			</attr>
 		</detailed>
