@@ -245,7 +245,7 @@ def sample_spatial_accuracy_chart(df):
         x_col = "Date", 
         y_col = "% VP within Scheduled Shape", 
         color_col = "% VP within Scheduled Shape", 
-        color_scheme = [*specific_chart_dict.color], 
+        color_scheme = [*specific_chart_dict.colors], 
         tooltip_cols = [*specific_chart_dict.tooltip], 
         date_format="%b %Y"
     )
