@@ -128,6 +128,14 @@ road_segments:
   #stop_pair_cols: ["stop_pair", "stop_pair_name", "segment_id"]
   timestamp_col: ${speed_vars.timestamp_col}
 
+modeled_vp:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  raw_vp: ${speeds_tables.usable_vp}
+  #resampled_vp:
+  #resampled_every100m
+  #stop_segments:
+  #speeds_by_stop_segments:
+
 shared_data:
   dir: ${gcs_paths.SHARED_GCS}
   road_segments_twomile: segmented_roads_twomile_2020
