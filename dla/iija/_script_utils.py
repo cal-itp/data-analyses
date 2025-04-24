@@ -326,6 +326,7 @@ def condense_df(df):
     df_agg['congressional_district'] = '|' + df_agg['congressional_district'] + '|'
     df_agg['county_name_abbrev'] = '|' + df_agg['county_name_abbrev'] + '|'
     
+    display(df_agg.columns)
     return df_agg
 
 
