@@ -83,32 +83,34 @@ def assemble_stops(analysis_date: str) -> gpd.GeoDataFrame:
     """
     Start with stop_times, attach stop geometry, 
     and also route info (route_type) from trips table.
+    
+    stop_times must be without direction since some rail/ferry/brt stops
+    still have no GTFS shape.
     """
+    
     stop_times = helpers.import_scheduled_stop_times(
-        analysis_date,
-        columns = ["feed_key", "schedule_gtfs_dataset_key",
-                   "stop_id", "trip_instance_key"],
-        with_direction = True,
-        get_pandas = True
+    analysis_date,
+    columns = ["feed_key", "trip_id", "stop_id"],
+    with_direction = False, #  required to include rail/ferry/brt stops w/out shapes
+    get_pandas = True
     )
     
     trips = helpers.import_scheduled_trips(
         analysis_date,
         columns = [
-            "name",
-            "trip_instance_key", 
-            "route_id", "route_type", "route_desc"
+            "name", "feed_key", "trip_id",
+            "route_id", "route_type", "route_desc",
         ],
         get_pandas = True
     )
-       
+           
     stops_with_route = pd.merge(
         stop_times,
         trips,
-        on = "trip_instance_key",
+        on = ["feed_key", "trip_id"],
         how = "inner"
     ).drop(
-        columns = "trip_instance_key"
+        columns = "trip_id"
     ).drop_duplicates().reset_index(drop=True)
         
     # Attach stop geometry
