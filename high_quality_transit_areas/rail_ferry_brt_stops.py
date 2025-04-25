@@ -100,9 +100,10 @@ def assemble_stops(analysis_date: str) -> gpd.GeoDataFrame:
         columns = [
             "name", "feed_key", "trip_id",
             "route_id", "route_type", "route_desc",
+            "gtfs_dataset_key"
         ],
         get_pandas = True
-    )
+    ).rename(columns={"gtfs_dataset_key":"schedule_gtfs_dataset_key"})
            
     stops_with_route = pd.merge(
         stop_times,
