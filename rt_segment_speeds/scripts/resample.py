@@ -16,7 +16,7 @@ from calitp_data_analysis import utils
 
 from segment_speed_utils import helpers, vp_transform
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT, PROJECT_CRS
-from shared_utils import rt_dates, geo_utils
+from shared_utils import rt_dates, geo_utils, publish_utils
 
 subset_trips = [
     '00000ec4ec4f4cee317f06c981d4965f',
@@ -27,8 +27,10 @@ subset_trips = [
 ]
 
 def determine_batches(analysis_date: str) -> dict:
+    VP_USABLE = GTFS_DATA_DICT.modeled_vp.raw_vp
+
     vp = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}/",
+        f"{SEGMENT_GCS}{VP_USABLE}_{analysis_date}/",
         columns = ["gtfs_dataset_name"],
     ).drop_duplicates()
     
@@ -70,10 +72,11 @@ def get_trips_by_batches(operator_list: list) -> list:
 def create_vp_with_shape_and_project(analysis_date: str) -> gpd.GeoDataFrame:
     """
     """
-    VP_USABLE = GTFS_DATA_DICT.speeds_tables.usable_vp 
+    VP_USABLE = GTFS_DATA_DICT.modeled_vp.raw_vp
+    
     
     vp = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_usable_{analysis_date}/",
+        f"{SEGMENT_GCS}{VP_USABLE}_{analysis_date}/",
         columns = ["trip_instance_key", "location_timestamp_local", "x", "y"],
 
     ).pipe(
@@ -205,7 +208,7 @@ def get_resampled_vp_points(
         ) for vp_meters_arr, vp_path 
         in zip(interpolated_vp_meters, vp_line_geometry)
     ]    
-    '''
+    
     # Instead of coercing it to be a linestring, keep as array of points
     # that can be exploded
     new_vp_points = [
@@ -224,12 +227,12 @@ def get_resampled_vp_points(
         [one_point[1] for one_point in individual_trip] 
         for individual_trip in new_vp_points
     ]
-     
+    ''' 
     gdf2 = gdf.assign(
         resampled_timestamps = resampled_timestamps,
         interpolated_distances = interpolated_vp_meters,
-        interpolated_vp_x = new_vp_x, 
-        interpolated_vp_y = new_vp_y
+        #interpolated_vp_x = new_vp_x, 
+        #interpolated_vp_y = new_vp_y
         #new_vp_coords = new_vp_points,
         #geometry = gpd.GeoSeries(new_vp_points, crs = PROJECT_CRS)
     ).drop(
@@ -240,8 +243,8 @@ def get_resampled_vp_points(
     modeled_cols = [
         "resampled_timestamps", 
         "interpolated_distances", 
-        "interpolated_vp_x", 
-        "interpolated_vp_y"
+        #"interpolated_vp_x", 
+        #"interpolated_vp_y"
     ]
     
     gdf3 = gdf2[["trip_instance_key"] + modeled_cols]
@@ -261,6 +264,8 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     
     analysis_date = rt_dates.DATES["oct2024"]    
+    
+    EXPORT_FILE = GTFS_DATA_DICT.modeled_vp.resampled_vp
     
     gdf = create_vp_with_shape_and_project(
         analysis_date
@@ -296,13 +301,31 @@ if __name__ == "__main__":
         )
     
         results = get_resampled_vp_points(gdf)
-
+        
         results.to_parquet(
-            f"{SEGMENT_GCS}vp_condensed/vp_resampled_batch{batch_number}_{analysis_date}.parquet",
+            f"{SEGMENT_GCS}{EXPORT_FILE}_batch{batch_number}_{analysis_date}.parquet"
         )
+        
         
         del results
 
+        
+    batched_files = [
+        f"{SEGMENT_GCS}{EXPORT_FILE}_batch{batch_number}_{analysis_date}.parquet"
+        for batch_number in list(batch_dict.keys())
+    ]
+    
+    full_results = pd.concat([
+        pd.read_parquet(f) for f in batched_files
+    ], axis=0, ignore_index=True)
+    
+    full_results.to_parquet(
+        f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet"
+    )
+    
+    for f in batched_files:
+        publish_utils.if_exists_then_delete(f)   
+    
     
     end = datetime.datetime.now()
     logger.info(f"resample and interpolate: {end - time1}")
