@@ -33,8 +33,8 @@ download_roads:
 speeds_with_arrays:
 	python resample.py
 	python stop_times_prep.py
-	python model_speeds_every100.py # split this out 
+	python model_speeds_every100.py # split this out?
 	python model_speeds_to_aggregation.py # add the corresponding columns
-	python condense_shn.py
-	python project_road_segments.py
+	#step to create road segments prepped similar to stop times
+	#would road endpoints be projected same way as stop times?
     
