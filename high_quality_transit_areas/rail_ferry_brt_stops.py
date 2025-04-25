@@ -156,7 +156,7 @@ def grab_ferry_stops(
     
     return gdf[
         (gdf.route_type.isin(route_types)) & 
-        ~(gdf.stop_id.isin(angel_and_alcatraz))
+        ~(gdf.stop_id.isin(no_bus_or_rail))
     ].reset_index(drop=True).assign(hqta_type = "major_stop_ferry")
 
 
