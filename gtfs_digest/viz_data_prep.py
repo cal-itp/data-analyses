@@ -22,8 +22,8 @@ route_direction_cols_for_viz = [
     "speed_mph",
     "portfolio_organization_name",
     "headway_in_minutes",
- "sched_rt_category",
-    'avg_stop_miles'# added this
+    "sched_rt_category", # added this
+    'avg_stop_miles'
 ]
 
 readable_col_names = {
@@ -66,13 +66,13 @@ def data_wrangling_for_visualizing(
     
     # create new columns
     # what is the formatting on this? it should be included...for now, it's in the floats
+    # AH 4/25: Changed this to integer 
     df = df.assign(
         headway_in_minutes = 60 / df.frequency
-    )
+    ).round(0)
     
     # these show up as floats but should be integers
     # also these aren't kept...
-    # AH: delete this out? 
     route_typology_cols = [
         f"is_{c}" for c in 
         ["express", "rapid",
@@ -93,7 +93,7 @@ def data_wrangling_for_visualizing(
     # of the order of the code execution
     # AH: Think it should be at the nearest integer since any decimal points would be too much detail
     pct_cols = [c for c in df.columns if "pct" in c]
-    df[pct_cols] = df[pct_cols] * 100
+    df[pct_cols] = df[pct_cols].round(0) * 100
 
     
     # subset to schedule and vp / why is this done now? do you publish schedule operators?
@@ -104,7 +104,7 @@ def data_wrangling_for_visualizing(
     # AH: we publish schedule only operators as well and they only have 
     # info for the first section, so filtering it out should be ok. 
     df2 = df.assign(
-        time_period = df.time_period.str.replace("_", " ").str.title()
+        time_period = df.time_period.astype(str).str.replace("_", " ").str.title()
     )[subset].query(
         'sched_rt_category == "schedule_and_vp"'
     ).rename(
