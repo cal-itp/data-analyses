@@ -21,8 +21,8 @@ def concatenate_schedule_operator_metrics(
     date_list: list
 ) -> pd.DataFrame:
     """
-    Get spatial accuracy and vehicle positions per minute metrics on the
-    operator-service_date grain for certain dates.
+    Get schedule statistics such as number of routes,
+    trips, etc. 
     """
     FILE = GTFS_DATA_DICT.schedule_tables.operator_scheduled_stats
     
@@ -39,8 +39,8 @@ def concatenate_rt_vs_schedule_operator_metrics(
     date_list: list
 ) -> pd.DataFrame:
     """
-    Concatenate operator grain RT vs schedule metrics
-    across all dates we have.
+    Get spatial accuracy and vehicle positions per minute metrics on the
+    operator-service_date grain for certain dates.
     """
     FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.vp_operator_metrics
     
@@ -73,6 +73,17 @@ def concatenate_operator_routes(
     
     return df
 
+## TODO: move counties stuff here
+# swap order at the bottom since this needs to be created first
+def counties_served_by_operator(route_gdf_by_operator):
+    """
+    take input produced in concatenate_operator_routes
+    get counties for operator-date
+    df should only be operator-date-counties_served
+    use this to merge into crosswalk and replace NTD column
+    """
+    
+    return
 
 def concatenate_crosswalks(
     date_list: list
@@ -117,12 +128,24 @@ def concatenate_crosswalks(
     )
     
     
-    # to aggregate up to organization, 
-    # group by name-service_date-portfolio_organization_name
-    # because name indicates different feeds, so we want to sum those.
+    # Group by name-service_date-portfolio_organization_name to aggregate up to      portfolio_organization_name,because name indicates different feeds, so we want to sum those.
+    agg1 = (
+    df.groupby(
+        [
+            "service_date",
+            "caltrans_district",
+            "portfolio_organization_name",
+            "schedule_gtfs_dataset_key",
+            "name",
+        ]
+    )
+    .agg({"service_area_pop": "sum", "service_area_sq_miles": "sum"})
+    .reset_index()
+    )
     
+    # Merge back in with 
     
-    return df
+    return agg1
 
 def merge_data_sources_by_operator(
     df_schedule: pd.DataFrame,
@@ -147,17 +170,7 @@ def merge_data_sources_by_operator(
         
     return df
 
-## TODO: move counties stuff here
-# swap order at the bottom since this needs to be created first
-def counties_served_by_operator(route_gdf_by_operator):
-    """
-    take input produced in concatenate_operator_routes
-    get counties for operator-date
-    df should only be operator-date-counties_served
-    use this to merge into crosswalk and replace NTD column
-    """
-    
-    return
+
 
 if __name__ == "__main__":
 
