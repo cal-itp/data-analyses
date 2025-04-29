@@ -307,6 +307,7 @@ def condense_df(df):
                  'program_code_description_for_description':lambda x:', and the '.join(x.unique()),
                  'project_title':'first', #should be the same                 
                  'obligations_amount':'sum', #sum of the obligations amount
+                 'total_cost_amount':'sum', #sum of the obligations amount
                  'congressional_district':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'district':lambda x:'|'.join(x.unique()), # get unique values to concatenate
                  'county_code':lambda x:'|'.join(x.unique()), # get unique values to concatenate
@@ -319,11 +320,13 @@ def condense_df(df):
                 }).reset_index())
     
     df_agg['obligations_amount'] = df_agg['obligations_amount'].astype(np.int64)
+    df_agg['total_cost_amount'] = df_agg['total_cost_amount'].astype(np.int64)
     
     df_agg['district'] = '|' + df_agg['district'] + '|'
     df_agg['congressional_district'] = '|' + df_agg['congressional_district'] + '|'
     df_agg['county_name_abbrev'] = '|' + df_agg['county_name_abbrev'] + '|'
     
+    display(df_agg.columns)
     return df_agg
 
 
