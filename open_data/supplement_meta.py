@@ -14,6 +14,23 @@ from open_data_utils import RENAME_HQTA, RENAME_SPEED, STANDARDIZED_COLUMNS_DICT
 def get_esri_url(name: str)-> str:
     return f"{ESRI_BASE_URL}{name}/FeatureServer"
 
+def add_shapefile_truncations(rename_dict: dict) -> dict:
+    '''
+    renaming dicts like STANDARDIZED_COLUMNS_DICT are used to both standardize
+    column names from our various analyses (as in create_stops_data.py), and
+    rename shapefile-truncated columns (as added here for use in arcgis_pro_script.py).
+    
+    When the desired name is longer than the shapefile limit, we need keys for both the 
+    original name and the shapefile-truncated desired name to point to the full
+    desired name. This function augements the dictionary with the latter.
+    '''
+    
+    duplicate_message = 
+    truncated_values = [value[:10] for value in rename_dict.values()]
+    assert len(truncated_values) == len(set(truncated_values)), ''
+    shp_truncations = {value[:10]:value for value in rename_dict.values() if len(value) > 10}
+    return rename_dict | shp_truncations #  union operator keeps unique key:value across both
+
 #--------------------------------------------------------#
 # Define methodology
 #--------------------------------------------------------#
@@ -34,13 +51,13 @@ supplement_me = {
         "methodology": HQTA_METHODOLOGY,
         "data_dict_url": get_esri_url("CA_HQ_Transit_Areas"),
         "revision_date": analysis_date,
-        "rename_cols": add_shapefile_truncations(RENAME_HQTA),
+        "rename_cols": RENAME_HQTA,
     },
     "ca_hq_transit_stops": {
         "methodology": HQTA_METHODOLOGY,
         "data_dict_url": get_esri_url("CA_HQ_Transit_Stops"), 
         "revision_date": analysis_date,
-        "rename_cols": add_shapefile_truncations(RENAME_HQTA),
+        "rename_cols": RENAME_HQTA,
     },
     "ca_transit_routes": {
         "methodology": TRAFFIC_OPS_METHODOLOGY,
@@ -58,28 +75,15 @@ supplement_me = {
         "methodology": SEGMENT_METHODOLOGY,
         "data_dict_url": get_esri_url("Speeds_By_Stop_Segments"),
         "revision_date": analysis_date,
-        "rename_cols": add_shapefile_truncations(RENAME_SPEED),
+        "rename_cols": RENAME_SPEED,
     },
     "speeds_by_route_time_of_day": {
         "methodology": ROUTE_METHODOLOGY,
         "data_dict_url": get_esri_url("Speeds_By_Route_Time_of_Day"),
         "revision_date": analysis_date,
-        "rename_cols": add_shapefile_truncations(RENAME_SPEED),
+        "rename_cols": RENAME_SPEED,
     }
 }
-
-def add_shapefile_truncations(rename_dict: dict) -> dict:
-    '''
-    renaming dicts like STANDARDIZED_COLUMNS_DICT are used to both standardize
-    column names from our various analyses (as in create_stops_data.py), and
-    rename shapefile-truncated columns (as added here for use in arcgis_pro_script.py).
-    
-    When the desired name is longer than the shapefile limit, we need keys for both the 
-    original name and the shapefile-truncated desired name to point to the full
-    desired name. This function augements the dictionary with the latter.
-    '''
-    shp_truncations = {value[:10]:value for value in rename_dict.values() if len(value) > 10}
-    return rename_dict | shp_truncations #  union operator keeps unique key:value across both
     
 if __name__ == "__main__":
     
