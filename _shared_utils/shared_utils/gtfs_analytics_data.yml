@@ -135,3 +135,5 @@ shared_data:
   dir: ${gcs_paths.SHARED_GCS}
   road_segments_twomile: segmented_roads_twomile_2020
   road_segments_onekm: segmented_roads_onekm_2020
+  road_cols: ["linearid", "mtfcc"]
+  road_segment_cols: ["linearid", "mtfcc", "fullname", "segment_sequence"]
