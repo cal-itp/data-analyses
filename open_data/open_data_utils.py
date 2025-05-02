@@ -159,30 +159,54 @@ def remove_internal_keys(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     
     return df.drop(columns = internal_cols)
 
+def esri_truncate_columns(columns: list | pd.Index) -> dict:
+    '''
+    from a list of columns or df.columns, match gdal algorithm
+    to generate ESRI Shapefile truncated names. Includes handling
+    truncated duplicates.
+    
+    https://gdal.org/en/stable/drivers/vector/shapefile.html
+    
+    Intended for use after all other renaming and just before shapefile export
+    '''
+    truncated_cols = []
+    for col in columns:
+        if col[:10] not in truncated_cols:
+            truncated_cols += [col[:10]]
+        else: #  truncated duplicate present
+            for i in range(1, 101):
+                if i > 99: raise Exception("gdal does not support more than 99 truncated duplicates")
+                suffix = str(i).rjust(2, "_") #  pad single digits with _ on left
+                if col[:8] + suffix not in truncated_cols:
+                    truncated_cols += [col[:8] + suffix]
+                    break
+    truncated_dict = dict(zip(truncated_cols, columns))
+    truncated_dict = {key: truncated_dict[key] for key in truncated_dict.keys() if key != truncated_dict[key]}
+    return truncated_dict
 
-# Rename columns when shapefile truncates
-RENAME_HQTA = {
-    "agency_pri": "agency_primary",
-    "agency_sec": "agency_secondary",
-    "hqta_detai": "hqta_details",
-    "base64_url": "base64_url_primary",
-    "base64_u_1": "base64_url_secondary",  
-    "org_id_pri": "org_id_primary",
-    "org_id_sec": "org_id_secondary",
-    "avg_trips_": "avg_trips_per_peak_hr"
-}
+# # Rename columns when shapefile truncates
+# RENAME_HQTA = {
+#     "agency_pri": "agency_primary",
+#     "agency_sec": "agency_secondary",
+#     "hqta_detai": "hqta_details",
+#     "base64_url": "base64_url_primary",
+#     "base64_u_1": "base64_url_secondary",  
+#     "org_id_pri": "org_id_primary",
+#     "org_id_sec": "org_id_secondary",
+#     "avg_trips_": "avg_trips_per_peak_hr"
+# }
 
-RENAME_SPEED = {
-    "stop_seque": "stop_sequence",
-    "time_of_da": "time_of_day",
-    "time_perio": "time_period",
-    "district_n": "district_name",
-    "direction_": "direction_id",
-    "common_sha": "common_shape_id",
-    "avg_sched_": "avg_sched_trip_min", 
-    "avg_rt_tri": "avg_rt_trip_min",
-    "caltrans_d": "district_name",
-    "organization_source_record_id": "org_id",
-    "organization_name": "agency",
-    "stop_pair_": "stop_pair_name"
-}
+# RENAME_SPEED = {
+#     "stop_seque": "stop_sequence",
+#     "time_of_da": "time_of_day",
+#     "time_perio": "time_period",
+#     "district_n": "district_name",
+#     "direction_": "direction_id",
+#     "common_sha": "common_shape_id",
+#     "avg_sched_": "avg_sched_trip_min", 
+#     "avg_rt_tri": "avg_rt_trip_min",
+#     "caltrans_d": "district_name",
+#     "organization_source_record_id": "org_id",
+#     "organization_name": "agency",
+#     "stop_pair_": "stop_pair_name"
+# }

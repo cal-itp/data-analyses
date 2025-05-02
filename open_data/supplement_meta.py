@@ -9,27 +9,23 @@ from pathlib import Path
 
 from calitp_data_analysis import utils
 from update_vars import analysis_date, ESRI_BASE_URL
-from open_data_utils import RENAME_HQTA, RENAME_SPEED, STANDARDIZED_COLUMNS_DICT
+from open_data_utils import esri_truncate_columns
+from gcs_to_esri import project_and_standardize_cols
+
+import intake
+catalog = intake.open_catalog("./catalog.yml")
 
 def get_esri_url(name: str)-> str:
     return f"{ESRI_BASE_URL}{name}/FeatureServer"
 
-def add_shapefile_truncations(rename_dict: dict) -> dict:
+def truncate_from_catalog(catalog_entry: str) -> dict:
     '''
-    renaming dicts like STANDARDIZED_COLUMNS_DICT are used to both standardize
-    column names from our various analyses (as in create_stops_data.py), and
-    rename shapefile-truncated columns (as added here for use in arcgis_pro_script.py).
-    
-    When the desired name is longer than the shapefile limit, we need keys for both the 
-    original name and the shapefile-truncated desired name to point to the full
-    desired name. This function augements the dictionary with the latter.
+    using a catalog entry name (the keys in supplement_me below),
+    get just the first row of the gdf and return dict matching
+    ESRI shapefile truncated columns to full names.
     '''
-    
-    duplicate_message = 
-    truncated_values = [value[:10] for value in rename_dict.values()]
-    assert len(truncated_values) == len(set(truncated_values)), ''
-    shp_truncations = {value[:10]:value for value in rename_dict.values() if len(value) > 10}
-    return rename_dict | shp_truncations #  union operator keeps unique key:value across both
+    one_row_gdf = catalog[catalog_entry].read().iloc[:1].pipe(project_and_standardize_cols)
+    return esri_truncate_columns(one_row_gdf.columns)
 
 #--------------------------------------------------------#
 # Define methodology
@@ -51,37 +47,37 @@ supplement_me = {
         "methodology": HQTA_METHODOLOGY,
         "data_dict_url": get_esri_url("CA_HQ_Transit_Areas"),
         "revision_date": analysis_date,
-        "rename_cols": RENAME_HQTA,
+        "rename_cols": truncate_from_catalog("ca_hq_transit_areas"),
     },
     "ca_hq_transit_stops": {
         "methodology": HQTA_METHODOLOGY,
         "data_dict_url": get_esri_url("CA_HQ_Transit_Stops"), 
         "revision_date": analysis_date,
-        "rename_cols": RENAME_HQTA,
+        "rename_cols": truncate_from_catalog("ca_hq_transit_stops"),
     },
     "ca_transit_routes": {
         "methodology": TRAFFIC_OPS_METHODOLOGY,
         "data_dict_url": get_esri_url("CA_Transit_Routes"),
         "revision_date": analysis_date,
-        "rename_cols": add_shapefile_truncations(STANDARDIZED_COLUMNS_DICT)
+        "rename_cols": truncate_from_catalog("ca_transit_routes")
     },
     "ca_transit_stops": {
         "methodology": TRAFFIC_OPS_METHODOLOGY,
         "data_dict_url": get_esri_url("CA_Transit_Stops"),
         "revision_date": analysis_date,
-        "rename_cols": add_shapefile_truncations(STANDARDIZED_COLUMNS_DICT)
+        "rename_cols": truncate_from_catalog("ca_transit_stops")
     },
     "speeds_by_stop_segments": {
         "methodology": SEGMENT_METHODOLOGY,
         "data_dict_url": get_esri_url("Speeds_By_Stop_Segments"),
         "revision_date": analysis_date,
-        "rename_cols": RENAME_SPEED,
+        "rename_cols": truncate_from_catalog("speeds_by_stop_segments"),
     },
     "speeds_by_route_time_of_day": {
         "methodology": ROUTE_METHODOLOGY,
         "data_dict_url": get_esri_url("Speeds_By_Route_Time_of_Day"),
         "revision_date": analysis_date,
-        "rename_cols": RENAME_SPEED,
+        "rename_cols": truncate_from_catalog("speeds_by_route_time_of_day"),
     }
 }
     
