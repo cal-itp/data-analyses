@@ -29,3 +29,12 @@ download_roads:
 	#pip install esridump
 	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson
 	python download_all_roads.py
+
+speeds_with_arrays:
+	python resample.py
+	python stop_times_prep.py
+	python model_speeds_every100.py # split this out?
+	python model_speeds_to_aggregation.py # add the corresponding columns
+	#step to create road segments prepped similar to stop times
+	#would road endpoints be projected same way as stop times?
+    
