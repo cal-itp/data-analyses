@@ -128,8 +128,6 @@ STANDARDIZED_COLUMNS_DICT = {
     "agency_name_secondary": "agency_secondary",
     "route_name_used": "route_name",
     "route_types_served": "routetypes",
-    "n_hours_in": "n_hours_in_service",
-    "route_ids_": "route_ids_served",
     "meters_to_shn": "meters_to_ca_state_highway"
 }
 
@@ -167,7 +165,7 @@ def esri_truncate_columns(columns: list | pd.Index) -> dict:
     
     https://gdal.org/en/stable/drivers/vector/shapefile.html
     
-    Intended for use after all other renaming and just before shapefile export
+    Intended for use after all other renaming complete.
     '''
     truncated_cols = []
     for col in columns:
