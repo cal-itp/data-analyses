@@ -115,27 +115,21 @@ speedmap_segments:
   min_meters_elapsed: 1609
   segment_meters: 1000
 
-road_segments:
-  dir: ${gcs_paths.SEGMENT_GCS}
-  stage1: ${speeds_tables.vp_dwell}
-  proxy_stop_times: "stop_time_expansion/roads_stop_times"
-  stage2: "nearest/nearest_vp_roads"
-  stage3: "road_segments/stop_arrivals"
-  stage4: "speeds_road_segments"
-  road_cols: ["linearid", "mtfcc"]
-  road_segment_cols: ["linearid", "mtfcc", "segment_sequence"]
-  trip_stop_cols: ["trip_instance_key", "linaerid", "mtfcc", "segment_sequence"]
-  #stop_pair_cols: ["stop_pair", "stop_pair_name", "segment_id"]
-  timestamp_col: ${speed_vars.timestamp_col}
-
 modeled_vp:
   dir: ${gcs_paths.SEGMENT_GCS}
-  raw_vp: ${speeds_tables.usable_vp}
-  vp_projected: "vp_condensed/vp_projected"
+  raw_vp: ${speeds_tables.raw_vp}
+  vp_projected: "resampled/vp_projected"
   resampled_vp: "resampled/resampled_5sec"
-  #speeds_100m or 250m?
-  stop_times_on_vp_path: "stop_times_projected"
-  speeds_by_stop_segments: "resampled/rough_speeds_stop_to_stop"
+  speeds_wide: "resampled/speeds_wide_100m"
+
+modeled_rt_stop_times:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  stop_times_projected: "model_rt_stop_times/stop_times_projected"
+  speeds_wide: "modeled_rt_stop_times/speeds_wide"
+  speeds: "modeled_rt_stop_times/speeds"
+  trip_stop_cols: ["trip_instance_key", "stop_sequence"]
+  stop_pair_cols: ["stop_pair", "stop_pair_name"]
+  route_dir_cols: ["route_id", "direction_id"]
 
 shared_data:
   dir: ${gcs_paths.SHARED_GCS}
