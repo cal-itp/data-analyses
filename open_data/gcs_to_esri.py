@@ -42,6 +42,17 @@ def remove_zipped_shapefiles():
     for f in FILES:
         os.remove(f)
     return
+
+def project_and_standardize_cols(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Project to WGS84, then standardize column names.
+    """
+    gdf = gdf.to_crs(WGS84).pipe(
+            open_data_utils.standardize_column_names
+        ).pipe(
+            open_data_utils.remove_internal_keys
+        )
+    return gdf
     
     
 if __name__=="__main__":
@@ -53,18 +64,11 @@ if __name__=="__main__":
                level="INFO")
         
     for d in RUN_ME :
-        gdf = catalog[d].read().to_crs(WGS84).pipe(
-            open_data_utils.standardize_column_names
-        ).pipe(
-            open_data_utils.remove_internal_keys
-        )
+        gdf = catalog[d].read().pipe(project_and_standardize_cols)
         
-
         logger.info(f"********* {d} *************")
         print_info(gdf)
 
         # Zip the shapefile
         utils.make_zipped_shapefile(gdf, f"{d}.zip")
     
-
-
