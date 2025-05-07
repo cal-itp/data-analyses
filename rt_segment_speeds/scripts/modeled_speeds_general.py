@@ -9,8 +9,7 @@ import sys
 from loguru import logger
 
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT
-from shared_utils import rt_dates
-from B2_modeled_rt_stop_times_speeds import speed_arrays_by_segment_trip
+from modeled_rt_stop_times_speeds import speed_arrays_by_segment_trip
 
 if __name__ == "__main__":
     
@@ -22,11 +21,9 @@ if __name__ == "__main__":
                level="INFO")
     
     
-    analysis_date_list = [
-        rt_dates.DATES["oct2024"]
-    ]    
-
-    for analysis_date in analysis_date_list:
+    from segment_speed_utils.project_vars import test_dates
+    
+    for analysis_date in test_dates:
         
         start = datetime.datetime.now()
 
