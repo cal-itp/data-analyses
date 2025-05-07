@@ -2,13 +2,7 @@
 segmentize:
 	#pip install -r requirements.txt
 	python cut_stop_segments.py
-	python cut_speedmap_segments.py    
-
-prep_roads:
-# run cut_road_segments once
-	#python cut_road_segments.py #cut once creates files needed to run in concat_road_segments
-	python shapes_roads_crosswalk.py     
-	python proxy_road_stop_times.py    
+	python cut_speedmap_segments.py      
 
 rt_stop_times_pipeline:
 	make segmentize
