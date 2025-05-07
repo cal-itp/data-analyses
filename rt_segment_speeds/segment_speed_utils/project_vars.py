@@ -28,6 +28,7 @@ weeks_available = [
 
 
 analysis_date_list = [rt_dates.DATES["apr2025"]]
+test_dates = [rt_dates.DATES["nov2024"]]
 
 PROJECT_CRS = "EPSG:3310"
 ROAD_SEGMENT_METERS = 1_000
