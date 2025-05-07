@@ -115,6 +115,7 @@ speedmap_segments:
   min_meters_elapsed: 1609
   segment_meters: 1000
 
+# POC stage - only 2 dates supported
 modeled_vp:
   dir: ${gcs_paths.SEGMENT_GCS}
   raw_vp: ${speeds_tables.raw_vp}
@@ -122,18 +123,33 @@ modeled_vp:
   resampled_vp: "resampled/resampled_5sec"
   speeds_wide: "resampled/speeds_wide_100m"
 
+# POC stage - only 2 dates supported
 modeled_rt_stop_times:
   dir: ${gcs_paths.SEGMENT_GCS}
   stop_times_projected: "model_rt_stop_times/stop_times_projected"
   speeds_wide: "modeled_rt_stop_times/speeds_wide"
   speeds: "modeled_rt_stop_times/speeds"
+  segment_timeofday: "rollup_singleday/modeled_speeds_stop_segments"
   trip_stop_cols: ["trip_instance_key", "stop_sequence"]
   stop_pair_cols: ["stop_pair", "stop_pair_name"]
   route_dir_cols: ["route_id", "direction_id"]
+
+# POC stage - only 2 dates supported
+modeled_road_segments:
+  dir: ${gcs_paths.SEGMENT_GCS}
+  crosswalk: "road_segments/roads_trips_crosswalk"
+  road_endpoints_projected: "road_segments/road_endpoints_projected"
+  speeds_wide: "road_segments/speeds_wide"
+  speeds: "road_segments/speeds"
+  segment_timeofday: "rollup_multioperator/speeds"
+  trip_stop_cols: ["trip_instance_key", "linearid", "segment_sequence"]
+  min_seconds_elapsed: 60
+  min_meters_elapsed: 250
 
 shared_data:
   dir: ${gcs_paths.SHARED_GCS}
   road_segments_twomile: segmented_roads_twomile_2020
   road_segments_onekm: segmented_roads_onekm_2020
+  condensed_shn: condensed_shn_onekm
   road_cols: ["linearid", "mtfcc"]
   road_segment_cols: ["linearid", "mtfcc", "fullname", "segment_sequence"]
