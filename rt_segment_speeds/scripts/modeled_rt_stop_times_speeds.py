@@ -10,7 +10,6 @@ import sys
 from loguru import logger
 
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT
-from shared_utils import rt_dates
 import model_utils
 
 def set_intervaled_distance_cutoffs(
@@ -111,18 +110,16 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
+    from segment_speed_utils.project_vars import test_dates
     
-    analysis_date_list = [
-        rt_dates.DATES["oct2024"]
-    ]    
-
-    for analysis_date in analysis_date_list:
+    for analysis_date in test_dates:
         
         start = datetime.datetime.now()
 
+        segment_type = "modeled_rt_stop_times"
         INPUT_FILE = GTFS_DATA_DICT.modeled_vp.resampled_vp
-        STOP_TIMES_FILE = GTFS_DATA_DICT.modeled_rt_stop_times.stop_times_projected
-        EXPORT_FILE = GTFS_DATA_DICT.modeled_rt_stop_times.speeds_wide
+        STOP_TIMES_FILE = GTFS_DATA_DICT[segment_type].stop_times_projected
+        EXPORT_FILE = GTFS_DATA_DICT[segment_type].speeds_wide
 
         df = pd.read_parquet(
             f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet"
@@ -157,4 +154,4 @@ if __name__ == "__main__":
         )
 
         end = datetime.datetime.now()
-        logger.info(f"{analysis_date}: speeds every stop: {end - start}")
+        logger.info(f"{segment_type}  {analysis_date}: speeds every stop: {end - start}")

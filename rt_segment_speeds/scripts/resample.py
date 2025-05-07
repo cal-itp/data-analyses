@@ -10,7 +10,7 @@ import sys
 from loguru import logger
 
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT
-from shared_utils import rt_dates, publish_utils
+from shared_utils import  publish_utils
 import model_utils
 
 def determine_batches(analysis_date: str) -> dict:
@@ -136,12 +136,10 @@ if __name__ == "__main__":
                level="INFO")
     
     
-    analysis_date_list = [
-        rt_dates.DATES["oct2024"]
-    ]
+    from segment_speed_utils.project_vars import test_dates
     
-    for analysis_date in analysis_date_list:
-
+    for analysis_date in test_dates:
+    
         start = datetime.datetime.now()
         
         INPUT_FILE = GTFS_DATA_DICT.modeled_vp.vp_projected
