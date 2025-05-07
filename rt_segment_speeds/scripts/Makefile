@@ -30,11 +30,27 @@ download_roads:
 	#esri2geojson https://geo.dot.gov/server/rest/services/Hosted/California_2018_PR/FeatureServer/0 ca_roads.geojson
 	python download_all_roads.py
 
-speeds_with_arrays:
-	python resample.py
+# Prefer Census TIGER roads because road identifiers are easier to use (linearid)
+census_roads_preprocessing:
+	python ingest_ca_roads.py
+	python cut_road_segments.py
+	python condense_shn.py
+
+modeled_vp_preprocessing:
+	python vp_condenser.py
+	python resample.py 
+	#python modeled_speeds_general.py 
+# dependency is a more minimal version of stop_times_direction
+	#python cut_stop_segments.py  
+
+modeled_rt_stop_times:
 	python stop_times_prep.py
-	python model_speeds_every100.py # split this out?
-	python model_speeds_to_aggregation.py # add the corresponding columns
-	#step to create road segments prepped similar to stop times
-	#would road endpoints be projected same way as stop times?
+	python modeled_rt_stop_times_speeds.py
+	python aggregate_modeled_speeds.py
+    
+modeled_road_segment_speeds:
+	python crosswalk_vp_roads.py    
+	python project_road_segments.py
+	python model_speeds_for_roads.py
+	python aggregate_road_speeds.py
     
