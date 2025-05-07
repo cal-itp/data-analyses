@@ -12,7 +12,11 @@ shared_utils_dir = "_shared_utils/shared_utils/"
 
 
 def get_catalog(catalog_name: Literal["shared_data_catalog", "gtfs_analytics_data"]) -> Path:
-    """ """
+    """
+    Grab either the shared_data_catalog (uses intake driver) or
+    gtfs_analytics_data catalog (uses OmegaConf yaml parser).
+
+    """
     catalog_file_path = Path(f"{repo_name}{shared_utils_dir}{catalog_name}.yml")
     catalog_path = Path.cwd().home().joinpath(catalog_file_path)
 

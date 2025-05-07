@@ -12,7 +12,7 @@ from calitp_data_analysis import utils
 
 from segment_speed_utils import helpers, vp_transform
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT, PROJECT_CRS
-from shared_utils import rt_dates, geo_utils
+from shared_utils import geo_utils
 import model_utils
 
 
@@ -75,11 +75,9 @@ if __name__ == "__main__":
                level="INFO")
     
     
-    analysis_date_list = [
-        rt_dates.DATES["oct2024"]
-    ]
+    from segment_speed_utils.project_vars import test_dates
     
-    for analysis_date in analysis_date_list:
+    for analysis_date in test_dates:
         
         start = datetime.datetime.now()
 

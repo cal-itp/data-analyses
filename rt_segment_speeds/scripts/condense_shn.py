@@ -12,8 +12,35 @@ from calitp_data_analysis import utils
 
 from segment_speed_utils import vp_transform
 from segment_speed_utils.project_vars import GTFS_DATA_DICT, PROJECT_CRS, SHARED_GCS
+from shared_utils import catalog_utils
 
+catalog = catalog_utils.get_catalog("shared_data_catalog")
+
+def spatial_join_shn_caltrans_districts(
+    gdf: gpd.GeoDataFrame,
+) -> gpd.GeoDataFrame:
+    """
+    Attach caltrans_district to Census TIGER roads linearid.
+    """
+    districts = catalog.caltrans_districts.read()[
+        ["DISTRICT", "geometry"]
+    ].to_crs(PROJECT_CRS).rename(
+        columns = {"DISTRICT": "caltrans_district"}
+    )
     
+    # inner join gets us more rows than original SHN because
+    # some linearids intersect with multiple districts
+    # this is ok, but it makes doing a left join much more time-consuming
+    crosswalk = gpd.sjoin(
+        gdf,
+        districts,
+        how = "inner",
+        predicate = "intersects"
+    )[["linearid", "caltrans_district"]].drop_duplicates()
+    
+    return crosswalk
+
+
 if __name__ == "__main__":
     
     start = datetime.datetime.now()
@@ -37,9 +64,18 @@ if __name__ == "__main__":
     ).set_crs(
         PROJECT_CRS
     )
-        
-    utils.geoparquet_gcs_export(
+    
+    shn_with_district = spatial_join_shn_caltrans_districts(shn)
+    
+    shn2 = pd.merge(
         shn,
+        shn_with_district,
+        on = "linearid",
+        how = "left"
+    )
+    
+    utils.geoparquet_gcs_export(
+        shn2,
         SHARED_GCS,
         f"condensed_shn_{segment_type}"
     )
@@ -48,3 +84,4 @@ if __name__ == "__main__":
     print(f"condense {segment_type} SHN segments: {end - start}")
     
     #condense onekm SHN segments: 0:00:33.344454    
+    #add district column 0:01:26.688158
