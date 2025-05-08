@@ -2,7 +2,7 @@ import datetime as dt
 from shared_utils import rt_dates
 
 GCS_PATH = 'gs://calitp-analytics-data/data-analyses/conveyal_update/'
-TARGET_DATE = rt_dates.DATES['mar2025']  
+TARGET_DATE = rt_dates.DATES['apr2025']  
 LOOKBACK_TIME = dt.timedelta(days=60)
 OSM_FILE = 'us-west-latest.osm.pbf'
 PUBLISHED_FEEDS_YML_PATH = "../gtfs_funnel/published_operators.yml"
