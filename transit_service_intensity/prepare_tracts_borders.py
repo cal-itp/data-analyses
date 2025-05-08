@@ -36,31 +36,33 @@ def find_borders(tracts_gdf: gpd.GeoDataFrame,
     borders['intersection_id'] = [str(uuid.uuid4()) for _ in range(borders.shape[0])] 
     return borders
 
-# def find_shapes_in_tracts_borders(shape_stops, tracts, borders):
+def find_shapes_in_tracts_borders(shape_stops, tracts, borders):
     
-#     '''
-#     sjoin stops to tracts and border zones by GTFS shape.
-#     create tsi_segment_id equal to tract if a single tract
-#     or intersection_id if a border zone
-#     '''
-#     shape_stops_tracts_borders = (pd.concat([tracts, borders])
-#                               .sjoin(shape_stops)
-#                               .drop(columns='index_right')
-#                              )
+    '''
+    sjoin stops to tracts and border zones by GTFS shape.
+    create tsi_segment_id equal to tract if a single tract
+    or intersection_id if a border zone
+    '''
+    shape_stops_tracts_borders = (pd.concat([tracts, borders])
+                              .sjoin(shape_stops)
+                              .drop(columns='index_right')
+                             )
     
-#     shape_stops_tracts_borders = shape_stops_tracts_borders.assign(
-#         tsi_segment_id = shape_stops_tracts_borders.tract.combine_first(
-#             shape_stops_tracts_borders.intersection_id)
-#             .astype(str)
-#     )
-#     return shape_stops_tracts_borders
+    shape_stops_tracts_borders = shape_stops_tracts_borders.assign(
+        tsi_segment_id = shape_stops_tracts_borders.tract.combine_first(
+            shape_stops_tracts_borders.intersection_id)
+            .astype(str)
+    )
+    return shape_stops_tracts_borders
 
 
 if __name__ == "__main__":
     
-    tracts = read_census_tracts()
+    print(f'prepare_tracts_borders {ANALYSIS_DATE}')
+    tracts = read_census_tracts(ANALYSIS_DATE)
     shapes = helpers.import_scheduled_shapes(ANALYSIS_DATE)
-    borders = find_borders(tracts)
+    # borders = find_borders(tracts)
+    borders = gpd.read_parquet(f'borders_{ANALYSIS_DATE}.parquet')
     st = helpers.import_scheduled_stop_times(analysis_date=ANALYSIS_DATE,
                                              columns=['feed_key', 'trip_id', 'stop_id'],
                                              get_pandas=True)
@@ -73,7 +75,6 @@ if __name__ == "__main__":
      .dropna()
     )
 
-    # shape_stops_tracts_borders = find_shapes_in_tracts_borders(shape_stops, tracts, borders)
-    # shape_stops_tracts_borders.to_parquet(f'shape_stops_tracts_borders_{ANALYSIS_DATE}.parquet')
-    
     borders.to_parquet(f'borders_{ANALYSIS_DATE}.parquet')
+    shape_stops_tracts_borders = find_shapes_in_tracts_borders(shape_stops, tracts, borders)
+    shape_stops_tracts_borders.to_parquet(f'shape_stops_tracts_borders_{ANALYSIS_DATE}.parquet')

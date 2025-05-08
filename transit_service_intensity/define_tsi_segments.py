@@ -61,6 +61,7 @@ def overlay_tracts_borders(
         
 if __name__ == "__main__":
     
+    print(f'define_tsi_segments {ANALYSIS_DATE}')
     tracts = read_census_tracts(ANALYSIS_DATE)
     shapes = helpers.import_scheduled_shapes(ANALYSIS_DATE)
     borders = gpd.read_parquet(f'borders_{ANALYSIS_DATE}.parquet')
