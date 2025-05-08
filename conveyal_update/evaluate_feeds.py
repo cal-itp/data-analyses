@@ -139,8 +139,15 @@ def get_old_feeds(undefined_feeds_base64_urls: pd.Series, target_date: dt.date |
     response = query_sql(
         query
     )
+    if response.index.size == 0:
+        # Early exit if no feeds are found
+        print("No old feeds found")
+        return pd.DataFrame(
+            columns=["base64_url", "feed_key", "date_processed"]
+        )
     response_grouped = response.groupby("base64_url")
     feed_info_by_url = response_grouped[["valid_feed_date", "feed_key"]].first()
+    print(feed_info_by_url["valid_feed_date"])
     feed_info_by_url["date_processed"] = feed_info_by_url["valid_feed_date"].dt.date - dt.timedelta(days=1) 
     # we have the day the feed becomes invalid, so the day we are interested in where the feed *is* valid is the day after
     return feed_info_by_url.drop("valid_feed_date", axis=1)
@@ -168,6 +175,18 @@ def merge_old_feeds(df_all_feeds: pd.DataFrame, df_undefined_feeds: pd.DataFrame
         target_date,
         max_lookback_timedelta
     )
+    if feed_search_result.index.size == 0:
+        # Early exit if no old feeds are found
+        df_out = df_all_feeds.copy()
+        df_out["no_schedule_feed_found"] = (df_out["base64_url"].isin(df_undefined_feeds["base64_url"])).fillna(False) #TODO: check if this should be False or True?
+        df_out["valid_date_other_than_service_date"] = False
+        # This is a bit messy, but future steps expect a date rather than a datetime, so we convert that here if needed
+        try:
+            df_out["date"] = df_all_feeds["date"].dt.date
+        except AttributeError:
+            pass
+        return df_out
+    
     feeds_merged = df_all_feeds.merge(
         feed_search_result,
         how="left",
