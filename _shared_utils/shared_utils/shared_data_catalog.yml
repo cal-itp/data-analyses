@@ -5,7 +5,7 @@ sources:
     driver: geojson
     description: CA county polygons
     args:
-      urlpath: https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson
+      urlpath: https://cecgis-caenergy.opendata.arcgis.com/api/download/v1/items/ce721c35ab7e4e4b89ef2080b4c331f6/geojson?layers=0
   caltrans_districts:
     driver: geojson
     description: Caltrans district polygons
