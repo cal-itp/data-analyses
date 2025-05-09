@@ -7,6 +7,7 @@ import geopandas as gpd
 catalog = intake.open_catalog("*.yml")
 
 def read_census_tracts(
+    analysis_date: str,
     crs: str = geography_utils.CA_NAD83Albers_m
 ) -> gpd.GeoDataFrame:
     census_tracts = (
