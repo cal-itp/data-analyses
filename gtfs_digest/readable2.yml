@@ -1,0 +1,89 @@
+# Creating the portfolio
+
+# Color Palettes
+# This color palette is good for categorizing nominal values.
+# The colors do not represent "good" or "bad", they merely differentiate the values.
+color_palettes:
+  two_colors: ["#dd217d","#fcb40e"]
+  tri_color: ["#ccbb44","#5b8efd","#dd217d"]
+  four_colors: ["#dd217d","#fcb40e","#ccbb44","#5b8efd"]
+  full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44"]
+  headway_scale: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d","#dd217d","#dd217d"]  
+# Organization Descriptive Info
+# To Come
+
+# Portfolio Organization Grain Charts
+organization_spatial_accuracy:
+  title: "Spatial Accuracy (All Routes)"
+organization_vp_per_min_graph:
+  title: "Vehicle Positions per Minute (All Routes)"
+    
+# Route Grain Charts
+text_graph:
+  title: "Route Statistics for "
+  subtitle: "Data taken from the most recent date of"
+
+avg_scheduled_min_graph:
+  title: "Average Scheduled Minutes"
+  subtitle: "The average minutes a trip is scheduled to run in each direction."
+  tooltip: ["Date","Route","Direction","Average Scheduled Service (trip minutes)"]
+  colors: ${color_palettes.four_colors} 
+
+timeliness_trips_graph:
+  title: "Breakdown of Trips by Timeliness for " # hold the variable you'll inject 
+  subtitle: "Categorizing whether a trip is early, late, or on time. A trip is on time if it arrives 5 minutes later or earlier than scheduled."
+  tooltip: ["Date","Route","Direction","Period", "Percentage"]
+  colors: ${color_palettes.tri_color}
+
+frequency_graph:
+  title: "Frequency of Trips in Minutes"
+  subtitle: "Understanding how often a trip comes. If the bar says 120 minutes, that means a trip will pass that particular direction once every 2 hours."
+  tooltip: ["Date","Route","Direction","Period", "Headway (Minutes)",]
+  # Headways of 0-15 are green, 30-60 are yellow, and 60+ are red.
+  domain: [0, 15, 30, 45, 60, 120, 180, 240]
+  range: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d","#dd217d","#dd217d"]  
+  colors:  ${color_palettes.headway_scale}
+  
+n_scheduled_graph:
+  title: "Total Scheduled Trips for "
+  subtitle: ""
+  tooltip: ["Date","Route","Direction","Period", "# Scheduled Trips",]
+  colors: ${color_palettes.four_colors}
+
+speed_graph:
+  title: "Average Speed (MPH)"
+  subtitle: "The average miles per hour a vehicle travels by direction and time of day."
+  tooltip: ["Date","Route","Direction","Period","Speed (MPH)",]
+  colors: ${color_palettes.tri_color}
+
+vp_per_min_graph:
+  title: "Vehicle Positions per Minute"
+  subtitle: "Trips should have 2+ VPs per minute. This metric reflects the accuracy of the temporal data collected."
+  tooltip: ["Date","Route","Direction", "Average VP per Minute",]
+  # This scale goes from red, yellow, to green.
+  # 0-1.9 are red, 2-3 are yellow, and the ideal number (3) is green. 
+  domain: [0,1,2,3]
+  colors: ["#dd217d","#fc5c04","#fcb40e","#ccbb44"]
+
+sched_vp_per_min_graph:
+  title: "Percentage of Scheduled Trip Journey with 1+/2+ Vehicle Positions"
+  subtitle: "The goal is for ~100% of a trip's duration to have 2 or more Vehicle Positions per minute."
+  tooltip: ["Date","Route","Direction", "Category", "% of Trip Duration",]
+  colors: ${color_palettes.tri_color}
+
+spatial_accuracy_graph:
+  title: "Spatial Accuracy"
+  subtitle: "The percentage of vehicle positions that fall within 35 meters of a route's scheduled shape (path) reflects the accuracy of the collected spatial data."
+  tooltip: ["Date","Route","Direction", "% VP within Scheduled Shape",]
+  # This scale goes from red, yellow, to green.
+  # Low numbers are red, medium numbers are yellow, and the ideal number (in the ballpark of 100%) is dark green. 
+  domain: [0,20, 40, 60, 80, 100]  
+  colors: ["#dd217d","#fc5c04","#ff9c42","#fcb40e", "#e9d868","#ccbb44"]
+
+# Divider Charts
+rider_quality_graph:
+  title: "The charts below measure the quality of the rider experience for this route."
+data_quality_graph:
+  title: "The charts below describe the quality of GTFS data collected for this route."
+summary_graph:
+  title: "Below are some of the summary statistics collected for this route."

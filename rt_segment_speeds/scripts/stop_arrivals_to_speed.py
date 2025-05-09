@@ -48,7 +48,7 @@ def attach_operator_natural_identifiers(
         how = "inner",
     )
     
-    if segment_type == "rt_stop_times":
+    if segment_type in ["rt_stop_times", "modeled_rt_stop_times"]:
         
         trip_stop_cols = [*GTFS_DATA_DICT[segment_type]["trip_stop_cols"]]
         

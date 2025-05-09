@@ -9,8 +9,6 @@ import yaml
 from great_tables import GT, loc, style
 
 def labeling(word: str) -> str:
-    """
-    """
     return (
         word.replace("_", " ")
         .title()

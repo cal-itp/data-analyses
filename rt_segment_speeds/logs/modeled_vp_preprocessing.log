@@ -1,0 +1,6 @@
+2025-05-02 09:32:49.655 | INFO     | __main__:<module>:106 - 2024-10-16 project vp against shape and condense: 0:13:45.964514
+2025-05-02 09:43:24.288 | INFO     | __main__:<module>:188 - 2024-10-16: resample, interpolate: 0:02:24.672603
+2025-05-02 10:23:47.657 | INFO     | __main__:<module>:144 - 2024-10-16: condense stop times and interpolate: 0:02:16.656144
+2025-05-06 16:34:08.357 | INFO     | __main__:<module>:104 - 2024-11-13 project vp against shape and condense: 0:14:25.173723
+2025-05-06 16:37:26.521 | INFO     | __main__:<module>:186 - 2024-11-13: resample, interpolate: 0:02:35.685557
+2025-05-06 16:44:52.268 | INFO     | __main__:<module>:142 - 2024-11-13: condense stop times and interpolate: 0:02:19.362609

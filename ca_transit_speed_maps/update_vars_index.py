@@ -21,9 +21,9 @@ def datetime_to_rt_date_key(datetime: dt.datetime, day_offset: int = 0) -> str:
     datetime = datetime + dt.timedelta(days = day_offset)
     return datetime.strftime('%b%Y').lower()
 
-#  default is current month then 2 months of lookback
+#  default is current month if available in rt_dates then 2 months of lookback
 ANALYSIS_DATE_LIST = [datetime_to_rt_date_key(dt.datetime.now(), x) for x in range(0, -61, -30)]
-ANALYSIS_DATE_LIST = [rt_dates.DATES[key] for key in ANALYSIS_DATE_LIST]
+ANALYSIS_DATE_LIST = [rt_dates.DATES[key] for key in ANALYSIS_DATE_LIST if key in rt_dates.DATES.keys()]
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE_LIST[0]}.parquet'
 SPEED_SEGS_PATH = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.segment_timeofday}'
 GEOJSON_SUBFOLDER = f'segment_speeds_{ANALYSIS_DATE_LIST[0]}/'

@@ -7,6 +7,7 @@ import geopandas as gpd
 import pandas as pd
 
 from calitp_data_analysis import utils
+from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils import time_series_utils
 from shared_utils import gtfs_utils_v2, portfolio_utils, publish_utils
 from merge_data import merge_in_standardized_route_names, PORTFOLIO_ORGANIZATIONS_DICT
@@ -21,8 +22,8 @@ def concatenate_schedule_operator_metrics(
     date_list: list
 ) -> pd.DataFrame:
     """
-    Get spatial accuracy and vehicle positions per minute metrics on the
-    operator-service_date grain for certain dates.
+    Get schedule statistics such as number of routes,
+    trips, etc. 
     """
     FILE = GTFS_DATA_DICT.schedule_tables.operator_scheduled_stats
     
@@ -39,8 +40,8 @@ def concatenate_rt_vs_schedule_operator_metrics(
     date_list: list
 ) -> pd.DataFrame:
     """
-    Concatenate operator grain RT vs schedule metrics
-    across all dates we have.
+    Get spatial accuracy and vehicle positions per minute metrics on the
+    operator-service_date grain for certain dates.
     """
     FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.vp_operator_metrics
     
@@ -73,6 +74,55 @@ def concatenate_operator_routes(
     
     return df
 
+def get_counties() -> gpd.GeoDataFrame:
+    """
+    Load a geodataframe of the California counties.
+    """
+    ca_gdf = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
+    my_gdf = to_snakecase(gpd.read_file(f"{ca_gdf}"))[["county_name", "geometry"]]
+
+    return my_gdf
+
+## TODO: move counties stuff here
+# swap order at the bottom since this needs to be created first
+def counties_served_by_operator(route_gdf_by_operator):
+    """
+    take input produced in concatenate_operator_routes
+    get counties for operator-date
+    df should only be operator-date-counties_served
+    use this to merge into crosswalk and replace NTD column
+    """
+    # Subset
+    gdf2 = gdf[["route_id", "service_date", "portfolio_organization_name", "geometry"]]
+
+    # Grab counties
+    ca_counties = get_counties()
+
+    # Sjoin
+    counties_served = gpd.sjoin(
+        gdf2, ca_counties.to_crs(gdf.crs), how="inner", predicate="intersects"
+    ).drop(columns="index_right")
+
+    # Drop Duplicates
+    counties_served2 = (
+        counties_served[["service_date", "portfolio_organization_name", "county_name"]]
+        .drop_duplicates()
+        .sort_values(by=["county_name"])
+        .reset_index(drop=True)
+    )
+
+    # Concatenate the counties using a groupby
+    counties_served3 = counties_served2.groupby(
+        [
+            "service_date",
+            "portfolio_organization_name",
+        ],
+        as_index=False,
+    ).agg({"county_name": ",".join})
+    
+    # Rename
+    counties_served3 = counties_served3.rename({"county_name":"counties_served"})
+    return counties_served3
 
 def concatenate_crosswalks(
     date_list: list
@@ -117,12 +167,23 @@ def concatenate_crosswalks(
     )
     
     
-    # to aggregate up to organization, 
-    # group by name-service_date-portfolio_organization_name
-    # because name indicates different feeds, so we want to sum those.
+    # Group by name-service_date-portfolio_organization_name to aggregate up to      portfolio_organization_name,because name indicates different feeds, so we want to sum those.
+    agg1 = (
+    df.groupby(
+        [
+            "service_date",
+            "caltrans_district",
+            "portfolio_organization_name",
+            "schedule_gtfs_dataset_key",
+            "name",
+        ]
+    )
+    .agg({"service_area_pop": "sum", "service_area_sq_miles": "sum"})
+    .reset_index()
+    )
     
     
-    return df
+    return agg1
 
 def merge_data_sources_by_operator(
     df_schedule: pd.DataFrame,
@@ -147,17 +208,7 @@ def merge_data_sources_by_operator(
         
     return df
 
-## TODO: move counties stuff here
-# swap order at the bottom since this needs to be created first
-def counties_served_by_operator(route_gdf_by_operator):
-    """
-    take input produced in concatenate_operator_routes
-    get counties for operator-date
-    df should only be operator-date-counties_served
-    use this to merge into crosswalk and replace NTD column
-    """
-    
-    return
+
 
 if __name__ == "__main__":
 
@@ -182,6 +233,21 @@ if __name__ == "__main__":
     # Concat NTD/crosswalk
     crosswalk_df = concatenate_crosswalks(analysis_date_list)
     
+    # Load in scheduled routes.
+    gdf = concatenate_operator_routes(
+        analysis_date_list
+    ).pipe(
+        merge_in_standardized_route_names
+    ).pipe(
+        publish_utils.exclude_private_datasets, 
+        col = "schedule_gtfs_dataset_key", 
+        public_gtfs_dataset_keys = public_feeds
+    )
+
+    # Merge crosswalk_df with counties served that we spatial join on our own
+    counties_served_df = counties_served_by_operator(gdf)
+    crosswalk_df = pd.merge(crosswalk_df, counties_served_df, how = "left", on = ["portfolio_organization_name", "service_date"])
+    
     operator_df = merge_data_sources_by_operator(
         schedule_df,
         rt_schedule_df,
@@ -195,18 +261,6 @@ if __name__ == "__main__":
     operator_df.to_parquet(
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
     )
-    
-    # Load in scheduled routes.
-    gdf = concatenate_operator_routes(
-        analysis_date_list
-    ).pipe(
-        merge_in_standardized_route_names
-    ).pipe(
-        publish_utils.exclude_private_datasets, 
-        col = "schedule_gtfs_dataset_key", 
-        public_gtfs_dataset_keys = public_feeds
-    )
-
     utils.geoparquet_gcs_export(
         gdf,
         RT_SCHED_GCS,

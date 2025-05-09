@@ -1,0 +1,8 @@
+2025-05-02 11:01:15.230 | INFO     | __main__:<module>:160 - 2024-10-16: speeds every stop: 0:01:21.668336
+2025-05-02 11:45:06.223 | INFO     | __main__:<module>:51 - 2024-10-16: speeds every 100m: 0:05:23.038420
+2025-05-05 13:04:35.994 | INFO     | __main__:<module>:103 - modeled_rt_stop_times  2024-10-16: speeds wide to long 0:02:13.850344
+2025-05-06 16:46:45.026 | INFO     | __main__:<module>:158 - modeled_rt_stop_times  2024-11-13: speeds every stop: 0:01:21.522659
+2025-05-06 19:00:25.371 | INFO     | __main__:<module>:160 - modeled_rt_stop_times  2024-10-16: speeds wide to long 0:01:54.558585
+2025-05-06 19:00:54.060 | INFO     | __main__:<module>:182 - modeled_rt_stop_times  2024-10-16: aggregated stop segment speeds: 0:00:28.689206
+2025-05-06 19:03:00.820 | INFO     | __main__:<module>:160 - modeled_rt_stop_times  2024-11-13: speeds wide to long 0:02:06.758947
+2025-05-06 19:03:28.958 | INFO     | __main__:<module>:182 - modeled_rt_stop_times  2024-11-13: aggregated stop segment speeds: 0:00:28.137780
