@@ -65,8 +65,6 @@ def data_wrangling_for_visualizing(
     """
     
     # create new columns
-    # what is the formatting on this? it should be included...for now, it's in the floats
-    # AH 4/25: Changed this to integer 
     df = df.assign(
         headway_in_minutes = 60 / df.frequency
     ).round(0)
@@ -80,29 +78,15 @@ def data_wrangling_for_visualizing(
          "local", "downtown_local"]
     ]
     
-    # the pct_ columns are included here....do you want to round it first
-    # and then scale it up? i dealt with this by excluding it
     float_cols = [c for c in df.select_dtypes(include=["float"]).columns 
                      if c not in route_typology_cols and "pct" not in c]
     
     df[float_cols] = df[float_cols].round(2)
     
-    # these had 3 decimal places, then when it gets scaled, it just has 1 decimal place
-    # is that what you want? or you want it rounded to the nearest integer?
-    # whatever you decide, it should be obvious bc of the code, not because 
-    # of the order of the code execution
-    # AH: Think it should be at the nearest integer since any decimal points would be too much detail
+
     pct_cols = [c for c in df.columns if "pct" in c]
     df[pct_cols] = df[pct_cols].round(0) * 100
 
-    
-    # subset to schedule and vp / why is this done now? do you publish schedule operators?
-    # or do schedule_only operators only get the first section?
-    # the subset columns is missing sched_rt_category, and it needs an
-    # entry in the rename dict if it's used within text table as combo column?
-    
-    # AH: we publish schedule only operators as well and they only have 
-    # info for the first section, so filtering it out should be ok. 
     df2 = df.assign(
         time_period = df.time_period.astype(str).str.replace("_", " ").str.title()
     )[subset].query(

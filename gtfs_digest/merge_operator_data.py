@@ -70,15 +70,14 @@ def concatenate_operator_routes(
         FILE,
         date_list,
         data_type = "gdf",
-    ).sort_values(sort_cols).reset_index(drop=True)   
-    
-    # TODO is there a short/long route, can it be flagged per date as a new column here?
+    ).sort_values(sort_cols).reset_index(drop=True).pipe(
+        portfolio_utils.standardize_portfolio_organization_names, 
+        PORTFOLIO_ORGANIZATIONS_DICT
+    )
     
     return df
 
 
-## TODO: move counties stuff here
-# swap order at the bottom since this needs to be created first
 def counties_served_by_operator(
     route_gdf_by_operator: gpd.GeoDataFrame
 ) -> gpd.GeoDataFrame:
@@ -160,10 +159,10 @@ def concatenate_crosswalks(
         caltrans_district = df.caltrans_district.map(
             portfolio_utils.CALTRANS_DISTRICT_DICT
         )
-    )#.pipe(
-     #   portfolio_utils.standardize_portfolio_organization_names, 
-     #   PORTFOLIO_ORGANIZATIONS_DICT
-    #)
+    ).pipe(
+        portfolio_utils.standardize_portfolio_organization_names, 
+        PORTFOLIO_ORGANIZATIONS_DICT
+    )
     
     return df
 
@@ -311,46 +310,6 @@ def merge_data_sources_by_operator(
     )
         
     return df
-
-
-def list_pop_as_string(df, stringify_cols: list):
-    # pop list as string, so instead of [one, two], we can display "one, two"
-    for c in stringify_cols:
-        df[c] = df[c].apply(lambda x: ', '.join(map(str, x)))
-
-    return df
-
-def multiple_ntd_info(df):
-    """
-    Test a function that allows multiple ntd entries, like hq_city, primary_uza, etc.
-    Unpack these as a string to populate description.
-    Don't think we want to get rid of multiple ntd_ids...if an operator can be associated
-    with multiple entries, we should unpack as much as we can? unless we decide to set a primary,
-    which is dependent on knowing operator-organization-ntd_id relationship.
-    """
-    # Group by name-service_date-portfolio_organization_name to aggregate up to 
-    # portfolio_organization_name,because name indicates different feeds, so we want to sum those.
-    agg1 = (
-        df.groupby(
-            [
-                "service_date",
-                "portfolio_organization_name",
-                "caltrans_district",
-            ]
-        )
-        .agg({
-            "service_area_pop": "sum", 
-            "service_area_sq_miles": "sum",
-            # do not sort here because we might scramble them?
-            "hq_city": lambda x: list(set(x)),
-            "reporter_type": lambda x: list(set(x)), 
-            "primary_uza_name": lambda x: list(set(x)),
-        })
-        .reset_index()
-    ).pipe(list_pop_as_string, ["hq_city", "reporter_type", "primary_uza_name"])
-    
-    return agg1
-    
 
 if __name__ == "__main__":
 
