@@ -1,7 +1,7 @@
 from shared_utils import rt_dates
 import datetime as dt
 
-analysis_date = rt_dates.DATES["apr2025"]
+analysis_date = rt_dates.DATES["may2025"]
 
 GCS_FILE_PATH = ("gs://calitp-analytics-data/data-analyses/"
                  "high_quality_transit_areas/")
