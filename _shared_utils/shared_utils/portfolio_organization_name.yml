@@ -13,7 +13,6 @@
 'B-Line Schedule': Butte County Association of Governments
 'Baldwin Park Schedule': City of Baldwin Park
 'Banning Pass Schedule': City of Banning
-'Basin Transit GMV Schedule': Basin Transit
 'Bay Area 511 AC Transit Schedule': Alameda-Contra Costa Transit District
 'Bay Area 511 ACE Schedule': San Joaquin Regional Rail Commission
 'Bay Area 511 Angel Island-Tiburon Ferry Schedule': Angel Island-Tiburon Ferry Company
@@ -135,7 +134,6 @@
 'Lake Schedule': Lake Transit Authority
 'Lassen Flex': Lassen Transit Service Agency
 'Lassen Schedule': Lassen Transit Service Agency
-'Lawndale Beat GMV Schedule': City of Lawndale
 'Lawndale Schedule': City of Lawndale
 'Lompoc Schedule': City of Lompoc
 'Long Beach Schedule': Long Beach Transit
@@ -149,7 +147,6 @@
 'Mariposa Grove Shuttle Schedule': Yosemite National Park
 'Maywood Schedule': City of Maywood
 'Mendocino Schedule': Mendocino Transit Authority
-'Merced GMV Schedule': Transit Joint Powers Authority for Merced County
 'Merced Schedule': Transit Joint Powers Authority for Merced County
 'Metrolink Schedule': Southern California Regional Rail Authority
 'Mission Bay Schedule': Mission Bay Transportation Management Agency
@@ -157,7 +154,6 @@
 'Monterey Salinas Schedule': Monterey-Salinas Transit
 'Morongo Basin Schedule': Basin Transit
 'Morro Bay Cal-ITP Schedule': City of Morro Bay
-'Mountain Transit GMV Schedule': Mountain Area Regional Transit Authority
 'Mountain Transit Schedule': Mountain Area Regional Transit Authority
 'Needles Schedule': City of Needles
 'Nevada County Schedule': Nevada County
@@ -179,9 +175,8 @@
 'Rosemead Passio Schedule': City of Rosemead
 'Rosemead Schedule': City of Rosemead
 'Roseville Schedule': City of Roseville
-'Roseville Transit GMV Schedule': City of Roseville
 'SBMTD Schedule': Santa Barbara Metropolitan Transit District
-'SLO Peak Transit Schedule': City of San Luis Obispo
+'SLO Peak Transit Schedule': San Luis Obispo Regional Transit Authority
 'SLO Schedule': San Luis Obispo Regional Transit Authority
 'SLORTA Schedule': San Luis Obispo Regional Transit Authority
 'Sacramento Schedule': Sacramento Regional Transit District
@@ -200,7 +195,6 @@
 'Sierra Madre Schedule': City of Sierra Madre
 'Siskiyou Schedule': Siskiyou County
 'South County Transit Link Schedule': Sacramento County
-'South San Francisco Schedule': City of South San Francisco
 'Spirit Bus Passio Schedule': City of Monterey Park
 'Spirit Bus Schedule': City of Monterey Park
 'StanRTA Flex': Stanislaus Regional Transit Authority
@@ -212,7 +206,6 @@
   Lake Tahoe'
 'TCRTA TripShot Schedule': Tulare County Regional Transit Agency
 'TIME GMV Schedule': Tulare County Regional Transit Agency
-'Tahoe Transportation District GMV Schedule': Tahoe Transportation District
 'Tahoe Transportation District Schedule': Tahoe Transportation District
 'Tehama Schedule': Tehama County
 'Thousand Oaks Flex': City of Thousand Oaks
@@ -228,10 +221,10 @@
 'UCSC Schedule': UCSC and City of Santa Cruz Beach Shuttle
 'Union City Flex': City of Union City
 'Unitrans Schedule': 'University of California, Davis'
-'VCTC Flex': Ventura County Transportation Commission
+'VCTC Flex': 'Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai,
+  Simi Valley, Thousand Oaks)'
 'VCTC GMV Schedule': 'Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark,
   Ojai, Simi Valley, Thousand Oaks)'
-'Victor Valley GMV Schedule': Victor Valley Transit Authority
 'Victor Valley Schedule': Victor Valley Transit Authority
 'Visalia Schedule': City of Visalia
 'WeHo Schedule': City of West Hollywood
