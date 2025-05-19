@@ -11,6 +11,7 @@ EXPORT_YAML_NAME = "portfolio_organization_name.yml"
 PORTFOLIO_ORGANIZATION_NAMES = {
     # These are 1 (schedule_gtfs_dataset)_name linked to many organization_names
     # preferred organization_name or combined name is here
+    # expanded this based on manual check
     "Amtrak Schedule": "Amtrak",
     "Bay Area 511 Commute.org Schedule": "Commute.org and Menlo Park Community Shuttles Schedule",
     "Bay Area 511 Dumbarton Express Schedule": "Alameda-Contra Costa Transit District",  # or "Dumbarton Bridge Regional Operations Consortium"
@@ -24,12 +25,29 @@ PORTFOLIO_ORGANIZATION_NAMES = {
     "Redding Schedule": "Redding Area Bus Authority",
     "Sacramento Schedule": "Sacramento Regional Transit District",
     "San Diego Schedule": "San Diego Metropolitan Transit System, Airport, Flagship Cruises",  # combined this
+    "SLO Peak Transit Schedule": "San Luis Obispo Regional Transit Authority",  # added this
     "TART, North Lake Tahoe Schedule": "Tahoe Truckee Area Regional Transportation, North Lake Tahoe",  # combined this
     "Tehama Schedule": "Tehama County",  # or Susanville Indian Rancheria
     "UCSC Schedule": "UCSC and City of Santa Cruz Beach Shuttle",
     "Santa Cruz Schedule": "UCSC and City of Santa Cruz Beach Shuttle",
     "VCTC GMV Schedule": "Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai, Simi Valley, Thousand Oaks)",
+    "VCTC Flex": "Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai, Simi Valley, Thousand Oaks)",  # added this
 }
+
+# These have different feeds, schedule_gtfs_dataset_name,
+# but likely would represent the same info (same n_routes)
+duplicated_feed_info = [
+    "Basin Transit GMV Schedule",  # dupe with Morongo Basin Schedule
+    "Cerritos on Wheels Schedule"  # dupe wtih Cerritos on Wheels Website Schedule (different n_routes, but website has more routes)
+    "LAX Shuttles Schedule",  # dupe with LAX Flyaway Bus Schedule
+    "Lawndale Beat GMV Schedule",  # dupe with Lawndale Schedule
+    "Merced GMV Schedule",  # dupe with Merced Schedule
+    "Mountain Transit GMV Schedule",  # dupe with Mountain Transit Schedule
+    "Roseville Transit GMV Schedule",  # dupe with Roseville Schedule
+    "South San Francisco Schedule",  # dupe with Bay Area 511 South San Francisco Shuttle
+    "Tahoe Transportation District GMV Schedule",  # dupe with Tahoe Transportation District Schedule
+    "Victor Valley GMV Schedule",  # dupe with Victor Valley Schedule
+]
 
 
 def operators_and_organization_df(date_list: list) -> pd.DataFrame:
@@ -91,7 +109,11 @@ def operators_keep_existing_organization_names(
 
 
 if __name__ == "__main__":
+    # Get all the operators and organization combinations across all dates
     df = operators_and_organization_df(rt_dates.all_dates)
+
+    # Drop where we've found manual duplications
+    df = df[~df.name.isin(duplicated_feed_info)].reset_index(drop=True)
 
     operators_to_fix = find_operators_with_multiple_organization_names(df)
 
