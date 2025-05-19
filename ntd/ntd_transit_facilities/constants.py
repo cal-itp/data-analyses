@@ -1,5 +1,12 @@
-NTD_FACILITIES_INVENTORY_URL = "https://www.transit.dot.gov/sites/fta.dot.gov/files/2024-10/2023%20Facility%20Inventory.xlsx"
-NTD_CRS = "EPSG: 4326"
+import pathlib
+from calitp_data_analysis.geography_utils import WGS84
+
+# Using a GCS version of the NTD url, since currently the official NTD download link will not download using requests.get or pandas.read_excel
+NTD_FACILITIES_INVENTORY_PARENT = "gs://calitp-analytics-data/data-analyses/ntd/ntd_transit_facilities/"
+ORIGINAL_NTD_FACILITIES_INVENTORY_URI = f"{NTD_FACILITIES_INVENTORY_PARENT}2023_facilities_inventory_unprocessed.xlsx"
+PROCESSED_GEOJSON_URI = f"{NTD_FACILITIES_INVENTORY_PARENT}2023_facilities_inventory_processed.geojson"
+PROCESSED_SHAPEFILE_URI = f"{NTD_FACILITIES_INVENTORY_PARENT}2023_facilities_inventory_processed.zip"
+NTD_CRS = WGS84
 
 # Define NTD Field Names
 STREET_ADDRESS = "Street Address"
