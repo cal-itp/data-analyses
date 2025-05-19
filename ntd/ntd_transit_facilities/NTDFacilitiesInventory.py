@@ -11,105 +11,97 @@ from urllib.parse import urlparse
 import dotenv
 import os
 import gcsfs
+import requests
 
-class NTDFacilitiesInventory:
-    
-    def __init__(
-        self,
-        url: str = NTD_FACILITIES_INVENTORY_URL,
+def load_ntd(
+        url: str = ORIGINAL_NTD_FACILITIES_INVENTORY_URI,
         output_file_uri: str | None = None, 
         address_filter: dict[typing.Literal[*NTD_ADDRESS_FIELDS], str | typing.Iterable[str]] | None = None, # typing.Iterable or something else?
         geospatial_filter: gpd.GeoDataFrame = None,
         attempt_geocoding: bool = True
-    ):
-        """
-        A wrapper for downloading and geocoding information from the National Transit Database facilities inventory
-        
-        Params:
-        url: A url or GCS uri where the 2023 Facility Inventory can be found
-        output_file_uri: A uri (GCS or local path) where the facilities inventory should be saved
-        address_filter: A filter in the format {ntd_column: name} to filter addresses by. Only values that need to be geocoded will be filtered
-        geospatial_filter: A GDF that will mask the output. Applies to both geocoded and non geo
-        attempt_geocoding: True if geocoding should be attempted, false otherwise
-        """
-        parsed_url = urlparse(url)
-        file_type = pathlib.Path(parsed_url.path).suffix          
-        # Load the base ntd file
-        if file_type == ".xlsx":
-            # Load an xlsx file formatted identically to the 2023 ntd facilities inventory
-            df = pd.read_excel(url)
-            df["address_only"] = False
-            df.loc[
-                (df[LONGITUDE].isna() | df[LATITUDE].isna()) & ~(df[[*NTD_ADDRESS_FIELDS]].isna().all(axis=1)), 
-                "address_only"
-            ] = True
-            slice_with_address = df.loc[~df["address_only"]]
-            gdf_provided = gpd.GeoDataFrame(
-                slice_with_address,
-                geometry=gpd.points_from_xy(slice_with_address[LONGITUDE], slice_with_address[LATITUDE], crs=NTD_CRS)
-            )
-            gdf_provided["Geometry Geocoded"] = False    
+) -> gpd.GeoDataFrame:
+    """
+    A function for downloading and geocoding information from the National Transit Database facilities inventory
+
+    Params:
+    url: A url or GCS uri where the 2023 Facility Inventory can be found
+    output_file_uri: A uri (GCS or local path) where the facilities inventory should be saved
+    address_filter: A filter in the format {ntd_column: name} to filter addresses by. Only values that need to be geocoded will be filtered
+    geospatial_filter: A GDF that will mask the output. Applies to both geocoded and non geo
+    attempt_geocoding: True if geocoding should be attempted, false otherwise
+    """
+    parsed_url = urlparse(url)
+    file_type = pathlib.Path(parsed_url.path).suffix          
+    # Load the base ntd file
+    if file_type == ".xlsx":
+        # Load an xlsx file formatted identically to the 2023 ntd facilities inventory
+        df = pd.read_excel(url)
+        df["address_only"] = False
+        df.loc[
+            (df[LONGITUDE].isna() | df[LATITUDE].isna()) & ~(df[[*NTD_ADDRESS_FIELDS]].isna().all(axis=1)), 
+            "address_only"
+        ] = True
+        slice_with_address = df.loc[~df["address_only"]]
+        gdf_provided = gpd.GeoDataFrame(
+            slice_with_address,
+            geometry=gpd.points_from_xy(slice_with_address[LONGITUDE], slice_with_address[LATITUDE], crs=NTD_CRS)
+        )
+        gdf_provided["Geometry Geocoded"] = False    
+    else:
+        # Load a GeoDataFrame. Ignore any Latitude or Longitude columns
+        if check_is_gs_uri(url) and file_type == ".geojson":
+            path, name = split_gs_uri(url)
+            gdf = read_geojson(path, name)
         else:
-            # Load a GeoDataFrame. Ignore any Latitude or Longitude columns
-            if check_is_gs_uri(url) and file_type == ".geojson":
-                path, name = split_gs_uri(url)
-                gdf = read_geojson(path, name)
-            else:
-                gdf = gpd.read_file(url)
-            gdf["address_only"] = False
-            gdf.loc[gdf.geometry.isna(), "address_only"] = True
-            gdf_provided = gdf.loc[~gdf["address_only"]].copy()
-            df = gdf.drop(gdf.geometry.name, axis=1)
-        
-        # Geocoding
-        if df["address_only"].any() and attempt_geocoding:
-            # Get only rows that must be geocoded
-            df_address_only = df.loc[df["address_only"]].copy()
-            # Get a formatted address
-            df_address_only[ZIP_CODE] = df_address_only[ZIP_CODE].astype(int)
-            df_address_only[[*NTD_ADDRESS_FIELDS]] = df_address_only[[*NTD_ADDRESS_FIELDS]].fillna("").astype(str)
-            for filter_key in address_filter:
-                df_address_only = df_address_only.loc[df_address_only[filter_key] == address_filter[filter_key]]
-            df_address_only = df_address_only.copy()
-            df_address_only["address"] = df_address_only[STREET_ADDRESS] + ", " + df_address_only[CITY] + ", " + df_address_only[STATE] + ", " + df_address_only[ZIP_CODE]
-            # Run the geocoder
-            geocode_result = geocode_series(
-                df_address_only["address"], 
-                address_output_name="Geocode Result Address",
-                geometry_output_name=gdf_provided.geometry.name
-            )
-            # Merge the result
-            gdf_geocoded = gpd.GeoDataFrame(
-                pd.concat([df_address_only, geocode_result], axis=1),
-                geometry=gdf_provided.geometry.name
-            )
-            gdf_geocoded["Geometry Geocoded"] = True
-            gdf_combined = pd.concat([gdf_provided, gdf_geocoded], axis=0)
-        else:
-            gdf_combined = gdf_provided
-        
-        # Apply the geospatial filter
-        if geospatial_filter is not None:
-            self._gdf = gdf_combined.clip(geospatial_filter)
-        else:
-            self._gdf = gdf_combined
-        
-        # Save the output result
-        if output_file_uri is not None:
-            if output_file_uri.lower()[:5] == "gs://":
-                path, name = split_gs_uri(output_file_uri)
-                geojson_gcs_export(
-                    self._gdf, path, name # f-string is a necessary cludge to get geojson_gcs_export to save the path properly
-                )
-            else:
-                self._gdf.to_file(output_file_uri)
+            gdf = gpd.read_file(url)
+        gdf["address_only"] = False
+        gdf.loc[gdf.geometry.isna(), "address_only"] = True
+        gdf_provided = gdf.loc[~gdf["address_only"]].copy()
+        df = gdf.drop(gdf.geometry.name, axis=1)
+
+    # Geocoding
+    if df["address_only"].any() and attempt_geocoding:
+        # Get only rows that must be geocoded
+        df_address_only = df.loc[df["address_only"]].copy()
+        # Get a formatted address
+        df_address_only[ZIP_CODE] = df_address_only[ZIP_CODE].astype(int)
+        df_address_only[[*NTD_ADDRESS_FIELDS]] = df_address_only[[*NTD_ADDRESS_FIELDS]].fillna("").astype(str)
+        for filter_key in address_filter:
+            df_address_only = df_address_only.loc[df_address_only[filter_key] == address_filter[filter_key]]
+        df_address_only = df_address_only.copy()
+        df_address_only["address"] = df_address_only[STREET_ADDRESS] + ", " + df_address_only[CITY] + ", " + df_address_only[STATE] + ", " + df_address_only[ZIP_CODE]
+        # Run the geocoder
+        print("start geocoding")
+        geocode_result = geocode_series(
+            df_address_only["address"], 
+            address_output_name="Geocode Result Address",
+            geometry_output_name=gdf_provided.geometry.name
+        )
+        print("geocoding done")
+        # Merge the result
+        gdf_geocoded = gpd.GeoDataFrame(
+            pd.concat([df_address_only, geocode_result], axis=1),
+            geometry=gdf_provided.geometry.name
+        )
+        gdf_geocoded["Geometry Geocoded"] = True
+        gdf_combined = pd.concat([gdf_provided, gdf_geocoded], axis=0)
+    else:
+        gdf_combined = gdf_provided
+
+    # Apply the geospatial filter
+    if geospatial_filter is not None:
+        gdf_inventory_output = gdf_combined.clip(geospatial_filter)
+    else:
+        gdf_inventory_output = gdf_combined
     
-    @property
-    def gdf(self):
-        """A cleaned GDF containing the values from the original facility inventory and a geometry column based on geocoding"""
-        return self._gdf.copy()
+    return gdf_inventory_output
     
-    def folium_geojson(self, use_categories=True, needed_fields = DEFAULT_TOOLTIP_FIELDS, **args):
+def facilities_inventory_gdf_to_folium(
+        processed_ntd_gdf: gpd.GeoDataFrame,
+        use_categories: bool = True,
+        needed_fields: list[typing.Hashable] = DEFAULT_TOOLTIP_FIELDS, # REVIEW NOTE - Not sure if this should be a list[str] or a list[typing.Hashable], since I'm not sure about the type for df column names
+        **args
+) -> folium.GeoJson:
         """
         Gets a Folium Geojson object that can be passed to a Folium map. 
         By default, contains a popup with the agency name, facility name and facility type, 
@@ -117,6 +109,7 @@ class NTDFacilitiesInventory:
         Any args passed will override that.
         
         Params:
+        processed_ntd_gdf: A GeoDataFrame as returned by load_ntd
         use_categories: Whether to categorize entries based on categories.py. Useful for color coding
         needed_fields: the fields that are needed for the display. 
             Must be specified if attempt_geocoding was False and the source did not already have geocoding applied
@@ -127,7 +120,6 @@ class NTDFacilitiesInventory:
         A Folium GeoJSON instance that can be added to a map with the .add_to method
         """
         # Get the GDF and the needed fields (note the deep copies)
-        gdf = self.gdf 
         needed_fields_altered = list(needed_fields)
         # Add categories
         if use_categories:
@@ -138,11 +130,15 @@ class NTDFacilitiesInventory:
                 for facility_type in categories.TYPES_BY_CATEGORY[category]:
                     field_to_category[facility_type] = categories.STRING_VALUE_BY_CATEGORY[category]
             # Add categories to the gdf
-            gdf["Category"] = gdf[FACILITY_TYPE].map(
+            processed_ntd_gdf["Category"] = processed_ntd_gdf[FACILITY_TYPE].map(
                 defaultdict(lambda: categories.STRING_VALUE_BY_CATEGORY[categories.DEFAULT_CATEGORY], field_to_category)
             )
         # Filter for values that are needed, this is to reduce the memory needed to display the map
-        gdf_to_plot = gdf[[*needed_fields_altered, gdf.geometry.name]].dropna(subset=[gdf.geometry.name]).fillna("")
+        gdf_to_plot = processed_ntd_gdf[
+            [*needed_fields_altered, processed_ntd_gdf.geometry.name]
+        ].dropna(
+            subset=[processed_ntd_gdf.geometry.name]
+        ).fillna("")
         args_with_default = dict(args)
         # Add default args 
         # Tooltip
@@ -163,18 +159,36 @@ class NTDFacilitiesInventory:
         # Return a Folium GeoJson that can be added to a map
         return folium.GeoJson(data=gdf_to_plot, **args_with_default)
     
-    def save_shapefile(self, output_uri: str, keep_fields = DEFAULT_TOOLTIP_FIELDS, column_rename_mapper = SHAPEFILE_MAP, temp_folder = ".temp") -> None:
+def facilities_inventory_gdf_to_geojson(processed_ntd_gdf: gpd.GeoDataFrame, output_uri: str) -> None:
+    """
+    Save the facilities inventory gdf to a geojson file
+    """
+    # Save the output result
+    if output_uri is not None:
+        if output_uri.lower()[:5] == "gs://":
+            path, name = split_gs_uri(output_uri)
+            geojson_gcs_export(
+                processed_ntd_gdf, path, name
+            )
+        else:
+            processed_ntd_gdf.to_file(output_uri)
+
+def facilities_inventory_gdf_to_shapefile(
+        processed_ntd_gdf: gpd.GeoDataFrame,
+        output_uri: str,
+        keep_fields: list[typing.Hashable] = DEFAULT_TOOLTIP_FIELDS, column_rename_mapper = SHAPEFILE_MAP, temp_folder = ".temp") -> None:
         """
         Save the gdf as a shapefile to the specified path, either locally or in GCS (as a zip).
         
         Params:
+        processed_ntd_gdf: A GeoDataFrame as returned by load_ntd
         output_uri: A string containing a uri, either a local path or a GCS url
         keep_fields: The complete fields to keep
         column_rename_mapper: A dict or function to pass to pd.rename to rename column names before they are truncated to 10 characters or fewer
         temp_folder: A temp folder to store the zipped shapefile in if output_uri is a GCS url
         """
         # Format the GeoDataFrame so it can be saved as a shapefile
-        gdf_shortened_columns = self.gdf[[*keep_fields, self.gdf.geometry.name]]
+        gdf_shortened_columns = processed_ntd_gdf[[*keep_fields, processed_ntd_gdf.geometry.name]]
         if column_rename_mapper is not None:
             gdf_shortened_columns = gdf_shortened_columns.rename(
                 columns=column_rename_mapper
@@ -191,7 +205,6 @@ class NTDFacilitiesInventory:
             name_as_zip = name_stem + ".zip"
             # Get the temp path where the file should be stored
             local_path = str((pathlib.Path(temp_folder) / (name_stem)).resolve())
-            print(local_path)
             # Get a zipped shapefile locally (will save to the home directory)
             make_zipped_shapefile(gdf_shortened_columns, local_path, gcs_folder=None)
             # Upload the zipped shapefile to GCS
@@ -208,8 +221,8 @@ def check_is_gs_uri(uri_or_path):
     return uri_or_path[:5] == "gs://"
     
 def split_gs_uri(uri):
-    """Split a gs:// url into its parent and name using Pathlib"""
-    assert check_is_gs_uri(uri), "URI is not a gs:// url"
+    """Split a gs:// uri into its parent and name using Pathlib"""
+    assert check_is_gs_uri(uri), "URI is not a gs:// uri"
     output_file_path = pathlib.PosixPath(uri[5:])
     return f"{output_file_path.parent}/", output_file_path.name
     
