@@ -11,24 +11,9 @@ import pyaml # use pyaml because it gets us prettier indents than yaml
 from pathlib import Path
 from typing import Union
 
-from shared_utils import gtfs_utils_v2, rt_dates
+from shared_utils import gtfs_utils_v2, publish_utils, rt_dates
 from segment_speed_utils import time_series_utils
 import datetime
-
-def filter_to_recent_date(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    By schedule_gtfs_dataset_name, keep the most recent
-    service_date that shows up in scheduled trips.
-    """
-    df2 = (df.groupby("name", group_keys=False)
-           .service_date
-           .max()
-           .reset_index()
-           .sort_values(["service_date", "name"], ascending=[False, True])
-           .reset_index(drop=True)
-           .astype({"service_date": "str"})
-          )
-    return df2
 
 
 def export_results_yml(
@@ -92,7 +77,10 @@ if __name__ == "__main__":
         get_pandas = True,
         filters = [[("gtfs_dataset_key", "in", public_feeds)]],
         columns = ["name"]
-    ).drop_duplicates().pipe(filter_to_recent_date)
+    ).drop_duplicates().pipe(
+        publish_utils.filter_to_recent_date, ["name"]
+    ).astype({"service_date": "str"})
+
     
     current_year = str(datetime.datetime.now().year)
     assert (operators.service_date.str.contains(current_year)).any(), 'must add current calendar year, see README'
