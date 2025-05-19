@@ -469,6 +469,55 @@ def generate_all_red_flags(dates_subset:list)->pd.DataFrame:
     
     return final
 
+def case1_vp_only(
+    schedule_file: str,
+    speeds_file: str
+) -> list:
+    """
+    Find all operators that appear in avg_speeds that never appears in scheduled...
+    then show the dates that are present for vp_only
+    """
+    '''
+    scheduled_operators = pd.read_parquet(
+        (most_recent)_schedule_file, 
+    ).schedule_gtfs_dataset_key.unique().tolist()
+    
+    vp_operators pd.read_parquet(
+        speeds_file, 
+        columns = ["schedule_gtfs_dataset_key"],
+        filters = [[("schedule_gtfs_dataset_key", "notin", scheduled_opeartors)]]
+    ).drop_duplicates().pipe(publish_utils.filter_to_recent_date, ["schedule_gtfs_dataset_key"])
+        
+    '''
+    return 
+ 
+def case2_lost_rt(filepath):
+    """
+    schedule_and_rt_df, read in operator, operator's sched_rt_category based on mode(sched_rt_category) per date, 
+
+     subset for our 2 types
+     for sched_rt_category, group by operator, get max(date)
+     for sched_category, group by operator, get max(date)
+     merge these and filter if sched_category.date > sched_rt_category.date
+     
+    df should have name, sched_category's max date, sched_rt_category max(date)
+    """
+     return df
+
+    
+def case3_stale_data(filepath):
+    """
+    Find where we haven't found operators for at least 3 months
+    """
+    '''
+    df = pd.read_parquet(
+        most_recent_operator_data?,
+        columns = ["name", "service_date"]
+    )
+    filter if it is at least 3 months old
+
+    return df
+    '''
 if __name__ == "__main__":
     df = load_df_for_yml(schd_vp_url, operator_digest_cols)
     generate_key_org_ymls(df)
