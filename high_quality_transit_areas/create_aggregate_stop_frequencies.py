@@ -10,7 +10,7 @@ import datetime
 
 from update_vars import (analysis_date, AM_PEAK, PM_PEAK, EXPORT_PATH, GCS_FILE_PATH, PROJECT_CRS,
 SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD, SHARED_STOP_THRESHOLD,
-ROUTE_COLLINEARITY_KEYS_TO_DROP)
+ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP)
 
 am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
 pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
@@ -321,13 +321,15 @@ if __name__ == "__main__":
     share_counts = {}
     multi_only_explode.groupby(['schedule_gtfs_dataset_key', 'stop_id']).apply(accumulate_share_count)
     qualify_dict = {key: share_counts[key] for key in share_counts.keys() if share_counts[key] >= SHARED_STOP_THRESHOLD}
+    
+    keys_to_drop = []
     for key_part in ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP:
         keys_to_drop += [key for key in qualify_dict.keys() if key_part in key]
     if not len(keys_to_drop) == len(ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP):
         raise Exception("matched keys should exactly equal number of key parts in search")
     for key in keys_to_drop: qualify_dict.pop(key)
-    feeds_to_filter = np.unique([key.split('__')[0] for key in qualify_dict.keys()])
     
+    feeds_to_filter = np.unique([key.split('__')[0] for key in qualify_dict.keys()])
     combined_export = filter_all_prepare_export(feeds_to_filter, multi_only_explode, qualify_dict,
                                 st_prepped, max_arrivals_by_stop_single, (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD))
     combined_export.to_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
