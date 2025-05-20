@@ -82,3 +82,8 @@ sources:
     description: California senate district polygons
     args:
       urlpath: https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/Legislative/FeatureServer/1/query?outFields=*&where=1%3D1&f=geojson
+  metropolitan_planning_orgs:
+    driver: geojson
+    description: California Metropolitan Planning Organizations (MPOs)
+    args:
+      urlpath: https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHboundary/MPO_Boundaries/FeatureServer/0/query?outFields=*&where=1%3D1&f=geojson
