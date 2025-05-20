@@ -321,9 +321,11 @@ if __name__ == "__main__":
     share_counts = {}
     multi_only_explode.groupby(['schedule_gtfs_dataset_key', 'stop_id']).apply(accumulate_share_count)
     qualify_dict = {key: share_counts[key] for key in share_counts.keys() if share_counts[key] >= SHARED_STOP_THRESHOLD}
-    # print([key for key in qualify_dict.keys() if '42A_0__42B_0' in key]) #  run to locate likely yolobus 42A/42B key, see update_vars
-    #  will error if key not present, check if situation still present and update key if needed
-    for key in ROUTE_COLLINEARITY_KEYS_TO_DROP: qualify_dict.pop(key)
+    for key_part in ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP:
+        keys_to_drop += [key for key in qualify_dict.keys() if key_part in key]
+    if not len(keys_to_drop) == len(ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP):
+        raise Exception("matched keys should exactly equal number of key parts in search")
+    for key in keys_to_drop: qualify_dict.pop(key)
     feeds_to_filter = np.unique([key.split('__')[0] for key in qualify_dict.keys()])
     
     combined_export = filter_all_prepare_export(feeds_to_filter, multi_only_explode, qualify_dict,
