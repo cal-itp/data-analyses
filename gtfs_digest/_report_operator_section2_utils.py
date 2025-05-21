@@ -8,7 +8,7 @@ import altair as alt
 alt.data_transformers.enable('default', max_rows=None)
 import _report_utils
 
-# Display
+# Displayfrequency_graph_dir_0 
 from IPython.display import HTML, Markdown, display
 
 # Other
@@ -968,6 +968,7 @@ def filtered_route(
         .transform_filter(xcol_param)
     ) 
 
+    """ 
     frequency_graph_dir_0 = (
     frequency_chart(peak_offpeak_df, 
                      0,
@@ -985,12 +986,12 @@ def filtered_route(
     .add_params(xcol_param)
     .transform_filter(xcol_param)
     )
-    
+    """
     n_trips_dir_0 = (stacked_bar_chart(
     df = quarter_rollup_peak_offpeak.loc[quarter_rollup_peak_offpeak.dir_0_1 == 0],
     y_col = "# scheduled trips",
     color_col = "Period",
-    title = readable_dict["trips_per_day_graph"]["title"],
+    title = readable_dict["trips_per_day_graph_dir_0"]["title"],
     subtitle = "",
     range_color=color_dict["four_colors"],
     quarter = True)
@@ -1001,7 +1002,7 @@ def filtered_route(
     df = quarter_rollup_peak_offpeak.loc[quarter_rollup_peak_offpeak.dir_0_1 == 1],
     y_col = "# scheduled trips",
     color_col = "Period",
-    title = readable_dict["trips_per_day_graph"]["title"],
+    title = readable_dict["trips_per_day_graph_dir_1"]["title"],
     subtitle = "",
     range_color=color_dict["four_colors"],
     quarter = True)
@@ -1098,9 +1099,7 @@ def filtered_route(
     avg_scheduled_min_graph,
     timeliness_trips_dir_0,
     timeliness_trips_dir_1,
-    frequency_graph_dir_0,
     n_trips_dir_0,
-    frequency_graph_dir_1,
     n_trips_dir_1,
     speed_graph,
     data_quality,
