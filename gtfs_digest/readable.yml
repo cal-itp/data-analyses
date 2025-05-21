@@ -137,5 +137,7 @@ agency_spatial_accuracy:
     title: "Spatial Accuracy (All Routes)"
 agency_vp_per_min_graph:
     title: "Vehicle Positions per Minute (All Routes)"
-trips_per_day_graph:
-    title: "Total Scheduled Trips by Period"
+trips_per_day_graph_dir_0:
+    title: "Total Scheduled Trips by Period for Direction 0"
+trips_per_day_graph_dir_1:
+    title: "Total Scheduled Trips by Period for Direction 1"

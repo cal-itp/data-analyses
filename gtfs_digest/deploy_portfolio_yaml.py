@@ -45,10 +45,12 @@ def generate_operator_grain_yaml()->pd.DataFrame:
                  )
     
     # Get the most recent date using publish_utils
-    recent_date = publish_utils.filter_to_recent_date(schd_vp_df)
+    recent_date = publish_utils.filter_to_recent_date(schd_vp_df, [
+            "organization_name"])
     
     # Merge to get the most recent row for each organization
     schd_vp_df.service_date = schd_vp_df.service_date.astype(str)
+    recent_date.service_date = recent_date.service_date.astype(str)
     m1 = pd.merge(schd_vp_df, recent_date)
     
     # Map certain organizations for the portfolio name 
