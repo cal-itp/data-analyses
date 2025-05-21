@@ -4,7 +4,11 @@ in GTFS digest and filter to only recent date.
 
 Includes operator info and operator route map.
 
-TODO: add renaming and any remaining viz wrangling
+TODO: add renaming and any remaining viz wrangling.
+This script is equivalent to viz_data_prep.py, so both
+should be renamed to make grain clear, and do similar things between route-dir
+and operator grain.
+(aggregate metrics, rename for viz)
 """
 import geopandas as gpd
 import pandas as pd
@@ -12,6 +16,55 @@ import pandas as pd
 from calitp_data_analysis import utils
 from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
+
+def aggregate_operator_stats(
+    df: pd.DataFrame,
+    group_cols: list
+) -> pd.DataFrame:
+    """
+    Aggregate by portfolio organization name
+    and get operator profile metrics.
+    Most of these are sums.
+    """
+    gtfs_cols = [
+        f"operator_n_{i}" for i in 
+        ["routes", "trips", "shapes", "stops", "arrivals"]
+    ] + ["operator_route_length_miles"]
+    
+    route_typology_cols = [
+        f"n_{i}_routes" for i in 
+        ["downtown_local", "local", "coverage", "rapid", "express", "rail", "ferry"]
+    ]
+    
+    # These columns either needed weighted average
+    # or display both, like ntd, or be generous and display the larger value across feeds
+    weighted_avg_cols = ["vp_per_min_agency", "spatial_accuracy_agency"]
+    
+    agg1 = (
+        df
+        .groupby(group_cols, group_keys=False)
+        .agg({
+            **{c: "sum" for c in gtfs_cols + route_typology_cols},
+            **{c: "max" for c in weighted_avg_cols},
+            **{"schedule_gtfs_dataset_key": "nunique"},
+            **{"name": lambda x: list(x)},
+            **{"counties_served": "first"}
+        }).reset_index()
+        .rename(columns = {
+            "schedule_gtfs_dataset_key": "n_feeds",
+            "name": "operator_feeds"
+        })
+    ).pipe(list_pop_as_string, ["counties_served", "operator_feeds"])
+    
+    return agg1
+    
+    
+def renaming_stuff(df):
+    # Add renaming step similar to viz_data_prep
+    
+    # probably want to drop columns that aren't applicable
+    # organization_source_record_id, organization_name
+    return
 
 def list_pop_as_string(df, stringify_cols: list):
     # pop list as string, so instead of [one, two], we can display "one, two"
@@ -21,7 +74,10 @@ def list_pop_as_string(df, stringify_cols: list):
     return df
 
 
-def unpack_multiple_ntd(df: pd.DataFrame) -> pd.DataFrame:
+def unpack_multiple_ntd(
+    df: pd.DataFrame,
+    group_cols: list
+) -> pd.DataFrame:
     """
     Test a function that allows multiple ntd entries, like hq_city, primary_uza, etc.
     Unpack these as a string to populate description.
@@ -35,13 +91,7 @@ def unpack_multiple_ntd(df: pd.DataFrame) -> pd.DataFrame:
         df
         # sometimes ntd info is None, drop these if it's none across all 3 columns
         .dropna(subset=["hq_city", "reporter_type", "primary_uza_name"])
-        .groupby(
-            [
-                "service_date",
-                "portfolio_organization_name",
-                "caltrans_district",
-            ]
-        )
+        .groupby(group_cols, group_keys=False)
         .agg({
             "service_area_pop": "sum", 
             "service_area_sq_miles": "sum",
@@ -51,7 +101,11 @@ def unpack_multiple_ntd(df: pd.DataFrame) -> pd.DataFrame:
             "primary_uza_name": lambda x: list(set(x)),
         })
         .reset_index()
-    ).pipe(list_pop_as_string, ["hq_city", "reporter_type", "primary_uza_name"])
+    ).pipe(
+        list_pop_as_string, 
+        ["hq_city", "reporter_type", 
+         "primary_uza_name"]
+    )
     
     
     return agg1
@@ -89,17 +143,31 @@ if __name__ == "__main__":
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
     )
     
+    operator_aggregated = aggregate_operator_stats(
+        operator_data,
+        group_cols = ["portfolio_organization_name", "service_date", "caltrans_district"]
+    )
+    
+    ntd_data = unpack_multiple_ntd(
+        operator_data,
+        group_cols = ["portfolio_organization_name", "service_date"]
+    )
+
     most_recent_dates = publish_utils.filter_to_recent_date(
         operator_data,
         ["portfolio_organization_name"]
     )
     
     most_recent_operator_data = pd.merge(
-        operator_data,
+        operator_aggregated,
         most_recent_dates,
         on = ["portfolio_organization_name", "service_date"],
         how = "inner"
-    ).pipe(unpack_multiple_ntd)
+    ).merge(
+        ntd_data,
+        on = ["portfolio_organization_name", "service_date"],
+        how = "inner"
+    )
     
     most_recent_operator_data.to_parquet(
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}_recent.parquet"
