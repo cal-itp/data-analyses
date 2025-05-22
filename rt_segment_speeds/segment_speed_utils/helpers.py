@@ -19,7 +19,8 @@ from segment_speed_utils.project_vars import (GTFS_DATA_DICT,
                                               SCHED_GCS,
                                               PROJECT_CRS)
 from calitp_data_analysis import utils
-
+import google.auth
+credentials, project = google.auth.default()
 
 def import_scheduled_trips(
     analysis_date: str, 
@@ -67,7 +68,7 @@ def import_scheduled_shapes(
     
     if get_pandas: 
         shapes = gpd.read_parquet(
-            FILE, filters = filters, columns = columns
+            FILE, filters = filters, columns = columns, storage_options = {"token": credentials.token}
         )
     else:
         shapes = dg.read_parquet(
@@ -97,7 +98,7 @@ def import_scheduled_stop_times(
         if get_pandas:
             if columns is None or "geometry" in columns:
                 stop_times = gpd.read_parquet(
-                    FILE, filters = filters, columns = columns
+                    FILE, filters = filters, columns = columns, storage_options = {"token": credentials.token}
                 ).to_crs(crs)
             else:
                 stop_times = pd.read_parquet(
@@ -140,7 +141,7 @@ def import_scheduled_stops(
     if get_pandas:
         if columns is None or "geometry" in columns:
             stops = gpd.read_parquet(
-                FILE, filters = filters, columns = columns
+                FILE, filters = filters, columns = columns, storage_options = {"token": credentials.token}
             ).to_crs(crs)
 
         else:
