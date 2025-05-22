@@ -28,3 +28,4 @@
 2025-04-21 17:20:59.225 | INFO     | __main__:rt_schedule_trip_metrics:281 - tabular trip metrics 2025-04-16: 0:03:38.357992
 2025-04-21 17:46:06.770 | INFO     | __main__:rt_schedule_trip_metrics:286 - spatial trip metrics 2025-04-16: 0:25:07.544559
 2025-04-21 17:47:28.861 | INFO     | __main__:rt_schedule_trip_metrics:335 - Total run time for metrics on 2025-04-16: 0:30:07.994045
+2025-05-22 14:44:57.974 | INFO     | __main__:rt_schedule_trip_metrics:281 - tabular trip metrics 2025-05-14: 0:03:40.246885
