@@ -70,7 +70,7 @@
 			</attr>
 			<attr>
 				<attrlabl>hqta_details</attrlabl>
-				<attrdef>Indicates the details associated with High Quality Transit Area type as defined in the Public Resources Code. Valid options are: major_stop_rail_single_operator, major_stop_brt_single_operator, major_stop_ferry_single_operator,   intersection_2_bus_routes_same_operator, intersection_2_bus_routes_different_operators, stop_along_hq_bus_corridor_single_operator</attrdef>
+				<attrdef>Indicates the details associated with High Quality Transit Area type as defined in the Public Resources Code. Valid options are: major_stop_rail_single_operator, major_stop_brt_single_operator, major_stop_ferry_single_operator,   intersection_2_bus_routes_same_operator, intersection_2_bus_routes_different_operators, stop_along_hq_bus_corridor_single_operator, mpo_rtp_planned_major_stop</attrdef>
 				<attrdefs>https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PRC&amp;sectionNum=21155, https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=PRC&amp;division=13.&amp;title=&amp;part=&amp;chapter=2.5.&amp;article</attrdefs>
 			</attr>
 			<attr>
@@ -102,6 +102,14 @@
 			<attr>
 				<attrlabl>avg_trips_per_peak_hr</attrlabl>
 				<attrdef>The number of AM and PM hourly trips. Where AM and PM peak trips differ, the lesser value is used.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>mpo</attrlabl>
+				<attrdef>Metropolitan Planning Organization, for planned major stops only.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>plan_name</attrlabl>
+				<attrdef>Name of applicable Regional Transportation Plan, for planned major stops only.</attrdef>
 			</attr>
 		</detailed>
 	</eainfo>

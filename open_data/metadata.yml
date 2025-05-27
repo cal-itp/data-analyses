@@ -37,7 +37,7 @@ common-fields:
 tables:
   - dataset_name: ca_hq_transit_areas
     publish_entity: *publish_entity
-    summary_purpose: "Estimated High Quality Transit Corridors and Major Transit Stops as described in Public Resources Code 21155, 21064.3, 21060.2."
+    summary_purpose: "Estimated High Quality Transit Corridors and Major Transit Stops as described in Public Resources Code 21155, 21064.3, 21060.2. High Quality Transit Corridors are buffered a half-mile from the linear General Transit Feed Specification (GTFS) shape, while Major Transit Stops are buffered a half-mile from the point locations of stops in General Transit Feed Specification (GTFS) data or, for planned major transit stops, MPO-provided Regional Transportation Plan data. See https://github.com/cal-itp/data-analyses/tree/main/high_quality_transit_areas for additional details."
     description: *hqta_description
     public_access: *public_access
     creation_date: "2022-02-08"
@@ -58,7 +58,7 @@ tables:
   
   - dataset_name: ca_hq_transit_stops
     publish_entity: *publish_entity
-    summary_purpose: "Estimated stops along High Quality Transit Corridors, plus major transit stops for bus rapid transit, ferry, rail modes as described in Public Resources Code 21155, 21064.3, 21060.2."
+    summary_purpose: "Estimated stops along High Quality Transit Corridors, plus major transit stops for bus rapid transit, ferry, rail modes as described in Public Resources Code 21155, 21064.3, 21060.2. Existing stops are calculated from General Transit Feed Specification (GTFS) data. Planned major transit stops are from MPO-provided Regional Transportation Plans. See https://github.com/cal-itp/data-analyses/tree/main/high_quality_transit_areas for additional details."
     description: *hqta_description
     public_access: *public_access
     creation_date: "2022-02-08"

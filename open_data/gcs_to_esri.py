@@ -17,6 +17,9 @@ from calitp_data_analysis.geography_utils import WGS84
 from calitp_data_analysis import utils
 from update_vars import analysis_date, RUN_ME
 
+import google.auth
+credentials, project = google.auth.default()
+
 catalog = intake.open_catalog("./catalog.yml")
 
 def print_info(gdf: gpd.GeoDataFrame):
@@ -64,7 +67,8 @@ if __name__=="__main__":
                level="INFO")
         
     for d in RUN_ME :
-        gdf = catalog[d].read().pipe(project_and_standardize_cols)
+        #  clunky way to add SSO credentials with bracket/key syntax
+        gdf = catalog[d](geopandas_kwargs={"storage_options": {"token": credentials.token}}).read().pipe(project_and_standardize_cols)
         
         logger.info(f"********* {d} *************")
         print_info(gdf)
