@@ -19,6 +19,10 @@ from typing import Union
 
 import open_data_utils
 from update_vars import analysis_date
+from supplement_meta import truncate_from_catalog
+
+import google.auth
+credentials, project = google.auth.default()
 
 catalog = intake.open_catalog("catalog.yml")
 
@@ -65,15 +69,15 @@ def new_columns_for_data_dict(
         
         # Columns in our dataset
         FILE = catalog[t].urlpath
-        gdf = gpd.read_parquet(FILE).pipe(
+        gdf = gpd.read_parquet(FILE, storage_options = {'token': credentials.token}).pipe(
             open_data_utils.standardize_column_names
         ).pipe(
             open_data_utils.remove_internal_keys)
-        
-        if "hq_" in t:
-            gdf = gdf.rename(columns = open_data_utils.RENAME_HQTA)
-        elif "speed" in t:
-            gdf = gdf.rename(columns = open_data_utils.RENAME_SPEED)
+        gdf = gdf.rename(columns = truncate_from_catalog(t))
+#        if "hq_" in t:
+#            gdf = gdf.rename(columns = open_data_utils.RENAME_HQTA)
+#        elif "speed" in t:
+#            gdf = gdf.rename(columns = open_data_utils.RENAME_SPEED)
             
         col_list = gdf.columns.tolist()
                 
