@@ -8,8 +8,8 @@
 			</citeinfo>
 		</citation>
 		<descript>
-			<abstract>Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled frequencies of 15 minutes or less.</abstract>
-			<purpose>Estimated stops along High Quality Transit Corridors, plus major transit stops for bus rapid transit, ferry, rail modes as described in Public Resources Code 21155, 21064.3, 21060.2.</purpose>
+			<abstract>Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled headways of 20 minutes or less.</abstract>
+			<purpose>Estimated stops along High Quality Transit Corridors, plus major transit stops for bus rapid transit, ferry, rail modes as described in Public Resources Code 21155, 21064.3, 21060.2. Existing stops are calculated from General Transit Feed Specification (GTFS) data. Planned major transit stops are from MPO-provided Regional Transportation Plans. See https://github.com/cal-itp/data-analyses/tree/main/high_quality_transit_areas for additional details.</purpose>
 		</descript>
 		<keywords>
 			<theme>
