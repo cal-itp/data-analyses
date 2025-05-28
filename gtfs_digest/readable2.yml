@@ -8,10 +8,30 @@ color_palettes:
   tri_color: ["#ccbb44","#5b8efd","#dd217d"]
   four_colors: ["#dd217d","#fcb40e","#ccbb44","#5b8efd"]
   full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44"]
-  headway_scale: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d","#dd217d","#dd217d"]  
+  headway_scale: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d","#dd217d","#dd217d"] 
+  
 # Organization Descriptive Info
-# To Come
-
+route_typology_graph:
+  title: "Total Routes by Typology"
+  tooltip: ["Route Type", "Total Routes"]
+  colors: ${color_palettes.full_color_scale} 
+longest_shortest_route:
+  title: "Longest and Shortest Route"
+  subtitle: "In miles."
+  tooltip: 
+  colors: ${color_palettes.two_colors} 
+route_percentiles:
+  title: "Route Length Percentile Groups"
+  subtitle: "Count of routes by their percentile groups based on their length."
+  tooltip: ["Percentile Group", "Total Routes"]
+  colors: ${color_palettes.full_color_scale} 
+    
+# Scheduled Service Hours
+daily_scheduled_hour:
+    title: "Daily Scheduled Service Hours"
+    subtitle: "Use the legend to highlight a particular month and hover over the line for additional information."
+    colors: ${color_palettes.full_color_scale} 
+    
 # Portfolio Organization Grain Charts
 organization_spatial_accuracy:
   title: "Spatial Accuracy (All Routes)"
