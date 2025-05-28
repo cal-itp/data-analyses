@@ -4,6 +4,97 @@ from constants import RT_COLUMN_RENAME_MAP
 import pandas as pd
 import numpy as np
 
+def flag_nonsequential_stops(rt_schedule_stop_times_sorted: pd.DataFrame) -> pd.DataFrame:
+    grouped_by_trip = rt_schedule_stop_times_sorted.groupby(
+        ["schedule_gtfs_dataset_key", "trip_instance_key"]
+    )
+    shifted_grouped = grouped_by_trip[["scheduled_arrival_sec", "rt_arrival_sec"]].shift(1)
+    df_output = rt_schedule_stop_times_sorted.copy()
+    df_output["non_sequential_rt_arrival"] = (
+        shifted_grouped["rt_arrival_sec"] > df_output["rt_arrival_sec"]
+    ).copy()
+    df_output["flag_surrounding_non_sequential_rt_arrival"] = (
+        df_output["non_sequential_rt_arrival"] | df_output["non_sequential_rt_arrival"].shift(-1)
+    ).copy()
+    return df_output
+
+def impute_first_last(rt_schedule_stop_times_sorted: pd.DataFrame) -> pd.DataFrame:
+    assert not rt_schedule_stop_times_sorted["scheduled_arrival_sec"].isna().any()
+    # Get the first & last stop time in each trip
+    stop_time_grouped = rt_schedule_stop_times_sorted.groupby("trip_instance_key")
+    first_stop_time = stop_time_grouped.first()
+    first_stop_sequence = first_stop_time["stop_sequence"].rename("first_stop_sequence")
+    last_stop_time = stop_time_grouped.last()
+    last_stop_sequence = last_stop_time["stop_sequence"].rename("last_stop_sequence")
+    # Get the first / last stop time with RT data that is not the first/last stop time overall (resp.)
+    # We need this to have a baseline to impute the first/last stop times
+    stop_times_with_first_last_sequence = rt_schedule_stop_times_sorted.merge(
+        pd.concat([first_stop_sequence, last_stop_sequence], axis=1),
+        on='trip_instance_key',
+        how='left',
+        validate="many_to_one"
+    )
+    stop_times_na_dropped = stop_times_with_first_last_sequence.loc[
+        stop_times_with_first_last_sequence['rt_arrival_sec'].notna() &
+        ~stop_times_with_first_last_sequence["flag_surrounding_non_sequential_rt_arrival"]
+    ]
+    # Get the "second" stop time
+    second_candidates = stop_times_na_dropped[
+        stop_times_na_dropped['stop_sequence'] > stop_times_na_dropped['first_stop_sequence']
+    ]
+    second_stop_time = second_candidates.groupby(
+        'trip_instance_key'
+    ).first()
+    # Get the "penultimate" stop time
+    penultimate_candidates = stop_times_na_dropped[
+        stop_times_na_dropped["stop_sequence"] < stop_times_na_dropped["last_stop_sequence"]
+    ]
+    penultimate_stop_time = penultimate_candidates.groupby(
+        'trip_instance_key'
+    ).last()
+    # Get the scheduled time between first & "second" and "penultimate" & last stop
+    scheduled_first_second_difference = second_stop_time["scheduled_arrival_sec"] - first_stop_time["scheduled_arrival_sec"]
+    scheduled_penultimate_last_difference = last_stop_time["scheduled_arrival_sec"] - penultimate_stop_time["scheduled_arrival_sec"]
+
+    assert (scheduled_first_second_difference.isna() |(scheduled_first_second_difference > 0)).all()
+    assert (scheduled_penultimate_last_difference.isna() |(scheduled_penultimate_last_difference > 0)).all()
+    rt_first_imputed = (
+        second_stop_time["rt_arrival_sec"] - scheduled_first_second_difference
+    ).rename("first_arrival_sec_imputed")
+    rt_last_imputed = (
+        penultimate_stop_time["rt_arrival_sec"] + scheduled_penultimate_last_difference
+    ).rename("last_arrival_sec_imputed")
+    # Merge in imputed first times
+    stop_times_imputed_merged = stop_times_with_first_last_sequence.merge(
+        pd.concat([rt_first_imputed, rt_last_imputed], axis=1),
+        how="left",
+        left_on="trip_instance_key",
+        right_index=True,
+        validate="many_to_one"
+    )
+    # Combine imputed and rt columns
+    stop_times_imputed_merged["imputed_arrival_sec"] = (
+        stop_times_imputed_merged["rt_arrival_sec"].where(
+            (
+                stop_times_imputed_merged["first_stop_sequence"]
+                != stop_times_imputed_merged["stop_sequence"]
+            ),
+            stop_times_imputed_merged["first_arrival_sec_imputed"]
+        ).where(
+            (
+                stop_times_with_first_last_sequence["last_stop_sequence"] 
+                != stop_times_with_first_last_sequence["stop_sequence"]
+            ),
+            stop_times_imputed_merged["last_arrival_sec_imputed"]
+        )
+    )
+    return stop_times_imputed_merged.drop([
+        "first_arrival_sec_imputed",
+         "last_arrival_sec_imputed", 
+         "first_stop_sequence", 
+         "last_stop_sequence"
+    ], axis=1)
+
 def make_retrospective_feed_single_date(
         filtered_input_feed: GTFS, 
         stop_times_table: pd.DataFrame,
@@ -50,7 +141,7 @@ def make_retrospective_feed_single_date(
         ~stop_times_merged["schedule_gtfs_dataset_key"].isna()
     ].reset_index(drop=True)
     stop_times_merged_filtered["rt_arrival_gtfs_time"] = seconds_to_gtfs_format_time(
-        stop_times_merged_filtered["rt_arrival_sec"]
+        stop_times_merged_filtered["imputed_arrival_sec"]
     )
     stop_times_gtfs_format_with_rt_times = stop_times_merged_filtered.drop(
         ["arrival_time", "departure_time"], axis=1
