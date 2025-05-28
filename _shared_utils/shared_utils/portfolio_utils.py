@@ -196,5 +196,7 @@ def standardize_portfolio_organization_names(df: pd.DataFrame, preferred_organiz
     Map the preferred organization name using schedule_gtfs_dataset_name.
     """
     df = df.assign(portfolio_organization_name=df.name.map(preferred_organization_name_dict))
+    # drop the ones that were removed with duplicated feed info (create_portfolio_display_yaml.py)
+    df = df.dropna(subset="portfolio_organization_name")
 
     return df

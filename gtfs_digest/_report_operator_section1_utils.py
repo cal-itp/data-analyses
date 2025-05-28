@@ -22,6 +22,10 @@ from IPython.display import HTML, Markdown, display
 with open("color_palettes.yml") as f:
     color_dict = yaml.safe_load(f)
 
+# Opening up gdf
+import google.auth
+credentials, project = google.auth.default()
+
 """
 Data
 """
@@ -31,9 +35,8 @@ def organization_name_crosswalk(organization_name: str) -> str:
     """
     schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
     
-    df = pd.read_parquet(
-        schd_vp_url, filters=[[("organization_name", "==", organization_name)]],
-    )
+    df = pd.read_parquet(schd_vp_url)
+    df = df.loc[df.organization_name == organization_name]
     
     # Get most recent name.
     df = df.sort_values(by = ['service_date'], ascending = False).drop_duplicates()
@@ -46,17 +49,18 @@ def load_operator_map(names:list)->gpd.GeoDataFrame:
     """
     op_routes_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_routes_map}.parquet"
     op_routes_gdf = gpd.read_parquet(
-    op_routes_url,
-    filters=[[("name", "in", names)]])
+    op_routes_url, storage_options={"token": credentials.token})
+    
+    op_routes_gdf = op_routes_gdf.loc[op_routes_gdf.name.isin(names)]
     
     # Find the most recent geography for each route.
     op_routes_gdf = op_routes_gdf.sort_values(by = ["service_date"], ascending = False)
     
     # Keep only the most recent row.
+    
     op_routes_gdf = op_routes_gdf.drop_duplicates(
-    subset=["route_long_name", 
-            "route_short_name", 
-            "route_combined_name"]
+    subset=['route_id',
+            'combined_name',]
     )
     
     # Drop service_dates
@@ -64,6 +68,7 @@ def load_operator_map(names:list)->gpd.GeoDataFrame:
     
     # Rename dataframe.
     op_routes_gdf = _report_utils.replace_column_names(op_routes_gdf)
+    
     return op_routes_gdf
 
 def get_counties()->gpd.GeoDataFrame:
@@ -71,7 +76,8 @@ def get_counties()->gpd.GeoDataFrame:
     Load a geodataframe of the California counties.
     """
     ca_gdf = "https://opendata.arcgis.com/datasets/8713ced9b78a4abb97dc130a691a8695_0.geojson"
-    my_gdf = to_snakecase(gpd.read_file(f"{ca_gdf}"))[["county_name", "geometry"]]
+    my_gdf = to_snakecase(gpd.read_file(ca_gdf),
+    storage_options={"token": credentials.token},)[["county_name", "geometry"]]
 
     return my_gdf
 
@@ -79,8 +85,9 @@ def load_operator_ntd_profile(organization_name:str)->pd.DataFrame:
 
     op_profiles_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.operator_profiles}.parquet"
     op_profiles_df = pd.read_parquet(
-    op_profiles_url,
-    filters=[[("organization_name", "==", organization_name)]])
+    op_profiles_url)
+    
+    op_profiles_df = op_profiles_df.loc[op_profiles_df.organization_name == organization_name]
     
     # Keep only the most recent row
     op_profiles_df1 = op_profiles_df.sort_values(by = ['service_date', "operator_n_routes"], ascending = [False, False]).head(1)
@@ -96,8 +103,8 @@ def load_operator_service_hours(names:list)->pd.DataFrame:
     """
     url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.scheduled_service_hours}.parquet"
 
-    df = pd.read_parquet(url,
-    filters=[[(("name", "in", names))]])
+    df = pd.read_parquet(url)
+    df = df.loc[df.name.isin(names)]
     
     # Rename dataframe
     df = _report_utils.replace_column_names(df)
