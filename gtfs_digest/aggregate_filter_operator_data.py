@@ -20,33 +20,55 @@ from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 import google.auth
 credentials, project = google.auth.default()
 
+routes_readable_col_names = {
+    "recent_combined_name":"Route",
+    "route_length_miles": "Route Length (Miles)",
+    "percentile_group":"Percentile Group",
+    "route_length_miles_percentile":"Route Length Percentile Groups",
+    "route_id": "Route ID",
+}
+
+routes_subset = [
+    "geometry",
+    "route_id",
+    "route_length_miles",
+    "is_downtown_local",
+    "is_local",
+    "is_coverage",
+    "is_rapid",
+    "is_express",
+    "is_rail",
+    "is_ferry",
+    "service_date",
+    "portfolio_organization_name",
+    "recent_combined_name",
+    "route_length_miles_percentile",
+    "percentile_group",
+]
 def grab_most_recent_geography(portfolio_organization_name:str) -> gpd.GeoDataFrame:
+    """
+    CHANGE THIS TO USE THE FILE CREATED IN LINE 170. 
+    Also add renaming dictionary at the top like
+    viz_data_prep. Also subset for only columns I Need. 
+    """
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
 
-    op_geography_df = gpd.read_parquet(
-        f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet",
+    gdf = gpd.read_parquet(
+     f"{RT_SCHED_GCS}{OPERATOR_ROUTE}_recent.parquet",
         storage_options={"token": credentials.token},
-    )
+    )[routes_subset]
 
-    op_geography_df = op_geography_df.loc[op_geography_df.portfolio_organization_name == portfolio_organization_name]
+    gdf = gdf.loc[gdf.portfolio_organization_name == portfolio_organization_name]
     
-    most_recent_dates = publish_utils.filter_to_recent_date(
-        df=op_geography_df, group_cols=["portfolio_organization_name",]
+    gdf = (gdf
+           .sort_values(by = ["service_date"], ascending = False)
+           .drop_duplicates(subset = ["portfolio_organization_name", "route_id"])
+          ).reset_index(drop = True)
+    
+    gdf = gdf.rename(
+        columns = routes_readable_col_names
     )
-
-    most_recent_geo = pd.merge(
-        op_geography_df,
-        most_recent_dates,
-        on=["portfolio_organization_name", "service_date"],
-        how="inner",
-    )
-    
-    most_recent_geo = (most_recent_geo
-                       .sort_values(by = ["service_date"], ascending = False)
-                       .drop_duplicates(subset = ["portfolio_organization_name", "route_id"])
-                      ).reset_index(drop = True)
-    
-    return most_recent_geo
+    return gdf
 
 def aggregate_operator_stats(
     df: pd.DataFrame,
