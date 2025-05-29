@@ -1,7 +1,7 @@
 from shared_utils import rt_dates
 import datetime as dt
 
-analysis_date = rt_dates.DATES["apr2025"]
+analysis_date = rt_dates.DATES["may2025"]
 
 GCS_FILE_PATH = ("gs://calitp-analytics-data/data-analyses/"
                  "high_quality_transit_areas/")
@@ -20,4 +20,5 @@ MS_TRANSIT_THRESHOLD = 3  #  different statutory threshold as of October 2024
 
 SHARED_STOP_THRESHOLD = 8 #  current rec
 #  Yolobus. Separate route_id, but same route in a CW and CCW loop, drop per rule to not compare same rt with itself
-ROUTE_COLLINEARITY_KEYS_TO_DROP = ['24956c9535f71f462472e2a1ceb5567c__42A_0__42B_0', '24956c9535f71f462472e2a1ceb5567c__42B_0__42A_0']
+#  can match on partial keys, see create_aggregate_stop_frequencies.py
+ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP = ['__42A_0__42B_0', '__42B_0__42A_0']

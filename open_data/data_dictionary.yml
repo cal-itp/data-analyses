@@ -68,7 +68,7 @@ common-fields:
       https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PRC&sectionNum=21155, https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=PRC&division=13.&title=&part=&chapter=2.5.&article
   - &hqta_details
     definition: |-
-      Indicates the details associated with High Quality Transit Area type as defined in the Public Resources Code. Valid options are: major_stop_rail_single_operator, major_stop_brt_single_operator, major_stop_ferry_single_operator,   intersection_2_bus_routes_same_operator, intersection_2_bus_routes_different_operators, stop_along_hq_bus_corridor_single_operator
+      Indicates the details associated with High Quality Transit Area type as defined in the Public Resources Code. Valid options are: major_stop_rail_single_operator, major_stop_brt_single_operator, major_stop_ferry_single_operator,   intersection_2_bus_routes_same_operator, intersection_2_bus_routes_different_operators, stop_along_hq_bus_corridor_single_operator, mpo_rtp_planned_major_stop
     definition_source: |- 
       https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PRC&sectionNum=21155, https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=PRC&division=13.&title=&part=&chapter=2.5.&article
 
@@ -88,6 +88,16 @@ tables:
     org_id_primary: *org_id
     org_id_secondary: 
       definition: Organization identifier for the secondary agency
+    mpo:
+      definition: |- 
+        Metropolitan Planning Organization, for planned major stops only.
+    plan_name:
+      definition: |- 
+        Name of applicable Regional Transportation Plan, for planned major stops only.
+    stop_id: *stop_id
+    avg_trips_per_peak_hr:
+      definition: |- 
+        The number of AM and PM hourly trips. Where AM and PM peak trips differ, the lesser value is used.
   
   - dataset_name: ca_hq_transit_stops
     agency_primary: *agency
@@ -108,6 +118,12 @@ tables:
     avg_trips_per_peak_hr:
       definition: |- 
         The number of AM and PM hourly trips. Where AM and PM peak trips differ, the lesser value is used.
+    mpo:
+      definition: |- 
+        Metropolitan Planning Organization, for planned major stops only.
+    plan_name:
+      definition: |- 
+        Name of applicable Regional Transportation Plan, for planned major stops only.
         
   - dataset_name: ca_transit_routes
     agency: *agency

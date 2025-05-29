@@ -15,6 +15,9 @@ from gcs_to_esri import project_and_standardize_cols
 import intake
 catalog = intake.open_catalog("./catalog.yml")
 
+import google.auth
+credentials, project = google.auth.default()
+
 def get_esri_url(name: str)-> str:
     return f"{ESRI_BASE_URL}{name}/FeatureServer"
 
@@ -24,7 +27,8 @@ def truncate_from_catalog(catalog_entry: str) -> dict:
     get just the first row of the gdf and return dict matching
     ESRI shapefile truncated columns to full names.
     '''
-    one_row_gdf = catalog[catalog_entry].read().iloc[:1].pipe(project_and_standardize_cols)
+    #  clunky way to add SSO credentials with bracket/key syntax
+    one_row_gdf = catalog[catalog_entry](geopandas_kwargs={"storage_options": {"token": credentials.token}}).read().iloc[:1].pipe(project_and_standardize_cols)
     return esri_truncate_columns(one_row_gdf.columns)
 
 #--------------------------------------------------------#
