@@ -12,7 +12,8 @@ assemble_operator_data:
 	python merge_operator_data.py
 	python aggregate_filter_operator_data.py # filters only to recent date for each operator
 	python merge_operator_service.py # is this filtered to recent date too?    
-
+	python aggregate_filter_operator_data.py # is this filtered to recent date too?
+    
 portfolio_deploy:
 	python deploy_portfolio_yaml.py
 	python _yml_gtfs_digest_orgs.py
