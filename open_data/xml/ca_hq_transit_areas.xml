@@ -15,7 +15,7 @@
 <contact gco:nilReason="missing">
 </contact>
 <dateStamp>
-<gco:Date>2025-04-22</gco:Date>
+<gco:Date>2025-05-27</gco:Date>
 </dateStamp>
 <metadataStandardName>
 <gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
@@ -72,7 +72,7 @@
 <gco:CharacterString>Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled frequencies of 15 minutes or less.</gco:CharacterString>
 </abstract>
 <purpose>
-<gco:CharacterString>Estimated High Quality Transit Corridors and Major Transit Stops as described in Public Resources Code 21155, 21064.3, 21060.2.</gco:CharacterString>
+<gco:CharacterString>Estimated High Quality Transit Corridors and Major Transit Stops as described in Public Resources Code 21155, 21064.3, 21060.2. High Quality Transit Corridors are buffered a half-mile from the linear General Transit Feed Specification (GTFS) shape, while Major Transit Stops are buffered a half-mile from the point locations of stops in General Transit Feed Specification (GTFS) data or, for planned major transit stops, MPO-provided Regional Transportation Plan data. See https://github.com/cal-itp/data-analyses/tree/main/high_quality_transit_areas for additional details.</gco:CharacterString>
 </purpose>
 <descriptiveKeywords>
 <MD_Keywords>
@@ -110,7 +110,7 @@
 <MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
 </characterSet>
 <environmentDescription>
-<gco:CharacterString>Microsoft Windows 10 Version 10.0 (Build 19045) ; Esri ArcGIS 12.9.12.32739</gco:CharacterString>
+<gco:CharacterString>Microsoft Windows 10 Version 10.0 (Build 22631) ; Esri ArcGIS 12.9.12.32739</gco:CharacterString>
 </environmentDescription>
 </MD_DataIdentification>
 </identificationInfo>

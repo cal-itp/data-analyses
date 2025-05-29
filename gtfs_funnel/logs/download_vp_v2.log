@@ -169,3 +169,8 @@
 2025-04-17 10:36:56.397 | INFO     | __main__:<module>:99 - Analysis date: 2025-04-16
 2025-04-17 10:37:06.001 | INFO     | __main__:<module>:107 - concat and filter batched data: 0:00:09.603306
 2025-04-17 10:40:36.570 | INFO     | __main__:<module>:114 - export concatenated vp: 0:03:30.569211
+2025-05-19 15:40:10.597 | INFO     | __main__:<module>:99 - Analysis date: 2025-05-14
+2025-05-19 15:40:16.973 | INFO     | __main__:<module>:107 - concat and filter batched data: 0:00:06.375762
+2025-05-19 15:42:28.254 | INFO     | __main__:<module>:114 - export concatenated vp: 0:02:11.280938
+2025-05-19 15:44:07.321 | INFO     | __main__:<module>:136 - remove batched parquets
+2025-05-19 15:44:07.324 | INFO     | __main__:<module>:139 - execution time: 0:03:56.726872

@@ -1,4 +1,4 @@
-'2025-04-16':
+2025-05-14:
   - Alhambra Schedule
   - Amador Schedule
   - Amtrak Schedule
@@ -13,6 +13,7 @@
   - Basin Transit GMV Schedule
   - Bay Area 511 AC Transit Schedule
   - Bay Area 511 ACE Schedule
+  - Bay Area 511 Angel Island-Tiburon Ferry Schedule
   - Bay Area 511 BART Schedule
   - Bay Area 511 Caltrain Schedule
   - Bay Area 511 Capitol Corridor Schedule
@@ -78,7 +79,6 @@
   - El Dorado Schedule
   - El Monte Schedule
   - Elk Grove Schedule
-  - Flixbus Schedule
   - Foothill Schedule
   - Fresno County Schedule
   - Fresno Schedule
@@ -87,7 +87,6 @@
   - Get Around Town Express Schedule
   - Glendale Schedule
   - Glendora Schedule
-  - Glenn Schedule
   - Go West Schedule
   - Grapeline Schedule
   - Guadalupe Flyer Schedule
@@ -145,6 +144,7 @@
   - Redwood Coast Schedule
   - Riverside Schedule
   - Rosemead Passio Schedule
+  - Roseville Schedule
   - Roseville Transit GMV Schedule
   - SBMTD Schedule
   - SLO Peak Transit Schedule
@@ -161,12 +161,13 @@
   - Santa Maria Schedule
   - Santa Ynez Mecatran Schedule
   - Siskiyou Schedule
+  - South County Transit Link Schedule
   - South San Francisco Schedule
   - Spirit Bus Passio Schedule
   - StanRTA Schedule
   - Stanford Schedule
   - SunLine Avail Schedule
-  - TART, North Lake Tahoe Schedule
+  - 'TART, North Lake Tahoe Schedule'
   - TCRTA TripShot Schedule
   - Tahoe Transportation District GMV Schedule
   - Tahoe Transportation District Schedule
@@ -181,7 +182,6 @@
   - Unitrans Schedule
   - VCTC GMV Schedule
   - Victor Valley GMV Schedule
-  - Victor Valley Schedule
   - Visalia Schedule
   - WeHo Schedule
   - YARTS Schedule
@@ -191,59 +191,45 @@
   - Yuma Schedule
   - Yurok Schedule
   - eTrans Schedule
-
-'2025-03-12':
+2025-04-16:
+  - Flixbus Schedule
+  - Glenn Schedule
+  - Victor Valley Schedule
+2025-03-12:
   - Bay Area 511 Rio Vista Delta Breeze Schedule
   - Imperial Valley Transit Schedule
-  - South County Transit Link Schedule
-
-'2025-01-15':
+2025-01-15:
   - Auburn Schedule
   - Golden Gate Park Shuttle Schedule
-
-'2024-12-11':
+2024-12-11:
   - Huntington Schedule
   - La Puente Schedule
-  - Roseville Schedule
   - Sierra Madre Schedule
-
-'2024-11-13':
+2024-11-13:
   - San Clemente Trolley Schedule
-
-'2024-10-16':
-  - Bay Area 511 Angel Island-Tiburon Ferry Schedule
+2024-10-16:
   - Beaumont Pass Schedule
   - PresidiGo Schedule
-
-'2024-09-18':
+2024-09-18:
   - DowneyLINK GMV Schedule
-
-'2024-06-12':
+2024-06-12:
   - Anteater Express Schedule
   - Lynwood Schedule
-
-'2024-05-22':
+2024-05-22:
   - El Segundo Schedule
   - Redwood Coast Schedulel
-
-'2024-03-13':
+2024-03-13:
   - Avalon Schedule
-
-'2024-02-14':
+2024-02-14:
   - Rosemead Schedule
-
-'2023-12-13':
+2023-12-13:
   - DowneyLINK Schedule
   - Spirit Bus Schedule
-
-'2023-11-15':
+2023-11-15:
   - Mission Bay Schedule
-
-'2023-08-15':
+2023-08-15:
   - Blossom Express Schedule
-
-'2023-06-14':
+2023-06-14:
   - Tuolumne Schedule
-
-'2023-03-15':
+2023-03-15:
   - TIME GMV Schedule
