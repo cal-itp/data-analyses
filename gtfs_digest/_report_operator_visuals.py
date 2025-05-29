@@ -1,5 +1,5 @@
 import pandas as pd
-import _report_visuals_utils
+import _report_route_dir_visuals
 import altair as alt
 from omegaconf import OmegaConf
 readable_dict = OmegaConf.load("readable2.yml")
@@ -62,7 +62,7 @@ def route_typology_chart(df) -> alt.Chart:
 
     specific_chart_dict = readable_dict.route_typology_graph
 
-    chart = _report_visuals_utils.pie_chart(
+    chart = _report_route_dir_visuals.pie_chart(
         df=df2,
         color_col="Route Type",
         theta_col="Total Routes",
@@ -80,7 +80,7 @@ def percentile_routes_chart(df: pd.DataFrame) -> alt.Chart:
 
     specific_chart_dict = readable_dict.route_percentiles
 
-    chart = _report_visuals_utils.bar_chart(
+    chart = _report_route_dir_visuals.bar_chart(
         x_col="Total Routes",
         y_col="Percentile Group",
         color_col="Percentile Group",
@@ -106,7 +106,7 @@ def shortest_longest_routes_chart(df: pd.DataFrame) -> alt.Chart:
 
     specific_chart_dict = readable_dict.longest_shortest_route
 
-    chart = _report_visuals_utils.bar_chart(
+    chart = _report_route_dir_visuals.bar_chart(
         x_col="Route Length Miles",
         y_col="Recent Combined Name",
         color_col="Route Length Miles",
