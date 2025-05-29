@@ -44,26 +44,13 @@ def reshape_percentile_groups(df: pd.DataFrame) -> pd.DataFrame:
     the route_length_miles_percentile groups.
     """
     agg1 = (
-        df.groupby(["percentile_group", "route_length_miles_percentile"])
-        .agg({"route_id": "nunique"})
+        df.groupby(["Percentile Group","Route Length Percentile Groups",])
+        .agg({"Route ID": "nunique"})
         .reset_index()
     ).rename(
-        columns={"percentile_group": "Percentile Group", "route_id": "Total Routes"}
+        columns={"Route ID": "Total Routes"}
     )
     return agg1
-
-def reshape_longest_shortest_route(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Filter for only the longest and shortest route
-    """
-    df2 = df.loc[
-        (df.shortest_longest == "shortest") | (df.shortest_longest == "longest")
-    ][["route_length_miles", "route_id", "recent_combined_name"]]
-
-    df2 = df2.drop_duplicates(subset=["route_length_miles"])
-
-    df2.columns = df2.columns.str.title().str.replace("_", " ")
-    return df2
 
 """
 Make Visuals

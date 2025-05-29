@@ -272,7 +272,7 @@ def categorize_route_percentiles(
     )
     
     # Add shortest and longest routes
-    shortest_longest = shortest_longest_routes(gdf, sort_cols)
+    """shortest_longest = shortest_longest_routes(gdf, sort_cols)
     
     # Use left merge so that all routes are kept for each date
     # Those that aren't shortest or longest have blanks
@@ -282,12 +282,12 @@ def categorize_route_percentiles(
         on = sort_cols + ["route_length_miles"],
         how = "left"
     ).fillna({"shortest_longest": ""}) 
-    
+    """
     drop_cols = [
         "p25", "p50", "p75", 
     ]
-    
-    return gdf2.drop(columns = drop_cols)
+     
+    return gdf.drop(columns = drop_cols)
 
 def add_sched_rt_category() -> pd.DataFrame:
     """
