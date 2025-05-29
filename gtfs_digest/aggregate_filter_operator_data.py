@@ -115,9 +115,7 @@ def aggregate_operator_stats(
 def renaming(df:pd.DataFrame)->pd.DataFrame:
     # Add renaming step similar to viz_data_prep
     df['operator_feeds'] = df['operator_feeds'].apply(lambda x: ', '.join(set(x.split(', '))))
-    # probably want to drop columns that aren't applicable
-    # organization_source_record_id, organization_name
-    return
+    return df
 
 def list_pop_as_string(df, stringify_cols: list):
     # pop list as string, so instead of [one, two], we can display "one, two"
@@ -204,11 +202,6 @@ if __name__ == "__main__":
     ntd_data = unpack_multiple_ntd(
         operator_data,
         group_cols = ["portfolio_organization_name", "service_date"]
-    )
-
-    most_recent_dates = publish_utils.filter_to_recent_date(
-        operator_data,
-        ["portfolio_organization_name"]
     )
     
     most_recent_operator_data = pd.merge(
