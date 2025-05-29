@@ -269,7 +269,7 @@ def bar_chart(
     color_col: str,
     color_scheme: list,
     tooltip_cols: list,
-    date_format: str = "%b %Y",
+    date_format: str,
 ) -> alt.Chart:
 
     chart = (
