@@ -17,6 +17,8 @@ from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 catalog = intake.open_catalog("../_shared_utils/shared_utils/shared_data_catalog.yml")
 sort_cols = ["schedule_gtfs_dataset_key", "service_date"]
 
+import google.auth
+credentials, project = google.auth.default()
 """
 Concatenating Functions 
 """
@@ -287,6 +289,36 @@ def categorize_route_percentiles(
     
     return gdf2.drop(columns = drop_cols)
 
+def add_sched_rt_category() -> pd.DataFrame:
+    """
+    Add sched_rt_category to OPERATOR_PROFILE
+    """
+    FILE = GTFS_DATA_DICT.digest_tables.route_schedule_vp
+    sched_rt_df = pd.read_parquet(f"{RT_SCHED_GCS}{FILE}.parquet")[
+        [
+            "service_date",
+            "portfolio_organization_name",
+            "sched_rt_category",
+        ]
+    ]
+
+    sched_rt_df["sort"] = sched_rt_df["sched_rt_category"].map(
+        {"schedule_and_vp": 3, "schedule_only": 2, "vp_only": 1}
+    )
+
+    # Sort and drop duplicates
+    sched_rt_df2 = (
+        (
+            sched_rt_df.sort_values(
+                by=["portfolio_organization_name", "service_date", "sort"],
+                ascending=[True, True, False],
+            ).drop_duplicates(subset=["portfolio_organization_name", "service_date"])
+        )
+        .reset_index(drop=True)
+        .drop(columns=["sort"])
+    )
+
+    return sched_rt_df2
 
 def merge_data_sources_by_operator(
     df_schedule: pd.DataFrame,
@@ -320,6 +352,7 @@ if __name__ == "__main__":
         rt_dates.y2025_dates + rt_dates.y2024_dates + rt_dates.y2023_dates 
     )
     
+    #analysis_date_list = ["2025-03-12"]
     OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
     
@@ -331,7 +364,7 @@ if __name__ == "__main__":
     ).pipe(
         merge_in_standardized_route_names
     ).pipe(
-        categorize_route_percentiles, sort_cols
+        categorize_route_percentiles, ["portfolio_organization_name", "service_date"]
     ).pipe(
         publish_utils.exclude_private_datasets, 
         col = "schedule_gtfs_dataset_key", 
@@ -354,7 +387,10 @@ if __name__ == "__main__":
     # Concat NTD/crosswalk
     counties_served = counties_served_by_operator(operator_routes)
     crosswalk_df = concatenate_crosswalks(analysis_date_list)
-        
+    
+    # Add what category an operator falls under for that month: schd, vp only, or both
+    sched_rt_df = add_sched_rt_category()
+    
     operator_df = merge_data_sources_by_operator(
         schedule_df,
         rt_schedule_df,
@@ -363,6 +399,10 @@ if __name__ == "__main__":
         counties_served,
         on = "schedule_gtfs_dataset_key",
         how = "inner"
+    ).merge(
+        sched_rt_df,
+        on = ["portfolio_organization_name", "service_date"],
+        how = "left"  
     ).pipe(
         publish_utils.exclude_private_datasets, 
         col = "schedule_gtfs_dataset_key", 

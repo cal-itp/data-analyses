@@ -17,6 +17,37 @@ from calitp_data_analysis import utils
 from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
+import google.auth
+credentials, project = google.auth.default()
+
+def grab_most_recent_geography(portfolio_organization_name:str) -> gpd.GeoDataFrame:
+    OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
+
+    op_geography_df = gpd.read_parquet(
+        f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet",
+        storage_options={"token": credentials.token},
+    )
+
+    op_geography_df = op_geography_df.loc[op_geography_df.portfolio_organization_name == portfolio_organization_name]
+    
+    most_recent_dates = publish_utils.filter_to_recent_date(
+        df=op_geography_df, group_cols=["portfolio_organization_name",]
+    )
+
+    most_recent_geo = pd.merge(
+        op_geography_df,
+        most_recent_dates,
+        on=["portfolio_organization_name", "service_date"],
+        how="inner",
+    )
+    
+    most_recent_geo = (most_recent_geo
+                       .sort_values(by = ["service_date"], ascending = False)
+                       .drop_duplicates(subset = ["portfolio_organization_name", "route_id"])
+                      ).reset_index(drop = True)
+    
+    return most_recent_geo
+
 def aggregate_operator_stats(
     df: pd.DataFrame,
     group_cols: list
@@ -59,9 +90,9 @@ def aggregate_operator_stats(
     return agg1
     
     
-def renaming_stuff(df):
+def renaming(df:pd.DataFrame)->pd.DataFrame:
     # Add renaming step similar to viz_data_prep
-    
+    df['operator_feeds'] = df['operator_feeds'].apply(lambda x: ', '.join(set(x.split(', '))))
     # probably want to drop columns that aren't applicable
     # organization_source_record_id, organization_name
     return
@@ -167,7 +198,7 @@ if __name__ == "__main__":
         ntd_data,
         on = ["portfolio_organization_name", "service_date"],
         how = "inner"
-    )
+    ).pipe(renaming)
     
     most_recent_operator_data.to_parquet(
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}_recent.parquet"
