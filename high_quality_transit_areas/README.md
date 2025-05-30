@@ -1,5 +1,7 @@
 # High Quality Transit Areas Analysis
 
+Including Major Transit Stops and High Quality Transit Corridors
+
 ## Open Data Portal 
 
 These datasets are updated **monthly**. We usually use a Wednesday in the middle of the month. The datasets reflect the a snapshot in time based on published GTFS schedule data.
