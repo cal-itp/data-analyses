@@ -12,6 +12,7 @@ SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
 PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
 
 analysis_date = rt_dates.DATES["may2025"]
+analysis_date_list = [analysis_date]
 
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
 apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
@@ -27,7 +28,6 @@ weeks_available = [
 ]
 
 
-analysis_date_list = [rt_dates.DATES["apr2025"]]
 test_dates = [rt_dates.DATES["nov2024"]]
 
 PROJECT_CRS = "EPSG:3310"
