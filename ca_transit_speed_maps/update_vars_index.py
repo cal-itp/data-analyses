@@ -11,6 +11,9 @@ from segment_speed_utils.project_vars import (
     SEGMENT_GCS,
 )
 
+import google.auth
+credentials, project = google.auth.default()
+
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 
 def datetime_to_rt_date_key(datetime: dt.datetime, day_offset: int = 0) -> str:
@@ -34,7 +37,8 @@ def read_segs(analysis_date: str) -> gpd.GeoDataFrame:
     '''
     path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
     org_cols = ['organization_name', 'organization_source_record_id', 'name', 'base64_url']
-    speedmap_segs = gpd.read_parquet(path)[org_cols].drop_duplicates().reset_index(drop=True)
+    speedmap_segs = gpd.read_parquet(path, storage_options = {"token": credentials.token})
+    speedmap_segs = speedmap_segs[org_cols].drop_duplicates().reset_index(drop=True)
     return speedmap_segs
 
 def append_previous(speedmap_segs: pd.DataFrame, date: str, operators: dict) -> pd.DataFrame():
