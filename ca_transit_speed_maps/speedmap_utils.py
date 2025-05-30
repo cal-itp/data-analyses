@@ -11,6 +11,9 @@ from IPython.display import display, Markdown, IFrame
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 from update_vars_index import SPEED_SEGS_PATH, ANALYSIS_DATE_LIST, GEOJSON_SUBFOLDER
 
+import google.auth
+credentials, project = google.auth.default()
+
 def read_segments_shn(organization_name: str, force_analysis_date: str = None) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
     '''
     Get filtered detailed speedmap segments for an organization, and relevant district SHN.
@@ -22,11 +25,13 @@ def read_segments_shn(organization_name: str, force_analysis_date: str = None) -
         this_org_ix = ix_df.query('organization_name == @organization_name')
         analysis_date = this_org_ix.analysis_date.iloc[0] #  with lookback, this may be a previous date
     path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
-    speedmap_segs = gpd.read_parquet(path, filters=[['organization_name', '==', organization_name]]) #  aggregated
+    speedmap_segs = gpd.read_parquet(path,
+                                     filters=[['organization_name', '==', organization_name]],
+                                     storage_options = {"token": credentials.token}) #  aggregated
     assert (speedmap_segs
     >> select(-_.route_short_name, -_.direction_id)).isna().any().any() == False, 'no cols besides route_short_name, direction_id should be nan'
     speedmap_segs = prepare_segment_gdf(speedmap_segs).assign(analysis_date = analysis_date)
-    shn = gpd.read_parquet(rt_utils.SHN_PATH)
+    shn = gpd.read_parquet(rt_utils.SHN_PATH, storage_options = {"token": credentials.token})
     this_shn = shn >> filter(_.District.isin([int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]))
     
     return (speedmap_segs, this_shn)
