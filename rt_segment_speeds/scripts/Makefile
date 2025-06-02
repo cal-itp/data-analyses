@@ -1,8 +1,8 @@
 # Cut segments
 segmentize:
 	#pip install -r requirements.txt
-#	python cut_stop_segments.py
-#	python cut_speedmap_segments.py      
+	python cut_stop_segments.py
+	python cut_speedmap_segments.py      
 
 rt_stop_times_pipeline:
 	make segmentize
