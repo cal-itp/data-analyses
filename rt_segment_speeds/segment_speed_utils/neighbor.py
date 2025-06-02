@@ -9,6 +9,8 @@ import shapely
 from segment_speed_utils import helpers     
 from segment_speed_utils.project_vars import SEGMENT_GCS, GTFS_DATA_DICT, PROJECT_CRS
 from shared_utils import geo_utils
+import google.auth
+credentials, project = google.auth.default()
 
 def merge_stop_vp_for_nearest_neighbor(
     stop_times: gpd.GeoDataFrame,
@@ -27,6 +29,7 @@ def merge_stop_vp_for_nearest_neighbor(
         columns = ["trip_instance_key", 
                    "vp_idx", "vp_primary_direction", 
                    "geometry"],
+        storage_options = {"token": credentials.token},
         **kwargs
     )
 
