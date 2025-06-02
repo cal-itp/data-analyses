@@ -15,6 +15,8 @@ from typing import Literal, Optional
 from segment_speed_utils import helpers, neighbor, vp_transform
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from segment_speed_utils.project_vars import SEGMENT_TYPES
+import google.auth
+credentials, project = google.auth.default()
 
 
 def stop_times_for_all_trips(
@@ -60,7 +62,8 @@ def stop_times_for_speedmaps(
 
     stop_times = gpd.read_parquet(
         f"{SEGMENT_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet",
-        filters = [[("proxy_stop", "==", 1)]]
+        filters = [[("proxy_stop", "==", 1)]],
+        storage_options = {"token": credentials.token}
     )
     
     stop_times = stop_times.reindex(columns = stop_time_col_order)

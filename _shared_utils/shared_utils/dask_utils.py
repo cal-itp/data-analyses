@@ -12,6 +12,8 @@ from calitp_data_analysis import utils
 from dask import compute, delayed
 from dask.delayed import Delayed  # type hint
 from shared_utils import time_helpers
+import google.auth
+credentials, project = google.auth.default()
 
 fs = gcsfs.GCSFileSystem()
 
@@ -129,6 +131,7 @@ def import_df_func(
         df = gpd.read_parquet(
             f"{path}_{one_date}.parquet",
             **kwargs,
+            storage_options = {"token": credentials.token}
         ).drop_duplicates()
 
     else:

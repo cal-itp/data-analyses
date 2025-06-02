@@ -9,7 +9,8 @@ from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 from calitp_data_analysis import utils, geography_utils
-
+import google.auth
+credentials, project = google.auth.default()
 
 def cut_longer_segments(
     stop_segments: gpd.GeoDataFrame, 
@@ -190,6 +191,7 @@ if __name__ == "__main__":
         
         stop_segments = gpd.read_parquet(
             f"{SEGMENT_GCS}{ALL_STOP_SEGMENTS}_{analysis_date}.parquet",
+            storage_options = {"token": credentials.token}
         )
 
         stop_segments = stop_segments.assign(
