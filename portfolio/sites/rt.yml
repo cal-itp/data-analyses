@@ -23,7 +23,6 @@ parts:
           district: 03 - Marysville / Sacramento
         sections:
           - organization_name: Butte County Association of Governments
-          - organization_name: City of Elk Grove
           - organization_name: City of Rancho Cordova
           - organization_name: Nevada County
           - organization_name: Sacramento Regional Transit District
@@ -68,6 +67,7 @@ parts:
         params:
           district: 05 - San Luis Obispo / Santa Barbara
         sections:
+          - organization_name: City of San Luis Obispo
           - organization_name: City of Santa Maria
           - organization_name: Monterey-Salinas Transit
           - organization_name: San Luis Obispo Regional Transit Authority
@@ -95,9 +95,9 @@ parts:
           - organization_name: City of Cerritos
           - organization_name: City of Commerce
           - organization_name: City of Culver City
+          - organization_name: City of Downey
           - organization_name: City of Duarte
           - organization_name: City of Gardena
-          - organization_name: City of Lawndale
           - organization_name: City of Los Angeles
           - organization_name: City of Montebello
           - organization_name: City of Monterey Park
@@ -117,6 +117,7 @@ parts:
           - organization_name: Gold Coast Transit District
           - organization_name: Long Beach Transit
           - organization_name: Los Angeles County Metropolitan Transportation Authority
+          - organization_name: Los Angeles World Airports
           - organization_name: 'University of California, Los Angeles'
           - organization_name: Ventura County Transportation Commission
       - caption: District 08 - San Bernardino / Riverside
@@ -127,10 +128,8 @@ parts:
           - organization_name: City of Banning
           - organization_name: City of Beaumont
           - organization_name: Mountain Area Regional Transit Authority
-          - organization_name: OmniTrans
           - organization_name: Palo Verde Valley Transit Agency
           - organization_name: Riverside Transit Agency
-          - organization_name: SunLine Transit Agency
           - organization_name: Victor Valley Transit Authority
       - caption: District 09 - Bishop
         params:
@@ -142,10 +141,13 @@ parts:
           district: 10 - Stockton
         sections:
           - organization_name: City of Escalon
+          - organization_name: City of Manteca
+          - organization_name: City of Tracy
           - organization_name: City of Turlock
           - organization_name: San Joaquin Regional Rail Commission
           - organization_name: San Joaquin Regional Transit District
           - organization_name: Stanislaus Regional Transit Authority
+          - organization_name: Transit Joint Powers Authority for Merced County
           - organization_name: Tuolumne County Transit Agency
       - caption: District 11 - San Diego
         params:
@@ -155,12 +157,13 @@ parts:
           - organization_name: North County Transit District
           - organization_name: San Diego International Airport
           - organization_name: San Diego Metropolitan Transit System
+          - organization_name: 'University of California, San Diego'
       - caption: District 12 - Orange County
         params:
           district: 12 - Orange County
         sections:
           - organization_name: Anaheim Transportation Network
-          - organization_name: City of Irvine
+          - organization_name: City of Mission Viejo
           - organization_name: Orange County Transportation Authority
 readme: ./ca_transit_speed_maps/README.md
 title: California Transit Speed Maps
