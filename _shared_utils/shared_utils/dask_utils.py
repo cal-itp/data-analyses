@@ -7,11 +7,14 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import gcsfs
 import geopandas as gpd
+import google.auth
 import pandas as pd
 from calitp_data_analysis import utils
 from dask import compute, delayed
 from dask.delayed import Delayed  # type hint
 from shared_utils import time_helpers
+
+credentials, project = google.auth.default()
 
 fs = gcsfs.GCSFileSystem()
 
@@ -127,8 +130,7 @@ def import_df_func(
     """
     if data_type == "gdf":
         df = gpd.read_parquet(
-            f"{path}_{one_date}.parquet",
-            **kwargs,
+            f"{path}_{one_date}.parquet", **kwargs, storage_options={"token": credentials.token}
         ).drop_duplicates()
 
     else:
