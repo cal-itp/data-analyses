@@ -3,7 +3,13 @@ Simple data wrangling to get route-direction grain
 ready for visualization.
 Rename columns, format values, 
 """
+import datetime
 import pandas as pd
+import sys
+
+from loguru import logger
+
+from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
 route_direction_cols_for_viz = [
     "direction_id",
@@ -71,6 +77,15 @@ def data_wrangling_for_visualizing(
         headway_in_minutes = 60 / df.frequency
     ).round(0)
     
+    # these show up as floats but should be integers
+    # also these aren't kept...
+    route_typology_cols = [
+        f"is_{c}" for c in 
+        ["express", "rapid",
+         "ferry", "rail", "coverage",
+         "local", "downtown_local"]
+    ]
+    
     float_cols = [c for c in df.select_dtypes(include=["float"]).columns 
                      if c not in route_typology_cols and "pct" not in c]
     
@@ -93,8 +108,17 @@ def data_wrangling_for_visualizing(
 
 if __name__ == "__main__":
     
+    logger.add("./logs/digest_data_prep.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    start = datetime.datetime.now()
+    
     ROUTE_DIR_FILE = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp
-
+    ROUTE_DIR_REPORT = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp_report
+    
+    # Rename, format columns and save output to use in report
     route_dir_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{ROUTE_DIR_FILE}.parquet"
     ).pipe(
@@ -104,5 +128,8 @@ if __name__ == "__main__":
     )
     
     route_dir_df.to_parquet(
-        f"{RT_SCEHD_GCS}{ROUTE_DIR_FILE}_viz.parquet"
+        f"{RT_SCHED_GCS}{ROUTE_DIR_REPORT}.parquet"
     )
+    
+    end = datetime.datetime.now()
+    logger.info(f"route-direction viz data prep: {end - start}")

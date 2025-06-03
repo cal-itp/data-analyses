@@ -3,9 +3,14 @@ Concatenate the high-level operator stats.
 Produce a single row for each operator-date we have.
 This comprises first section of GTFS Digest.
 """
+import datetime
 import geopandas as gpd
+import google.auth
 import intake
 import pandas as pd
+import sys
+
+from loguru import logger
 
 from calitp_data_analysis import utils
 from calitp_data_analysis.sql import to_snakecase
@@ -16,9 +21,8 @@ from update_vars import GTFS_DATA_DICT, SCHED_GCS, RT_SCHED_GCS
 
 catalog = intake.open_catalog("../_shared_utils/shared_utils/shared_data_catalog.yml")
 sort_cols = ["schedule_gtfs_dataset_key", "service_date"]
-
-import google.auth
 credentials, project = google.auth.default()
+
 """
 Concatenating Functions 
 """
@@ -97,15 +101,8 @@ def counties_served_by_operator(
 
     # operator routes are available for all dates
     # use most recent date per operator and do sjoin
-    operator_most_recent_date = publish_utils.filter_to_recent_date(
+    operator_recent_routes = publish_utils.filter_to_recent_date(
         route_gdf_by_operator, ["schedule_gtfs_dataset_key"]
-    )
-    
-    operator_recent_routes = pd.merge(
-        route_gdf_by_operator[sort_cols + ["route_id", "direction_id", "geometry"]],
-        operator_most_recent_date,
-        on = sort_cols,
-        how = "inner",
     )
     
     # Sjoin most recent route geometries per operator
@@ -289,34 +286,26 @@ def categorize_route_percentiles(
      
     return gdf.drop(columns = drop_cols)
 
-def add_sched_rt_category() -> pd.DataFrame:
+def add_sched_rt_category(filename: str) -> pd.DataFrame:
     """
     Add sched_rt_category to OPERATOR_PROFILE
-    """
-    FILE = GTFS_DATA_DICT.digest_tables.route_schedule_vp
-    sched_rt_df = pd.read_parquet(f"{RT_SCHED_GCS}{FILE}.parquet")[
-        [
-            "service_date",
-            "portfolio_organization_name",
-            "sched_rt_category",
-        ]
-    ]
-
-    sched_rt_df["sort"] = sched_rt_df["sched_rt_category"].map(
-        {"schedule_and_vp": 3, "schedule_only": 2, "vp_only": 1}
+    using route-direction grain.
+    Since sched_rt_category is assigned to routes, use the 
+    most common (mode) designation for each operator.
+    """  
+    sched_rt_df = pd.read_parquet(
+        f"{RT_SCHED_GCS}{filename}.parquet",
+        columns = ["portfolio_organization_name", "service_date", 
+                   "route_id", "sched_rt_category"]
     )
-
-    # Sort and drop duplicates
-    sched_rt_df2 = (
-        (
-            sched_rt_df.sort_values(
-                by=["portfolio_organization_name", "service_date", "sort"],
-                ascending=[True, True, False],
-            ).drop_duplicates(subset=["portfolio_organization_name", "service_date"])
-        )
-        .reset_index(drop=True)
-        .drop(columns=["sort"])
-    )
+    
+    # Find the mode
+    # https://stackoverflow.com/questions/15222754/groupby-pandas-dataframe-and-select-most-common-value
+    sched_rt_df2 = (sched_rt_df
+                    .groupby(["portfolio_organization_name", "service_date"])
+                    .agg({"sched_rt_category": lambda x: pd.Series.mode(x)[0]})
+                    .reset_index()
+                    )
 
     return sched_rt_df2
 
@@ -348,6 +337,13 @@ if __name__ == "__main__":
 
     from shared_utils import rt_dates
     
+    logger.add("./logs/digest_data_prep.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    start = datetime.datetime.now()    
+    
     analysis_date_list = (
         rt_dates.y2025_dates + rt_dates.y2024_dates + rt_dates.y2023_dates 
     )
@@ -364,7 +360,8 @@ if __name__ == "__main__":
     ).pipe(
         merge_in_standardized_route_names
     ).pipe(
-        categorize_route_percentiles, ["portfolio_organization_name", "service_date"]
+        categorize_route_percentiles, 
+        ["portfolio_organization_name", "service_date"]
     ).pipe(
         publish_utils.exclude_private_datasets, 
         col = "schedule_gtfs_dataset_key", 
@@ -376,6 +373,9 @@ if __name__ == "__main__":
         RT_SCHED_GCS,
         OPERATOR_ROUTE
     )
+    
+    time1 = datetime.datetime.now()
+    logger.info(f"concatenate operator route gdf: {time1 - start}")
     
     # Concat operator grain for schedule metrics.
     schedule_df = concatenate_schedule_operator_metrics(analysis_date_list)
@@ -389,7 +389,8 @@ if __name__ == "__main__":
     crosswalk_df = concatenate_crosswalks(analysis_date_list)
     
     # Add what category an operator falls under for that month: schd, vp only, or both
-    sched_rt_df = add_sched_rt_category()
+    ROUTE_DIR_FILE = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp
+    sched_rt_df = add_sched_rt_category(ROUTE_DIR_FILE)
     
     operator_df = merge_data_sources_by_operator(
         schedule_df,
@@ -413,3 +414,6 @@ if __name__ == "__main__":
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
     )
     
+    end = datetime.datetime.now()
+    logger.info(f"concatenate operator profiles: {end - time1}")
+    logger.info(f"concatenate operator execution time: {end - start}")
