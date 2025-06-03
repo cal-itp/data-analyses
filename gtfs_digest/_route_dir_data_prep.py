@@ -71,15 +71,6 @@ def data_wrangling_for_visualizing(
         headway_in_minutes = 60 / df.frequency
     ).round(0)
     
-    # these show up as floats but should be integers
-    # also these aren't kept...
-    route_typology_cols = [
-        f"is_{c}" for c in 
-        ["express", "rapid",
-         "ferry", "rail", "coverage",
-         "local", "downtown_local"]
-    ]
-    
     float_cols = [c for c in df.select_dtypes(include=["float"]).columns 
                      if c not in route_typology_cols and "pct" not in c]
     
