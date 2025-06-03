@@ -3,21 +3,19 @@ Produce the aggregation for section 1 (operator)
 in GTFS digest and filter to only recent date.
 
 Includes operator info and operator route map.
-
-TODO: add renaming and any remaining viz wrangling.
-This script is equivalent to viz_data_prep.py, so both
-should be renamed to make grain clear, and do similar things between route-dir
-and operator grain.
-(aggregate metrics, rename for viz)
 """
+import datetime
 import geopandas as gpd
+import google.auth
 import pandas as pd
+import sys
+
+from loguru import logger
 
 from calitp_data_analysis import utils
 from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
-import google.auth
 credentials, project = google.auth.default()
 
 routes_readable_col_names = {
@@ -45,6 +43,10 @@ routes_subset = [
     "route_length_miles_percentile",
     "percentile_group",
 ]
+
+operator_date_cols = ["portfolio_organization_name", "service_date"]
+
+'''
 def grab_most_recent_geography(portfolio_organization_name:str) -> gpd.GeoDataFrame:
     """
     CHANGE THIS TO USE THE FILE CREATED IN LINE 170. 
@@ -69,7 +71,7 @@ def grab_most_recent_geography(portfolio_organization_name:str) -> gpd.GeoDataFr
         columns = routes_readable_col_names
     )
     return gdf
-
+'''
 def aggregate_operator_stats(
     df: pd.DataFrame,
     group_cols: list
@@ -109,15 +111,18 @@ def aggregate_operator_stats(
         })
     ).pipe(list_pop_as_string, ["counties_served", "operator_feeds"])
     
+    # Pop out the operator gtfs_dataset_names 
+    agg1['operator_feeds'] = agg1['operator_feeds'].apply(
+        lambda x: ', '.join(set(x.split(', ')))
+    )
+    
     return agg1
     
-    
-def renaming(df:pd.DataFrame)->pd.DataFrame:
-    # Add renaming step similar to viz_data_prep
-    df['operator_feeds'] = df['operator_feeds'].apply(lambda x: ', '.join(set(x.split(', '))))
-    return df
 
-def list_pop_as_string(df, stringify_cols: list):
+def list_pop_as_string(
+    df: pd.DataFrame, 
+    stringify_cols: list
+) -> pd.DataFrame:
     # pop list as string, so instead of [one, two], we can display "one, two"
     for c in stringify_cols:
         df[c] = df[c].apply(lambda x: ', '.join(map(str, x)))
@@ -158,63 +163,73 @@ def unpack_multiple_ntd(
          "primary_uza_name"]
     )
     
-    
     return agg1
 
 if __name__ == "__main__":
     
+    logger.add("./logs/digest_data_prep.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    start = datetime.datetime.now()
+    
     OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
     
+    OPERATOR_PROFILE_REPORT = GTFS_DATA_DICT.digest_tables.operator_profiles_report
+    OPERATOR_ROUTE_REPORT = GTFS_DATA_DICT.digest_tables.operator_routes_map_report
     
-    operator_routes = gpd.read_parquet(
-        f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet"
-    )
-    
-    # Maybe rewrite this function to return the subset df
-    most_recent_dates = publish_utils.filter_to_recent_date(
-        operator_routes,
+    most_recent_routes = gpd.read_parquet(
+        f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet",
+        columns = routes_subset,
+        storage_options={"token": credentials.token},
+    ).pipe(
+        publish_utils.filter_to_recent_date,
         ["portfolio_organization_name"]
-    )
-    
-    most_recent_routes = pd.merge(
-        operator_routes,
-        most_recent_dates,
-        on = ["portfolio_organization_name", "service_date"],
-        how = "inner"
-    )
+    ).drop_duplicates(
+        subset = ["portfolio_organization_name", "route_id"]
+    ).rename(
+        columns = routes_readable_col_names
+    ).reset_index(drop=True)
     
     utils.geoparquet_gcs_export(
         most_recent_routes,
         RT_SCHED_GCS,
-        f"{OPERATOR_ROUTE}_recent"
+        OPERATOR_ROUTE_REPORT
     )
     
+    # For each date, get aggregated operator stats (count route typologies, etc)
+    # and NTD stats, then filter to the most recent date for the report
     operator_data = pd.read_parquet(
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet"
     )
     
     operator_aggregated = aggregate_operator_stats(
         operator_data,
-        group_cols = ["portfolio_organization_name", "service_date", "caltrans_district"]
+        group_cols = operator_date_cols + ["caltrans_district"]
     )
     
     ntd_data = unpack_multiple_ntd(
         operator_data,
-        group_cols = ["portfolio_organization_name", "service_date"]
+        group_cols = operator_date_cols
     )
     
     most_recent_operator_data = pd.merge(
         operator_aggregated,
-        most_recent_dates,
-        on = ["portfolio_organization_name", "service_date"],
-        how = "inner"
-    ).merge(
         ntd_data,
-        on = ["portfolio_organization_name", "service_date"],
+        on = operator_date_cols,
         how = "inner"
-    ).pipe(renaming)
+    ).pipe(
+        publish_utils.filter_to_recent_date, 
+        ["portfolio_organization_name"]
+    ).rename(
+        columns = routes_readable_col_names
+    )
     
     most_recent_operator_data.to_parquet(
-        f"{RT_SCHED_GCS}{OPERATOR_PROFILE}_recent.parquet"
+        f"{RT_SCHED_GCS}{OPERATOR_PROFILE_REPORT}.parquet"
     )
+    
+    end = datetime.datetime.now()
+    logger.info(f"operator viz data prep: {end - start}")

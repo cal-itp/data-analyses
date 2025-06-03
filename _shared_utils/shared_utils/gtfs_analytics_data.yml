@@ -62,10 +62,12 @@ rt_vs_schedule_tables:
 digest_tables:
   dir: ${gcs_paths.RT_SCHED_GCS}
   monthly_route_schedule_vp: "digest/schedule_vp_metrics"
-  monthly_route_schedule_vp_report: "digest/schedule_vp_metrics_viz"
+  monthly_route_schedule_vp_report: ${.monthly_route_schedule_vp}_report
   #quarterly_route_schedule_vp: "digest/quarterly_schedule_vp_metrics" # doesn't exist yet
   operator_profiles: "digest/operator_profiles"
+  operator_profiles_report: ${.operator_profiles}_report
   operator_routes_map: "digest/operator_routes"
+  operator_routes_map_report: ${.operator_routes_map}_report
   operator_sched_rt: "digest/operator_schedule_rt_category"
   scheduled_service_hours: "digest/total_scheduled_service_hours"
 
