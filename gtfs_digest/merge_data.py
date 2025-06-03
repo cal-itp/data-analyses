@@ -357,7 +357,7 @@ if __name__ == "__main__":
         rt_dates.y2025_dates
     )
     
-    DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
+    DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp 
     
     # These are public schedule_gtfs_dataset_keys
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()

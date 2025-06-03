@@ -1,3 +1,8 @@
+"""
+Simple data wrangling to get route-direction grain
+ready for visualization.
+Rename columns, format values, 
+"""
 import pandas as pd
 
 route_direction_cols_for_viz = [
@@ -54,16 +59,13 @@ readable_col_names = {
 
 
 def data_wrangling_for_visualizing(
-    df, 
-    subset, 
-    readable_col_names
-):
+    df: pd.DataFrame, 
+    subset: list, 
+    readable_col_names: dict
+) -> pd.DataFrame:
     """
-    Depending on how much this is used, some stuff
-    might be moved outside to be variables borrowed elsewhere.
-    remove the args subset, readable_col_names, just leave here to use in notebook
+    Keep the subset of columns, rename for parameterized notebook.
     """
-    
     # create new columns
     df = df.assign(
         headway_in_minutes = 60 / df.frequency
@@ -96,3 +98,20 @@ def data_wrangling_for_visualizing(
     ).reset_index(drop=True)
 
     return df2
+
+
+if __name__ == "__main__":
+    
+    ROUTE_DIR_FILE = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp
+
+    route_dir_df = pd.read_parquet(
+        f"{RT_SCHED_GCS}{ROUTE_DIR_FILE}.parquet"
+    ).pipe(
+        data_wrangling_for_visualizing,
+        route_direction_cols_for_viz,
+        readable_col_names,
+    )
+    
+    route_dir_df.to_parquet(
+        f"{RT_SCEHD_GCS}{ROUTE_DIR_FILE}_viz.parquet"
+    )
