@@ -20,24 +20,26 @@ def _filter_non_rt_trips(
     trip_instance_key_column: ColumnName,
     **_unused_column_names: ColumnMap
 ) -> pd.DataFrame:
+    """Filter out all trips that do not have any rt stop times"""
     trips_by_rt_status = (
-        rt_schedule_stop_times["rt_arrival_sec"]
+        rt_schedule_stop_times[rt_column]
         .isna()
-        .groupby(rt_schedule_stop_times["trip_instance_key"])
+        .groupby(rt_schedule_stop_times[trip_instance_key_column])
         .all()
     )
     trips_without_rt = trips_by_rt_status[trips_by_rt_status].index
     filtered_stop_times = rt_schedule_stop_times.loc[
-        ~(rt_schedule_stop_times["trip_instance_key"].isin(trips_without_rt))
+        ~(rt_schedule_stop_times[trip_instance_key_column].isin(trips_without_rt))
     ].copy()
     return filtered_stop_times
-    
+
 
 def _filter_na_stop_times(
     rt_stop_times: pd.DataFrame,
     rt_column: ColumnName,
     **_unused_column_names: ColumnMap
 ) -> pd.DataFrame:
+    """Filter out all stop times that do not have rt times"""
     return rt_stop_times.dropna(subset=[rt_column])
 
 
@@ -67,8 +69,9 @@ def flag_nonmonotonic_sections(
     stop_sequence_column: ColumnName,
     **_unused_column_names: ColumnMap
 ) -> pd.DataFrame:
+    """Get a Series corresponding with whether the rt arrival does not monotonically increase relative to all prior stops"""
     assert not rt_schedule_stop_times_sorted.index.duplicated().any()
-    rt_sec_reverse_cummin = (
+    rt_sec_reverse_cummin = (  # TODO: I think this is dumb
         # Sort in reverse order
         rt_schedule_stop_times_sorted.sort_values(stop_sequence_column, ascending=False)
         # Get the minimum stop time in reverse order
@@ -82,6 +85,7 @@ def flag_nonmonotonic_sections(
     return nonmonotonic_flag
 
 
+# TODO: remove
 def add_monotonic_flag_to_df(
     rt_schedule_stop_times_sorted: pd.DataFrame,
     nonmonotonic_column: ColumnName,
@@ -103,6 +107,7 @@ def impute_first_last(
     nonmonotonic_column: ColumnName,
     **_unused_column_name_args: ColumnMap
 ) -> pd.DataFrame:
+    """Impute the first and last stop times based on schedule times, regardless of whether rt times are present."""
     assert not rt_schedule_stop_times_sorted[schedule_column].isna().any()
     # Get the first & last stop time in each trip
     stop_time_grouped = rt_schedule_stop_times_sorted.groupby(trip_instance_key_column)
@@ -207,6 +212,7 @@ def impute_labeled_times(
     trip_instance_key_column: ColumnName,
     **_unused_column_names: ColumnMap
 ) -> pd.Series:
+    """Impute stop times based on schedule for all stop times where the column referred to by impute_label_column is True"""
     grouped_flag = rt_schedule_stop_times_sorted.groupby(trip_instance_key_column)[
         impute_label_column
     ]
@@ -257,6 +263,8 @@ def impute_non_monotonic_rt_times(
     trip_instance_key_column: ColumnName,
     **_unused_column_names: ColumnMap
 ):
+    """Impute stop times where the nonmonotonic column is True"""
+    # TODO: get the monotonic flag as part of this function
     # Check that first/last trip times are present
     trip_id_grouped = rt_schedule_stop_times_sorted.groupby(trip_instance_key_column)
     assert not trip_id_grouped[rt_column].first().isna().any()
@@ -286,6 +294,7 @@ def impute_short_gaps(
     trip_instance_key_column: ColumnName,
     **_unused_column_names: ColumnMap
 ):
+    """Impute gaps in rt data that are fewer than max_gap_length in consecutive length"""
     # Check that first/last rt times are present
     trip_id_grouped = rt_schedule_stop_times_sorted.groupby(trip_instance_key_column)
     assert not trip_id_grouped[rt_column].first().isna().any()
@@ -321,7 +330,23 @@ def make_retrospective_feed_single_date(
     validate: bool = True,
     **_unused_column_names: ColumnMap
 ) -> GTFS:
+    """
+    Create a retrospective deed based on schedule data from filtered_input_feed and rt from stop_times_table
 
+    Parameters
+    filtered_input_feed: a GTFS-Lite feed, representing schedule data
+    stop_times_table: a DataFrame with the columns specified in other arguments containing real time data and columns to link to schedule data
+    stop_times_desired_columns: the columns that should be kept in the output stop_times table. Must include all required columns, if optional columns are included they will be retained from the schedule data TODO: this probably shouldn't exist
+    schedule_column: The column in stop_times_table containing *schedule* arrival times, in seconds since midnight
+    rt_column: The column in stop_times_table containing *real time* arrival times, in seconds since midnight TODO: check if it's technically something different because dst
+    trip_id_column: The column that contains the trip id
+    stop_sequence_column: The column that contains the stop sequence value
+    validate: Whether to run validation checks on the output feed, defaults to true
+    **_unused_column_names: Not used, included for compatibility with other functions
+
+    Returns:
+    A GTFS-Lite feed with stop times and trips based on filtered_input_feed
+    """
     # Process the input feed
     schedule_trips_original = filtered_input_feed.trips.set_index("trip_id")
     schedule_stop_times_original = filtered_input_feed.stop_times.copy()
