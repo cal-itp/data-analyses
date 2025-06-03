@@ -2,73 +2,34 @@
 Create the GTFS Digest yaml that 
 sets the parameterization for the analysis site.
 """
-from shared_utils import catalog_utils, portfolio_utils,  publish_utils
 import pandas as pd
-GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
+from shared_utils import portfolio_utils, publish_utils
+from update_vars import GTFS_DATA_DICT
 
 SITE_YML = "../portfolio/sites/gtfs_digest.yml"
 
-import sys
-sys.path.append("../_shared_utils/shared_utils")
-import create_portfolio_display_yaml
-
-def generate_operator_grain_yaml()->pd.DataFrame:
+def generate_operator_grain_yaml(filename: str) -> pd.DataFrame:
     """
     Generate the yaml for our Operator grain portfolio.
     """
-    schd_vp_url = f"{GTFS_DATA_DICT.digest_tables.dir}{GTFS_DATA_DICT.digest_tables.route_schedule_vp}.parquet"
+    FILEPATH_URL = f"{GTFS_DATA_DICT.digest_tables.dir}{filename}.parquet"
     
     # Keep only organizations with RT and schedule OR only schedule.
-    schd_vp_df = (pd.read_parquet(schd_vp_url, 
-                       filters=[[("sched_rt_category", "in", ["schedule_and_vp", "schedule_only"])]],
-                       columns = [ "schedule_gtfs_dataset_key",
-                                    "caltrans_district",
-                                    "organization_name",
-                                    "name",
-                                    "sched_rt_category",
-                                    "service_date",]
-                                     )
-                     )
-
-    
-    # Drop duplicates & drop any rows without CT district values
-    schd_vp_df = (schd_vp_df
-                  .drop_duplicates(subset=[
-            "schedule_gtfs_dataset_key",
-            "caltrans_district",
-            "organization_name",
-            "name",
-            "sched_rt_category",
-        ]
-    ).dropna(subset="caltrans_district")
-     .reset_index(drop = True)
-                 )
-    
-    # Get the most recent date using publish_utils
-    recent_date = publish_utils.filter_to_recent_date(schd_vp_df, [
-            "organization_name"])
-    
-    # Merge to get the most recent row for each organization
-    schd_vp_df.service_date = schd_vp_df.service_date.astype(str)
-    recent_date.service_date = recent_date.service_date.astype(str)
-    m1 = pd.merge(schd_vp_df, recent_date)
-    
-    # Map certain organizations for the portfolio name 
-    m1['organization_name'] = m1['organization_name'].replace(create_portfolio_display_yaml.PORTFOLIO_ORGANIZATION_NAMES)
-    
-    # Drop duplicates again & sort
-    final_cols = ["caltrans_district", "organization_name"]
-    
-    m2 = m1.drop_duplicates(
-    subset= final_cols
-    ).sort_values(by = final_cols, ascending = [True, True])
-    
-    final = m2[final_cols]
-    
-    return final
+    df = pd.read_parquet(
+        FILEPATH_URL, 
+        filters=[[("sched_rt_category", "in", ["schedule_and_vp", "schedule_only"])]],
+        columns = ["caltrans_district", "portfolio_organization_name"]
+    ).dropna(subset=["caltrans_district"]).rename(
+        columns = {"portfolio_organization_name": "organization_name"}
+    ).sort_values(["caltrans_district", "organization_name"]).reset_index(drop=True)
+                     
+    return df
 
 if __name__ == "__main__":
-    final = generate_operator_grain_yaml()
+    
+    OPERATOR_PROFILE_REPORT = GTFS_DATA_DICT.digest_tables.operator_profiles_report
+
+    final = generate_operator_grain_yaml(OPERATOR_PROFILE_REPORT)
 
     portfolio_utils.create_portfolio_yaml_chapters_with_sections(
         SITE_YML,
