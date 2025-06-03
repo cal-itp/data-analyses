@@ -101,7 +101,7 @@ def filter_to_recent_date(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
     Example: By schedule_gtfs_dataset_name, keep the most recent
     service_date that shows up in scheduled trips.
     """
-    df2 = (
+    most_recent_df = (
         df.groupby(group_cols, group_keys=False)
         .service_date.max()
         .reset_index()
@@ -109,4 +109,7 @@ def filter_to_recent_date(df: pd.DataFrame, group_cols: list) -> pd.DataFrame:
         .reset_index(drop=True)
         # .astype({"service_date": "str"})
     )
-    return df2
+
+    subset_df = pd.merge(df, most_recent_df, on=group_cols + ["service_date"], how="inner")
+
+    return subset_df
