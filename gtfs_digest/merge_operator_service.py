@@ -5,13 +5,16 @@ downloaded every 1/2 a year.
 
 Grain is operator-service_date-route
 """
+import datetime
 import pandas as pd
+import sys
 
-from segment_speed_utils import (gtfs_schedule_wrangling, helpers, 
-                                 time_series_utils) 
+from loguru import logger
+
+from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils 
 from segment_speed_utils.project_vars import (
     COMPILED_CACHED_VIEWS, weeks_available)
-from shared_utils import gtfs_utils_v2, publish_utils, rt_dates
+from shared_utils import gtfs_utils_v2, publish_utils
 from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
 def concatenate_trips(
@@ -120,7 +123,12 @@ def total_service_hours_all_months(week_list: list[list]) -> pd.DataFrame:
 
 if __name__ == "__main__":
     
-    print(f"Aggregating for dates: {weeks_available}")
+    logger.add("./logs/digest_data_prep.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    start = datetime.datetime.now()    
     
     # Save service hours
     SERVICE_EXPORT = GTFS_DATA_DICT.digest_tables.scheduled_service_hours
@@ -131,3 +139,8 @@ if __name__ == "__main__":
         f"{RT_SCHED_GCS}{SERVICE_EXPORT}.parquet"
     ) 
     
+    end = datetime.datetime.now()
+    logger.info(
+        f"concatenate operator service hours for: {weeks_available} "
+        f"{end - start}"
+    )
