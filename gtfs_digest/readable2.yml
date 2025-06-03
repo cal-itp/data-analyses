@@ -18,7 +18,7 @@ route_typology_graph:
 longest_shortest_route:
   title: "Longest and Shortest Route"
   subtitle: "In miles."
-  tooltip: 
+  tooltip: ['Route Length Miles', 'Recent Combined Name']
   colors: ${color_palettes.two_colors} 
 route_percentiles:
   title: "Route Length Percentile Groups"
