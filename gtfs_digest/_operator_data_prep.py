@@ -46,32 +46,7 @@ routes_subset = [
 
 operator_date_cols = ["portfolio_organization_name", "service_date"]
 
-'''
-def grab_most_recent_geography(portfolio_organization_name:str) -> gpd.GeoDataFrame:
-    """
-    CHANGE THIS TO USE THE FILE CREATED IN LINE 170. 
-    Also add renaming dictionary at the top like
-    viz_data_prep. Also subset for only columns I Need. 
-    """
-    OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
 
-    gdf = gpd.read_parquet(
-     f"{RT_SCHED_GCS}{OPERATOR_ROUTE}_recent.parquet",
-        storage_options={"token": credentials.token},
-    )[routes_subset]
-
-    gdf = gdf.loc[gdf.portfolio_organization_name == portfolio_organization_name]
-    
-    gdf = (gdf
-           .sort_values(by = ["service_date"], ascending = False)
-           .drop_duplicates(subset = ["portfolio_organization_name", "route_id"])
-          ).reset_index(drop = True)
-    
-    gdf = gdf.rename(
-        columns = routes_readable_col_names
-    )
-    return gdf
-'''
 def aggregate_operator_stats(
     df: pd.DataFrame,
     group_cols: list
