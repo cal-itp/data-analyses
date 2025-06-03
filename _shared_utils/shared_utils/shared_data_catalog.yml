@@ -23,30 +23,35 @@ sources:
     args:
       # source: shared_utils/shared_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/shared_data/state_highway_network.parquet
+      use_fsspec: true
   ca_transit_routes:
     driver: geoparquet
     description: CA transit routes with line geometry at the operator-level (open data)
     args:
       # source: open_data/create_routes_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet
+      use_fsspec: true
   ca_transit_stops:
     driver: geoparquet
     description: CA transit stops with point geometry (open data)
     args:
       # source: open_data/create_stops_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_stops.parquet
+      use_fsspec: true
   hqta_stops:
     driver: geoparquet
     description: CA high quality transit areas with point geometry (open data)
     args:
       # source: high_quality_transit_areas/D1_assemble_hqta_points.py
       urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_points.parquet
+      use_fsspec: true
   hqta_areas:
     driver: geoparquet
     description: CA high quality transit areas with polygon geometry (open data)
     args:
       # source: high_quality_transit_areas/D2_assemble_hqta_polygons.py
       urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/hqta_areas.parquet
+      use_fsspec: true
   us_states:
     driver: geojson
     description: US state polygons
@@ -59,6 +64,7 @@ sources:
     args:
       # source: bus_service_increase/bus_service_utils/generate_calenviroscreen_lehd_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/bus_service_increase/calenviroscreen_lehd_by_tract.parquet
+      use_fsspec: true
   state_highway_network_postmiles:
     driver: geoparquet
     description: Caltrans State Highway Network postmiles (every 0.1 mile) with postmiles as point geometry.
@@ -66,12 +72,14 @@ sources:
        # source: https://gisdata-caltrans.opendata.arcgis.com/datasets/c22341fec9c74c6b9488ee4da23dd967_0/about
        # hitting url directly would limit us to 2,000 rows
       urlpath: gs://calitp-analytics-data/data-analyses/shared_data/state_highway_network_postmiles.parquet
+      use_fsspec: true
   state_highway_network_postmile_segments:
     driver: geoparquet
     description: Caltrans State Highway Network postmile segments (postmiles converted to line segments)
     args:
        # source: shared_utils/shared_data.py
       urlpath: gs://calitp-analytics-data/data-analyses/shared_data/state_highway_network_postmile_segments.parquet
+      use_fsspec: true
   assembly_districts:
     driver: geojson
     description: California assembly district polygons
