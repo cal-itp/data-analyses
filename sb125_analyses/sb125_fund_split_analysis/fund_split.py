@@ -1,4 +1,4 @@
-# A lot of dataframes needed to be uniquly cleaned, 
+# A lot of dataframes needed to be uniquly cleaned.
 
 import altair as alt
 import pandas as pd
