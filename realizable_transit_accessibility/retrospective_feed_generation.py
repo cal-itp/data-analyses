@@ -43,61 +43,6 @@ def _filter_na_stop_times(
     return rt_stop_times.dropna(subset=[rt_column])
 
 
-# THIS IS WRONG
-"""
-def flag_nonmonotonic_sections(
-    rt_schedule_stop_times_sorted: pd.DataFrame,
-    trip_instance_key_column: ColumnName,
-    rt_column: ColumnName,
-    schedule_column: ColumnName,
-    **_unused_column_names: ColumnMap
-) -> pd.DataFrame:
-    rt_arrival_sec_shifted = rt_schedule_stop_times_sorted.groupby(
-        trip_instance_key_column
-    )[rt_column].shift(1)
-    rt_arrival_sec_dips = (
-        rt_arrival_sec_shifted > rt_schedule_stop_times_sorted[rt_column]
-    ) & rt_schedule_stop_times_sorted[rt_column].notna()
-    print(rt_arrival_sec_dips.any())
-    return rt_arrival_sec_dips"""
-
-
-def flag_nonmonotonic_sections(
-    rt_schedule_stop_times_sorted: pd.DataFrame,
-    trip_instance_key_column: ColumnName,
-    rt_column: ColumnName,
-    stop_sequence_column: ColumnName,
-    **_unused_column_names: ColumnMap
-) -> pd.DataFrame:
-    """Get a Series corresponding with whether the rt arrival does not monotonically increase relative to all prior stops"""
-    assert not rt_schedule_stop_times_sorted.index.duplicated().any()
-    rt_sec_reverse_cummin = (  # TODO: I think this is dumb
-        # Sort in reverse order
-        rt_schedule_stop_times_sorted.sort_values(stop_sequence_column, ascending=False)
-        # Get the minimum stop time in reverse order
-        .groupby(trip_instance_key_column)[rt_column].cummin()
-        # Reindex to undo the sort
-        .reindex(rt_schedule_stop_times_sorted.index)
-    )
-    return (
-        rt_sec_reverse_cummin != rt_schedule_stop_times_sorted[rt_column]
-    ) & rt_schedule_stop_times_sorted[rt_column].notna()
-    return nonmonotonic_flag
-
-
-# TODO: remove
-def add_monotonic_flag_to_df(
-    rt_schedule_stop_times_sorted: pd.DataFrame,
-    nonmonotonic_column: ColumnName,
-    **column_name_args: ColumnMap
-) -> pd.DataFrame:
-    df_output = rt_schedule_stop_times_sorted.copy()
-    df_output[nonmonotonic_column] = flag_nonmonotonic_sections(
-        rt_schedule_stop_times_sorted, **column_name_args
-    )
-    return df_output
-
-
 def impute_first_last(
     rt_schedule_stop_times_sorted: pd.DataFrame,
     trip_instance_key_column: ColumnName,
@@ -106,7 +51,7 @@ def impute_first_last(
     stop_sequence_column: ColumnName,
     nonmonotonic_column: ColumnName,
     **_unused_column_name_args: ColumnMap
-) -> pd.DataFrame:
+) -> pd.Series:
     """Impute the first and last stop times based on schedule times, regardless of whether rt times are present."""
     assert not rt_schedule_stop_times_sorted[schedule_column].isna().any()
     # Get the first & last stop time in each trip
@@ -193,15 +138,7 @@ def impute_first_last(
             stop_times_imputed_merged["last_arrival_sec_imputed"],
         )
     )
-    return stop_times_imputed_merged.drop(
-        [
-            "first_arrival_sec_imputed",
-            "last_arrival_sec_imputed",
-            "first_stop_sequence",
-            "last_stop_sequence",
-        ],
-        axis=1,
-    )
+    return stop_times_imputed_merged["imputed_arrival_sec"]
 
 
 def impute_labeled_times(
@@ -255,47 +192,36 @@ def impute_labeled_times(
     return merged_imputed_time
 
 
-def impute_non_monotonic_rt_times(
+def flag_nonmonotonic_sections(
     rt_schedule_stop_times_sorted: pd.DataFrame,
-    rt_column: ColumnName,
-    schedule_column: ColumnName,
-    nonmonotonic_column: ColumnName,
     trip_instance_key_column: ColumnName,
+    rt_column: ColumnName,
+    stop_sequence_column: ColumnName,
     **_unused_column_names: ColumnMap
-):
-    """Impute stop times where the nonmonotonic column is True"""
-    # TODO: get the monotonic flag as part of this function
-    # Check that first/last trip times are present
-    trip_id_grouped = rt_schedule_stop_times_sorted.groupby(trip_instance_key_column)
-    assert not trip_id_grouped[rt_column].first().isna().any()
-    assert not trip_id_grouped[rt_column].last().isna().any()
-    # Check that schedule values are present for all trips
-    assert not rt_schedule_stop_times_sorted[schedule_column].isna().any()
-    # Check that the first and last values of each trip are not marked as nonmonotonic
-    assert not trip_id_grouped[nonmonotonic_column].first().any()
-    assert not trip_id_grouped[nonmonotonic_column].last().any()
-
-    return impute_labeled_times(
-        rt_schedule_stop_times_sorted,
-        impute_label_column=nonmonotonic_column,
-        rt_column=rt_column,
-        nonmonotonic_column=nonmonotonic_column,
-        schedule_column=schedule_column,
-        trip_instance_key_column=trip_instance_key_column,
+) -> pd.Series:
+    """Get a Series corresponding with whether the rt arrival does not monotonically increase relative to all prior stops"""
+    assert not rt_schedule_stop_times_sorted.index.duplicated().any()
+    rt_sec_reverse_cummin = (  # TODO: I think this is dumb
+        # Sort in reverse order
+        rt_schedule_stop_times_sorted.sort_values(stop_sequence_column, ascending=False)
+        # Get the minimum stop time in reverse order
+        .groupby(trip_instance_key_column)[rt_column].cummin()
+        # Reindex to undo the sort
+        .reindex(rt_schedule_stop_times_sorted.index)
     )
+    return (
+        rt_sec_reverse_cummin != rt_schedule_stop_times_sorted[rt_column]
+    ) & rt_schedule_stop_times_sorted[rt_column].notna()
+    return nonmonotonic_flag
 
 
-def impute_short_gaps(
+def flag_short_gaps(
     rt_schedule_stop_times_sorted: pd.DataFrame,
     max_gap_length: int,
-    rt_column: ColumnName,
-    schedule_column: ColumnName,
-    nonmonotonic_column: ColumnName,
     trip_instance_key_column: ColumnName,
+    rt_column: ColumnName,
     **_unused_column_names: ColumnMap
-):
-    """Impute gaps in rt data that are fewer than max_gap_length in consecutive length"""
-    # Check that first/last rt times are present
+) -> pd.Series:
     trip_id_grouped = rt_schedule_stop_times_sorted.groupby(trip_instance_key_column)
     assert not trip_id_grouped[rt_column].first().isna().any()
     assert not trip_id_grouped[rt_column].last().isna().any()
@@ -304,19 +230,53 @@ def impute_short_gaps(
     gap_present = rt_schedule_stop_times_sorted[rt_column].isna()
     gap_length = gap_present.groupby((~gap_present).cumsum()).transform("sum")
     imputable_gap_present = gap_present & (gap_length <= max_gap_length)
-    print("imputable gap", imputable_gap_present.any())
-    stop_times_copy = rt_schedule_stop_times_sorted.copy()
-    stop_times_copy["impute"] = imputable_gap_present
-    print("impute", stop_times_copy["impute"].any())
-    print(imputable_gap_present)
-    return impute_labeled_times(
-        stop_times_copy,
-        rt_column=rt_column,
-        schedule_column=schedule_column,
-        impute_label_column="impute",
-        trip_instance_key_column=trip_instance_key_column,
-    )
+    return imputable_gap_present
 
+
+def impute_unrealistic_rt_times(
+    rt_schedule_stop_times_sorted: pd.DataFrame,
+    max_gap_length: int,
+    **kwargs: ColumnMap
+):
+    assert not rt_schedule_stop_times_sorted.index.duplicated().any(), "rt_schedule_stop_times_sorted index must be unique"
+    # Some imputing functions require a unique index, so reset index
+    stop_times_with_imputed_values = _filter_non_rt_trips(
+        rt_schedule_stop_times_sorted, **kwargs
+    )
+    # Get imputed values
+    stop_times_with_imputed_values["nonmonotonic"] = flag_nonmonotonic_sections(
+        stop_times_with_imputed_values, **kwargs
+    )
+    stop_times_with_imputed_values["first_last_imputed_rt_arrival_sec"] = (
+        impute_first_last(
+            stop_times_with_imputed_values,
+            **{**kwargs, "nonmonotonic_column": "nonmonotonic"}
+        )
+    )
+    stop_times_with_imputed_values["monotonic_imputed_rt_arrival_sec"] = (
+        impute_labeled_times(
+            stop_times_with_imputed_values,
+            **{
+                **kwargs,
+                "rt_column": "first_last_imputed_rt_arrival_sec",
+                "impute_label_column": "nonmonotonic",
+            }
+        )
+    )
+    stop_times_with_imputed_values["imputable_gap"] = flag_short_gaps(
+        stop_times_with_imputed_values,
+        max_gap_length,
+        **{**kwargs, "rt_column": "monotonic_imputed_rt_arrival_sec"}
+    )
+    stop_times_with_imputed_values["_final_imputed_time"] = impute_labeled_times(
+        stop_times_with_imputed_values,
+        **{
+            **kwargs,
+            "rt_column": "monotonic_imputed_rt_arrival_sec",
+            "impute_label_column": "imputable_gap",
+        }
+    )
+    return stop_times_with_imputed_values["_final_imputed_time"].rename(kwargs["rt_column"])
 
 def make_retrospective_feed_single_date(
     filtered_input_feed: GTFS,
@@ -353,12 +313,14 @@ def make_retrospective_feed_single_date(
     schedule_stop_times_original["feed_arrival_sec"] = (
         time_string_to_time_since_midnight(schedule_stop_times_original["arrival_time"])
     )
+    # Process the rt stop times
+    filtered_stop_times_table = _filter_na_stop_times(stop_times_table, rt_column=rt_column)
 
     # Merge the schedule and rt stop time tables
-    rt_trip_ids = stop_times_table[trip_id_column].drop_duplicates(keep="first")
+    rt_trip_ids = filtered_stop_times_table[trip_id_column].drop_duplicates(keep="first")
     schedule_trips_in_rt = schedule_trips_original.loc[rt_trip_ids]
     stop_times_merged = schedule_stop_times_original.merge(
-        stop_times_table.rename(
+        filtered_stop_times_table.rename(
             columns={
                 stop_id_column: "warehouse_stop_id",
                 schedule_column: "warehouse_scheduled_arrival_sec",
