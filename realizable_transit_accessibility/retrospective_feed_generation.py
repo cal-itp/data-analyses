@@ -199,8 +199,7 @@ def flag_non_monotonic_sections(
 ) -> pd.Series:
     """Get a Series corresponding with whether the rt arrival does not monotonically increase relative to all prior stops"""
     assert not rt_schedule_stop_times_sorted.index.duplicated().any()
-    rt_sec_reverse_cummin = (  
-        # TODO: Chekc logic here, I think it might not produce an ideal result
+    rt_sec_reverse_cummin = (
         # Sort in reverse order
         rt_schedule_stop_times_sorted.sort_values(
             columns[col.STOP_SEQUENCE], ascending=False
@@ -210,7 +209,7 @@ def flag_non_monotonic_sections(
         # Reindex to undo the sort
         .reindex(rt_schedule_stop_times_sorted.index)
     )
-    non_monotonic_flag =  (
+    non_monotonic_flag = (
         rt_sec_reverse_cummin
         != rt_schedule_stop_times_sorted[columns[col.RT_ARRIVAL_SEC]]
     ) & rt_schedule_stop_times_sorted[columns[col.RT_ARRIVAL_SEC]].notna()
@@ -237,7 +236,7 @@ def impute_unrealistic_rt_times(
     rt_schedule_stop_times_sorted: pd.DataFrame,
     max_gap_length: int,
     columns: ColumnMap,
-):
+) -> pd.Series:
     assert (
         not rt_schedule_stop_times_sorted.index.duplicated().any()
     ), "rt_schedule_stop_times_sorted index must be unique"
@@ -297,11 +296,8 @@ def make_retrospective_feed_single_date(
     Parameters
     filtered_input_feed: a GTFS-Lite feed, representing schedule data
     stop_times_table: a DataFrame with the columns specified in other arguments containing real time data and columns to link to schedule data
-    stop_times_desired_columns: the columns that should be kept in the output stop_times table. Must include all required columns, if optional columns are included they will be retained from the schedule data TODO: this probably shouldn't exist
-    schedule_column: The column in stop_times_table containing *schedule* arrival times, in seconds since midnight
-    rt_column: The column in stop_times_table containing *real time* arrival times, in seconds since midnight TODO: check if it's technically something different because dst
-    trip_id_column: The column that contains the trip id
-    stop_sequence_column: The column that contains the stop sequence value
+    stop_times_desired_columns: the columns that should be kept in the output stop_times table. Must include all required columns, if optional columns are included they will be retained from the schedule data
+    columns: A map of column keys to column names. See columns.py for details
     validate: Whether to run validation checks on the output feed, defaults to true
     **_unused_column_names: Not used, included for compatibility with other functions
 
@@ -338,7 +334,7 @@ def make_retrospective_feed_single_date(
             stop_times_table_columns[col.TRIP_ID],
             stop_times_table_columns[col.STOP_SEQUENCE],
         ],
-        how="left",  # TODO: left for proof of concept to simplify, should be outer
+        how="left",  # left merge means dropping rt-only trips. This is not necessarily a good way of having things be in the long term
         validate="one_to_one",
     )
 
@@ -363,7 +359,7 @@ def make_retrospective_feed_single_date(
             ~stop_times_merged["feed_arrival_sec"].isna()
             | stop_times_merged[
                 stop_times_table_columns[col.SCHEDULE_GTFS_DATASET_KEY]
-            ].isna()  # TODO: should be a constant
+            ].isna()
         ).all()
 
     stop_times_merged_filtered = stop_times_merged.loc[
@@ -387,8 +383,6 @@ def make_retrospective_feed_single_date(
         ]
         .copy()
     )
-    # TODO: not sure if this is the correct thing to do, for first/last trips
-    # TODO: move this earlier on, so departure_time ends up in the desired position in columns
     stop_times_gtfs_format_with_rt_times["departure_time"] = (
         stop_times_gtfs_format_with_rt_times["arrival_time"].copy()
     )
