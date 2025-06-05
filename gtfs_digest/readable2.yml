@@ -27,9 +27,22 @@ route_percentiles:
   colors: ${color_palettes.full_color_scale} 
     
 # Scheduled Service Hours
-daily_scheduled_hour:
-    title: "Daily Scheduled Service Hours"
+weekday_scheduled_service_graph:
+    title: "Daily Scheduled Service Hours for Weekday"
     subtitle: "Use the legend to highlight a particular month and hover over the line for additional information."
+    tooltip: ["Month", 'Departure Hour (in Military Time)'] 
+    colors: ${color_palettes.full_color_scale} 
+saturday_scheduled_service_graph:
+    title: "Daily Scheduled Service Hours for Saturday"
+    subtitle: "Use the legend to highlight a particular month and hover over the line for additional information."
+    tooltip: ["Month", 'Departure Hour (in Military Time)'] 
+    colors: ${color_palettes.full_color_scale} 
+sunday_scheduled_service_graph:
+    title: "Daily Scheduled Service Hours for Sunday"
+    subtitle: "Use the legend to highlight a particular month and hover over the line for additional information."
+    tooltip: ["Month", 'Departure Hour (in Military Time)'] 
+    colors: ${color_palettes.full_color_scale} 
+background_graph:
     colors: ${color_palettes.full_color_scale} 
     
 # Portfolio Organization Grain Charts
