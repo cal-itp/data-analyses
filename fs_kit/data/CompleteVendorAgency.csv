@@ -1,0 +1,153 @@
+"organization_name","gtfs_dataset_name","valid_from","valid_to"
+"Alameda-Contra Costa Transit District","AC Transit VehiclePositions",2023-05-23,2024-07-10 23:59:59
+"Anaheim Transportation Network","Anaheim Resort VehiclePositions",2023-12-06,2024-06-19 23:59:59
+"Antelope Valley Transit Authority","Antelope Valley Transit Authority Vehicle Positions",2023-05-23,2024-06-19 23:59:59
+"Avail Technologies Inc.","Antelope Valley Transit Authority Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"Avail Technologies Inc.","Foothill Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"Avail Technologies Inc.","Historic Petaluma Avail Vehicle Positions",2024-03-03,2098-12-31 23:59:59
+"Avail Technologies Inc.","Montebello Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"Avail Technologies Inc.","Norwalk Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"Avail Technologies Inc.","Santa Rosa CityBus Vehicle Positions",2023-10-27,2098-12-31 23:59:59
+"Avail Technologies Inc.","StanRTA Vehicle Positions",2023-10-31,2098-12-31 23:59:59
+"Avail Technologies Inc.","SunLine Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"California Integrated Travel Project","Desert Roadrunner Vehicle Positions Historic GRaaS Demo",2023-11-14,2098-12-31 23:59:59
+"California Integrated Travel Project","Glenn Vehicle Positions Historic GRaaS Demo",2023-11-14,2098-12-31 23:59:59
+"California Integrated Travel Project","Santa Ynez Vehicle Positions",2023-11-14,2098-12-31 23:59:59
+"California Integrated Travel Project","TCRTA Vehicle Positions Historic GRaaS Demo",2023-11-14,2098-12-31 23:59:59
+"City of Burbank","Burbank VehiclePositions",2023-05-23,2024-06-19 23:59:59
+"City of Commerce","Commerce VehiclePositions",2023-05-23,2024-06-19 23:59:59
+"City of Culver City","Culver City VehiclePositions",2023-09-16,2024-06-19 23:59:59
+"City of Fresno","Fresno Vehicle Positions",2023-05-23,2098-12-31 23:59:59
+"City of Gardena","G Trans Vehicle Positions",2024-02-13,2098-12-31 23:59:59
+"City of Los Angeles","LA DOT VehiclePositions",2023-06-03,2024-06-19 23:59:59
+"City of Montebello","Montebello Vehicle Positions",2023-05-23,2024-06-19 23:59:59
+"City of Monterey Park","Spirit Bus Passio Vehicle Positions",2024-01-06,2024-06-19 23:59:59
+"City of Pasadena","Pasadena VehiclePositions",2023-05-23,2098-12-31 23:59:59
+"City of Redondo Beach","Beach Cities VehiclePositions",2023-05-23,2024-06-19 23:59:59
+"City of Roseville","Roseville Transit GMV VehiclePositions",2024-05-30,2098-12-31 23:59:59
+"City of Santa Clarita","Santa Clarita VehiclePositions",2023-05-23,2024-07-10 23:59:59
+"City of Santa Monica","Big Blue Bus VehiclePositions",2023-05-23,2024-06-19 23:59:59
+"Clever Devices Ltd.","Culver City VehiclePositions",2023-09-16,2024-07-10 23:59:59
+"Clever Devices Ltd.","Santa Cruz Vehicle Positions",2023-09-16,2024-07-10 23:59:59
+"Clever Devices Ltd.","Torrance Vehicle Positions",2023-09-16,2024-07-10 23:59:59
+"Connexionz Inc.","GET VehiclePositions",2023-09-22,2024-07-10 23:59:59
+"Connexionz Inc.","Kings Vehicle Positions",2023-09-22,2024-07-10 23:59:59
+"Connexionz Inc.","SLORTA VehiclePositions",2023-10-28,2024-07-10 23:59:59
+"Connexionz Inc.","SolTrans Vehicle Positions",2023-09-22,2024-07-10 23:59:59
+"Cubic","Bear Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"Cubic","OmniTrans Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"Cubic","Unitrans Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"Cubic","WeHo Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"Cubic","eTrans VehiclePositions",2023-09-16,2098-12-31 23:59:59
+"GMV Syncromatics Inc","Beach Cities VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Burbank VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Commerce VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Desert Roadrunner Vehicle Positions",2024-06-20,2024-07-10 23:59:59
+"GMV Syncromatics Inc","DowneyLINK GMV Vehicle Positions",2024-06-20,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Elk Grove VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Emery Go-Round VehiclePositions Historic",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Historic TIME Vehicle Positions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","LA DOT VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Lawndale Beat Vehicle Positions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Marin VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Merced VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Mountain Transit GMV VehiclePositions",2024-06-20,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Petaluma GMV Vehicle Positions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","PresidiGo VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","San Pedro Trolley Vehicle Positions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Santa Rosa CityBus GMV VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Tahoe Transportation District GMV VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Union City Vehicle Positions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","VCTC Vehicle Positions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Victor Valley Vehicle Position",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Vine GMV Vehicle Positions",2024-03-03,2024-07-10 23:59:59
+"GMV Syncromatics Inc","Visalia VehiclePositions",2024-03-03,2024-07-10 23:59:59
+"Golden Empire Transit District","GET VehiclePositions",2023-05-23,2024-06-19 23:59:59
+"Long Beach Transit","Long Beach VehiclePositions",2023-10-27,2098-12-31 23:59:59
+"Los Angeles County Metropolitan Transportation Authority","Arcadia VehiclePositions",2024-05-22,2024-06-19 23:59:59
+"Los Angeles County Metropolitan Transportation Authority","DowneyLINK GMV Vehicle Positions",2024-05-22,2024-06-19 23:59:59
+"Marin County Transit District","Marin VehiclePositions",2023-05-23,2024-06-19 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 AC Transit Vehicle Position",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 ACE VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Angel Island-Tiburon Ferry VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 BART VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Caltrain VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Capitol Corridor VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Commute.org VehiclePositions",2024-04-04,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 County Connection VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Dumbarton Express VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Emery Go-Round VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Fairfield and Suisun Transit Vehicle Positions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 MVGO VehiclePositions",2023-12-12,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Marin VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Mission Bay Vehicle Positions",2023-12-09,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Muni VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Petaluma VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Regional VehiclePositions",2024-04-04,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Rio Vista Delta Breeze VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 SFO AirTrain VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 SamTrans VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 San Francisco Bay Ferry VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 San Joaquins VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Santa Clara Transit VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Santa Rosa CityBus VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 SolTrans VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Sonoma County Transit Vehicle Positions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Sonoma-Marin Area Rail Transit VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 South San Francisco Shuttle VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Tideline VehiclePositions Historic",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Treasure Island Ferry VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Tri Delta VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Tri-Valley Wheels VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Union City Transit VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Vacaville City Coach VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 Vine Transit VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Metropolitan Transportation Commission","Bay Area 511 WestCAT VehiclePositions",2023-11-08,2024-07-10 23:59:59
+"Monterey-Salinas Transit","Monterey Salinas VehiclePositions",2023-05-23,2098-12-31 23:59:59
+"Mountain Area Regional Transit Authority","Mountain Transit GMV VehiclePositions",2024-05-04,2024-06-19 23:59:59
+"Palo Verde Valley Transit Agency","Desert Roadrunner Vehicle Positions",2023-10-05,2024-06-19 23:59:59
+"Passio Technologies","Arcadia VehiclePositions",2024-04-27,2098-12-31 23:59:59
+"Passio Technologies","Cerritos on Wheels Vehicle Positions",2024-04-27,2098-12-31 23:59:59
+"Passio Technologies","Irvine CONNECT Vehicle Positions",2024-04-27,2098-12-31 23:59:59
+"Passio Technologies","Rosemead Passio Vehicle Positions",2024-04-27,2098-12-31 23:59:59
+"Passio Technologies","Spirit Bus Passio Vehicle Positions",2024-04-27,2098-12-31 23:59:59
+"Riverside Transit Agency","Riverside VehiclePositions",2023-06-03,2098-12-31 23:59:59
+"Sacramento Regional Transit District","Sacramento Vehicle Positions",2023-09-16,2098-12-31 23:59:59
+"San Diego Metropolitan Transit System","San Diego Vehicle Positions",2023-05-23,2098-12-31 23:59:59
+"San Luis Obispo Regional Transit Authority","SLORTA VehiclePositions",2023-10-28,2024-06-19 23:59:59
+"Santa Barbara Metropolitan Transit District","SBMTD VehiclePositions",2023-05-23,2098-12-31 23:59:59
+"Southern California Regional Rail Authority","Metrolink VehiclePositions",2024-03-08,2098-12-31 23:59:59
+"Stanislaus Regional Transit Authority","StanRTA Vehicle Positions",2023-12-19,2024-06-19 23:59:59
+"Swiftly Inc.","Avalon Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Banning Pass Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Bay Area 511 Golden Gate Ferry Vehicle Positions",2024-05-04,2024-07-10 23:59:59
+"Swiftly Inc.","Bay Area 511 Golden Gate Transit Vehicle Positions",2024-05-04,2024-07-10 23:59:59
+"Swiftly Inc.","Beaumont Pass Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Big Blue Bus VehiclePositions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Eastern Sierra Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Fairfield Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Humboldt Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","LA Metro Bus Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","LA Metro Rail Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Lake Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Madera County Connection Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Mendocino Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Nevada County Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","North County Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","OCTA VehiclePositions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Redding Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Redwood Coast Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","SMART Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","San Francisco Bay Ferry Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","San Joaquin Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Tahoe Transportation Vehicle Positions Historic",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Torrance Swiftly Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"Swiftly Inc.","Turlock Vehicle Positions",2024-05-04,2024-08-02 23:59:59
+"TripShot Inc.","Anaheim Resort VehiclePositions",2023-12-09,2024-07-10 23:59:59
+"TripShot Inc.","BruinBus Vehicle Positions",2023-12-09,2024-07-10 23:59:59
+"TripShot Inc.","Emery Go-Round TripShot Vehicle Positions",2023-12-09,2024-07-10 23:59:59
+"TripShot Inc.","MVGO VehiclePositions",2023-12-09,2024-07-10 23:59:59
+"TripShot Inc.","Santa Maria Vehicle Positions",2023-12-09,2024-07-10 23:59:59
+"TripShot Inc.","TCRTA Vehicle Positions",2023-12-09,2024-07-10 23:59:59
+"TripSpark","B-Line Vehicle Positions",2023-08-18,2098-12-31 23:59:59
+"Yolo County Transportation District","Yolobus Vehicle Positions",2023-05-23,2098-12-31 23:59:59
