@@ -1,3 +1,5 @@
+# !!DEPRECATED!! Switching to dim_organizations.rtpa_name
+
 # Script to generate list of ntd_id crosswalked to Regional Transportation Planning Authority (RTPA) name
 # joins map of CA census designated places (CDPs) to map of CA RTPAs
 # ingest data from warehouse to get list of NTD agencies
