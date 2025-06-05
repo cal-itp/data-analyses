@@ -199,7 +199,8 @@ def flag_non_monotonic_sections(
 ) -> pd.Series:
     """Get a Series corresponding with whether the rt arrival does not monotonically increase relative to all prior stops"""
     assert not rt_schedule_stop_times_sorted.index.duplicated().any()
-    rt_sec_reverse_cummin = (  # TODO: I think this is dumb
+    rt_sec_reverse_cummin = (  
+        # TODO: Chekc logic here, I think it might not produce an ideal result
         # Sort in reverse order
         rt_schedule_stop_times_sorted.sort_values(
             columns[col.STOP_SEQUENCE], ascending=False
