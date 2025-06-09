@@ -5,8 +5,8 @@ assemble_data:
     
 assemble_route_direction_data:
 	python merge_data.py
-	python _route_dir_data_prep.py  
 	python quarterly_rollup.py # for now, quarterly only affects route-direction, since operator filters to recent date
+	python _route_dir_data_prep.py  
 
 assemble_operator_data:
 	python merge_operator_data.py

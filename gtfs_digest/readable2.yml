@@ -78,7 +78,7 @@ frequency_graph:
   colors:  ${color_palettes.headway_scale}
   
 n_scheduled_graph:
-  title: "Total Scheduled Trips for "
+  title: "Total Scheduled Trips for Vehicles going to Direction "
   subtitle: ""
   tooltip: ["Date","Route","Direction","Period", "# Scheduled Trips",]
   colors: ${color_palettes.four_colors}

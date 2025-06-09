@@ -148,6 +148,12 @@ if __name__ == "__main__":
                                                          readable_col_names,
                                                         "year_quarter",
                                                         "Quarter")
+    # We are using the column "Route" to display the charts
+    # so we have to drop duplicates because the relationship 
+    # between "Route" (aka recent_combined_name) to "route_id"
+    # and "recent_route_id" is 1:m.
+    # qtr_df = qtr_df.drop_duplicates(subset = )
+    
     qtr_route_dir_df.to_parquet(
         f"{RT_SCHED_GCS}{ROUTE_DIR_QTR_EXPORT}.parquet"
     )

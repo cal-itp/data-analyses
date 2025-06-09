@@ -18,7 +18,7 @@ groupby_cols = [
     "year_quarter",
     "direction_id",
     "time_period",
-    "recent_route_id",
+    "recent_combined_name",
 ]
 rt_metric_cols = [
     "minutes_atleast1_vp",
@@ -55,16 +55,9 @@ crosswalk_cols = [
     "sched_rt_category",
     "combined_name",
     'route_id',
-    "recent_combined_name",
+    "recent_route_id",
     'year', 
     'quarter'
-]
-group_cols = [
-    "year_quarter",
-    "schedule_gtfs_dataset_key",
-    "recent_route_id",
-    "direction_id",
-    "time_period",
 ]
 
 def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
@@ -149,7 +142,7 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     # Drop service_date & duplicates
     m2 = (m2
           .drop(columns=["service_date", "year","quarter"])
-          .drop_duplicates(subset = group_cols)
+          .drop_duplicates(subset = groupby_cols)
           .reset_index(drop=True))
     return m2
 

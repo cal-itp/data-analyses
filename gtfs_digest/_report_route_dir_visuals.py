@@ -37,28 +37,6 @@ def configure_chart(
 """
 Functions to Reshape DF
 """
-def concat_qtr_month(qtr_df: pd.DataFrame, month_dir: pd.DataFrame) -> pd.DataFrame:
-    """
-    Delete any metrics we want to present on a quarterly
-    level from the month roll up. Concatenate the two
-    back together. 
-    """
-    qtr_metrics = [
-        "Average VP per Minute",
-        "Average Scheduled Service (trip minutes)",
-        "% VP within Scheduled Shape",
-    ]
-    month_dir = month_dir.drop(columns=qtr_metrics)
-    qtr_df = qtr_df[qtr_metrics + ["Quarter"]]
-    df = pd.concat(
-        [
-            month_dir,
-            qtr_df,
-        ],
-        axis=1,
-    )
-    return df
-
 def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
     """
     Reshape dataframe for the charts that illustrate
@@ -117,6 +95,8 @@ def reshape_pct_journey_with_vp(df: pd.DataFrame) -> pd.DataFrame:
 
     df3 = df3.rename(columns={"variable": "Category", "value": "% of Trip Duration"})
 
+    # Drop duplicates
+    df3 = df3.drop_duplicates()
     return df3
 
 def reshape_route_stats(df: pd.DataFrame) -> pd.DataFrame:
@@ -247,6 +227,7 @@ def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
 
     melted_df["Percentage"] = (melted_df.value / melted_df["# Realtime Trips"]) * 100
 
+    melted_df = melted_df.drop_duplicates()
     return melted_df
 """
 Charts
@@ -496,6 +477,8 @@ def avg_scheduled_min_chart(df):
     return chart
 
 def vp_per_minute_chart(df: pd.DataFrame) -> alt.Chart:
+    # Need to drop duplicates
+    
     specific_chart_dict = readable_dict.vp_per_min_graph
     ruler = ruler_chart(df, 3)
 
@@ -672,8 +655,16 @@ def total_scheduled_trips_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
     # Filter to one direction only
     df = df.loc[df["Direction (0/1)"] == direction]
 
+    # Subset so the kernel doesn't explode
+    df = df[["Direction (0/1)",
+             "Direction",
+             "Date", 
+             "Route", 
+             "# Scheduled Trips", 
+             "Period"]].drop_duplicates()
+    
     # Grab cardinal direction value to use for the title
-    direction_str = df["Direction"].iloc[0]
+    direction_str = df["Direction (0/1)"].iloc[0]
 
     specific_chart_dict = readable_dict.n_scheduled_graph
 
@@ -693,7 +684,7 @@ def total_scheduled_trips_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         chart,
         width=400,
         height=250,
-        title=f"{specific_chart_dict.title}{direction_str} Vehicles",
+        title=f"{specific_chart_dict.title}{direction_str}",
         subtitle=specific_chart_dict.subtitle,
     )
     return chart
@@ -702,6 +693,18 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
 
     # Filter to one direction only
     df = df.loc[df["Direction (0/1)"] == direction]
+
+    # Simplify the dataframe
+    df = df[
+            [
+                "Route",
+                "Date",
+                "Period",
+                "Direction (0/1)",
+                "Headway (Minutes)",
+                "Direction",
+            ]
+        ].drop_duplicates()
 
     # Grab cardinal direction value to use for the title
     direction_str = df["Direction"].iloc[0]
@@ -719,7 +722,7 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
 
     chart = (
         alt.layer(chart, data=df)
-        .encode(y=alt.Y("Headway (Minutes)", scale=alt.Scale(domain=[0, 250])))
+        .encode(y=alt.Y("Headway (Minutes)", scale=alt.Scale(domain=[0, 250], clamp = True)))
         .properties(width=200, height=250)
     )
 
@@ -743,11 +746,13 @@ def route_filter(qtr_df: pd.DataFrame, month_df: pd.DataFrame):
         options=routes_list,
         name="Routes: ",
     )
+    
     # Column that controls the bar charts
     xcol_param = alt.selection_point(
         fields=["Route"], value=routes_list[0], bind=route_dropdown
     )
 
+    
     # Charts
     spatial_accuracy = (
         spatial_accuracy_chart(qtr_df[qtr_df.Period == "All Day"])
