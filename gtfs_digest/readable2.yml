@@ -7,7 +7,7 @@ color_palettes:
   two_colors: ["#dd217d","#fcb40e"]
   tri_color: ["#ccbb44","#5b8efd","#dd217d"]
   four_colors: ["#dd217d","#fcb40e","#ccbb44","#5b8efd"]
-  full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44"]
+  full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44", "#c5c5c4"]
   headway_scale: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d","#dd217d","#dd217d"] 
   
 # Organization Descriptive Info
@@ -59,7 +59,7 @@ text_graph:
 avg_scheduled_min_graph:
   title: "Average Scheduled Minutes"
   subtitle: "The average minutes a trip is scheduled to run in each direction."
-  tooltip: ["Date","Route","Direction","Average Scheduled Service (trip minutes)"]
+  tooltip: ["Quarter","Route","Direction","Average Scheduled Service (trip minutes)"]
   colors: ${color_palettes.four_colors} 
 
 timeliness_trips_graph:
@@ -92,7 +92,7 @@ speed_graph:
 vp_per_min_graph:
   title: "Vehicle Positions per Minute"
   subtitle: "Trips should have 2+ VPs per minute. This metric reflects the accuracy of the temporal data collected."
-  tooltip: ["Date","Route","Direction", "Average VP per Minute",]
+  tooltip: ["Quarter","Route","Direction", "Average VP per Minute",]
   # This scale goes from red, yellow, to green.
   # 0-1.9 are red, 2-3 are yellow, and the ideal number (3) is green. 
   domain: [0,1,2,3]
@@ -107,7 +107,7 @@ sched_vp_per_min_graph:
 spatial_accuracy_graph:
   title: "Spatial Accuracy"
   subtitle: "The percentage of vehicle positions that fall within 35 meters of a route's scheduled shape (path) reflects the accuracy of the collected spatial data."
-  tooltip: ["Date","Route","Direction", "% VP within Scheduled Shape",]
+  tooltip: ["Quarter","Route","Direction", "% VP within Scheduled Shape",]
   # This scale goes from red, yellow, to green.
   # Low numbers are red, medium numbers are yellow, and the ideal number (in the ballpark of 100%) is dark green. 
   domain: [0,20, 40, 60, 80, 100]  

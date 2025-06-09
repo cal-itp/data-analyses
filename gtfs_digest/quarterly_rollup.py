@@ -37,6 +37,7 @@ rt_metric_no_weighted_avg = [
 crosswalk_cols = [
     "base64_url",
     "organization_source_record_id",
+    "portfolio_organization_name",
     "organization_name",
     "caltrans_district",
     "route_primary_direction",
@@ -147,7 +148,7 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     
     # Drop service_date & duplicates
     m2 = (m2
-          .drop(columns=["service_date"])
+          .drop(columns=["service_date", "year","quarter"])
           .drop_duplicates(subset = group_cols)
           .reset_index(drop=True))
     return m2
@@ -155,7 +156,7 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":
     
     DIGEST_RT_SCHED_MONTH = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp 
-    DIGEST_RT_SCHED_QTR = GTFS_DATA_DICT.digest_tables.quarterly_route_schedule_vp 
+    DIGEST_RT_SCHED_QTR = "digest/quarterly_schedule_vp_metrics"
     
     # Save metrics on a monthly candence.
     monthly_df = pd.read_parquet(

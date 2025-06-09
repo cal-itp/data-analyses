@@ -37,6 +37,28 @@ def configure_chart(
 """
 Functions to Reshape DF
 """
+def concat_qtr_month(qtr_df: pd.DataFrame, month_dir: pd.DataFrame) -> pd.DataFrame:
+    """
+    Delete any metrics we want to present on a quarterly
+    level from the month roll up. Concatenate the two
+    back together. 
+    """
+    qtr_metrics = [
+        "Average VP per Minute",
+        "Average Scheduled Service (trip minutes)",
+        "% VP within Scheduled Shape",
+    ]
+    month_dir = month_dir.drop(columns=qtr_metrics)
+    qtr_df = qtr_df[qtr_metrics + ["Quarter"]]
+    df = pd.concat(
+        [
+            month_dir,
+            qtr_df,
+        ],
+        axis=1,
+    )
+    return df
+
 def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
     """
     Reshape dataframe for the charts that illustrate
@@ -153,6 +175,9 @@ def reshape_route_stats(df: pd.DataFrame) -> pd.DataFrame:
 
     # Add back date
     table_df["Date"] = most_recent_date
+    
+    # Drop dups
+    table_df = table_df.drop_duplicates()
     return table_df
 
 def reshape_df_text_table(df: pd.DataFrame) -> pd.DataFrame:
@@ -169,7 +194,6 @@ def reshape_df_text_table(df: pd.DataFrame) -> pd.DataFrame:
             "Direction (0/1)",
         ],
         value_vars=[
-            "Average Scheduled Service (Trip Minutes)",
             "Average Stop Distance (Miles)",
             "# Scheduled Trips",
             "Gtfs Availability",
@@ -418,18 +442,18 @@ def circle_chart(
 """
 Actual Charts
 """
-def sample_spatial_accuracy_chart(df):
+def spatial_accuracy_chart(df):
     specific_chart_dict = readable_dict.spatial_accuracy_graph
 
     ruler = ruler_chart(df, 100)
 
     bar = bar_chart(
-        x_col = "Date", 
+        x_col = "Quarter", 
         y_col = "% VP within Scheduled Shape", 
         color_col = "% VP within Scheduled Shape", 
         color_scheme = [*specific_chart_dict.colors], 
         tooltip_cols = [*specific_chart_dict.tooltip], 
-        date_format="%b %Y"
+        date_format=""
     )
    
     # write this way so that the df is inherited by .facet
@@ -448,17 +472,17 @@ def sample_spatial_accuracy_chart(df):
     return chart
 
 
-def sample_avg_scheduled_min_chart(df):
+def avg_scheduled_min_chart(df):
     specific_chart_dict = readable_dict.avg_scheduled_min_graph
     
     chart = grouped_bar_chart(
         df,
-        x_col = "Date:T",
+        x_col = "Quarter",
         y_col="Average Scheduled Service (trip minutes)",
         color_col="Direction:N",
         color_scheme = [*specific_chart_dict.colors],
         tooltip_cols = [*specific_chart_dict.tooltip],
-        date_format = "%b %Y",
+        date_format = "",
         offset_col="Direction:N",
     )
         
@@ -476,12 +500,12 @@ def vp_per_minute_chart(df: pd.DataFrame) -> alt.Chart:
     ruler = ruler_chart(df, 3)
 
     bar = bar_chart(
-        x_col="Date",
+        x_col="Quarter",
         y_col="Average VP per Minute",
         color_col="Average VP per Minute",
         color_scheme=[*specific_chart_dict.colors],
         tooltip_cols=[*specific_chart_dict.tooltip],
-        date_format="%b %Y",
+        date_format="",
     )
 
     # write this way so that the df is inherited by .facet
@@ -497,6 +521,7 @@ def vp_per_minute_chart(df: pd.DataFrame) -> alt.Chart:
         }
     )
     return chart
+
 
 def timeliness_chart(df) -> alt.Chart:
 
@@ -629,7 +654,7 @@ def timeliness_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         color_col="variable",
         color_scheme=[*specific_chart_dict.colors],
         tooltip_cols=[*specific_chart_dict.tooltip],
-    ).properties(width=200, height=250)
+    ).properties(width=400, height=250)
 
     chart = chart.facet(
         column=alt.Column(
@@ -710,8 +735,9 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
     )
     return chart
 
-def route_filter(df):
-    routes_list = df["Route"].unique().tolist()
+def route_filter(qtr_df: pd.DataFrame, month_df: pd.DataFrame):
+    
+    routes_list = month_df["Route"].unique().tolist()
 
     route_dropdown = alt.binding_select(
         options=routes_list,
@@ -724,91 +750,91 @@ def route_filter(df):
 
     # Charts
     spatial_accuracy = (
-        sample_spatial_accuracy_chart(df[df.Period == "All Day"])
+        spatial_accuracy_chart(qtr_df[qtr_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
 
     avg_scheduled_min = (
-       sample_avg_scheduled_min_chart(df[df.Period == "All Day"])
+       avg_scheduled_min_chart(qtr_df[qtr_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
+    print("done with spatial & avg sched")
     vp_per_minute = (
-        vp_per_minute_chart(df[df.Period == "All Day"])
+        vp_per_minute_chart(qtr_df[qtr_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
     speed = (
-        speed_chart(df)
+        speed_chart(month_df)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
+    print("done with vp and speed")
     sched_vp_per_min = (
-        sched_vp_per_min_chart(df[df.Period == "All Day"])
+        sched_vp_per_min_chart(month_df[month_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
+    print("done with sched vp")
     text_dir0 = (
-        text_chart(df, 0)
+        text_chart(month_df, 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
+    print("done with text")
     text_dir1 = (
-        text_chart(df, 1)
+        text_chart(month_df, 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
+    print("done with text2")
     timeliness_dir0 =(
-        timeliness_chart(df[df.Period == "All Day"], 0)
+        timeliness_chart(month_df[month_df.Period == "All Day"], 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
+    print("done with timeliness")
     timeliness_dir1 =(
-        timeliness_chart(df[df.Period == "All Day"], 1)
+        timeliness_chart(month_df[month_df.Period == "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
+    print('done with timeliness2')
     n_scheduled_dir0 = (
-        total_scheduled_trips_chart(df[df.Period == "All Day"], 0)
+        total_scheduled_trips_chart(month_df[month_df.Period == "All Day"], 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
+    print('done with scheduled')
     n_scheduled_dir1 = (
-        total_scheduled_trips_chart(df[df.Period == "All Day"], 1)
+        total_scheduled_trips_chart(month_df[month_df.Period == "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
+    print('done with scheduled2')
     n_freq_dir0 = (
-        headway_chart(df[df.Period != "All Day"], 0)
+        headway_chart(month_df[month_df.Period != "All Day"], 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
+    print('done with freq1')
     n_freq_dir1 = (
-         headway_chart(df[df.Period != "All Day"], 1)
+         headway_chart(month_df[month_df.Period != "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
+    print('done with freq2')
     # Divider Charts
     data_quality = divider_chart(
-        df, readable_dict.data_quality_graph.title
+        month_df, readable_dict.data_quality_graph.title
     )
     rider_quality = divider_chart(
-        df, readable_dict.rider_quality_graph.title
+        month_df, readable_dict.rider_quality_graph.title
     )
-    summary = divider_chart(df, readable_dict.summary_graph.title)
-
+    summary = divider_chart(month_df, readable_dict.summary_graph.title)
+    print('done with divider charts')
     chart_list = [
         summary,
         text_dir0,
@@ -825,9 +851,8 @@ def route_filter(df):
         data_quality,
         spatial_accuracy,
         vp_per_minute,
-        
         sched_vp_per_min,
     ]
     chart = alt.vconcat(*chart_list)
-
+    print('done with concating')
     return chart
