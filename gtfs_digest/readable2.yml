@@ -63,7 +63,7 @@ avg_scheduled_min_graph:
   colors: ${color_palettes.four_colors} 
 
 timeliness_trips_graph:
-  title: "Breakdown of Trips by Timeliness for " # hold the variable you'll inject 
+  title: "Breakdown of Trips by Timeliness" # hold the variable you'll inject 
   subtitle: "Categorizing whether a trip is early, late, or on time. A trip is on time if it arrives 5 minutes later or earlier than scheduled."
   tooltip: ["Date","Route","Direction","Period", "Percentage"]
   colors: ${color_palettes.tri_color}

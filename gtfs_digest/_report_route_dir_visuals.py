@@ -200,6 +200,7 @@ def reshape_df_text_table(df: pd.DataFrame) -> pd.DataFrame:
         "Schedule and Realtime Data",
     ).str.replace("Gtfs", "GTFS")
 
+    melt1 = melt1.drop_duplicates()
     return melt1
 
 def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
@@ -505,35 +506,6 @@ def vp_per_minute_chart(df: pd.DataFrame) -> alt.Chart:
     )
     return chart
 
-
-def timeliness_chart(df) -> alt.Chart:
-
-    # Reshape dataframe from wide to long
-    df2 = reshape_timeliness_trips(df)
-
-    specific_chart_dict = readable_dict.timeliness_trips_graph
-
-    chart = line_chart(
-        df=df2,
-        x_col="Date",
-        y_col="Percentage",
-        color_col="variable",
-        color_scheme=[*specific_chart_dict.colors],
-        tooltip_cols=[*specific_chart_dict.tooltip],
-    ).properties(width=200, height=250)
-
-    chart = chart.facet(
-        column=alt.Column(
-            "Direction:N",
-        )
-    ).properties(
-        title={
-            "text": specific_chart_dict.title,
-            "subtitle": specific_chart_dict.subtitle,
-        }
-    )
-    return chart
-
 def speed_chart(df) -> alt.Chart:
     specific_chart_dict = readable_dict.speed_graph
 
@@ -620,13 +592,13 @@ def text_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
 def timeliness_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
 
     # Filter to one direction only
-    df = df.loc[df["Direction (0/1)"] == direction]
+    #df = df.loc[df["Direction (0/1)"] == direction]
 
     # Reshape dataframe from wide to long
     df2 = reshape_timeliness_trips(df)
 
     # Grab cardinal direction value to use for the title
-    direction_str = df2["Direction"].iloc[0]
+    #direction_str = df2["Direction"].iloc[0]
 
     specific_chart_dict = readable_dict.timeliness_trips_graph
 
@@ -637,7 +609,7 @@ def timeliness_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         color_col="variable",
         color_scheme=[*specific_chart_dict.colors],
         tooltip_cols=[*specific_chart_dict.tooltip],
-    ).properties(width=400, height=250)
+    ).properties(width=200, height=250)
 
     chart = chart.facet(
         column=alt.Column(
@@ -645,7 +617,7 @@ def timeliness_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         )
     ).properties(
         title={
-            "text": f"{specific_chart_dict.title}{direction_str} Vehicles",
+            "text": f"{specific_chart_dict.title}",
             "subtitle": specific_chart_dict.subtitle,
         }
     )
@@ -669,7 +641,7 @@ def total_scheduled_trips_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
     specific_chart_dict = readable_dict.n_scheduled_graph
 
     chart = bar_chart(
-        x_col="Date:T",
+        x_col="Date",
         y_col="# Scheduled Trips",
         color_col="Period:N",
         color_scheme=[*specific_chart_dict.colors],
@@ -712,7 +684,7 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
     specific_chart_dict = readable_dict.frequency_graph
 
     chart = bar_chart(
-        x_col="Date:T",
+        x_col="Date",
         y_col="Headway (Minutes)",
         color_col="Headway (Minutes):N",
         color_scheme=[*specific_chart_dict.colors],
@@ -795,13 +767,7 @@ def route_filter(qtr_df: pd.DataFrame, month_df: pd.DataFrame):
         .transform_filter(xcol_param)
     )
     print("done with text2")
-    timeliness_dir0 =(
-        timeliness_chart(month_df[month_df.Period == "All Day"], 0)
-        .add_params(xcol_param)
-        .transform_filter(xcol_param)
-    )
-    print("done with timeliness")
-    timeliness_dir1 =(
+    timeliness_dir =(
         timeliness_chart(month_df[month_df.Period == "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
@@ -846,8 +812,7 @@ def route_filter(qtr_df: pd.DataFrame, month_df: pd.DataFrame):
         text_dir1,
         rider_quality,
         avg_scheduled_min,
-        timeliness_dir0,
-        timeliness_dir1,
+        timeliness_dir,
         n_freq_dir0,
         n_scheduled_dir0,
         n_freq_dir1,
