@@ -398,35 +398,6 @@ def arrowize_by_frequency(row, frequency_col="trips_per_hour", frequency_thresho
     return row
 
 
-def exclude_desc(desc):
-    # match descriptions that don't give additional info, like Route 602 or Route 51B
-    exclude_texts = [
-        " *Route *[0-9]*[a-z]{0,1}$",
-        " *Metro.*(Local|Rapid|Limited).*Line",
-        " *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)",
-        " *service within the Stockton Metropolitan Area",
-        " *Hopper bus can deviate",
-        " *RTD's Interregional Commuter Service is a limited-capacity service",
-    ]
-    desc_eval = [re.search(text, desc, flags=re.IGNORECASE) for text in exclude_texts]
-    # number_only = re.search(' *Route *[0-9]*[a-z]{0,1}$', desc, flags=re.IGNORECASE)
-    # metro = re.search(' *Metro.*(Local|Rapid|Limited).*Line', desc, flags=re.IGNORECASE)
-    # redwood = re.search(' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)', desc, flags=re.IGNORECASE)
-    # return number_only or metro or redwood
-    return any(desc_eval)
-
-
-def which_desc(row):
-    long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
-    route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
-    if route_desc_valid:
-        return f", {row.route_desc}"
-    elif long_name_valid:
-        return f", {row.route_long_name}"
-    else:
-        return ""
-
-
 def describe_slowest(row):
     description = which_desc(row)
     full_description = (

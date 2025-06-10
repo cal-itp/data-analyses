@@ -8,6 +8,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 from shared_utils import rt_utils
+from typing import Literal
 
 
 def decode_base64_url(row):
@@ -23,21 +24,57 @@ def decode_base64_url(row):
 
     return decoded
 
+def exclude_desc(desc: str): -> bool
+    """
+    match descriptions that duplicate route names, like Route 602 or Route 51B
+    also match descriptions that are not route-specific
+    """
+    exclude_texts = [
+        " *Route *[0-9]*[a-z]{0,1}$",
+        " *Metro.*(Local|Rapid|Limited).*Line",
+        " *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)",
+        " *service within the Stockton Metropolitan Area",
+        " *Hopper bus can deviate",
+        " *RTD's Interregional Commuter Service is a limited-capacity service",
+    ]
+    desc_eval = [re.search(text, desc, flags=re.IGNORECASE) for text in exclude_texts]
 
-# https://github.com/cal-itp/data-analyses/blob/main/rt_delay/utils.py
+    return any(desc_eval)
+
+
+def which_route_name(row, target: Literal["name", "description"] = "name"): -> str
+    """
+    Previous function in rt_utils was designed to add descriptions after route_short_name,
+    it would not return route_short_name in any case. Since we're using it to match names in this
+    script, move here and make flexible for either matching a name or a description as desired.
+    """
+    long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
+    route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
+    
+    if target = "name": #  finds most common name for route
+        if row.route_short_name and not skip_short_name:
+            return row.route_short_name
+        elif long_name_valid:
+            return row.route_long_name
+        elif route_desc_valid:
+            return row.route_desc
+    elif target = "description": #  augments a short or long name
+        if route_desc_valid:
+            return row.route_desc
+        elif long_name_valid:
+            return row.route_long_name
+    return "" #  empty string if no matches
+
 def add_route_name(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Input a df that has route_id and route_short_name, route_long_name, route_desc, and this will pick
+    Input a df that has route_id and route_short_name, route_long_name, route_desc, and this will pick.
     """
     route_cols = ["route_id", "route_short_name", "route_long_name", "route_desc"]
 
     if not (set(route_cols).issubset(set(list(df.columns)))):
         raise ValueError(f"Input a df that contains {route_cols}")
 
-    df = df.assign(route_name_used=df.apply(lambda x: rt_utils.which_desc(x), axis=1))
-
-    # If route names show up with leading comma
-    df = df.assign(route_name_used=df.route_name_used.str.lstrip(",").str.strip())
+    df = df.assign(route_name_used=df.apply(lambda x: which_route_name(x), axis=1))
 
     return df
 
