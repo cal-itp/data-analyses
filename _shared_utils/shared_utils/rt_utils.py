@@ -321,26 +321,7 @@ def get_routelines(
             return
 
         return routelines
-
-
-def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
-    if isinstance(value, int):
-        hour = value
-    elif isinstance(value, dt.datetime):
-        hour = value.hour
-    if hour < 4:
-        return "Owl"
-    elif hour < 7:
-        return "Early AM"
-    elif hour < 10:
-        return "AM Peak"
-    elif hour < 15:
-        return "Midday"
-    elif hour < 20:
-        return "PM Peak"
-    else:
-        return "Evening"
-
+    
 
 @jit(nopython=True)  # numba gives huge speedup here (~60x)
 def time_at_position_numba(desired_position, shape_array, dt_float_array):

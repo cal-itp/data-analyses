@@ -219,7 +219,7 @@ def get_vp_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
 
     df2 = df2.assign(
         time_of_day=df2.apply(
-            lambda x: rt_utils.categorize_time_of_day(x.min_time), axis=1
+            lambda x: time_helpers.categorize_time_of_day(x.min_time), axis=1
         )
     )[["time_of_day","trip_instance_key"]]
     
@@ -244,7 +244,7 @@ def get_trip_time_buckets(analysis_date: str) -> pd.DataFrame:
                               
     trips = trips.assign(
         time_of_day = trips.apply(
-            lambda x: rt_utils.categorize_time_of_day(
+            lambda x: time_helpers.categorize_time_of_day(
                 x.trip_first_departure_datetime_pacific), axis=1), 
         scheduled_service_minutes = trips.service_hours * 60
     )
@@ -552,7 +552,7 @@ def get_sched_trips_hr(analysis_date: str) -> pd.DataFrame:
                                     ['route_id', 'shape_id',
                                     'time_of_day', 'schedule_gtfs_dataset_key']
                             )
-    durations = rt_utils.time_of_day_durations()
+    durations = time_helpers.HOURS_BY_TIME_OF_DAY
     schedule_trip_counts['trips_hr'] = schedule_trip_counts.apply(
                                         lambda x: x.n_trips / durations[x.time_of_day], axis=1)
     return schedule_trip_counts

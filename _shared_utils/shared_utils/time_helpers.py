@@ -105,3 +105,21 @@ def add_quarter(df: pd.DataFrame, date_col: str = "service_date") -> pd.DataFram
     df = df.assign(year_quarter=df.year.astype(str) + "_Q" + df.quarter.astype(str))
 
     return df
+
+def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
+    if isinstance(value, int):
+        hour = value
+    elif isinstance(value, dt.datetime):
+        hour = value.hour
+    if hour < 4:
+        return "Owl"
+    elif hour < 7:
+        return "Early AM"
+    elif hour < 10:
+        return "AM Peak"
+    elif hour < 15:
+        return "Midday"
+    elif hour < 20:
+        return "PM Peak"
+    else:
+        return "Evening"
