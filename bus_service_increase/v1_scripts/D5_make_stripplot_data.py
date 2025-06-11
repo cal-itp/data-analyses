@@ -17,7 +17,7 @@ import D2_setup_gmaps as setup_gmaps
 import E2_aggregated_route_stats as aggregated_route_stats 
 from bus_service_utils import utils as bus_utils
 from calitp_data_analysis import utils
-from shared_utils import portfolio_utils, rt_utils
+from shared_utils import portfolio_utils, time_helpers
 from D1_setup_parallel_trips_with_stops import (ANALYSIS_DATE, COMPILED_CACHED,
                                                 merge_trips_with_service_hours)
 
@@ -63,7 +63,7 @@ def add_trip_time_of_day(trips: pd.DataFrame) -> pd.DataFrame:
     # Add time-of-day
     df = df.assign(
         time_of_day = df.apply(
-            lambda x: rt_utils.categorize_time_of_day(
+            lambda x: time_helpers.categorize_time_of_day(
                 x.trip_first_departure), 
             axis=1)
     )

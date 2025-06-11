@@ -18,7 +18,7 @@ import intake
 import geopandas as gpd
 import pandas as pd
 
-from shared_utils import gtfs_utils, portfolio_utils, rt_utils
+from shared_utils import gtfs_utils, portfolio_utils, rt_utils, time_helpers
 from calitp_data_analysis import utils
 from E0_bus_oppor_vars import GCS_FILE_PATH, ANALYSIS_DATE, COMPILED_CACHED_GCS
 from bus_service_utils import gtfs_build
@@ -113,7 +113,7 @@ def subset_trips_and_stop_times(trips: dd.DataFrame,
     
     stop_times_binned = stop_times_with_hr.assign(
         time_of_day=stop_times_with_hr.apply(
-            lambda x: rt_utils.categorize_time_of_day(x.departure_hour), axis=1, 
+            lambda x: time_helpers.categorize_time_of_day(x.departure_hour), axis=1, 
             meta=('time_of_day', 'str'))
     )
     

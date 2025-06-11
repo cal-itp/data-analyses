@@ -1,5 +1,6 @@
 from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers_m
 from shared_utils.rt_utils import *
+from shared_utils import webmap_utils
 from calitp_data_analysis.utils import geoparquet_gcs_export
 from calitp_data_analysis.calitp_color_palette import CALITP_CATEGORY_BOLD_COLORS, CALITP_CATEGORY_BRIGHT_COLORS
 import branca
@@ -564,7 +565,7 @@ class RtFilterMapper:
             
             title = f"{self.organization_name} {self.display_date} {self.filter_period.replace('_', ' ')}"
             
-            export_result = set_state_export(gdf, subfolder = subfolder, filename = filename,
+            export_result = webmap_utils.set_state_export(gdf, subfolder = subfolder, filename = filename,
                                 map_type = 'speedmap', map_title = title, cmap = cmap,
                                 color_col = 'p20_mph', legend_url = legend_url,
                                 existing_state = self.spa_map_state
@@ -581,7 +582,7 @@ class RtFilterMapper:
             filename = f'{self.calitp_itp_id}_{self.filter_period}_variance'
             title = f"{self.organization_name} {self.display_date} {self.filter_period.replace('_', ' ')}"
             
-            export_result = set_state_export(self._variance_map_view, subfolder = subfolder, filename = filename,
+            export_result = webmap_utils.set_state_export(self._variance_map_view, subfolder = subfolder, filename = filename,
                                 map_type = 'speed_variation', map_title = title, cmap = self.variance_cmap,
                                 color_col = 'fast_slow_ratio', 
                                 legend_url = 'https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg',
@@ -596,7 +597,7 @@ class RtFilterMapper:
             filename = f'{dist}_SHN'
             title = f"D{dist} State Highway Network"
             
-            export_result = set_state_export(self.shn, subfolder = subfolder, filename = filename,
+            export_result = webmap_utils.set_state_export(self.shn, subfolder = subfolder, filename = filename,
                                 map_type = 'state_highway_network', map_title = title)
             self.spa_map_state = export_result['state_dict']
             self.spa_map_url = export_result['spa_link']
