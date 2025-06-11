@@ -37,9 +37,11 @@ V2_SUBFOLDER = "v2_cached_views/"
 
 MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
 METERS_PER_MILE = 1609.34
-# Colorscale
-# ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
-# ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
+
+SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/speeds_legend.svg"
+VARIANCE_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg"
+ACCESS_SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/speeds_legend_color_access.svg"
+
 ACCESS_ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdBu_10.scale(vmin=0, vmax=30)
 ACCESS_ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 VARIANCE_COLORS = branca.colormap.step.Blues_06.colors[1:]  # actual breaks will vary

@@ -24,7 +24,7 @@ def decode_base64_url(row):
 
     return decoded
 
-def exclude_desc(desc: str): -> bool
+def exclude_desc(desc: str) -> bool:
     """
     match descriptions that duplicate route names, like Route 602 or Route 51B
     also match descriptions that are not route-specific
@@ -42,7 +42,7 @@ def exclude_desc(desc: str): -> bool
     return any(desc_eval)
 
 
-def which_route_name(row, target: Literal["name", "description"] = "name"): -> str
+def which_route_name(row, target: Literal["name", "description"] = "name") -> str:
     """
     Previous function in rt_utils was designed to add descriptions after route_short_name,
     it would not return route_short_name in any case. Since we're using it to match names in this
@@ -51,14 +51,14 @@ def which_route_name(row, target: Literal["name", "description"] = "name"): -> s
     long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
     route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
     
-    if target = "name": #  finds most common name for route
+    if target == "name": #  finds most common name for route
         if row.route_short_name and not skip_short_name:
             return row.route_short_name
         elif long_name_valid:
             return row.route_long_name
         elif route_desc_valid:
             return row.route_desc
-    elif target = "description": #  augments a short or long name
+    elif target == "description": #  augments a short or long name
         if route_desc_valid:
             return row.route_desc
         elif long_name_valid:

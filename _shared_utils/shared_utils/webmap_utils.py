@@ -10,15 +10,15 @@ import gzip
 import base64
 import branca
 from IPython.display import display, Markdown, IFrame
+from calitp_data_analysis import get_fs, geography_utils
+from typing import Literal
+import json
+
 
 fs = get_fs()
 
 SPA_MAP_SITE = "https://embeddable-maps.calitp.org/"
 SPA_MAP_BUCKET = "calitp-map-tiles/"
-SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/speeds_legend.svg"
-VARIANCE_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg"
-ACCESS_SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/speeds_legend_color_access.svg"
-
 
 def spa_map_export_link(
     gdf: gpd.GeoDataFrame,
@@ -27,7 +27,7 @@ def spa_map_export_link(
     site: str = SPA_MAP_SITE,
     cache_seconds: int = 3600,
     verbose: bool = False,
-): -> str
+) -> str:
     """
     Called via set_state_export. Handles stream writing of gzipped geojson to GCS bucket,
     encoding spa state as base64 and URL generation.
@@ -68,7 +68,7 @@ def set_state_export(
     existing_state: dict = {},
     cache_seconds: int = 3600,
     manual_centroid: list = None,
-): -> dict
+) -> dict:
     """
     Applies light formatting to gdf for successful spa display. Will pass map_type
     if supported by the spa and provided. GCS bucket is preset to the publically
