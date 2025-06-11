@@ -3,12 +3,12 @@ Common functions for standardizing how outputs
 are displayed in portfolio.
 """
 import base64
+import re
 from pathlib import Path
+from typing import Literal
 
 import pandas as pd
 import yaml
-from shared_utils import rt_utils
-from typing import Literal
 
 
 def decode_base64_url(row):
@@ -23,6 +23,7 @@ def decode_base64_url(row):
         decoded = row.uri.split("?")[0]
 
     return decoded
+
 
 def exclude_desc(desc: str) -> bool:
     """
@@ -50,20 +51,21 @@ def which_route_name(row, target: Literal["name", "description"] = "name") -> st
     """
     long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
     route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
-    
-    if target == "name": #  finds most common name for route
-        if row.route_short_name and not skip_short_name:
+
+    if target == "name":  # finds most common name for route
+        if row.route_short_name:
             return row.route_short_name
         elif long_name_valid:
             return row.route_long_name
         elif route_desc_valid:
             return row.route_desc
-    elif target == "description": #  augments a short or long name
+    elif target == "description":  # augments a short or long name
         if route_desc_valid:
             return row.route_desc
         elif long_name_valid:
             return row.route_long_name
-    return "" #  empty string if no matches
+    return ""  # empty string if no matches
+
 
 def add_route_name(df: pd.DataFrame) -> pd.DataFrame:
     """

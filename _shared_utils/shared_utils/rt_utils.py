@@ -1,12 +1,7 @@
-import base64
 import datetime as dt
-import gzip
-import json
 import os
-import re
 import time
 from pathlib import Path
-from typing import Literal, Union
 
 import branca
 import dask_geopandas as dg
@@ -114,8 +109,8 @@ def primary_cardinal_direction(
 
 
 def add_origin_destination(
-    gdf: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
-) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
+    gdf: gpd.GeoDataFrame | dg.GeoDataFrame,
+) -> gpd.GeoDataFrame | dg.GeoDataFrame:
     """
     For a gdf, add the origin, destination columns given a linestring.
     Note: multilinestring may not work!
@@ -151,10 +146,10 @@ direction_grouping = {
 
 
 def add_route_cardinal_direction(
-    df: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
+    df: gpd.GeoDataFrame | dg.GeoDataFrame,
     origin: str = "origin",
     destination: str = "destination",
-) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
+) -> gpd.GeoDataFrame | dg.GeoDataFrame:
     """
     Apply cardinal direction to gdf.
 
@@ -196,9 +191,9 @@ def show_full_df(df: pd.DataFrame):
 
 def check_cached(
     filename: str,
-    GCS_FILE_PATH: Union[str, Path] = GCS_FILE_PATH,
-    subfolder: Union[str, Path] = "cached_views/",
-) -> Union[str, Path]:
+    GCS_FILE_PATH: str | Path = GCS_FILE_PATH,
+    subfolder: str | Path = "cached_views/",
+) -> str | Path:
     """
     Check GCS bucket to see if a file already is there.
     Returns the path, if it exists.
@@ -212,7 +207,7 @@ def check_cached(
         return None
 
 
-def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None) -> pd.DataFrame:
+def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: int | None = None) -> pd.DataFrame:
     """
     Collect relevant keys for finding all schedule and rt data for a reports-assessed organization.
     Note that organizations may have multiple sets of feeds, or share feeds with other orgs.
@@ -300,7 +295,7 @@ def get_routelines(
     itp_id: int,
     analysis_date: dt.date,
     force_clear: bool = False,
-    export_path: Union[str, Path] = EXPORT_PATH,
+    export_path: str | Path = EXPORT_PATH,
 ) -> gpd.GeoDataFrame:
     date_str = analysis_date.strftime(FULL_DATE_FMT)
     filename = f"routelines_{itp_id}_{date_str}.parquet"
@@ -317,7 +312,7 @@ def get_routelines(
             return
 
         return routelines
-    
+
 
 @jit(nopython=True)  # numba gives huge speedup here (~60x)
 def time_at_position_numba(desired_position, shape_array, dt_float_array):
@@ -403,5 +398,3 @@ def describe_slowest(row):
     )
     row["full_description"] = full_description
     return row
-
-

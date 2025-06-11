@@ -4,6 +4,7 @@ weekend and weekends so we can aggregate our
 existing time-of-day bins.
 """
 import datetime
+
 import pandas as pd
 
 PEAK_PERIODS = ["AM Peak", "PM Peak"]
@@ -105,10 +106,11 @@ def add_quarter(df: pd.DataFrame, date_col: str = "service_date") -> pd.DataFram
 
     return df
 
+
 def categorize_time_of_day(value: int | datetime.datetime) -> str:
     if isinstance(value, int):
         hour = value
-    elif isinstance(value, dt.datetime):
+    elif isinstance(value, datetime.datetime):
         hour = value.hour
     if hour < 4:
         return "Owl"

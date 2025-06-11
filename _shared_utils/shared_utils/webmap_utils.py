@@ -4,21 +4,21 @@ Convienience functions for using web app maps via https://github.com/cal-itp/dat
 These maps perform much better on large datasets, and include a download link. They support a generic style,
 or certain predefined styles, for example for speedmaps and the state highway system.
 """
-import pandas as pd
-import geopandas as gpd
-import gzip
 import base64
-import branca
-from IPython.display import display, Markdown, IFrame
-from calitp_data_analysis import get_fs, geography_utils
-from typing import Literal
+import gzip
 import json
+from typing import Literal
 
+import branca
+import geopandas as gpd
+from calitp_data_analysis import geography_utils, get_fs
+from IPython.display import IFrame, Markdown, display
 
 fs = get_fs()
 
 SPA_MAP_SITE = "https://embeddable-maps.calitp.org/"
 SPA_MAP_BUCKET = "calitp-map-tiles/"
+
 
 def spa_map_export_link(
     gdf: gpd.GeoDataFrame,
@@ -47,20 +47,24 @@ def spa_map_export_link(
     return spa_map_url
 
 
+SPA_MAP_TYPES = [
+    "speedmap",
+    "speed_variation",
+    "new_speedmap",
+    "new_speed_variation",
+    "hqta_areas",
+    "hqta_stops",
+    "state_highway_network",
+    None,
+]
+
+
 def set_state_export(
     gdf,
     bucket: str = SPA_MAP_BUCKET,
     subfolder: str = "testing/",
     filename: str = "test2",
-    map_type: Literal[
-        "speedmap",
-        "speed_variation",
-        "new_speedmap",
-        "new_speed_variation",
-        "hqta_areas",
-        "hqta_stops",
-        "state_highway_network",
-    ] = None,
+    map_type: Literal = SPA_MAP_TYPES,
     map_title: str = "Map",
     cmap: branca.colormap.ColorMap = None,
     color_col: str = None,
@@ -70,9 +74,11 @@ def set_state_export(
     manual_centroid: list = None,
 ) -> dict:
     """
+    Main function to use single page application webmap.
+
     Applies light formatting to gdf for successful spa display. Will pass map_type
-    if supported by the spa and provided. GCS bucket is preset to the publically
-    available one.
+    if supported by the spa and provided, otherwise leave as None for generic style.
+    GCS bucket is preset to a publically available one.
     Supply cmap and color_col for coloring based on a Branca ColorMap and a column
     to apply the color to.
     Cache is 1 hour by default, can set shorter time in seconds for
@@ -107,25 +113,27 @@ def set_state_export(
     spa_map_state["lat_lon"] = centroid
     if legend_url:
         spa_map_state["legend_url"] = legend_url
-        
+
     return {
         "state_dict": spa_map_state,
         "spa_link": spa_map_export_link(gdf=gdf, path=path, state=spa_map_state, cache_seconds=cache_seconds),
     }
 
 
-def render_spa_link(spa_map_url: str, text='Full Map') -> None:
-    
+def render_spa_link(spa_map_url: str, text="Full Map") -> None:
+    """
+    Call within a notebook to render a link to your webmap.
+    """
     display(Markdown(f'<a href="{spa_map_url}" target="_blank">Open {text} in New Tab</a>'))
     return
 
 
-def display_spa_map(spa_map_url: str, width: int=1000, height: int=650) -> None:
-    '''
+def display_spa_map(spa_map_url: str, width: int = 1000, height: int = 650) -> None:
+    """
     Display map from external simple web app in the notebook/JupyterBook context via an IFrame.
     Width/height defaults are current best option for JupyterBook, don't change for portfolio use
     width, height: int (pixels)
-    '''
+    """
     i = IFrame(spa_map_url, width=width, height=height)
     display(i)
     return
