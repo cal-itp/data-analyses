@@ -64,16 +64,6 @@ def prepare_segment_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     return gdf
 
-def display_spa_map(spa_map_url: str, width: int=1000, height: int=650) -> None:
-    '''
-    Display map from external simple web app in the notebook/JupyterBook context via an IFrame.
-    Width/height defaults are current best option for JupyterBook, don't change for portfolio use
-    width, height: int (pixels)
-    '''
-    i = IFrame(spa_map_url, width=width, height=height)
-    display(i)
-    return
-
 def map_shn(district_gdf: gpd.GeoDataFrame):
     dist = district_gdf.District.iloc[0]
     filename = f'{dist}_SHN'
