@@ -149,7 +149,7 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":
     
     DIGEST_RT_SCHED_MONTH = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp 
-    DIGEST_RT_SCHED_QTR = "digest/quarterly_schedule_vp_metrics"
+    DIGEST_RT_SCHED_QTR = GTFS_DATA_DICT.digest_tables.quarterly_route_schedule_vp
     
     # Save metrics on a monthly candence.
     monthly_df = pd.read_parquet(

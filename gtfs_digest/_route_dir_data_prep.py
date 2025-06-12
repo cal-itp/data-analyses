@@ -123,8 +123,8 @@ if __name__ == "__main__":
     ROUTE_DIR_MONTH_FILE = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp
     ROUTE_DIR_MONTH_REPORT = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp_report
     
-    ROUTE_DIR_QTR_FILE = "digest/quarterly_schedule_vp_metrics"
-    ROUTE_DIR_QTR_EXPORT = 'digest/quarterly_schedule_vp_metrics_report'
+    ROUTE_DIR_QTR_FILE = GTFS_DATA_DICT.digest_tables.quarterly_route_schedule_vp
+    ROUTE_DIR_QTR_EXPORT = GTFS_DATA_DICT.digest_tables.quarterly_route_schedule_vp_report
     
     # Report by month
     month_route_dir_df = pd.read_parquet(
