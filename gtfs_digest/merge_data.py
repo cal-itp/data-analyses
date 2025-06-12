@@ -192,8 +192,8 @@ def concatenate_crosswalk_organization(
         "name",
         "schedule_source_record_id",
         "base64_url",
-        "organization_source_record_id",
-        "organization_name",
+        #"organization_source_record_id",
+        #"organization_name",
         "caltrans_district"
     ]
     

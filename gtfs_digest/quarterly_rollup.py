@@ -18,7 +18,7 @@ groupby_cols = [
     "year_quarter",
     "direction_id",
     "time_period",
-    "recent_route_id",
+    "recent_combined_name",
 ]
 rt_metric_cols = [
     "minutes_atleast1_vp",
@@ -37,6 +37,7 @@ rt_metric_no_weighted_avg = [
 crosswalk_cols = [
     "base64_url",
     "organization_source_record_id",
+    "portfolio_organization_name",
     "organization_name",
     "caltrans_district",
     "route_primary_direction",
@@ -54,16 +55,9 @@ crosswalk_cols = [
     "sched_rt_category",
     "combined_name",
     'route_id',
-    "recent_combined_name",
+    "recent_route_id",
     'year', 
     'quarter'
-]
-group_cols = [
-    "year_quarter",
-    "schedule_gtfs_dataset_key",
-    "recent_route_id",
-    "direction_id",
-    "time_period",
 ]
 
 def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
@@ -147,15 +141,15 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     
     # Drop service_date & duplicates
     m2 = (m2
-          .drop(columns=["service_date"])
-          .drop_duplicates(subset = group_cols)
+          .drop(columns=["service_date", "year","quarter"])
+          .drop_duplicates(subset = groupby_cols)
           .reset_index(drop=True))
     return m2
 
 if __name__ == "__main__":
     
     DIGEST_RT_SCHED_MONTH = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp 
-    DIGEST_RT_SCHED_QTR = GTFS_DATA_DICT.digest_tables.quarterly_route_schedule_vp 
+    DIGEST_RT_SCHED_QTR = GTFS_DATA_DICT.digest_tables.quarterly_route_schedule_vp
     
     # Save metrics on a monthly candence.
     monthly_df = pd.read_parquet(

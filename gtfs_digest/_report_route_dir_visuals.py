@@ -95,6 +95,8 @@ def reshape_pct_journey_with_vp(df: pd.DataFrame) -> pd.DataFrame:
 
     df3 = df3.rename(columns={"variable": "Category", "value": "% of Trip Duration"})
 
+    # Drop duplicates
+    df3 = df3.drop_duplicates()
     return df3
 
 def reshape_route_stats(df: pd.DataFrame) -> pd.DataFrame:
@@ -153,6 +155,9 @@ def reshape_route_stats(df: pd.DataFrame) -> pd.DataFrame:
 
     # Add back date
     table_df["Date"] = most_recent_date
+    
+    # Drop dups
+    table_df = table_df.drop_duplicates()
     return table_df
 
 def reshape_df_text_table(df: pd.DataFrame) -> pd.DataFrame:
@@ -169,7 +174,6 @@ def reshape_df_text_table(df: pd.DataFrame) -> pd.DataFrame:
             "Direction (0/1)",
         ],
         value_vars=[
-            "Average Scheduled Service (Trip Minutes)",
             "Average Stop Distance (Miles)",
             "# Scheduled Trips",
             "Gtfs Availability",
@@ -196,6 +200,7 @@ def reshape_df_text_table(df: pd.DataFrame) -> pd.DataFrame:
         "Schedule and Realtime Data",
     ).str.replace("Gtfs", "GTFS")
 
+    melt1 = melt1.drop_duplicates()
     return melt1
 
 def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
@@ -223,6 +228,7 @@ def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
 
     melted_df["Percentage"] = (melted_df.value / melted_df["# Realtime Trips"]) * 100
 
+    melted_df = melted_df.drop_duplicates()
     return melted_df
 """
 Charts
@@ -418,18 +424,18 @@ def circle_chart(
 """
 Actual Charts
 """
-def sample_spatial_accuracy_chart(df):
+def spatial_accuracy_chart(df):
     specific_chart_dict = readable_dict.spatial_accuracy_graph
 
     ruler = ruler_chart(df, 100)
 
     bar = bar_chart(
-        x_col = "Date", 
+        x_col = "Quarter", 
         y_col = "% VP within Scheduled Shape", 
         color_col = "% VP within Scheduled Shape", 
         color_scheme = [*specific_chart_dict.colors], 
         tooltip_cols = [*specific_chart_dict.tooltip], 
-        date_format="%b %Y"
+        date_format=""
     )
    
     # write this way so that the df is inherited by .facet
@@ -448,17 +454,17 @@ def sample_spatial_accuracy_chart(df):
     return chart
 
 
-def sample_avg_scheduled_min_chart(df):
+def avg_scheduled_min_chart(df):
     specific_chart_dict = readable_dict.avg_scheduled_min_graph
     
     chart = grouped_bar_chart(
         df,
-        x_col = "Date:T",
+        x_col = "Quarter",
         y_col="Average Scheduled Service (trip minutes)",
         color_col="Direction:N",
         color_scheme = [*specific_chart_dict.colors],
         tooltip_cols = [*specific_chart_dict.tooltip],
-        date_format = "%b %Y",
+        date_format = "",
         offset_col="Direction:N",
     )
         
@@ -472,48 +478,22 @@ def sample_avg_scheduled_min_chart(df):
     return chart
 
 def vp_per_minute_chart(df: pd.DataFrame) -> alt.Chart:
+    # Need to drop duplicates
+    
     specific_chart_dict = readable_dict.vp_per_min_graph
     ruler = ruler_chart(df, 3)
 
     bar = bar_chart(
-        x_col="Date",
+        x_col="Quarter",
         y_col="Average VP per Minute",
         color_col="Average VP per Minute",
         color_scheme=[*specific_chart_dict.colors],
         tooltip_cols=[*specific_chart_dict.tooltip],
-        date_format="%b %Y",
+        date_format="",
     )
 
     # write this way so that the df is inherited by .facet
     chart = alt.layer(bar, ruler, data=df).properties(width=200, height=250)
-    chart = chart.facet(
-        column=alt.Column(
-            "Direction:N",
-        )
-    ).properties(
-        title={
-            "text": specific_chart_dict.title,
-            "subtitle": specific_chart_dict.subtitle,
-        }
-    )
-    return chart
-
-def timeliness_chart(df) -> alt.Chart:
-
-    # Reshape dataframe from wide to long
-    df2 = reshape_timeliness_trips(df)
-
-    specific_chart_dict = readable_dict.timeliness_trips_graph
-
-    chart = line_chart(
-        df=df2,
-        x_col="Date",
-        y_col="Percentage",
-        color_col="variable",
-        color_scheme=[*specific_chart_dict.colors],
-        tooltip_cols=[*specific_chart_dict.tooltip],
-    ).properties(width=200, height=250)
-
     chart = chart.facet(
         column=alt.Column(
             "Direction:N",
@@ -612,13 +592,13 @@ def text_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
 def timeliness_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
 
     # Filter to one direction only
-    df = df.loc[df["Direction (0/1)"] == direction]
+    #df = df.loc[df["Direction (0/1)"] == direction]
 
     # Reshape dataframe from wide to long
     df2 = reshape_timeliness_trips(df)
 
     # Grab cardinal direction value to use for the title
-    direction_str = df2["Direction"].iloc[0]
+    #direction_str = df2["Direction"].iloc[0]
 
     specific_chart_dict = readable_dict.timeliness_trips_graph
 
@@ -637,7 +617,7 @@ def timeliness_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         )
     ).properties(
         title={
-            "text": f"{specific_chart_dict.title}{direction_str} Vehicles",
+            "text": f"{specific_chart_dict.title}",
             "subtitle": specific_chart_dict.subtitle,
         }
     )
@@ -647,13 +627,21 @@ def total_scheduled_trips_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
     # Filter to one direction only
     df = df.loc[df["Direction (0/1)"] == direction]
 
+    # Subset so the kernel doesn't explode
+    df = df[["Direction (0/1)",
+             "Direction",
+             "Date", 
+             "Route", 
+             "# Scheduled Trips", 
+             "Period"]].drop_duplicates()
+    
     # Grab cardinal direction value to use for the title
-    direction_str = df["Direction"].iloc[0]
+    direction_str = df["Direction (0/1)"].iloc[0]
 
     specific_chart_dict = readable_dict.n_scheduled_graph
 
     chart = bar_chart(
-        x_col="Date:T",
+        x_col="Date",
         y_col="# Scheduled Trips",
         color_col="Period:N",
         color_scheme=[*specific_chart_dict.colors],
@@ -668,7 +656,7 @@ def total_scheduled_trips_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         chart,
         width=400,
         height=250,
-        title=f"{specific_chart_dict.title}{direction_str} Vehicles",
+        title=f"{specific_chart_dict.title}{direction_str}",
         subtitle=specific_chart_dict.subtitle,
     )
     return chart
@@ -678,13 +666,25 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
     # Filter to one direction only
     df = df.loc[df["Direction (0/1)"] == direction]
 
+    # Simplify the dataframe
+    df = df[
+            [
+                "Route",
+                "Date",
+                "Period",
+                "Direction (0/1)",
+                "Headway (Minutes)",
+                "Direction",
+            ]
+        ].drop_duplicates()
+
     # Grab cardinal direction value to use for the title
     direction_str = df["Direction"].iloc[0]
 
     specific_chart_dict = readable_dict.frequency_graph
 
     chart = bar_chart(
-        x_col="Date:T",
+        x_col="Date",
         y_col="Headway (Minutes)",
         color_col="Headway (Minutes):N",
         color_scheme=[*specific_chart_dict.colors],
@@ -694,7 +694,7 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
 
     chart = (
         alt.layer(chart, data=df)
-        .encode(y=alt.Y("Headway (Minutes)", scale=alt.Scale(domain=[0, 250])))
+        .encode(y=alt.Y("Headway (Minutes)", scale=alt.Scale(domain=[0, 250], clamp = True)))
         .properties(width=200, height=250)
     )
 
@@ -710,113 +710,109 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
     )
     return chart
 
-def route_filter(df):
-    routes_list = df["Route"].unique().tolist()
+def route_filter(qtr_df: pd.DataFrame, month_df: pd.DataFrame):
+    
+    routes_list = month_df["Route"].unique().tolist()
 
     route_dropdown = alt.binding_select(
         options=routes_list,
         name="Routes: ",
     )
+    
     # Column that controls the bar charts
     xcol_param = alt.selection_point(
         fields=["Route"], value=routes_list[0], bind=route_dropdown
     )
 
+    
     # Charts
     spatial_accuracy = (
-        sample_spatial_accuracy_chart(df[df.Period == "All Day"])
+        spatial_accuracy_chart(qtr_df[qtr_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
 
     avg_scheduled_min = (
-       sample_avg_scheduled_min_chart(df[df.Period == "All Day"])
+       avg_scheduled_min_chart(qtr_df[qtr_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
+    print("done with spatial & avg sched")
     vp_per_minute = (
-        vp_per_minute_chart(df[df.Period == "All Day"])
+        vp_per_minute_chart(qtr_df[qtr_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
     speed = (
-        speed_chart(df)
+        speed_chart(month_df)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
+    print("done with vp and speed")
     sched_vp_per_min = (
-        sched_vp_per_min_chart(df[df.Period == "All Day"])
+        sched_vp_per_min_chart(month_df[month_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
+    print("done with sched vp")
     text_dir0 = (
-        text_chart(df, 0)
+        text_chart(month_df, 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
+    print("done with text")
     text_dir1 = (
-        text_chart(df, 1)
+        text_chart(month_df, 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
-    timeliness_dir0 =(
-        timeliness_chart(df[df.Period == "All Day"], 0)
+    print("done with text2")
+    timeliness_dir =(
+        timeliness_chart(month_df[month_df.Period == "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
-    timeliness_dir1 =(
-        timeliness_chart(df[df.Period == "All Day"], 1)
-        .add_params(xcol_param)
-        .transform_filter(xcol_param)
-    )
-    
+    print('done with timeliness2')
     n_scheduled_dir0 = (
-        total_scheduled_trips_chart(df[df.Period == "All Day"], 0)
+        total_scheduled_trips_chart(month_df[month_df.Period == "All Day"], 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
+    print('done with scheduled')
     n_scheduled_dir1 = (
-        total_scheduled_trips_chart(df[df.Period == "All Day"], 1)
+        total_scheduled_trips_chart(month_df[month_df.Period == "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
+    print('done with scheduled2')
     n_freq_dir0 = (
-        headway_chart(df[df.Period != "All Day"], 0)
+        headway_chart(month_df[month_df.Period != "All Day"], 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    
+    print('done with freq1')
     n_freq_dir1 = (
-         headway_chart(df[df.Period != "All Day"], 1)
+         headway_chart(month_df[month_df.Period != "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
+    print('done with freq2')
     # Divider Charts
     data_quality = divider_chart(
-        df, readable_dict.data_quality_graph.title
+        month_df, readable_dict.data_quality_graph.title
     )
     rider_quality = divider_chart(
-        df, readable_dict.rider_quality_graph.title
+        month_df, readable_dict.rider_quality_graph.title
     )
-    summary = divider_chart(df, readable_dict.summary_graph.title)
-
+    summary = divider_chart(month_df, readable_dict.summary_graph.title)
+    print('done with divider charts')
     chart_list = [
         summary,
         text_dir0,
         text_dir1,
         rider_quality,
         avg_scheduled_min,
-        timeliness_dir0,
-        timeliness_dir1,
+        timeliness_dir,
         n_freq_dir0,
         n_scheduled_dir0,
         n_freq_dir1,
@@ -825,9 +821,8 @@ def route_filter(df):
         data_quality,
         spatial_accuracy,
         vp_per_minute,
-        
         sched_vp_per_min,
     ]
     chart = alt.vconcat(*chart_list)
-
+    print('done with concating')
     return chart
