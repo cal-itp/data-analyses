@@ -226,7 +226,8 @@ def make_long(df: pd.DataFrame, group_cols: list, value_cols: list):
 def make_scatter(data, x_ax, y_ax, chart_title, color=None, column_num=None, log_scale=None, lin_x_ax=None, lin_y_ax=None):
     """
     makes scatterplot from designated z and y axis.
-    if scale is enabled, filters x and y axis cols for greater than zero to make log scale work
+    lin_x/y_ax enables linear scale for either axis
+    log_scale filters x and y axis cols for greater than zero to make log scale work
     """
     
     chart = (
@@ -273,7 +274,8 @@ def make_line(
     ind_axis=None,
 ):
     """
-    worked with melted dataframe wth a single value column.
+    works with melted dataframe wth a single value column.
+    ind_axis enables an independent y-axis for each faceted chart.
     """
     chart = (
         alt.Chart(df)
@@ -285,33 +287,32 @@ def make_line(
             tooltip=[x_col, y_col,color]
         )
     ).properties(
-        title=chart_title, width=350, height=150
+        width=350, 
+        height=150
     ).interactive()
     
-    # median, horizontal bar
-    rule = alt.Chart(df).mark_rule().encode(
-        y=alt.Y('median(' + y_col + ')')
-    )
     
     # data labels for line
     labels = alt.Chart(df).mark_text(align="right", dy=-10).encode(
         x=alt.X(x_col),
         y=alt.Y(y_col),
-        text=alt.Text(y_col),
+        text=alt.Text(y_col,  format=",.0f"), # enable zero decimal places just on chart level, tool tips still show entire value
         color=alt.Color(color)
     )
     
-    chart_w_rule = alt.layer(chart, rule, labels)
+    chart_w_rule = alt.layer(
+        chart, 
+        labels)
     
     chart_rule_facet = chart_w_rule.facet(
         facet=alt.Facet(
-                facet,
+            facet,
+            title= chart_title # moved chart title to here
         ),columns=2
                )
     
     if ind_axis:
-        chart_rule_facet = chart_rule_facet.resolve_scale(
-            #x="independent", 
+        chart_rule_facet = chart_rule_facet.resolve_scale( 
             y="independent"
         )
         
