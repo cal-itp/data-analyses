@@ -286,8 +286,8 @@ def stop_times_aggregation_max_by_stop(
         max_trips_by_stop = max_trips_by_stop.drop(columns=['route_id', 'direction_id'])
     #  divide by length of peak to get trips/hr, keep n_trips a raw sum
     max_trips_by_stop = max_trips_by_stop.assign(
-        am_max_trips_hr = (max_trips_by_stop.am_max_trips.fillna(0) / len(am_peak_hrs)).astype(int),
-        pm_max_trips_hr = (max_trips_by_stop.pm_max_trips.fillna(0) / len(pm_peak_hrs)).astype(int),
+        am_max_trips_hr = (max_trips_by_stop.am_max_trips.fillna(0) / len(am_peak_hrs)).round(2),
+        pm_max_trips_hr = (max_trips_by_stop.pm_max_trips.fillna(0) / len(pm_peak_hrs)).round(2),
         n_trips = (max_trips_by_stop.am_max_trips.fillna(0) + 
                    max_trips_by_stop.pm_max_trips.fillna(0)),
         route_dir_count = max_trips_by_stop.route_dir.map(lambda x: x.size)
