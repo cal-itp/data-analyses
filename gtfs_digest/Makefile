@@ -14,6 +14,6 @@ assemble_operator_data:
 	python merge_operator_service.py   
     
 portfolio_deploy:
+	python _yml_gtfs_digest_orgs.py # run this after the files are created in merge_*
 	python deploy_portfolio_yaml.py
-	python _yml_gtfs_digest_orgs.py
 	python publish_public_data.py
