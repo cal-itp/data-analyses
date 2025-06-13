@@ -3,8 +3,12 @@ Merge datasets across dates to create time-series data
 for GTFS digest.
 Grain is operator-service_date-route-direction-time_period.
 """
+import datetime
 import pandas as pd
 import yaml
+import sys
+
+from loguru import logger
 
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
 from shared_utils import dask_utils, gtfs_utils_v2, portfolio_utils, publish_utils
@@ -188,8 +192,8 @@ def concatenate_crosswalk_organization(
         "name",
         "schedule_source_record_id",
         "base64_url",
-        "organization_source_record_id",
-        "organization_name",
+        #"organization_source_record_id",
+        #"organization_name",
         "caltrans_district"
     ]
     
@@ -297,7 +301,6 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
     return df2
 
 
-
 """
 Merging Functions
 """
@@ -352,12 +355,19 @@ if __name__ == "__main__":
     
     from shared_utils import rt_dates
     
+    logger.add("./logs/digest_data_prep.log", retention="3 months")
+    logger.add(sys.stderr, 
+               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+               level="INFO")
+    
+    start = datetime.datetime.now()
+    
     analysis_date_list = (
         rt_dates.y2024_dates + rt_dates.y2023_dates +
         rt_dates.y2025_dates
     )
     
-    DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.route_schedule_vp 
+    DIGEST_RT_SCHED = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp 
     
     # These are public schedule_gtfs_dataset_keys
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
@@ -390,4 +400,6 @@ if __name__ == "__main__":
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
-    print("Saved GTFS digest")
+    
+    end = datetime.datetime.now()
+    logger.info(f"concatenate route-direction: {end - start}")

@@ -1,12 +1,7 @@
-import base64
 import datetime as dt
-import gzip
-import json
 import os
-import re
 import time
 from pathlib import Path
-from typing import Literal, Union
 
 import branca
 import dask_geopandas as dg
@@ -35,17 +30,13 @@ SHN_PATH = "gs://calitp-analytics-data/data-analyses/bus_service_increase/highwa
 VP_FILE_PATH = f"gs://{BUCKET_NAME}/data-analyses/rt_segment_speeds/"
 V2_SUBFOLDER = "v2_cached_views/"
 
-SPA_MAP_SITE = "https://embeddable-maps.calitp.org/"
-SPA_MAP_BUCKET = "calitp-map-tiles/"
+MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
+METERS_PER_MILE = 1609.34
+
 SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/speeds_legend.svg"
 VARIANCE_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/variance_legend.svg"
 ACCESS_SPEEDMAP_LEGEND_URL = "https://storage.googleapis.com/calitp-map-tiles/speeds_legend_color_access.svg"
 
-MPH_PER_MPS = 2.237  # use to convert meters/second to miles/hour
-METERS_PER_MILE = 1609.34
-# Colorscale
-# ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdYlGn_10.scale(vmin=0, vmax=30)
-# ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 ACCESS_ZERO_THIRTY_COLORSCALE = branca.colormap.step.RdBu_10.scale(vmin=0, vmax=30)
 ACCESS_ZERO_THIRTY_COLORSCALE.caption = "Speed (miles per hour)"
 VARIANCE_COLORS = branca.colormap.step.Blues_06.colors[1:]  # actual breaks will vary
@@ -118,8 +109,8 @@ def primary_cardinal_direction(
 
 
 def add_origin_destination(
-    gdf: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
-) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
+    gdf: gpd.GeoDataFrame | dg.GeoDataFrame,
+) -> gpd.GeoDataFrame | dg.GeoDataFrame:
     """
     For a gdf, add the origin, destination columns given a linestring.
     Note: multilinestring may not work!
@@ -155,10 +146,10 @@ direction_grouping = {
 
 
 def add_route_cardinal_direction(
-    df: Union[gpd.GeoDataFrame, dg.GeoDataFrame],
+    df: gpd.GeoDataFrame | dg.GeoDataFrame,
     origin: str = "origin",
     destination: str = "destination",
-) -> Union[gpd.GeoDataFrame, dg.GeoDataFrame]:
+) -> gpd.GeoDataFrame | dg.GeoDataFrame:
     """
     Apply cardinal direction to gdf.
 
@@ -200,9 +191,9 @@ def show_full_df(df: pd.DataFrame):
 
 def check_cached(
     filename: str,
-    GCS_FILE_PATH: Union[str, Path] = GCS_FILE_PATH,
-    subfolder: Union[str, Path] = "cached_views/",
-) -> Union[str, Path]:
+    GCS_FILE_PATH: str | Path = GCS_FILE_PATH,
+    subfolder: str | Path = "cached_views/",
+) -> str | Path:
     """
     Check GCS bucket to see if a file already is there.
     Returns the path, if it exists.
@@ -216,7 +207,7 @@ def check_cached(
         return None
 
 
-def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: Union[int, None] = None) -> pd.DataFrame:
+def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: int | None = None) -> pd.DataFrame:
     """
     Collect relevant keys for finding all schedule and rt data for a reports-assessed organization.
     Note that organizations may have multiple sets of feeds, or share feeds with other orgs.
@@ -304,7 +295,7 @@ def get_routelines(
     itp_id: int,
     analysis_date: dt.date,
     force_clear: bool = False,
-    export_path: Union[str, Path] = EXPORT_PATH,
+    export_path: str | Path = EXPORT_PATH,
 ) -> gpd.GeoDataFrame:
     date_str = analysis_date.strftime(FULL_DATE_FMT)
     filename = f"routelines_{itp_id}_{date_str}.parquet"
@@ -321,25 +312,6 @@ def get_routelines(
             return
 
         return routelines
-
-
-def categorize_time_of_day(value: Union[int, dt.datetime]) -> str:
-    if isinstance(value, int):
-        hour = value
-    elif isinstance(value, dt.datetime):
-        hour = value.hour
-    if hour < 4:
-        return "Owl"
-    elif hour < 7:
-        return "Early AM"
-    elif hour < 10:
-        return "AM Peak"
-    elif hour < 15:
-        return "Midday"
-    elif hour < 20:
-        return "PM Peak"
-    else:
-        return "Evening"
 
 
 @jit(nopython=True)  # numba gives huge speedup here (~60x)
@@ -417,35 +389,6 @@ def arrowize_by_frequency(row, frequency_col="trips_per_hour", frequency_thresho
     return row
 
 
-def exclude_desc(desc):
-    # match descriptions that don't give additional info, like Route 602 or Route 51B
-    exclude_texts = [
-        " *Route *[0-9]*[a-z]{0,1}$",
-        " *Metro.*(Local|Rapid|Limited).*Line",
-        " *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)",
-        " *service within the Stockton Metropolitan Area",
-        " *Hopper bus can deviate",
-        " *RTD's Interregional Commuter Service is a limited-capacity service",
-    ]
-    desc_eval = [re.search(text, desc, flags=re.IGNORECASE) for text in exclude_texts]
-    # number_only = re.search(' *Route *[0-9]*[a-z]{0,1}$', desc, flags=re.IGNORECASE)
-    # metro = re.search(' *Metro.*(Local|Rapid|Limited).*Line', desc, flags=re.IGNORECASE)
-    # redwood = re.search(' *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)', desc, flags=re.IGNORECASE)
-    # return number_only or metro or redwood
-    return any(desc_eval)
-
-
-def which_desc(row):
-    long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
-    route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
-    if route_desc_valid:
-        return f", {row.route_desc}"
-    elif long_name_valid:
-        return f", {row.route_long_name}"
-    else:
-        return ""
-
-
 def describe_slowest(row):
     description = which_desc(row)
     full_description = (
@@ -455,95 +398,3 @@ def describe_slowest(row):
     )
     row["full_description"] = full_description
     return row
-
-
-def spa_map_export_link(
-    gdf: gpd.GeoDataFrame,
-    path: str,
-    state: dict,
-    site: str = SPA_MAP_SITE,
-    cache_seconds: int = 3600,
-    verbose: bool = False,
-):
-    """
-    Called via set_state_export. Handles stream writing of gzipped geojson to GCS bucket,
-    encoding spa state as base64 and URL generation.
-    """
-    assert cache_seconds in range(3601), "cache must be 0-3600 seconds"
-    geojson_str = gdf.to_json()
-    geojson_bytes = geojson_str.encode("utf-8")
-    if verbose:
-        print(f"writing to {path}")
-    with fs.open(path, "wb") as writer:  # write out to public-facing GCS?
-        with gzip.GzipFile(fileobj=writer, mode="w") as gz:
-            gz.write(geojson_bytes)
-    if cache_seconds != 3600:
-        fs.setxattrs(path, fixed_key_metadata={"cache_control": f"public, max-age={cache_seconds}"})
-    base64state = base64.urlsafe_b64encode(json.dumps(state).encode()).decode()
-    spa_map_url = f"{site}?state={base64state}"
-    return spa_map_url
-
-
-def set_state_export(
-    gdf,
-    bucket: str = SPA_MAP_BUCKET,
-    subfolder: str = "testing/",
-    filename: str = "test2",
-    map_type: Literal[
-        "speedmap",
-        "speed_variation",
-        "new_speedmap",
-        "new_speed_variation" "hqta_areas",
-        "hqta_stops",
-        "state_highway_network",
-    ] = None,
-    map_title: str = "Map",
-    cmap: branca.colormap.ColorMap = None,
-    color_col: str = None,
-    legend_url: str = None,
-    existing_state: dict = {},
-    cache_seconds: int = 3600,
-    manual_centroid: list = None,
-):
-    """
-    Applies light formatting to gdf for successful spa display. Will pass map_type
-    if supported by the spa and provided. GCS bucket is preset to the publically
-    available one.
-    Supply cmap and color_col for coloring based on a Branca ColorMap and a column
-    to apply the color to.
-    Cache is 1 hour by default, can set shorter time in seconds for
-    "near realtime" applications (suggest 120) or development (suggest 0)
-
-    Returns dict with state dictionary and map URL. Can call multiple times and supply
-    previous state as existing_state to create multilayered maps.
-    """
-    assert not gdf.empty, "geodataframe is empty!"
-    spa_map_state = existing_state or {"name": "null", "layers": [], "lat_lon": (), "zoom": 13}
-    path = f"{bucket}{subfolder}{filename}.geojson.gz"
-    gdf = gdf.to_crs(geography_utils.WGS84)
-    if cmap and color_col:
-        gdf["color"] = gdf[color_col].apply(lambda x: cmap.rgb_bytes_tuple(x))
-    gdf = gdf.round(2)  # round for map display
-    this_layer = [
-        {
-            "name": f"{map_title}",
-            "url": f"https://storage.googleapis.com/{path}",
-            "properties": {"stroked": False, "highlight_saturation_multiplier": 0.5},
-        }
-    ]
-    if map_type:
-        this_layer[0]["type"] = map_type
-    if map_type in ["new_speedmap", "speedmap"]:
-        this_layer[0]["properties"]["tooltip_speed_key"] = "p20_mph"
-    spa_map_state["layers"] += this_layer
-    if manual_centroid:
-        centroid = manual_centroid
-    else:
-        centroid = (gdf.geometry.centroid.y.mean(), gdf.geometry.centroid.x.mean())
-    spa_map_state["lat_lon"] = centroid
-    if legend_url:
-        spa_map_state["legend_url"] = legend_url
-    return {
-        "state_dict": spa_map_state,
-        "spa_link": spa_map_export_link(gdf=gdf, path=path, state=spa_map_state, cache_seconds=cache_seconds),
-    }
