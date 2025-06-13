@@ -93,7 +93,8 @@ def get_explode_multiroute_only(
     # print(f'{multi_only_explode.stop_id.nunique()} stops may qualify with multi-route aggregation')
     return multi_only_explode
 
-def accumulate_share_count(route_dir_exploded: pd.DataFrame) -> None:
+def accumulate_share_count(route_dir_exploded: pd.DataFrame,
+                          share_counts: dict) -> None:
     '''
     For use via pd.DataFrame.groupby.apply
     Accumulate the number of times each route_dir shares stops with
@@ -101,7 +102,6 @@ def accumulate_share_count(route_dir_exploded: pd.DataFrame) -> None:
     Note impure function -- initialize share_counts = {} before calling
     Could be rewritten with iterrows if desired
     '''
-    global share_counts
     rt_dir = route_dir_exploded.route_dir.to_numpy()
     schedule_gtfs_dataset_key = route_dir_exploded.schedule_gtfs_dataset_key.iloc[0]
     for route_dir in rt_dir:
@@ -319,7 +319,7 @@ if __name__ == "__main__":
     
     multi_only_explode = get_explode_multiroute_only(max_arrivals_by_stop_single, max_arrivals_by_stop_multi, (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD))
     share_counts = {}
-    multi_only_explode.groupby(['schedule_gtfs_dataset_key', 'stop_id']).apply(accumulate_share_count)
+    multi_only_explode.groupby(['schedule_gtfs_dataset_key', 'stop_id']).apply(accumulate_share_count, share_counts=share_counts)
     qualify_dict = {key: share_counts[key] for key in share_counts.keys() if share_counts[key] >= SHARED_STOP_THRESHOLD}
     
     keys_to_drop = []
