@@ -12,10 +12,13 @@ catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 CORRIDOR_BUFFER = 70 #  meters
 CORRIDOR_RELEVANCE = 1000 #  meters, or half corridor length
 
+import google.auth
+credentials, project = google.auth.default()
+
 def import_speedmap_segment_speeds(analysis_date: str) -> gpd.GeoDataFrame:
     
     path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.segment_timeofday}_{analysis_date}.parquet'
-    detail = gpd.read_parquet(path)
+    detail = gpd.read_parquet(path, storage_options = {"token": credentials.token})
     return detail
 
 def get_max_frequencies(segment_speeds: gpd.GeoDataFrame) -> pd.DataFrame:
@@ -175,12 +178,11 @@ def analyze_corridor_trips(
     df = df.assign(corridor_speed_mph = df['corridor_speed_mps'] * rt_utils.MPH_PER_MPS)
     
     df = describe_cleaning(df, 'corridor_seconds > 0', 'trips with zero seconds')
-    df = describe_cleaning(df, 'corridor_speed_mph < 80', 'trips with speeds > 80mph')
+    corridor_trips_usable = describe_cleaning(df, 'corridor_speed_mph < 80 & corridor_speed_mph > 3', 'trips with speeds > 80mph or < 3mph')
     
-    # corridor_trips_usable = df.query('corridor_seconds > 0 & corridor_speed_mph <= 80')
-    corridor_trips_usable = describe_cleaning(df,
-                            'corridor_speed_mph > corridor_speed_mph.quantile(.05) & corridor_speed_mph < corridor_speed_mph.quantile(.95)',
-                                             'trips with speed below 5th or above 95%ile')
+    # corridor_trips_usable = describe_cleaning(df,
+    #                         'corridor_speed_mph > corridor_speed_mph.quantile(.02) & corridor_speed_mph < corridor_speed_mph.quantile(.98)',
+    #                                          'trips with speed below 2nd or above 98%ile')
     trip_identifiers = corridor_trips_gdf[['trip_instance_key', 'route_short_name', 'route_id',
                    'shape_array_key', 'shape_id', 'schedule_gtfs_dataset_key',
                     'time_of_day', 'corridor_id']].drop_duplicates()
