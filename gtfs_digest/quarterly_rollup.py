@@ -14,7 +14,7 @@ schd_metric_cols = [
 ]
 
 groupby_cols = [
-    "schedule_gtfs_dataset_key",
+    "portfolio_organization_name",
     "year_quarter",
     "direction_id",
     "time_period",
