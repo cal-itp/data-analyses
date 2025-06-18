@@ -36,9 +36,7 @@ rt_metric_no_weighted_avg = [
 ]
 crosswalk_cols = [
     "base64_url",
-    "organization_source_record_id",
     "portfolio_organization_name",
-    "organization_name",
     "caltrans_district",
     "route_primary_direction",
     "name",

@@ -127,6 +127,7 @@ if __name__ == "__main__":
     ROUTE_DIR_QTR_EXPORT = GTFS_DATA_DICT.digest_tables.quarterly_route_schedule_vp_report
     
     # Report by month
+    # Groupby recent combined name + portfolio org name + service date for _report 
     month_route_dir_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{ROUTE_DIR_MONTH_FILE}.parquet"
     )
@@ -139,7 +140,7 @@ if __name__ == "__main__":
         f"{RT_SCHED_GCS}{ROUTE_DIR_MONTH_REPORT}.parquet"
     )
     
-    # Report by quarter
+    # Take the group by around 130 and aggregate up to quarterly
     qtr_route_dir_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{ROUTE_DIR_QTR_FILE}.parquet"
     )
