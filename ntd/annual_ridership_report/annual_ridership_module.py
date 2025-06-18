@@ -144,7 +144,7 @@ def ntd_id_to_rtpa_crosswalk(split_scag:bool) -> pd.DataFrame:
     )
     
     # locate SoCal counties, replace initial RTPA name with dictionary.
-    if split_socal == True:
+    if split_scag == True:
         ntd_to_rtpa_crosswalk.loc[
             ntd_to_rtpa_crosswalk["county_geography_name"].isin(
                 socal_county_dict.keys()
@@ -300,7 +300,7 @@ def save_rtpa_outputs(
     #}
     print("creating individual RTPA excel files")
 
-    for i in df["RTPA"].unique():
+    for i in df["rtpa_name"].unique():
 
         print(f"creating excel file for: {i}")
 
@@ -317,31 +317,31 @@ def save_rtpa_outputs(
         
         #filter data by single RTPA
         rtpa_data = (
-            df[df["RTPA"] == i].sort_values("ntd_id")
-            .drop(columns=[
-                "_merge", 
-                "xwalk_agency_name",
-                "xwalk_reporter_type",
-                "xwalk_agency_status",
-                "xwalk_city",
-                "xwalk_state",
-            ])
+            df[df["rtpa_name"] == i].sort_values("ntd_id")
+            # .drop(columns=[
+            #     "_merge", 
+            #     "xwalk_agency_name",
+            #     "xwalk_reporter_type",
+            #     "xwalk_agency_status",
+            #     "xwalk_city",
+            #     "xwalk_state",
+            # ])
             # cleaning column names
             .rename(columns=lambda x: x.replace("_", " ").title().strip())
             # rename columns
             #.rename(columns=col_dict)
         )
         # column lists for aggregations
-        agency_cols = ["ntd_id", "agency_name", "RTPA"]
-        mode_cols = ["mode", "RTPA"]
-        tos_cols = ["service", "RTPA"]
-        reporter_type = ["reporter_type", "RTPA"]
+        agency_cols = ["ntd_id", "source_agency", "rtpa_name"]
+        mode_cols = ["mode", "rtpa_name"]
+        tos_cols = ["service", "rtpa_name"]
+        reporter_type = ["reporter_type", "rtpa_name"]
 
         # Creating aggregations
-        by_agency_long = annual_ridership_module.sum_by_group((df[df["RTPA"] == i]), agency_cols)
-        by_mode_long = annual_ridership_module.sum_by_group((df[df["RTPA"] == i]), mode_cols)
-        by_tos_long = annual_ridership_module.sum_by_group((df[df["RTPA"] == i]), tos_cols)
-        by_reporter_type_long = annual_ridership_module.sum_by_group((df[df["RTPA"] == i]), reporter_type)
+        by_agency_long = annual_ridership_module.sum_by_group((df[df["rtpa_name"] == i]), agency_cols)
+        by_mode_long = annual_ridership_module.sum_by_group((df[df["rtpa_name"] == i]), mode_cols)
+        by_tos_long = annual_ridership_module.sum_by_group((df[df["rtpa_name"] == i]), tos_cols)
+        by_reporter_type_long = annual_ridership_module.sum_by_group((df[df["rtpa_name"] == i]), reporter_type)
 
         # writing pages to excel file
         with pd.ExcelWriter(
@@ -392,14 +392,18 @@ def remove_local_outputs(
 
     
 if __name__ == "__main__":
-    min_year="2018"
+    min_year=2018
     
-    df = produce_annual_ntd_ridership_data_by_rtpa(min_year)
+    df = produce_annual_ntd_ridership_data_by_rtpa(min_year=min_year, split_scag=True)
     print("saving parqut to private GCS")
     
     df.to_parquet(f"{GCS_FILE_PATH}annual_ridership_report_data.parquet")
 
     os.makedirs(f"./{YEAR}_{MONTH}/")
-
+    
+    print("saving RTPA outputs")
     save_rtpa_outputs(df, YEAR, MONTH, upload_to_public = True)
+    
+    print("removing local folder")
     remove_local_outputs(YEAR, MONTH)
+    print("complete")
