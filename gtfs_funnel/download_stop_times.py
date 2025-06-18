@@ -14,6 +14,9 @@ from loguru import logger
 from shared_utils import gtfs_utils_v2
 from update_vars import GTFS_DATA_DICT, COMPILED_CACHED_VIEWS
 
+import google.auth
+credentials, _ = google.auth.default()
+
 def download_one_day(analysis_date: str):
     """
     Download single day for stop_times.
@@ -22,7 +25,8 @@ def download_one_day(analysis_date: str):
     start = dt.datetime.now()
     
     full_trips = pd.read_parquet(
-        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet")
+        f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet",
+    )
     
     FEEDS_TO_RUN = full_trips.feed_key.unique().tolist()
 

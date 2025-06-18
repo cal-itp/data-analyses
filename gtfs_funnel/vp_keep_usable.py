@@ -24,6 +24,9 @@ from segment_speed_utils import vp_transform
 from shared_utils import geo_utils, publish_utils, rt_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
+import google.auth
+credentials, _ = google.auth.default()
+
 def find_valid_trips(
     vp: pd.DataFrame,
     timestamp_col: str,
@@ -62,6 +65,7 @@ def pare_down_to_valid_trips(
 
     vp = gpd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
+        storage_options={"token": credentials.token}
     ).to_crs(WGS84)
     
     usable_trips = find_valid_trips(vp, TIMESTAMP_COL, TIME_CUTOFF)
@@ -109,13 +113,15 @@ def merge_in_vp_direction(
     INPUT_FILE = dict_inputs.speeds_tables.usable_vp
     
     vp_direction = pd.read_parquet(
-        f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet"
+        f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet",
+        storage_options={"token": credentials.token}
     )
     
     # By the end of add_vp_direction, we return df, not gdf
     # Let's convert to tabular now, make use of partitioning    
     vp = gpd.read_parquet(
         f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}_stage.parquet",
+        storage_options={"token": credentials.token}
     ).to_crs(WGS84).merge(
         vp_direction,
         on = "vp_idx",
