@@ -16,6 +16,7 @@ from siuba import _, collect, count, filter, show_query
 from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils.project_vars import PUBLIC_GCS
 from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS
+from annual_ridership_report.annual_ridership_module import ntd_id_to_rtpa_crosswalk
 
 fs = gcsfs.GCSFileSystem()
 

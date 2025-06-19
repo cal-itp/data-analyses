@@ -2,7 +2,7 @@
 import os
 import shutil
 import sys
-import annual_ridership_module
+# import annual_ridership_module
 sys.path.append("../")  # up one level
 
 import pandas as pd
@@ -102,6 +102,7 @@ def ntd_id_to_rtpa_crosswalk(split_scag:bool) -> pd.DataFrame:
         "San Bernardino": "San Bernardino County Transportation Authority",
         "Riverside": "Riverside County Transportation Commission",
         "Orange": "Orange County Transportation Authority",
+        "Imperial": "Imperial County Transportation Commission"
     }
     
     # Get agencies and RTPA name
