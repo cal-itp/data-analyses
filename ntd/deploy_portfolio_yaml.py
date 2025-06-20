@@ -13,19 +13,20 @@ from pathlib import Path
 
 from shared_utils import portfolio_utils
 from update_vars import GCS_FILE_PATH
+from _01_ntd_ridership_utils import ntd_id_to_rtpa_crosswalk # getting rtpa_name from dim_organizations now
 
 PORTFOLIO_SITE_YAML = Path("../portfolio/sites/ntd_monthly_ridership.yml")
 
 if __name__ == "__main__":
     
-    df = pd.read_parquet(
-        f"{GCS_FILE_PATH}ntd_id_rtpa_crosswalk.parquet",
-        columns = ["RTPA"]
-    ).drop_duplicates().sort_values("RTPA").reset_index(drop=True)
+    df = ntd_id_to_rtpa_crosswalk(split_scag=True)["rtpa_name"].drop_duplicates().to_frame()
+    # add row for LADPW
+    ladpw= pd.DataFrame({"rtpa_name":["Los Angeles County Department of Public Works"]})
+    df = pd.concat([df, ladpw], ignore_index=True).sort_values(by="rtpa_name")
     
     portfolio_utils.create_portfolio_yaml_chapters_no_sections(
         PORTFOLIO_SITE_YAML, 
         chapter_name = "rtpa",
-        chapter_values =list(df.RTPA)
+        chapter_values =list(df.rtpa_name)
     )
     
