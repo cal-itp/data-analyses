@@ -252,7 +252,7 @@ if __name__ == "__main__":
     # Define variables we'll probably change later
     from update_vars import YEAR, MONTH
     
-    df = produce_ntd_monthly_ridership_by_rtpa(YEAR, MONTH)
+    df = _01_ntd_ridership_utils.produce_ntd_monthly_ridership_by_rtpa(YEAR, MONTH)
     print(df.columns)
     df.to_parquet(f"{GCS_FILE_PATH}ca_monthly_ridership_{YEAR}_{MONTH}.parquet")
     
