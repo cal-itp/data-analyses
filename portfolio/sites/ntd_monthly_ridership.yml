@@ -1,5 +1,5 @@
-directory: ./ntd/
-notebook: ./ntd/monthly_ridership_report.ipynb
+directory: ./ntd/monthly_ridership_report
+notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
 parts:
 - caption: Introduction
 - chapters:
@@ -99,5 +99,5 @@ parts:
       rtpa: Tuolumne County Transportation Council
   - params:
       rtpa: Ventura County Transportation Commission
-readme: ./ntd/README.md
+readme: ./ntd/monthly_ridership_report/README.md
 title: NTD Monthly Ridership by RTPA
