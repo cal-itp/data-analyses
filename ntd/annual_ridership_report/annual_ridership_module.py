@@ -3,7 +3,7 @@ import os
 import shutil
 import sys
 # import annual_ridership_module
-sys.path.append("../")  # up one level
+sys.path.append("../../")  # up one level
 
 import pandas as pd
 from siuba import _, collect, count, filter, select, show_query
