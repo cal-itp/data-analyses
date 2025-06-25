@@ -1,6 +1,5 @@
 from gtfslite import GTFS
 from gtfs_utils import (
-    copy_GTFS,
     time_string_to_time_since_midnight,
     seconds_to_gtfs_format_time,
 )
@@ -8,6 +7,7 @@ import pandas as pd
 import numpy as np
 import typing
 import columns as col
+import copy
 
 ColumnId = typing.Literal[*col.COLUMN_IDS]
 ColumnName = typing.Literal[*col.COLUMN_NAMES]
@@ -389,7 +389,7 @@ def make_retrospective_feed_single_date(
 
     # Output a new synthetic feed!
     # Alter the feed with the new trips and stop times
-    altered_feed = copy_GTFS(filtered_input_feed)
+    altered_feed = copy.deepcopy(filtered_input_feed)
     altered_feed.trips = schedule_trips_in_rt.reset_index()
     altered_feed.stop_times = stop_times_gtfs_format_with_rt_times
 
@@ -405,6 +405,4 @@ def make_retrospective_feed_single_date(
         "feed_version": f"retrospective_{SAMPLE_DATE_STR}" if altered_feed.feed_info is not None else  f"retrospective_{altered_feed.feed_info["feed_version"]}_{SAMPLE_DATE_STR}"
     })
     """
-    # Copy the feed - this is necessary to validate the feed meets the standard since gtfs-lite only validates feeds on creation
-    output_feed = copy_GTFS(altered_feed)
-    return output_feed
+    return altered_feed

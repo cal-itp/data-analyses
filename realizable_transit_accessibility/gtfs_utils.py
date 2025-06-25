@@ -2,28 +2,7 @@ from gtfslite import GTFS
 import pandas as pd
 import datetime as dt
 from constants import ARBITRARY_SERVICE_ID, GTFS_DATE_STRFTIME
-
-def copy_GTFS(feed: GTFS) -> GTFS:
-    """Deep copy a gtfslite GTFS object"""
-    return GTFS(
-        agency=feed.agency,
-        stops=feed.stops,
-        routes=feed.routes,
-        trips=feed.trips,
-        stop_times=feed.stop_times,
-        calendar=feed.calendar,
-        calendar_dates=feed.calendar_dates,
-        fare_attributes=feed.fare_attributes,
-        fare_rules=feed.fare_rules,
-        shapes=feed.shapes,
-        frequencies=feed.frequencies,
-        transfers=feed.transfers,
-        pathways=feed.pathways,
-        levels=feed.levels,
-        translations=feed.translations,
-        feed_info=feed.feed_info,
-        attributions=feed.attributions
-    )
+import copy
 
 def subset_schedule_feed_to_one_date(feed: GTFS, service_date: dt.datetime) -> GTFS:
     """Update a gtfslite feed object to only contain service on a specified service date"""
@@ -48,7 +27,7 @@ def subset_schedule_feed_to_one_date(feed: GTFS, service_date: dt.datetime) -> G
     #TODO: add any additional behavior for feeds with frequencies.txt
     #TODO: update feed_info.txt
     # Copy the feed, and update it to only be valid on the service date
-    schedule_feed_service_date_only = copy_GTFS(feed)
+    schedule_feed_service_date_only = copy.deepcopy(feed)
     schedule_feed_service_date_only.calendar_dates = new_calendar_dates.copy()
     schedule_feed_service_date_only.calendar = None
     schedule_feed_service_date_only.trips = trips_on_service_date
