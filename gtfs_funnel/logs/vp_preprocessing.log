@@ -102,3 +102,6 @@
 2025-05-19 16:27:59.567 | INFO     | __main__:<module>:241 - merge with original and export: 0:02:14.664176
 2025-05-19 16:27:59.572 | INFO     | __main__:<module>:242 - vp with dwell time 2025-05-14: 0:08:28.700960
 2025-05-19 16:41:59.638 | INFO     | __main__:<module>:81 - 2025-05-14: condense vp for trip 0:03:01.743441
+2025-06-24 17:34:19.943 | INFO     | __main__:get_vp_direction_column:127 - export vp direction: 0:00:00
+2025-06-24 17:39:37.264 | INFO     | __main__:merge_in_vp_direction:75 - 2025-06-11: export usable vp with direction: 0:01:45.602199
+2025-06-24 17:39:37.557 | INFO     | __main__:<module>:158 - 2025-06-11: add vp direction execution time: 0:01:45.895240
