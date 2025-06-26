@@ -32,17 +32,17 @@ gtfs_table_readable_columns = {
     "operator_feeds": "Operator Feeds",
 }
 
-def data_wrangling_operator_profile(district:int)->pd.DataFrame:
+def data_wrangling_operator_profile(district:str)->pd.DataFrame:
     """
     Display only values in the column portfolio_organization_names
     that are in the organization grain GTFS Digest. Rename columns.
     """
     OPERATOR_PROFILE_REPORT = GTFS_DATA_DICT.digest_tables.operator_profiles_report
-    OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
+    # OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     
-    portfolio_organization_names_to_keep = (
-    deploy_portfolio_yaml.generate_operator_grain_yaml(OPERATOR_PROFILE)
-    )[["organization_name"]].drop_duplicates()
+    #portfolio_organization_names_to_keep = (
+    #deploy_portfolio_yaml.generate_operator_grain_yaml(OPERATOR_PROFILE)
+    #)[["organization_name"]].drop_duplicates()
     
     #operator_df = pd.read_parquet(
     #f"{RT_SCHED_GCS}{OPERATOR_PROFILE_REPORT}.parquet",
@@ -53,14 +53,14 @@ def data_wrangling_operator_profile(district:int)->pd.DataFrame:
     f"{RT_SCHED_GCS}{OPERATOR_PROFILE_REPORT}.parquet",
     )
     
-    operator_df2 = pd.merge(
-    operator_df,
-    portfolio_organization_names_to_keep,
-    left_on=["portfolio_organization_name"],
-    right_on=["organization_name"],
-    how="inner",)
+    #operator_df2 = pd.merge(
+    #operator_df,
+    #portfolio_organization_names_to_keep,
+    #left_on=["portfolio_organization_name"],
+    #right_on=["organization_name"],
+    #how="inner",)
     
-    operator_df2 = operator_df2.loc[operator_df2.caltrans_district == district]
+    operator_df2 = operator_df.loc[operator_df.caltrans_district == district]
     
     # operator_df2 = operator_df2.rename(columns = operator_profile_report_readable_columns)
     
