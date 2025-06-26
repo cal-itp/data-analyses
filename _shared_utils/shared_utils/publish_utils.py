@@ -12,6 +12,9 @@ import geopandas as gpd
 import pandas as pd
 from shared_utils import catalog_utils
 
+import google.auth
+credentials, _ = google.auth.default()
+
 fs = gcsfs.GCSFileSystem()
 SCHED_GCS = "gs://calitp-analytics-data/data-analyses/gtfs_schedule/"
 PUBLIC_BUCKET = "gs://calitp-publish-data-analysis/"
@@ -90,7 +93,8 @@ def subset_table_from_previous_date(
         )
     else:
         past_df = gpd.read_parquet(
-            f"{gcs_bucket}{filename}_{date}.parquet", filters=[[(crosswalk_col, "in", subset_keys)]]
+            f"{gcs_bucket}{filename}_{date}.parquet", filters=[[(crosswalk_col, "in", subset_keys)]],
+            storage_options={"token": credentials.token}
         )
 
     return past_df
