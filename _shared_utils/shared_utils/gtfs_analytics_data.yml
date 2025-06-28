@@ -31,6 +31,7 @@ speeds_tables:
   raw_vp: vp
   raw_vp2: vp_grouped
   usable_vp: vp_usable # this can be dropped
+  vp_dwell_premerge: vp_dwell_premerge
   vp_dwell: vp_usable_dwell
   vp_condensed_line: condensed/vp_condensed
   timestamp_col: ${speed_vars.timestamp_col}
