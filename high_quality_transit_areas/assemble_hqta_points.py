@@ -23,6 +23,9 @@ from segment_speed_utils import helpers
 from shared_utils import gtfs_utils_v2
 from update_vars import analysis_date, GCS_FILE_PATH, PROJECT_CRS, EXPORT_PATH
 
+import google.auth
+credentials, _ = google.auth.default()
+
 catalog = intake.open_catalog("*.yml")
 
 def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
@@ -31,17 +34,17 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     the maximum arrivals for each stop (keep if it shows up in hqta_points) 
     with left merge.
     """  
-    rail_ferry_brt = catalog.rail_brt_ferry_stops.read().to_crs(
+    rail_ferry_brt = catalog.rail_brt_ferry_stops(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(
         crs)
-    major_stop_bus = catalog.major_stop_bus.read().to_crs(crs)
-    stops_in_corridor = catalog.stops_in_hq_corr.read().to_crs(crs)
+    major_stop_bus = catalog.major_stop_bus(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
+    stops_in_corridor = catalog.stops_in_hq_corr(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
     
     trip_count_cols = ["am_max_trips_hr", "pm_max_trips_hr"]
 
     max_arrivals = pd.read_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet", 
         columns = ["schedule_gtfs_dataset_key", 
-                   "stop_id"] + trip_count_cols
+                   "stop_id"] + trip_count_cols,
     ).pipe(_utils.primary_rename)
     
     # Combine AM max and PM max into 1 column   
@@ -106,7 +109,7 @@ def add_route_agency_info(
     Add agency names by merging it in with our crosswalk
     and populate primary and secondary operator information.
     """
-    stop_with_route_crosswalk = catalog.stops_info_crosswalk.read()
+    stop_with_route_crosswalk = catalog.stops_info_crosswalk(geopandas_kwargs={"storage_options": {"token": credentials}}).read()
     
     agency_info = get_agency_crosswalk(analysis_date)
     
@@ -205,14 +208,14 @@ if __name__=="__main__":
     utils.geoparquet_gcs_export(
         gdf,
         EXPORT_PATH,
-        "ca_hq_transit_stops"
+        "ca_hq_transit_stops",
     )  
        
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(
         gdf, 
         GCS_FILE_PATH,
-        "hqta_points"
+        "hqta_points",
    )
     
     end = datetime.datetime.now()

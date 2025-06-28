@@ -24,6 +24,8 @@ from update_vars import (GCS_FILE_PATH, analysis_date,
                          PROJECT_CRS, SEGMENT_BUFFER_METERS,
                          INTERSECTION_BUFFER_METERS
                         )
+import google.auth
+credentials, _ = google.auth.default()
 
 def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame: 
     """
@@ -31,7 +33,8 @@ def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame:
     that might fall within it.
     """
     gdf = gpd.read_parquet(
-        f"{GCS_FILE_PATH}all_intersections.parquet"
+        f"{GCS_FILE_PATH}all_intersections.parquet",
+        storage_options={"token": credentials.token}
     )
     
     gdf = gdf.assign(
@@ -162,13 +165,13 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(
         major_stop_bus, 
         GCS_FILE_PATH,
-        "major_stop_bus"
+        "major_stop_bus",
     )
     
     utils.geoparquet_gcs_export(
         stops_in_hq_corr,
         GCS_FILE_PATH,
-        "stops_in_hq_corr"
+        "stops_in_hq_corr",
     )
     
     end = datetime.datetime.now()
