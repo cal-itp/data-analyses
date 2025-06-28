@@ -17,6 +17,9 @@ from update_vars import (analysis_date,
                          RT_SCHED_GCS, SCHED_GCS
                         )
 
+import google.auth
+credentials, _ = google.auth.default()
+
 catalog = intake.open_catalog("../_shared_utils/shared_utils/shared_data_catalog.yml")
 
 def create_stops_file_for_export(
@@ -32,7 +35,8 @@ def create_stops_file_for_export(
     STOP_FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_stop_metrics
 
     stops = gpd.read_parquet(
-        f"{RT_SCHED_GCS}{STOP_FILE}_{date}.parquet"
+        f"{RT_SCHED_GCS}{STOP_FILE}_{date}.parquet",
+        storage_options={"token": credentials.token}
     )
     
     stops2 = open_data_utils.standardize_operator_info_for_exports(stops, date)

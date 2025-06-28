@@ -125,7 +125,11 @@ def patch_previous_dates(
             date = one_date, 
             crosswalk_col = "schedule_gtfs_dataset_key",
             data_type = "gdf"
-        ).pipe(open_data_utils.standardize_operator_info_for_exports, one_date)
+        )#.pipe(open_data_utils.standardize_operator_info_for_exports, one_date)
+        print(one_date)
+        df_to_add.to_parquet(f"./subset_tables/original_data_{one_date}.parquet")
+        df_to_add = df_to_add.pipe(open_data_utils.standardize_operator_info_for_exports, one_date)
+        df_to_add.to_parquet(f"./subset_tables/standardized_data_{one_date}.parquet")
         
         partial_dfs.append(df_to_add)
 
