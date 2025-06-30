@@ -431,27 +431,3 @@ if __name__ == "__main__":
     
     print("complete")
     
-# data columns:
-# 'source_agency',
-#  'agency_status',
-#  'ntd_id',
-#  'primary_uza_name',
-#  'reporter_type',
-#  'mode',
-#  'service',
-#  'last_report_year',
-#  'year',
-#  'upt',
-#  'name',
-#  'ntd_id_2022',
-#  'rtpa_name',
-#  'mpo_name',
-#  'key',
-#  'county_geography_name',
-#  'organization_key',
-#  '_merge',
-#  'previous_y_upt',
-#  'change_1yr',
-#  'pct_change_1yr',
-#  'mode_full',
-#  'service_full'
