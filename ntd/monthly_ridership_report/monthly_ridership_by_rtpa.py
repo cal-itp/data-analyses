@@ -18,7 +18,7 @@ from calitp_data_analysis.tables import tbls
 from siuba import _, collect, count, filter, show_query #, distinct
 from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils.project_vars import PUBLIC_GCS
-from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS
+from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS, MONTH, YEAR
 import _01_ntd_ridership_utils #import produce_ntd_monthly_ridership_by_rtpa, save_rtpa_outputs
 
 fs = gcsfs.GCSFileSystem()
@@ -252,8 +252,23 @@ RTPA_URL = ("https://services3.arcgis.com/bWPjFyq029ChCGur/arcgis/rest/services/
     
 if __name__ == "__main__":
     
-    # Define variables we'll probably change later
-    from update_vars import YEAR, MONTH
+    monthly_col_dict ={
+        'Uace Cd': "UACE Code",
+        'Dt': "Date",
+        'Tos': "Type of Service",
+        'Legacy Ntd Id': "Legacy NTD ID",
+        'Vrm': "VRM",
+        'Vrh': "VRH",
+        'Voms': "VOMS",
+        'Rtpa': "RTPA",
+        'Pct Change 1Yr': "Percent Change in 1 Year UPT",
+        'Tos Full': "Type of Service Full Name"
+    }
+
+    monthly_cover_sheet_path = "cover_sheet_template.xlsx"
+    monthly_index_col = "**NTD Monthly Ridership by RTPA**"
+    monthly_data_file_name = f"{YEAR}_{MONTH}_monthly_report_data"
+    
     
     df = _01_ntd_ridership_utils.produce_ntd_monthly_ridership_by_rtpa(YEAR, MONTH)
     print(df.columns)
@@ -266,7 +281,16 @@ if __name__ == "__main__":
         f"{GCS_FILE_PATH}ca_monthly_ridership_{YEAR}_{MONTH}.parquet"
     )
     print("execute save_rtpa_outputs")
-    _01_ntd_ridership_utils.save_rtpa_outputs(df, YEAR, MONTH, upload_to_public = True)
+    _01_ntd_ridership_utils.save_rtpa_outputs(
+        df= df, 
+        year = YEAR, 
+        month = MONTH,
+        #col_dict = monthly_col_dict,
+        cover_sheet_path = monthly_cover_sheet_path,
+        cover_sheet_index_col = monthly_index_col,
+        output_file_name = monthly_data_file_name,
+        report_type = "monthly"
+    )
     
     print("execute remove_local_outputs")
     _01_ntd_ridership_utils.remove_local_outputs(YEAR, MONTH)
