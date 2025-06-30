@@ -197,7 +197,7 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         
         INPUT_FILE = GTFS_DATA_DICT.speeds_tables.usable_vp
-        EXPORT_FILE = GTFS_DATA_DICT.speeds_tables.vp_dwell_premergve
+        EXPORT_FILE = GTFS_DATA_DICT.speeds_tables.vp_dwell_premerge
         
         start = datetime.datetime.now()
         
@@ -213,15 +213,9 @@ if __name__ == "__main__":
 
         time1 = datetime.datetime.now()
         logger.info(f"compute dwell df: {time1 - start}")
-
-        remaining_vp = vp_with_dwell.vp_idx.tolist() # TODO: move to other function
-        
-        publish_utils.if_exists_then_delete(
-            f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}"
-        )
+       
         vp_with_dwell.to_parquet(
-            f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
-            partition_cols = "gtfs_dataset_key",
+            f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet",
         )
 
         end = datetime.datetime.now()

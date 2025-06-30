@@ -32,7 +32,7 @@ def merge_vp_usable_dwell(vp_with_dwell: pd.DataFrame) -> pd.DataFrame:
 if __name__ == "__main__":
     from update_vars import analysis_date_list
 
-    UNMERGED_VP_DWELL = GTFS_DATA_DICT.speeds_table.vp_dwell_premerge
+    UNMERGED_VP_DWELL = GTFS_DATA_DICT.speeds_tables.vp_dwell_premerge
     EXPORT_FILE = GTFS_DATA_DICT.speeds_tables.vp_dwell
     LOG_FILE = "./logs/vp_preprocessing.log"
     logger.add(LOG_FILE, retention="3 months")
@@ -45,8 +45,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
     for analysis_date in analysis_date_list:
         vp_with_dwell = pd.read_parquet(
-            f"{SEGMENT_GCS}{UNMERGED_VP_DWELL}_{analysis_date}",
-            partition_cols="gtfs_dataset_key",
+            f"{SEGMENT_GCS}{UNMERGED_VP_DWELL}_{analysis_date}.parquet",
         )
 
         vp_usable_with_dwell = merge_vp_usable_dwell(vp_with_dwell)
