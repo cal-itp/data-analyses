@@ -22,3 +22,8 @@ SHARED_STOP_THRESHOLD = 8 #  current rec
 #  Yolobus. Separate route_id, but same route in a CW and CCW loop, drop per rule to not compare same rt with itself
 #  can match on partial keys, see create_aggregate_stop_frequencies.py
 ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP = ['__42A_0__42B_0', '__42B_0__42A_0']
+
+BRANCHING_OVERLAY_BUFFER = 20
+AREA_MULTIPLIER = BRANCHING_OVERLAY_BUFFER * 2
+TARGET_METERS_DIFFERENCE = 5000 #  5km per route
+TARGET_AREA_DIFFERENCE = TARGET_METERS_DIFFERENCE * AREA_MULTIPLIER
