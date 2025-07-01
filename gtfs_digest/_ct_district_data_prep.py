@@ -37,10 +37,10 @@ def data_wrangling_operator_profile(district:str)->pd.DataFrame:
     Display only values in the column portfolio_organization_names
     that are in the organization grain GTFS Digest. Rename columns.
     """
-    OPERATOR_PROFILE_REPORT = GTFS_DATA_DICT.digest_tables.operator_profiles_report
+    OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     
     operator_df = pd.read_parquet(
-    f"{RT_SCHED_GCS}{OPERATOR_PROFILE_REPORT}.parquet",
+    f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet",
     )
     
     operator_df2 = operator_df.loc[operator_df.caltrans_district == district]
@@ -177,7 +177,7 @@ def create_gtfs_stats(df:pd.DataFrame)->pd.DataFrame:
     
     gtfs_table_df["Avg Arrivals per Stop"] = gtfs_table_df["# Arrivals"]/gtfs_table_df["# Stops"]
     
-    # string_cols = gtfs_table_df.select_dtypes(include="object").columns.tolist()
+    # gtfs_table_df = gtfs_table_df.drop_duplicates()
     
     return gtfs_table_df
 """
@@ -190,7 +190,7 @@ def load_ct_district(district:int)->gpd.GeoDataFrame:
     caltrans_url = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
     ca_geojson = (gpd.read_file(caltrans_url)
                .to_crs(epsg=3310))
-    district_geojson = ca_geojson.loc[ca_geojson.DISTRICT == district]
+    district_geojson = ca_geojson.loc[ca_geojson.DISTRICT == district][["geometry"]]
     return district_geojson
 
 def load_buffered_shn_map(buffer_amount:int, district:int) -> gpd.GeoDataFrame:

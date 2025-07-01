@@ -48,6 +48,7 @@ duplicated_feed_info = [
     "Tahoe Transportation District GMV Schedule",  # dupe with Tahoe Transportation District Schedule
     "Victor Valley GMV Schedule",  # dupe with Victor Valley Schedule,
     "Desert Roadrunner GMV Schedule", #dupe with Desert Roadrunner Schedule
+    "LAX Flyaway Schedule" # dupe with LAX Flyaway Bus Schedule
 ]
 
 

@@ -574,8 +574,9 @@ def text_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
     chart = text_table(text_table_df)
 
     # Grab cardinal direction value to use for the title
-    direction_str = text_table_df["Direction"].iloc[0]
-
+    # direction_str = text_table_df["Direction"].iloc[0]
+    direction_str = str(direction)
+    
     # Grab most recent date
     date_str = text_table_df["Date"].iloc[0].strftime("%B %Y")
 
@@ -584,7 +585,7 @@ def text_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         chart,
         width=400,
         height=250,
-        title=f"{specific_chart_dict.title}{direction_str} Vehicles",
+        title=f"{specific_chart_dict.title} Vehicles Heading in Direction {direction_str}",
         subtitle=f"{specific_chart_dict.subtitle} {date_str}",
     )
     return chart
@@ -679,15 +680,19 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         ].drop_duplicates()
 
     # Grab cardinal direction value to use for the title
-    direction_str = df["Direction"].iloc[0]
-
+    # direction_str = df["Direction"].iloc[0]
+    direction_str = str(direction)
     specific_chart_dict = readable_dict.frequency_graph
-
+    
+    color_scale = alt.Scale(
+        domain=[0, 15, 30, 45, 60, 120, 180, 240], range=[*specific_chart_dict.colors]
+    )
+    
     chart = bar_chart(
         x_col="Date",
         y_col="Headway (Minutes)",
         color_col="Headway (Minutes):N",
-        color_scheme=[*specific_chart_dict.colors],
+        color_scheme=specific_chart_dict,
         tooltip_cols=[*specific_chart_dict.tooltip],
         date_format="%b %Y",
     )
@@ -704,7 +709,7 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         )
     ).properties(
         title={
-            "text": f"{specific_chart_dict.title} {direction_str} Vehicles",
+            "text": f"{specific_chart_dict.title} Vehicles going Direction {direction_str}",
             "subtitle": specific_chart_dict.subtitle,
         }
     )
@@ -726,86 +731,92 @@ def route_filter(qtr_df: pd.DataFrame, month_df: pd.DataFrame):
 
     
     # Charts
-    spatial_accuracy = (
+    """ spatial_accuracy = (
         spatial_accuracy_chart(qtr_df[qtr_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-
+   """
     avg_scheduled_min = (
        avg_scheduled_min_chart(qtr_df[qtr_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print("done with spatial & avg sched")
+    """
+    # print("done with spatial & avg sched")
     vp_per_minute = (
         vp_per_minute_chart(qtr_df[qtr_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
+    """
     speed = (
         speed_chart(month_df)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print("done with vp and speed")
+    """
+   # print("done with vp and speed")
     sched_vp_per_min = (
         sched_vp_per_min_chart(month_df[month_df.Period == "All Day"])
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print("done with sched vp")
+    """
+    #print("done with sched vp")
     text_dir0 = (
         text_chart(month_df, 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print("done with text")
+    #print("done with text")
     text_dir1 = (
         text_chart(month_df, 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print("done with text2")
+    #print("done with text2")
     timeliness_dir =(
         timeliness_chart(month_df[month_df.Period == "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print('done with timeliness2')
+    #print('done with timeliness2')
     n_scheduled_dir0 = (
         total_scheduled_trips_chart(month_df[month_df.Period == "All Day"], 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print('done with scheduled')
+    #print('done with scheduled')
     n_scheduled_dir1 = (
         total_scheduled_trips_chart(month_df[month_df.Period == "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print('done with scheduled2')
+    #print('done with scheduled2')
     n_freq_dir0 = (
         headway_chart(month_df[month_df.Period != "All Day"], 0)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print('done with freq1')
+    #print('done with freq1')
     n_freq_dir1 = (
          headway_chart(month_df[month_df.Period != "All Day"], 1)
         .add_params(xcol_param)
         .transform_filter(xcol_param)
     )
-    print('done with freq2')
+    #print('done with freq2')
     # Divider Charts
+    """
     data_quality = divider_chart(
         month_df, readable_dict.data_quality_graph.title
     )
+    """
     rider_quality = divider_chart(
         month_df, readable_dict.rider_quality_graph.title
     )
     summary = divider_chart(month_df, readable_dict.summary_graph.title)
-    print('done with divider charts')
+    #print('done with divider charts')
     chart_list = [
         summary,
         text_dir0,
@@ -818,11 +829,11 @@ def route_filter(qtr_df: pd.DataFrame, month_df: pd.DataFrame):
         n_freq_dir1,
         n_scheduled_dir1,
         speed,
-        data_quality,
-        spatial_accuracy,
-        vp_per_minute,
-        sched_vp_per_min,
+        # data_quality,
+        # spatial_accuracy,
+        # vp_per_minute,
+        # sched_vp_per_min,
     ]
     chart = alt.vconcat(*chart_list)
-    print('done with concating')
+    #print('done with concating')
     return chart
