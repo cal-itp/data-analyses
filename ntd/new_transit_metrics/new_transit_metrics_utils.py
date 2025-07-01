@@ -9,7 +9,7 @@ import altair as alt
 from calitp_data_analysis.tables import tbls
 from siuba import _, collect, count, filter, show_query, select
 import sys
-sys.path.append("../")  # up one level
+sys.path.append("../monthly_ridership_report")  # up one level
 from update_vars import NTD_MODES, NTD_TOS
 
 
