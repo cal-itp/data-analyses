@@ -12,7 +12,6 @@ from segment_speed_utils.project_vars import SEGMENT_GCS
 from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT
 
-
 def import_vp(analysis_date: str, **kwargs) -> pd.DataFrame:
     """
     Import vehicle positions for this script, 

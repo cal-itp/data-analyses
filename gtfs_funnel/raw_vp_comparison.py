@@ -7,6 +7,9 @@ from shared_utils import rt_dates
 from segment_speed_utils import segment_calcs
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
+import google.auth
+credentials, _ = google.auth.default()
+
 def merge_raw_and_grouped(
     vp: gpd.GeoDataFrame,
     vp_grouped: gpd.GeoDataFrame,
@@ -77,12 +80,14 @@ if __name__ == "__main__":
     
     vp = delayed(gpd.read_parquet)(
         f"{SEGMENT_GCS}{RAW_VP}_{analysis_date}.parquet",
-        columns = subset_cols
+        columns = subset_cols,
+        storage_options={"token": credentials.token},
     ).dropna(subset="trip_instance_key")
 
     vp_grouped = delayed(gpd.read_parquet)(
         f"{SEGMENT_GCS}{VP_GROUPED}_{analysis_date}.parquet",
-        columns = subset_cols + ["moving_timestamp_local", "n_vp"]
+        columns = subset_cols + ["moving_timestamp_local", "n_vp"],
+        storage_options={"token": credentials.token},
     ).dropna(subset="trip_instance_key")
 
     results = delayed(merge_raw_and_grouped)(vp, vp_grouped)

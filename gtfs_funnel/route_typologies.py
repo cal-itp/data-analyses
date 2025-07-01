@@ -31,6 +31,9 @@ from segment_speed_utils.project_vars import PROJECT_CRS
 from update_vars import SHARED_GCS, SCHED_GCS, COMPILED_CACHED_VIEWS, GTFS_DATA_DICT
 import nacto_utils
 
+import google.auth
+credentials, _ = google.auth.default()
+
 route_cols = ["schedule_gtfs_dataset_key", "route_id"]
 
 typology_cols = ["freq_category", "typology"]
@@ -105,6 +108,7 @@ def prep_roads(year: str, buffer_meters: int, dict_inputs: dict) -> gpd.GeoDataF
     roads = gpd.read_parquet(
         f"{SHARED_GCS}{ROAD_SEGMENTS}.parquet",
         columns = road_segment_cols + ["geometry"],
+        storage_options={"token": credentials.token}
     ).to_crs(PROJECT_CRS)
     
     road_stats = road_stats.assign(
