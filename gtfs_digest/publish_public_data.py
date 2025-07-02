@@ -13,7 +13,10 @@ from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT 
   
 PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
-    
+
+import google.auth
+credentials, project = google.auth.default()
+
 def grab_filepaths(
     table_section: Literal["digest_tables", "schedule_tables"], 
     file_keys: list) -> list:
@@ -47,7 +50,7 @@ def export_parquet_as_csv_or_geojson(
         
         
     elif filetype=="gdf":
-        df = gpd.read_parquet(filename)
+        df = gpd.read_parquet(filename, storage_options={"token": credentials.token},)
         utils.geojson_gcs_export(
             df,
             f"{PUBLIC_GCS}gtfs_digest/",
@@ -64,9 +67,10 @@ if __name__ == "__main__":
     ]
     
     digest_df_keys = [
-        "route_schedule_vp", 
+        "monthly_route_schedule_vp", 
+        "quarterly_route_schedule_vp",
         "operator_profiles",  
-        "operator_sched_rt",
+        # "operator_sched_rt",
         "scheduled_service_hours",
     ]  
     

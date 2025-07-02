@@ -171,6 +171,7 @@ def concatenate_rt_vs_schedule_by_route_direction(
     
     df = df.drop(columns = drop_cols)
     
+    df = df.drop_duplicates()
     return df
 
 
@@ -304,6 +305,7 @@ def set_primary_typology(df: pd.DataFrame) -> pd.DataFrame:
 """
 Merging Functions
 """
+# Can take away df_rt_sched
 def merge_data_sources_by_route_direction(
     df_schedule: pd.DataFrame,
     df_rt_sched: pd.DataFrame,

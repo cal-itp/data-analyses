@@ -144,6 +144,7 @@ if __name__ == "__main__":
     qtr_route_dir_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{ROUTE_DIR_QTR_FILE}.parquet"
     )
+    
     qtr_route_dir_df =  data_wrangling_for_visualizing(qtr_route_dir_df,
                                                          route_direction_cols_for_viz,
                                                          readable_col_names,
@@ -152,5 +153,6 @@ if __name__ == "__main__":
     qtr_route_dir_df.to_parquet(
         f"{RT_SCHED_GCS}{ROUTE_DIR_QTR_EXPORT}.parquet"
     )
+    
     end = datetime.datetime.now()
     logger.info(f"route-direction viz data prep: {end - start}")

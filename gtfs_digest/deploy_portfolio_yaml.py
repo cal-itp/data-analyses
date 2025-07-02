@@ -27,7 +27,7 @@ def generate_operator_grain_yaml(filename: str) -> pd.DataFrame:
 
 if __name__ == "__main__":
     
-    OPERATOR_PROFILE_REPORT = GTFS_DATA_DICT.digest_tables.operator_profiles_report
+    OPERATOR_PROFILE_REPORT = GTFS_DATA_DICT.digest_tables.operator_profiles
 
     final = generate_operator_grain_yaml(OPERATOR_PROFILE_REPORT)
 

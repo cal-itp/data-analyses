@@ -68,7 +68,7 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     """
     # Create quarters
     # Turn date to quarters
-    df = time_helpers.add_quarter(df, 'service_date').drop_duplicates()
+    df = time_helpers.add_quarter(df, 'service_date')
     
     # Remove underscore
     df.year_quarter = df.year_quarter.str.replace("_", " ")
@@ -106,8 +106,9 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
 
     # Create a crosswalk with string descriptives such as
     # organization_name, route_long_name, etc that were excluded from the groupby_cols
+    # crosswalk = df[crosswalk_cols].drop_duplicates()
     crosswalk = df[crosswalk_cols].drop_duplicates()
-
+    
     # Merge all the dataframes
     m1 = (
         pd.merge(rt_metrics, schd_metrics, on=groupby_cols)

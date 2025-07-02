@@ -1,5 +1,5 @@
 assemble_data:
-	make asssemble route_direction_data
+	make assemble_route_direction_data
 	make assemble_operator_data 
 	make portfolio_deploy
     

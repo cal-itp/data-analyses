@@ -229,6 +229,7 @@ def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
     melted_df["Percentage"] = (melted_df.value / melted_df["# Realtime Trips"]) * 100
 
     melted_df = melted_df.drop_duplicates()
+    melted_df = melted_df.rename(columns = {"variable":"Timeliness Category"})
     return melted_df
 """
 Charts
@@ -607,7 +608,7 @@ def timeliness_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
         df=df2,
         x_col="Date",
         y_col="Percentage",
-        color_col="variable",
+        color_col="Timeliness Category",
         color_scheme=[*specific_chart_dict.colors],
         tooltip_cols=[*specific_chart_dict.tooltip],
     ).properties(width=200, height=250)
@@ -683,10 +684,6 @@ def headway_chart(df: pd.DataFrame, direction: int) -> alt.Chart:
     # direction_str = df["Direction"].iloc[0]
     direction_str = str(direction)
     specific_chart_dict = readable_dict.frequency_graph
-    
-    color_scale = alt.Scale(
-        domain=[0, 15, 30, 45, 60, 120, 180, 240], range=[*specific_chart_dict.colors]
-    )
     
     chart = bar_chart(
         x_col="Date",
