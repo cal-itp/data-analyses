@@ -64,7 +64,7 @@ digest_tables:
   monthly_route_schedule_vp: "digest/schedule_vp_metrics"
   monthly_route_schedule_vp_report: ${.monthly_route_schedule_vp}_report
   quarterly_route_schedule_vp: "digest/quarterly_schedule_vp_metrics"
-  quarterly_route_schedule_vp_report: "digest/quarterly_schedule_vp_metrics"
+  quarterly_route_schedule_vp_report:  ${.quarterly_route_schedule_vp}_report
   operator_profiles: "digest/operator_profiles"
   operator_profiles_report: ${.operator_profiles}_report
   operator_routes_map: "digest/operator_routes"
