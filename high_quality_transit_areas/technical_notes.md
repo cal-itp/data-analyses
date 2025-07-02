@@ -60,3 +60,18 @@ Export stop-level frequencies that are a composite of single-route results, and 
 * Formerly, this evaluated segments from all routes against all stops. Since it is a spatial join, this meant that infrequent routes running perpendicular to frequent routes often grabbed the cross street stop from the frequent route, creating an erroneous, isolated frequent segment and often an erroneous major transit stop.
 * Now, we first filter segments to only segments from routes with at least one stop-level frequency meeting the standard. This screens out entirely infrequent routes and vastly reduces the risk of false positives.
 * We have also reduced the segment to stop buffer (`SEGMENT_BUFFER_METERS`) to the extent possible.
+
+## Submitting Planned Major Transit Stops
+
+Metropolitan Planning Organizations are encouraged to submit geospatial data of planned major transit stops for inclusion in our datasets. Per [PRC 21155](https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=21155.&lawCode=PRC), these must be included in the _currently adopted_ regional transportation plan. MPOs should submit updated datasets when the RTP changes. Since the only statutory criteria for including these stops is that they are included in the RTP, Caltrans does not validate or further process them. We will add them to our map as-is.
+
+Please provide point geometries of stop locations, we will buffer them alongside our GTFS-derived current stops. For complex or large stations, MPOs may provide multiple points if appropriate, such as a point for each entrance. We prefer GeoJSON and GeoParquet formats, but we will accept others including file geodatabases and shapefiles. Data must conform to the schema below.
+
+|     Field name                          |     Data type    |     Naming convention for   field values                                                                             |
+|-----------------------------------------|------------------|----------------------------------------------------------------------------------------------------------------------|
+|     mpo                                 |     Text         |     Use your MPO/RTPA acronym,   not full name                                                                       |
+|     plan_name                           |     Text         |     Include plan name and year   e.g. “2025 mtp”                                                                     |
+|     hqta_type                           |     Text         |     Use types from Caltrans   major stop map: major_stop_bus, major_stop_rail, major_stop_ferry,   major_stop_brt    |
+|     stop_id (optional)                  |     Text         |     None                                                                                                             |
+|     avg_trips_per_peak_hr (optional)    |     Float        |     Expected average frequency during the AM and PM peaks                                                            |           
+|     agency_primary (optional)           |     Text       |     Transit agency expected to serve the stop                                                                        |
