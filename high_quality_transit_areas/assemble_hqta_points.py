@@ -1,18 +1,19 @@
 """
 Combine all the points for HQ transit open data portal.
 
-From combine_and_visualize.ipynb
-
 Request: Thank you for this data. It would be useful for us to get the 
 HQTA stops as a point data file, not a polygon. Also, if you could 
 differentiate between train, bus, BRT, and ferry stop that would be 
 immensely helpful. Let me know if it is possible to get the data in this format.
+
+Now included MPO-provided planned major transit stops.
 """
 import datetime
 import geopandas as gpd
 import intake
 import os
 import pandas as pd
+import numpy as np
 import sys
 
 from loguru import logger
@@ -77,10 +78,8 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
         "hqta_type", "avg_trips_per_peak_hr", "hqta_details"
     ]
     
-    with_planned_stops = pd.concat(with_stops, read_standardize_mpo_input())
-    
-    with_planned_stops = with_planned_stops.assign(
-        hqta_details = with_planned_stops.apply(_utils.add_hqta_details, axis=1)
+    with_stops = with_stops.assign(
+        hqta_details = with_stops.apply(_utils.add_hqta_details, axis=1)
     )[keep_stop_cols]
     
     return with_stops
@@ -145,7 +144,7 @@ def add_route_agency_info(
     return gdf3
 
 
-def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def final_processing_gtfs(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Final steps for getting dataset ready for Geoportal.
     Subset to columns, drop duplicates, sort for readability,
@@ -173,10 +172,10 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # include these as stable IDs?
         "base64_url_primary", "base64_url_secondary", 
         "org_id_primary", "org_id_secondary",
-        "avg_trips_per_peak_hr",
+        "avg_trips_per_peak_hr", "mpo",
         "geometry"
     ]
-    
+    public_feed_or_mpo = gdf2.schedule_gtfs_dataset_key_primary.isin(public_feeds)
     gdf3 = (
         gdf2[
             (gdf2.schedule_gtfs_dataset_key_primary.isin(public_feeds)) 
@@ -194,10 +193,10 @@ def read_standardize_mpo_input(mpo_data_path = MPO_DATA_PATH, gcsgp = gcsgp, fs 
     """
     Read in mpo-provided planned major transit stops and enforce schema.
     """
-    mpos = [x.split('/')[-1].split('.')[0] for x in fs.ls(MPO_DATA_PATH) if x.split('/')[-1]]
+    mpo_names = [x.split('/')[-1].split('.')[0] for x in fs.ls(MPO_DATA_PATH) if x.split('/')[-1]]
     
     mpo_gdfs = []
-    for mpo in mpos:
+    for mpo_name in mpo_names:
         mpo_gdf = gcsgp.read_file(f'{MPO_DATA_PATH}{mpo_name}.geojson')
         required_cols = ['mpo', 'hqta_type', 'plan_name']
         optional_cols = ['stop_id', 'avg_trips_per_peak_hr', 'agency_primary']
@@ -226,7 +225,13 @@ if __name__=="__main__":
     hqta_points_with_info = add_route_agency_info(
         hqta_points_combined, analysis_date)
 
-    gdf = final_processing(hqta_points_with_info)
+    gdf = final_processing_gtfs(hqta_points_with_info)
+    planned_stops = read_standardize_mpo_input().to_crs(geography_utils.WGS84)
+    planned_stops = planned_stops.assign(
+        hqta_details = planned_stops.apply(_utils.add_hqta_details, axis=1)
+    )
+    gdf = pd.concat([gdf, planned_stops]).astype({'stop_id': str, 'avg_trips_per_peak_hr': np.float64})
+    print(gdf.head(3))
     
     # Export to GCS
     # Stash this date's into its own folder

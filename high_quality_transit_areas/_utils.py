@@ -14,7 +14,10 @@ def add_hqta_details(row) -> str:
     """
     Add HQTA details of why nulls are present 
     based on feedback from open data users.
-    """   
+    """
+    if 'mpo' in row.index and isinstance(row.mpo, str) and row.mpo:
+        return "mpo_rtp_planned_major_stop"
+    
     if row.hqta_type == "major_stop_bus":
         if row.schedule_gtfs_dataset_key_primary != row.schedule_gtfs_dataset_key_secondary:
             return "intersection_2_bus_routes_different_operators"
@@ -31,8 +34,7 @@ def add_hqta_details(row) -> str:
                            "major_stop_brt", "major_stop_rail"]:
         return row.hqta_type + "_single_operator"
     
-    elif isinstance(row.mpo, str) and row.mpo:
-        return "mpo_rtp_planned_major_stop"
+
 
 def primary_rename(df: pd.DataFrame) -> pd.DataFrame:
     return df.rename(
