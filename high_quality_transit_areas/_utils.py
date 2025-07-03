@@ -4,6 +4,9 @@ Shared utility functions for HQTA
 import geopandas as gpd
 import intake
 import pandas as pd
+import google.auth
+
+credentials, _ = google.auth.default()
 
 catalog = intake.open_catalog("catalog.yml")
 
@@ -36,7 +39,7 @@ def clip_to_ca(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Clip to CA boundaries. 
     """    
-    ca = catalog.ca_boundary.read().to_crs(gdf.crs)
+    ca = catalog.ca_boundary(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(gdf.crs)
 
     gdf2 = gdf.clip(ca, keep_geom_type = False).reset_index(drop=True)
 

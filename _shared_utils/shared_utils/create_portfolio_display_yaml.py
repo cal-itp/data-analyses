@@ -47,7 +47,7 @@ duplicated_feed_info = [
     "South San Francisco Schedule",  # dupe with Bay Area 511 South San Francisco Shuttle
     "Tahoe Transportation District GMV Schedule",  # dupe with Tahoe Transportation District Schedule
     "Victor Valley GMV Schedule",  # dupe with Victor Valley Schedule,
-    "Desert Roadrunner GMV Schedule", #dupe with Desert Roadrunner Schedule
+    "Desert Roadrunner GMV Schedule",  # dupe with Desert Roadrunner Schedule
 ]
 
 

@@ -23,10 +23,12 @@ def standardize_operator_info_for_exports(
     and add in the organization columns we want to 
     publish on.
     """
+    
     CROSSWALK_FILE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
 
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
 
+    # Get the crosswalk file
     crosswalk = pd.read_parquet(
         f"{SCHED_GCS}{CROSSWALK_FILE}_{date}.parquet",
         columns = [
@@ -41,14 +43,17 @@ def standardize_operator_info_for_exports(
     # that may not have caltrans_district
     # and inner merge is fine. All operators are assigned a caltrans_district
     # so Amtrak / FlixBus stops have values populated
-    df2 = pd.merge(
+        
+    # Merge the crosswalk and the input DF
+    crosswalk_input_merged = pd.merge(
         df,
         crosswalk,
-        on = "schedule_gtfs_dataset_key",
+        on = ["schedule_gtfs_dataset_key"],
+        suffixes = ["_original", None], # Keep the source record id from the crosswalk as the "definitive" version
         how = "inner"
     )
     
-    return df2
+    return crosswalk_input_merged
     
     
 def clip_to_usa(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:

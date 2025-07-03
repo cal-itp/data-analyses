@@ -106,17 +106,20 @@ def patch_previous_dates(
     patch in previous dates for the 10 or so operators
     that do not have data for this current date.
     """
+    # Read in the published operators file
     with open(published_operators_yaml) as f:
         published_operators_dict = yaml.safe_load(f)
     
+    # Convert the published operators file into a dict mapping dates to an iterable of operators
     patch_operators_dict = {
         str(date): operator_list for 
         date, operator_list in published_operators_dict.items() 
-        if str(date) != current_date
+        if str(date) != current_date # Exclude the current (analysis) date, since that does not need to be patched
     }
     
     partial_dfs = []
-
+    
+    # For each date and corresponding iterable of operators, get the data from the last time they appeared
     for one_date, operator_list in patch_operators_dict.items():
         df_to_add = publish_utils.subset_table_from_previous_date(
             gcs_bucket = TRAFFIC_OPS_GCS,
@@ -130,7 +133,8 @@ def patch_previous_dates(
         partial_dfs.append(df_to_add)
 
     patch_routes = pd.concat(partial_dfs, axis=0, ignore_index=True)
-
+    
+    # Concat the current data to the "backfill" data
     published_routes = pd.concat(
         [current_routes, patch_routes], 
         axis=0, ignore_index=True

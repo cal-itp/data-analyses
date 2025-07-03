@@ -12,7 +12,6 @@ from segment_speed_utils.project_vars import SEGMENT_GCS
 from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT
 
-
 def import_vp(analysis_date: str, **kwargs) -> pd.DataFrame:
     """
     Import vehicle positions for this script, 
@@ -198,7 +197,7 @@ if __name__ == "__main__":
     for analysis_date in analysis_date_list:
         
         INPUT_FILE = GTFS_DATA_DICT.speeds_tables.usable_vp
-        EXPORT_FILE = GTFS_DATA_DICT.speeds_tables.vp_dwell
+        EXPORT_FILE = GTFS_DATA_DICT.speeds_tables.vp_dwell_premerge
         
         start = datetime.datetime.now()
         
@@ -214,29 +213,10 @@ if __name__ == "__main__":
 
         time1 = datetime.datetime.now()
         logger.info(f"compute dwell df: {time1 - start}")
-
-        remaining_vp = vp_with_dwell.vp_idx.tolist()
-        
-        vp_usable = import_vp(
-            analysis_date,
-            filters = [[("vp_idx", "in", remaining_vp)]]
-        )
-
-        vp_usable_with_dwell = pd.merge(
-            vp_usable,
-            vp_with_dwell,
-            on = "vp_idx",
-            how = "inner"
-        ).sort_values("vp_idx").reset_index(drop=True)
-
-        publish_utils.if_exists_then_delete(
-            f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}")
-
-        vp_usable_with_dwell.to_parquet(
-            f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
-            partition_cols = "gtfs_dataset_key",
+       
+        vp_with_dwell.to_parquet(
+            f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet",
         )
 
         end = datetime.datetime.now()
-        logger.info(f"merge with original and export: {end - time1}")
-        logger.info(f"vp with dwell time {analysis_date}: {end - start}")
+        logger.info(f"unmerged vp with dwell time {analysis_date}: {end - start}")
