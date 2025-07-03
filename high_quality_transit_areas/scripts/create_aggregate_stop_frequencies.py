@@ -315,6 +315,7 @@ if __name__ == "__main__":
     ).pipe(add_route_dir, analysis_date).pipe(prep_stop_times)
     
     max_arrivals_by_stop_single = st_prepped.pipe(stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=True)
+    max_arrivals_by_stop_single.to_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet") #  for branching_derived_intersections.py
     max_arrivals_by_stop_multi = st_prepped.pipe(stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=False)
     
     multi_only_explode = get_explode_multiroute_only(max_arrivals_by_stop_single, max_arrivals_by_stop_multi, (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD))

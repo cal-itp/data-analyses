@@ -106,17 +106,18 @@ if __name__ == '__main__':
           .drop_duplicates(subset = ['schedule_gtfs_dataset_key', 'route_dir', 'length'])
          )
     
-    stop_times = helpers.import_scheduled_stop_times(
-        analysis_date,
-        get_pandas = True,
-    )
+#     stop_times = helpers.import_scheduled_stop_times(
+#         analysis_date,
+#         get_pandas = True,
+#     )
 
-    stop_times = create_aggregate_stop_frequencies.add_route_dir(stop_times, analysis_date)
-    st_prepped = stop_times.pipe(create_aggregate_stop_frequencies.prep_stop_times)
-    max_arrivals_by_stop_single = st_prepped.pipe(
-        create_aggregate_stop_frequencies.stop_times_aggregation_max_by_stop,
-        analysis_date,
-        single_route_dir=True)
+#     stop_times = create_aggregate_stop_frequencies.add_route_dir(stop_times, analysis_date)
+#     st_prepped = stop_times.pipe(create_aggregate_stop_frequencies.prep_stop_times)
+#     max_arrivals_by_stop_single = st_prepped.pipe(
+#         create_aggregate_stop_frequencies.stop_times_aggregation_max_by_stop,
+#         analysis_date,
+#         single_route_dir=True)
+    max_arrivals_by_stop_single = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet")
     singles_explode = get_explode_singles(max_arrivals_by_stop_single, MS_TRANSIT_THRESHOLD).explode('route_dir')
     
     share_counts = {}
@@ -133,5 +134,6 @@ if __name__ == '__main__':
         this_feed_stops = find_stops_this_feed(gtfs_dataset_key, max_arrivals_by_stop_single, unique_qualify_pairs)
         hcd_branching_stops += [this_feed_stops]
     hcd_branching_stops = pd.concat(hcd_branching_stops)
+    hcd_branching_stops.to_parquet(f"{GCS_FILE_PATH}branching_major_stops.parquet")
     
     

@@ -112,7 +112,10 @@ If not, within the `gtfs_funnel` directory, run `make download_gtfs_data` in the
 
 In terminal: `make hqta_data` to run through entire workflow.
 
+#### Standard Spatial Methodology (current service, via GTFS)
+
 1. [Compile rail, ferry, brt data](./rail_ferry_brt_stops.py)
+1. [Calculate stop-level frequencies for single routes and multiple routes](./create_aggregate_stop_frequencies.py)
 1. [Draw bus corridors, from routes to HQTA segments](./create_hqta_segments.py)
     * Across all operators, find the longest shapes in each direction. Use a symmetric difference to grab the components that make up the route network.
     * Cut route into HQTA segments. Every segment is 1,250 m. 
@@ -126,6 +129,12 @@ In terminal: `make hqta_data` to run through entire workflow.
 1. [Create datasets for each of the hqta types](./create_bus_hqta_types.py)
     * `major_stop_bus`: the bus stop within the above intersection does not necessarily have the highest trip count
     * `hq_corridor_bus`: stops along the HQ transit corr (may not be highest trip count)
+
+#### Branching-derived Intersections (current service, via GTFS)
+
+#### Planned Major Stops (future service, provided by MPOs)
+
+#### Combine and Export
 1. [Compile and export HQTA areas as points](./assemble_hqta_points.py)
     * Sanity check: [check 3: hqta points](./check_hqta_points.ipynb)
 1. [Compile and export HQTA areas as polygons](./assemble_hqta_polygons.py)
