@@ -305,7 +305,7 @@ if __name__ == "__main__":
     # this takes < 2 min
     hqta_segments = gpd.read_parquet(
         f"{GCS_FILE_PATH}hqta_segments.parquet",
-        filesystem=fs
+        storage_options={"token": credentials}
     )
     stops = helpers.import_scheduled_stops(
         analysis_date,
@@ -324,7 +324,6 @@ if __name__ == "__main__":
         hq_transit_threshold = HQ_TRANSIT_THRESHOLD,
         ms_transit_threshold = MS_TRANSIT_THRESHOLD
     )
-    hqta_corr.to_parquet("test.parquet")
     utils.geoparquet_gcs_export(
         hqta_corr,
         GCS_FILE_PATH,
