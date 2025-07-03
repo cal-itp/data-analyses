@@ -400,6 +400,7 @@ if __name__ == "__main__":
     df.to_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet"
     )
+
     
     end = datetime.datetime.now()
     logger.info(f"concatenate route-direction: {end - start}")

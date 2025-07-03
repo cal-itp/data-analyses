@@ -64,11 +64,11 @@ def district_stats(
     df2 = (df.groupby(group_cols, 
                       observed=True, group_keys=False)
            .agg({
-               "name": "nunique",
+               "portfolio_organization_name": "nunique",
                **{c:"sum" for c in sum_me},
            })
            .reset_index()
-           .rename(columns = {"name": "n_operators"})
+           .rename(columns = {"portfolio_organization_name": "n_operators"})
           )
     
     # These need to be calculated again separately
@@ -100,10 +100,10 @@ def transpose_summary_stats(
     subset_df2 = subset_df.rename(
         columns = {
             **{c: f"{c.replace('operator_n_', '# ')}" for c in subset_df.columns},
-            "n_operators": "# operators",
-            "arrivals_per_stop": "arrivals per stop",
-            "trips_per_operator": "trips per operator"
-        }).T.reset_index().rename(columns = {0: "value"})
+            "n_operators": "# Operators",
+            "arrivals_per_stop": "Arrivals per Stop",
+            "trips_per_operator": "Trips per Operator"
+        }).T.reset_index().rename(columns = {0: "Value"})
     
     return subset_df2
 

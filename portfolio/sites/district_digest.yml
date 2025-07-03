@@ -8,24 +8,22 @@ parts:
   - params:
       district: 02 - Redding
   - params:
-      district: 03 - Marysville
+      district: 03 - Marysville / Sacramento
   - params:
-      district: 04 - Oakland
+      district: 04 - Bay Area / Oakland
   - params:
-      district: 05 - San Luis Obispo
+      district: 05 - San Luis Obispo / Santa Barbara
   - params:
-      district: 06 - Fresno
+      district: 06 - Fresno / Bakersfield
   - params:
-      district: 07 - Los Angeles
+      district: 07 - Los Angeles / Ventura
   - params:
-      district: 08 - San Bernardino
-  - params:
-      district: 09 - Bishop
+      district: 08 - San Bernardino / Riverside
   - params:
       district: 10 - Stockton
   - params:
       district: 11 - San Diego
   - params:
-      district: 12 - Irvine
+      district: 12 - Santa Ana
 readme: ./gtfs_digest/README.md
 title: District GTFS Digest
