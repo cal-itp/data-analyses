@@ -21,7 +21,11 @@ import _utils
 from calitp_data_analysis import geography_utils, utils
 from segment_speed_utils import helpers
 from shared_utils import gtfs_utils_v2
-from update_vars import analysis_date, GCS_FILE_PATH, PROJECT_CRS, EXPORT_PATH
+from update_vars import analysis_date, GCS_FILE_PATH, PROJECT_CRS, EXPORT_PATH, MPO_DATA_PATH
+from calitp_data_analysis import get_fs
+fs = get_fs()
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 
 import google.auth
 credentials, _ = google.auth.default()
@@ -73,8 +77,10 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
         "hqta_type", "avg_trips_per_peak_hr", "hqta_details"
     ]
     
-    with_stops = with_stops.assign(
-        hqta_details = with_stops.apply(_utils.add_hqta_details, axis=1)
+    with_planned_stops = pd.concat(with_stops, read_standardize_mpo_input())
+    
+    with_planned_stops = with_planned_stops.assign(
+        hqta_details = with_planned_stops.apply(_utils.add_hqta_details, axis=1)
     )[keep_stop_cols]
     
     return with_stops
@@ -183,6 +189,24 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     )
     
     return gdf3
+
+def read_standardize_mpo_input(mpo_data_path = MPO_DATA_PATH, gcsgp = gcsgp, fs = fs) -> gpd.GeoDataFrame:
+    """
+    Read in mpo-provided planned major transit stops and enforce schema.
+    """
+    mpos = [x.split('/')[-1].split('.')[0] for x in fs.ls(MPO_DATA_PATH) if x.split('/')[-1]]
+    
+    mpo_gdfs = []
+    for mpo in mpos:
+        mpo_gdf = gcsgp.read_file(f'{MPO_DATA_PATH}{mpo_name}.geojson')
+        required_cols = ['mpo', 'hqta_type', 'plan_name']
+        optional_cols = ['stop_id', 'avg_trips_per_peak_hr', 'agency_primary']
+        all_cols = required_cols + optional_cols + ['geometry']
+        assert set(required_cols).issubset(mpo_gdf.columns)
+        filter_cols = [col for col in all_cols if col in mpo_gdf.columns]
+        mpo_gdf = mpo_gdf[filter_cols]
+        mpo_gdfs += [mpo_gdf]
+    return pd.concat(mpo_gdfs)
    
     
 if __name__=="__main__":
@@ -193,6 +217,7 @@ if __name__=="__main__":
                level="INFO")
     
     start = datetime.datetime.now()
+    mpos = [x.split('/')[-1].split('.')[0] for x in fs.ls(MPO_DATA_PATH) if x.split('/')[-1]]
 
     # Combine all the points data and merge in max_arrivals 
     hqta_points_combined = combine_stops_by_hq_types(crs=PROJECT_CRS)    
