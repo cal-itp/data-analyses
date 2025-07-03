@@ -9,18 +9,24 @@ import create_aggregate_stop_frequencies
 
 from tqdm import tqdm
 tqdm.pandas()
+# !pip install calitp-data-analysis==2025.6.24
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 
 def get_explode_singles(
     single_route_aggregation: pd.DataFrame,
     ms_precursor_threshold: int | float
 ) -> pd.DataFrame:
+    """
+    Find all stops with single-route frequencies above the major stop precursor threshold.
+    """
     single_qual = (single_route_aggregation.query('am_max_trips_hr >= @ms_precursor_threshold & pm_max_trips_hr >= @ms_precursor_threshold')
                    .explode('route_dir')
                    .sort_values(['schedule_gtfs_dataset_key','stop_id', 'route_dir'])[['schedule_gtfs_dataset_key','stop_id', 'route_dir']]
                   )
     return single_qual
 
-def get_trips_with_route_dir(analysis_date):
+def get_trips_with_route_dir(analysis_date: str) -> pd.DataFrame:
     trips = helpers.import_scheduled_trips(
     analysis_date,
     columns = ["feed_key", "gtfs_dataset_key", "trip_id",
@@ -29,14 +35,18 @@ def get_trips_with_route_dir(analysis_date):
     get_pandas = True
     )
     trips = trips[trips['route_type'].isin(['3', '11'])] #  bus only
-
     trips.direction_id = trips.direction_id.fillna(0).astype(int).astype(str)
     trips['route_dir'] = trips[['route_id', 'direction_id']].agg('_'.join, axis=1)
     
     return trips
 
 def evaluate_overlaps(gtfs_dataset_key: str, show_map: bool = False) -> list:
-
+    """
+    For each route_dir determined to be partially collinear with another, check symmetric difference
+    to evaluate if each route can take riders from the shared trunk to unique destinations not served
+    by the other route ("X" or "Y" branching). Symmetric distance spatial threshold is derived from
+    update_vars.TARGET_METERS_DIFFERENCE, 5km as of July 2025.
+    """
     this_feed_qual = {key.split(gtfs_dataset_key)[1][2:]:qualify_dict[key] for key in qualify_dict.keys() if key.split('__')[0] == gtfs_dataset_key}
     qualify_pairs = [tuple(key.split('__')) for key in this_feed_qual.keys()]
 
@@ -73,12 +83,14 @@ def find_stops_this_pair(feed_stops: pd.DataFrame, one_feed_pair: list) -> pd.Da
                   .count()
                   .reset_index()
                  )
-    return feed_stops.query('route_dir > 1')
+    return feed_stops.query('route_dir > 1').drop(columns=['route_dir'])
 
 def find_stops_this_feed(gtfs_dataset_key: str,
                          max_arrivals_by_stop_single: pd.DataFrame,
                          unique_qualify_pairs: list) -> pd.DataFrame:
-    
+    """
+    Get all stops in shared trunk section for a route_dir pair. These are major transit stops.
+    """
     feed_stops = max_arrivals_by_stop_single.query('schedule_gtfs_dataset_key == @gtfs_dataset_key')
     stop_dfs = []
     for pair in unique_qualify_pairs:
@@ -106,17 +118,6 @@ if __name__ == '__main__':
           .drop_duplicates(subset = ['schedule_gtfs_dataset_key', 'route_dir', 'length'])
          )
     
-#     stop_times = helpers.import_scheduled_stop_times(
-#         analysis_date,
-#         get_pandas = True,
-#     )
-
-#     stop_times = create_aggregate_stop_frequencies.add_route_dir(stop_times, analysis_date)
-#     st_prepped = stop_times.pipe(create_aggregate_stop_frequencies.prep_stop_times)
-#     max_arrivals_by_stop_single = st_prepped.pipe(
-#         create_aggregate_stop_frequencies.stop_times_aggregation_max_by_stop,
-#         analysis_date,
-#         single_route_dir=True)
     max_arrivals_by_stop_single = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet")
     singles_explode = get_explode_singles(max_arrivals_by_stop_single, MS_TRANSIT_THRESHOLD).explode('route_dir')
     
@@ -134,6 +135,6 @@ if __name__ == '__main__':
         this_feed_stops = find_stops_this_feed(gtfs_dataset_key, max_arrivals_by_stop_single, unique_qualify_pairs)
         hcd_branching_stops += [this_feed_stops]
     hcd_branching_stops = pd.concat(hcd_branching_stops)
-    hcd_branching_stops.to_parquet(f"{GCS_FILE_PATH}branching_major_stops.parquet")
+    gcsgp.geo_data_frame_to_parquet(hcd_branching_stops, f"{GCS_FILE_PATH}branching_major_stops.parquet")
     
     
