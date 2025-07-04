@@ -67,6 +67,9 @@ Metropolitan Planning Organizations are encouraged to submit geospatial data of 
 
 Please provide point geometries of stop locations, we will buffer them alongside our GTFS-derived current stops. For complex or large stations, MPOs may provide multiple points if appropriate, such as a point for each entrance. We prefer GeoJSON and GeoParquet formats, but we will accept others including file geodatabases and shapefiles. Data must conform to the schema below.
 
+Submit via email to Data-Digital.Services.Request@dot.ca.gov or hello@calitp.org.
+
+
 |     Field name                          |     Data type    |     Naming convention for   field values                                                                             |
 |-----------------------------------------|------------------|----------------------------------------------------------------------------------------------------------------------|
 |     mpo                                 |     Text         |     Use your MPO/RTPA acronym,   not full name                                                                       |

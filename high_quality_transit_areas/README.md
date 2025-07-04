@@ -11,6 +11,10 @@ These datasets are updated **monthly**. We usually use a Wednesday in the middle
 1. [CA Transit Routes](https://gis.data.ca.gov/datasets/dd7cb74665a14859a59b8c31d3bc5a3e_0)
 1. [CA Transit Stops](https://gis.data.ca.gov/datasets/900992cc94ab49dbbb906d8f147c2a72_0)
 
+## Are you an MPO with planned Major Transit Stops in your RTP?
+
+Please see [technical_notes.md](technical_notes.md) for information and our data schema. If you provide your planned major transit stops, Caltrans will include them in our map.
+
 ## Understanding the Open Data
 
 ### Frequency Standards have Diverged
@@ -116,6 +120,8 @@ In terminal: `make hqta_data` to run through entire workflow.
 
 1. [Compile rail, ferry, brt data](./rail_ferry_brt_stops.py)
 1. [Calculate stop-level frequencies for single routes and multiple routes](./create_aggregate_stop_frequencies.py)
+    * We consider multiple routes where those routes are substantially collinear
+    * See [technical_notes.md](technical_notes.md) for additional details.
 1. [Draw bus corridors, from routes to HQTA segments](./create_hqta_segments.py)
     * Across all operators, find the longest shapes in each direction. Use a symmetric difference to grab the components that make up the route network.
     * Cut route into HQTA segments. Every segment is 1,250 m. 
@@ -132,7 +138,11 @@ In terminal: `make hqta_data` to run through entire workflow.
 
 #### Branching-derived Intersections (current service, via GTFS)
 
+1. [Find where two individually frequent routes share a substantially collinear trunk but each provide distinct service elsewhere](./branching_derived_intersections.py)
+
 #### Planned Major Stops (future service, provided by MPOs)
+
+1. [Included in compilation step](./assemble_hqta_points.py)
 
 #### Combine and Export
 1. [Compile and export HQTA areas as points](./assemble_hqta_points.py)
