@@ -242,3 +242,4 @@
 2025-07-02 18:29:51.676 | INFO     | __main__:<module>:334 - B3_sjoin_stops_to_segments 2025-06-11 execution time: 0:00:15.295917
 2025-07-03 16:04:56.827 | INFO     | __main__:<module>:246 - D1_assemble_hqta_points 2025-06-11 execution time: 0:00:19.713975
 2025-07-03 16:32:48.855 | INFO     | __main__:<module>:252 - D1_assemble_hqta_points 2025-06-11 execution time: 0:00:14.911832
+2025-07-03 19:28:54.503 | INFO     | __main__:<module>:255 - D1_assemble_hqta_points 2025-06-11 execution time: 0:00:18.135700

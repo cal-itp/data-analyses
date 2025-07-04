@@ -42,6 +42,7 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     rail_ferry_brt = catalog.rail_brt_ferry_stops(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(
         crs)
     major_stop_bus = catalog.major_stop_bus(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
+    major_stop_bus_branching = catalog.major_stop_bus_branching(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
     stops_in_corridor = catalog.stops_in_hq_corr(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
     
     trip_count_cols = ["am_max_trips_hr", "pm_max_trips_hr"]
@@ -60,6 +61,7 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     
     hqta_points_combined = pd.concat([
         major_stop_bus,
+        major_stop_bus_branching,
         stops_in_corridor,
         rail_ferry_brt,
     ], axis=0)
@@ -226,12 +228,13 @@ if __name__=="__main__":
         hqta_points_combined, analysis_date)
 
     gdf = final_processing_gtfs(hqta_points_with_info)
+    
+    # Add MPO-provided planned major transit stops
     planned_stops = read_standardize_mpo_input().to_crs(geography_utils.WGS84)
     planned_stops = planned_stops.assign(
         hqta_details = planned_stops.apply(_utils.add_hqta_details, axis=1)
     )
     gdf = pd.concat([gdf, planned_stops]).astype({'stop_id': str, 'avg_trips_per_peak_hr': np.float64})
-    print(gdf.head(3))
     
     # Export to GCS
     # Stash this date's into its own folder
