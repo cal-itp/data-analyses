@@ -40,7 +40,7 @@ def get_trips_with_route_dir(analysis_date: str) -> pd.DataFrame:
     
     return trips
 
-def evaluate_overlaps(gtfs_dataset_key: str, show_map: bool = False) -> list:
+def evaluate_overlaps(gtfs_dataset_key: str, qualify_dict: dict, shapes: gpd.GeoDataFrame, show_map: bool = False) -> list:
     """
     For each route_dir determined to be partially collinear with another, check symmetric difference
     to evaluate if each route can take riders from the shared trunk to unique destinations not served
@@ -101,6 +101,15 @@ def find_stops_this_feed(gtfs_dataset_key: str,
         feed_add = stops.merge(feed_add, on = ['feed_key', 'stop_id'])
         return feed_add
 
+def match_spatial_format(branching_stops_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Conform to existing pipeline format.
+    """
+    gdf = branching_stops_gdf.rename(columns={'schedule_gtfs_dataset_key': 'schedule_gtfs_dataset_key_primary'})
+    gdf = gdf.assign(schedule_gtfs_dataset_key_secondary = gdf.schedule_gtfs_dataset_key_primary,
+                    hqta_type = 'major_stop_bus')
+    return gdf
+
 if __name__ == '__main__':
     
     shapes = helpers.import_scheduled_shapes(analysis_date, columns=['shape_array_key', 'geometry'])
@@ -131,10 +140,10 @@ if __name__ == '__main__':
     
     hcd_branching_stops = []
     for gtfs_dataset_key in feeds_to_filter:
-        unique_qualify_pairs = evaluate_overlaps(gtfs_dataset_key, show_map=False)
+        unique_qualify_pairs = evaluate_overlaps(gtfs_dataset_key, show_map=False, shapes=shapes, qualify_dict=qualify_dict)
         this_feed_stops = find_stops_this_feed(gtfs_dataset_key, max_arrivals_by_stop_single, unique_qualify_pairs)
         hcd_branching_stops += [this_feed_stops]
-    hcd_branching_stops = pd.concat(hcd_branching_stops)
+    hcd_branching_stops = pd.concat(hcd_branching_stops).pipe(match_spatial_format)
     gcsgp.geo_data_frame_to_parquet(hcd_branching_stops, f"{GCS_FILE_PATH}branching_major_stops.parquet")
     
     
