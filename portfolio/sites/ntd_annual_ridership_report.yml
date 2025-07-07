@@ -26,6 +26,8 @@ parts:
   - params:
       rtpa: Humboldt County Association of Governments
   - params:
+      rtpa: Imperial County Transportation Commission
+  - params:
       rtpa: Inyo County Local Transportation Commission
   - params:
       rtpa: Kern Council of Governments
@@ -81,8 +83,6 @@ parts:
       rtpa: Sierra County Transportation Commission
   - params:
       rtpa: Siskiyou County Local Transportation Commission
-  - params:
-      rtpa: Southern California Association of Governments
   - params:
       rtpa: Stanislaus Council of Governments
   - params:
