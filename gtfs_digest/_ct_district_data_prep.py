@@ -45,6 +45,7 @@ def data_wrangling_operator_profile(district:str)->pd.DataFrame:
     
     operator_df2 = operator_df.loc[operator_df.caltrans_district == district]
     
+    operator_df2 = operator_df2.drop_duplicates(subset = ["portfolio_organization_name"])
     return operator_df2
         
 def data_wrangling_operator_map(portfolio_organization_names:list)->gpd.GeoDataFrame:
