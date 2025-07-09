@@ -17,6 +17,11 @@ from loguru import logger
 from calitp_data_analysis import utils
 from update_vars import GCS_FILE_PATH, analysis_date
 
+import gcsfs
+import google.auth
+credentials, _ = google.auth.default()
+fs = gcsfs.GCSFileSystem(token=credentials)
+
 def prep_bus_corridors(is_ms_precursor: bool = False, is_hq_corr: bool = False) -> gpd.GeoDataFrame:
     """
     Import all hqta segments with ms_precursor or is_hq_corr tagged.
@@ -27,13 +32,15 @@ def prep_bus_corridors(is_ms_precursor: bool = False, is_hq_corr: bool = False) 
     if is_ms_precursor:
         hqtc_or_ms_pre = gpd.read_parquet(
             f"{GCS_FILE_PATH}all_bus.parquet",
-            filters = [[("ms_precursor", "==", is_ms_precursor)]]
+            filters = [[("ms_precursor", "==", is_ms_precursor)]],
+            storage_options={"token": credentials.token}
         ).reset_index(drop=True)
     elif is_hq_corr:
         hqtc_or_ms_pre = gpd.read_parquet(
-        f"{GCS_FILE_PATH}all_bus.parquet",
-        filters = [[("hq_transit_corr", "==", is_hq_corr)]]
-    ).reset_index(drop=True)
+            f"{GCS_FILE_PATH}all_bus.parquet",
+            filters = [[("hq_transit_corr", "==", is_hq_corr)]],
+            storage_options={"token": credentials.token}
+        ).reset_index(drop=True)
         
     hqtc_or_ms_pre = hqtc_or_ms_pre.assign(
         route_type = "3"
@@ -121,12 +128,14 @@ def pairwise_intersections(
     )
     
     pairs.to_parquet(
-        f"{GCS_FILE_PATH}pairwise.parquet")
+        f"{GCS_FILE_PATH}pairwise.parquet",
+        filesystem=fs
+    )
     
     utils.geoparquet_gcs_export(
         corridors2,
         GCS_FILE_PATH,
-        "subset_corridors"
+        "subset_corridors",
     )
     
     return

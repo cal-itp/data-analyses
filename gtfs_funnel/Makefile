@@ -13,8 +13,10 @@ preprocess_schedule_vp_dependency:
     
 preprocess_vp:
 	python vp_keep_usable.py
+	python merge_in_vp_direction.py
 	python cleanup.py
-	python vp_dwell_time.py    
+	python vp_dwell_time.py
+	python merge_vp_dwell_usable.py
 	python vp_condenser.py
 
 preprocess_schedule_only:

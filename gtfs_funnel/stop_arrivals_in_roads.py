@@ -17,6 +17,9 @@ from update_vars import SHARED_GCS, SCHED_GCS
 road_cols = ["linearid", "mtfcc", "fullname"]
 road_segment_cols = road_cols + ["segment_sequence"]
 
+import google.auth
+credentials, _ = google.auth.default()
+
 def buffer_roads(road_file: str, buffer_meters: int) -> gpd.GeoDataFrame:
     """
     Buffer 2 mile road segments
@@ -25,6 +28,7 @@ def buffer_roads(road_file: str, buffer_meters: int) -> gpd.GeoDataFrame:
         f"{SHARED_GCS}"
         f"{road_file}.parquet",
         columns = road_segment_cols + ["geometry"],
+        storage_options={"token": credentials.token}
     ).to_crs(PROJECT_CRS)
     
     df = df.assign(

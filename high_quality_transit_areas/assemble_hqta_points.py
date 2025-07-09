@@ -1,18 +1,19 @@
 """
 Combine all the points for HQ transit open data portal.
 
-From combine_and_visualize.ipynb
-
 Request: Thank you for this data. It would be useful for us to get the 
 HQTA stops as a point data file, not a polygon. Also, if you could 
 differentiate between train, bus, BRT, and ferry stop that would be 
 immensely helpful. Let me know if it is possible to get the data in this format.
+
+Now included MPO-provided planned major transit stops.
 """
 import datetime
 import geopandas as gpd
 import intake
 import os
 import pandas as pd
+import numpy as np
 import sys
 
 from loguru import logger
@@ -21,7 +22,14 @@ import _utils
 from calitp_data_analysis import geography_utils, utils
 from segment_speed_utils import helpers
 from shared_utils import gtfs_utils_v2
-from update_vars import analysis_date, GCS_FILE_PATH, PROJECT_CRS, EXPORT_PATH
+from update_vars import analysis_date, GCS_FILE_PATH, PROJECT_CRS, EXPORT_PATH, MPO_DATA_PATH
+from calitp_data_analysis import get_fs
+fs = get_fs()
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
+
+import google.auth
+credentials, _ = google.auth.default()
 
 catalog = intake.open_catalog("*.yml")
 
@@ -31,17 +39,18 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     the maximum arrivals for each stop (keep if it shows up in hqta_points) 
     with left merge.
     """  
-    rail_ferry_brt = catalog.rail_brt_ferry_stops.read().to_crs(
+    rail_ferry_brt = catalog.rail_brt_ferry_stops(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(
         crs)
-    major_stop_bus = catalog.major_stop_bus.read().to_crs(crs)
-    stops_in_corridor = catalog.stops_in_hq_corr.read().to_crs(crs)
+    major_stop_bus = catalog.major_stop_bus(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
+    major_stop_bus_branching = catalog.major_stop_bus_branching(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
+    stops_in_corridor = catalog.stops_in_hq_corr(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
     
     trip_count_cols = ["am_max_trips_hr", "pm_max_trips_hr"]
 
     max_arrivals = pd.read_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet", 
         columns = ["schedule_gtfs_dataset_key", 
-                   "stop_id"] + trip_count_cols
+                   "stop_id"] + trip_count_cols,
     ).pipe(_utils.primary_rename)
     
     # Combine AM max and PM max into 1 column   
@@ -52,6 +61,7 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     
     hqta_points_combined = pd.concat([
         major_stop_bus,
+        major_stop_bus_branching,
         stops_in_corridor,
         rail_ferry_brt,
     ], axis=0)
@@ -106,7 +116,7 @@ def add_route_agency_info(
     Add agency names by merging it in with our crosswalk
     and populate primary and secondary operator information.
     """
-    stop_with_route_crosswalk = catalog.stops_info_crosswalk.read()
+    stop_with_route_crosswalk = catalog.stops_info_crosswalk(geopandas_kwargs={"storage_options": {"token": credentials}}).read()
     
     agency_info = get_agency_crosswalk(analysis_date)
     
@@ -136,7 +146,7 @@ def add_route_agency_info(
     return gdf3
 
 
-def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def final_processing_gtfs(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Final steps for getting dataset ready for Geoportal.
     Subset to columns, drop duplicates, sort for readability,
@@ -164,10 +174,10 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         # include these as stable IDs?
         "base64_url_primary", "base64_url_secondary", 
         "org_id_primary", "org_id_secondary",
-        "avg_trips_per_peak_hr",
+        "avg_trips_per_peak_hr", "mpo",
         "geometry"
     ]
-    
+    public_feed_or_mpo = gdf2.schedule_gtfs_dataset_key_primary.isin(public_feeds)
     gdf3 = (
         gdf2[
             (gdf2.schedule_gtfs_dataset_key_primary.isin(public_feeds)) 
@@ -180,6 +190,24 @@ def final_processing(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     )
     
     return gdf3
+
+def read_standardize_mpo_input(mpo_data_path = MPO_DATA_PATH, gcsgp = gcsgp, fs = fs) -> gpd.GeoDataFrame:
+    """
+    Read in mpo-provided planned major transit stops and enforce schema.
+    """
+    mpo_names = [x.split('/')[-1].split('.')[0] for x in fs.ls(MPO_DATA_PATH) if x.split('/')[-1]]
+    
+    mpo_gdfs = []
+    for mpo_name in mpo_names:
+        mpo_gdf = gcsgp.read_file(f'{MPO_DATA_PATH}{mpo_name}.geojson')
+        required_cols = ['mpo', 'hqta_type', 'plan_name']
+        optional_cols = ['stop_id', 'avg_trips_per_peak_hr', 'agency_primary']
+        all_cols = required_cols + optional_cols + ['geometry']
+        assert set(required_cols).issubset(mpo_gdf.columns)
+        filter_cols = [col for col in all_cols if col in mpo_gdf.columns]
+        mpo_gdf = mpo_gdf[filter_cols]
+        mpo_gdfs += [mpo_gdf]
+    return pd.concat(mpo_gdfs)
    
     
 if __name__=="__main__":
@@ -190,6 +218,7 @@ if __name__=="__main__":
                level="INFO")
     
     start = datetime.datetime.now()
+    mpos = [x.split('/')[-1].split('.')[0] for x in fs.ls(MPO_DATA_PATH) if x.split('/')[-1]]
 
     # Combine all the points data and merge in max_arrivals 
     hqta_points_combined = combine_stops_by_hq_types(crs=PROJECT_CRS)    
@@ -198,21 +227,28 @@ if __name__=="__main__":
     hqta_points_with_info = add_route_agency_info(
         hqta_points_combined, analysis_date)
 
-    gdf = final_processing(hqta_points_with_info)
+    gdf = final_processing_gtfs(hqta_points_with_info)
+    
+    # Add MPO-provided planned major transit stops
+    planned_stops = read_standardize_mpo_input().to_crs(geography_utils.WGS84)
+    planned_stops = planned_stops.assign(
+        hqta_details = planned_stops.apply(_utils.add_hqta_details, axis=1)
+    )
+    gdf = pd.concat([gdf, planned_stops]).astype({'stop_id': str, 'avg_trips_per_peak_hr': np.float64})
     
     # Export to GCS
     # Stash this date's into its own folder
     utils.geoparquet_gcs_export(
         gdf,
         EXPORT_PATH,
-        "ca_hq_transit_stops"
+        "ca_hq_transit_stops",
     )  
        
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(
         gdf, 
         GCS_FILE_PATH,
-        "hqta_points"
+        "hqta_points",
    )
     
     end = datetime.datetime.now()

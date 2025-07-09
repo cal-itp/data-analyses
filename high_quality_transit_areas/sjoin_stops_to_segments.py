@@ -14,7 +14,7 @@ import sys
 
 from loguru import logger
 
-from calitp_data_analysis import utils
+from calitp_data_analysis import utils, get_fs
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD
 
@@ -22,6 +22,9 @@ am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
 pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
 both_peaks_hrs = am_peak_hrs + pm_peak_hrs
 peaks_dict = {key: 'am_peak' for key in am_peak_hrs} | {key: 'pm_peak' for key in pm_peak_hrs}
+
+import google.auth
+credentials, _ = google.auth.default()
 
 def max_trips_by_group(
     df: pd.DataFrame, 
@@ -283,6 +286,8 @@ if __name__ == "__main__":
     
     start = datetime.datetime.now()
     
+    fs = get_fs()
+    
 #  shift to new script which will add collinearity checks
 #     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
 #     # takes 1 min
@@ -298,14 +303,18 @@ if __name__ == "__main__":
     
     ## (2) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
-    hqta_segments = gpd.read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
+    hqta_segments = gpd.read_parquet(
+        f"{GCS_FILE_PATH}hqta_segments.parquet",
+        storage_options={"token": credentials}
+    )
     stops = helpers.import_scheduled_stops(
         analysis_date,
         get_pandas = True,
         crs = PROJECT_CRS
     )
     max_arrivals_by_stop = pd.read_parquet(
-        f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet") 
+        f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet"
+    ) 
     
     hqta_corr = sjoin_stops_and_stop_times_to_hqta_segments(
         hqta_segments, 
@@ -315,11 +324,10 @@ if __name__ == "__main__":
         hq_transit_threshold = HQ_TRANSIT_THRESHOLD,
         ms_transit_threshold = MS_TRANSIT_THRESHOLD
     )
-        
     utils.geoparquet_gcs_export(
         hqta_corr,
         GCS_FILE_PATH,
-        "all_bus"
+        "all_bus",
     )
     
     end = datetime.datetime.now()

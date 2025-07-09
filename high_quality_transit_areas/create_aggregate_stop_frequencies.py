@@ -286,8 +286,8 @@ def stop_times_aggregation_max_by_stop(
         max_trips_by_stop = max_trips_by_stop.drop(columns=['route_id', 'direction_id'])
     #  divide by length of peak to get trips/hr, keep n_trips a raw sum
     max_trips_by_stop = max_trips_by_stop.assign(
-        am_max_trips_hr = (max_trips_by_stop.am_max_trips.fillna(0) / len(am_peak_hrs)).astype(int),
-        pm_max_trips_hr = (max_trips_by_stop.pm_max_trips.fillna(0) / len(pm_peak_hrs)).astype(int),
+        am_max_trips_hr = (max_trips_by_stop.am_max_trips.fillna(0) / len(am_peak_hrs)).round(2),
+        pm_max_trips_hr = (max_trips_by_stop.pm_max_trips.fillna(0) / len(pm_peak_hrs)).round(2),
         n_trips = (max_trips_by_stop.am_max_trips.fillna(0) + 
                    max_trips_by_stop.pm_max_trips.fillna(0)),
         route_dir_count = max_trips_by_stop.route_dir.map(lambda x: x.size)
@@ -315,6 +315,7 @@ if __name__ == "__main__":
     ).pipe(add_route_dir, analysis_date).pipe(prep_stop_times)
     
     max_arrivals_by_stop_single = st_prepped.pipe(stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=True)
+    max_arrivals_by_stop_single.to_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet") #  for branching_derived_intersections.py
     max_arrivals_by_stop_multi = st_prepped.pipe(stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=False)
     
     multi_only_explode = get_explode_multiroute_only(max_arrivals_by_stop_single, max_arrivals_by_stop_multi, (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD))

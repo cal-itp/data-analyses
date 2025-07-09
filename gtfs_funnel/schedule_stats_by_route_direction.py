@@ -12,6 +12,9 @@ from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from shared_utils.rt_utils import METERS_PER_MILE
 from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
+import google.auth
+credentials, _ = google.auth.default()
+
 def cardinal_direction_by_trip(
     stop_times: gpd.GeoDataFrame, 
     group_cols: list
@@ -55,7 +58,8 @@ def assemble_scheduled_trip_metrics(
     
     # Load files
     df = gpd.read_parquet(
-        f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet"
+        f"{RT_SCHED_GCS}{STOP_TIMES_FILE}_{analysis_date}.parquet",
+        storage_options={"token": credentials.token}
     )
     
     trip_cols = ["trip_instance_key"]

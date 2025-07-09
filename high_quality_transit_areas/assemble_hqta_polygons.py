@@ -21,6 +21,9 @@ from update_vars import (GCS_FILE_PATH, analysis_date, PROJECT_CRS, EXPORT_PATH,
 
 catalog = intake.open_catalog("*.yml")
 
+import google.auth
+credentials, _ = google.auth.default()
+
 def buffer_hq_corridor_bus(
     analysis_date: str,
     buffer_meters: int,
@@ -76,7 +79,7 @@ def buffer_major_transit_stops(
     Buffer major transit stops. 
     Start with hqta points and filter out the hq_corridor_bus types.
     """
-    hqta_points = catalog.hqta_points.read().to_crs(PROJECT_CRS)
+    hqta_points = catalog.hqta_points(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(PROJECT_CRS)
 
     stops = hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
     
@@ -154,14 +157,14 @@ if __name__=="__main__":
     utils.geoparquet_gcs_export(
         gdf, 
         EXPORT_PATH, 
-        "ca_hq_transit_areas"
+        "ca_hq_transit_areas",
     )
     
     # Overwrite most recent version (other catalog entry constantly changes)
     utils.geoparquet_gcs_export(
         gdf,
         GCS_FILE_PATH,
-        "hqta_areas"
+        "hqta_areas",
     )    
        
     end = datetime.datetime.now()

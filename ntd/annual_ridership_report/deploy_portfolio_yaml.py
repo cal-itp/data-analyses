@@ -8,15 +8,15 @@ in the navigation panel.
 
 import sys
 
-sys.path.append("../")  # up one level
-
+sys.path.append("../monthly_ridership_report")  # up one level
+sys.path.append("../")
 from pathlib import Path
 from calitp_data_analysis.tables import tbls
 import pandas as pd
 from shared_utils import portfolio_utils
 from siuba import _, collect, filter, select, show_query
 from update_vars import GCS_FILE_PATH
-from annual_ridership_module import ntd_id_to_rtpa_crosswalk
+from _01_ntd_ridership_utils import ntd_id_to_rtpa_crosswalk
 
 PORTFOLIO_SITE_YAML = Path("../../portfolio/sites/ntd_annual_ridership_report.yml")
 

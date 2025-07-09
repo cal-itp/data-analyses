@@ -59,9 +59,15 @@ sources:
     # Source: create_bus_hqta_types.py
     major_stop_bus:
         driver: geoparquet
-        description: Bus stops that are within the bus intersections. 
+        description: Bus stops that are within spatial intersections where frequent corridors cross. 
         args:
           urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/major_stop_bus.parquet
+    # Source: branching_derived_intersections.py
+    major_stop_bus_branching:
+        driver: geoparquet
+        description: Bus stops along shared trunks where both routes are frequent and diverge elsewhere. 
+        args:
+          urlpath: gs://calitp-analytics-data/data-analyses/high_quality_transit_areas/branching_major_stops.parquet
     stops_in_hq_corr:
         driver: geoparquet
         description: Bus stops that are within the HQ corridors, even if they stops themselves do not have a lot of trips pass through. 
