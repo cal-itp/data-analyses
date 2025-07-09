@@ -46,8 +46,10 @@ duplicated_feed_info = [
     "Roseville Transit GMV Schedule",  # dupe with Roseville Schedule
     "South San Francisco Schedule",  # dupe with Bay Area 511 South San Francisco Shuttle
     "Tahoe Transportation District GMV Schedule",  # dupe with Tahoe Transportation District Schedule
+    "LAX Flyaway Schedule" # dupe with LAX Flyaway Bus Schedule
     "Victor Valley GMV Schedule",  # dupe with Victor Valley Schedule
     "Desert Roadrunner GMV Schedule",  # dupe with Desert Roadrunner Schedule
+
 ]
 
 

@@ -20,7 +20,7 @@ def prep_operator_service_hours() -> pd.DataFrame:
     a transit operator.
     """
     SCHEDULED_SERVICES_FILE = GTFS_DATA_DICT.digest_tables.scheduled_service_hours
-    SCHEDULED_SERVICES_REPORT = f"{SCHEDULED_SERVICES_FILE}_report"
+    SCHEDULED_SERVICES_REPORT = GTFS_DATA_DICT.digest_tables.scheduled_service_hours_report
     
     url = f"{GTFS_DATA_DICT.digest_tables.dir}{SCHEDULED_SERVICES_FILE}.parquet"
     

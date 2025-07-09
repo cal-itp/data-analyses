@@ -105,6 +105,8 @@ def transpose_summary_stats(
             "trips_per_operator": "Trips per Operator"
         }).T.reset_index().rename(columns = {0: "Value"})
     
+    # Change to string for display
+    subset_df2['Value'] = subset_df2['Value'].apply(lambda x: "{:,}".format(x))
     return subset_df2
 
 

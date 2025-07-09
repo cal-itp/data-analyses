@@ -35,28 +35,30 @@ rt_metric_no_weighted_avg = [
     "is_late",
 ]
 crosswalk_cols = [
-    "base64_url",
-    "portfolio_organization_name",
-    "caltrans_district",
-    "route_primary_direction",
-    "name",
-    "schedule_source_record_id",
-    "is_express",
-    "is_rapid",
-    "is_rail",
-    "is_ferry",
-    "is_coverage",
-    "is_downtown_local",
-    "is_local",
-    "service_date",
-    "typology",
-    "sched_rt_category",
-    "combined_name",
-    'route_id',
-    "recent_route_id",
-    'year', 
-    'quarter'
-]
+        "base64_url",
+        "caltrans_district",
+        "combined_name",
+        "is_coverage",
+        "is_downtown_local",
+        "is_express",
+        "is_ferry",
+        "is_local",
+        "is_rail",
+        "is_rapid",
+        "name",
+        "recent_route_id",
+        "route_id",
+        "route_primary_direction",
+        "sched_rt_category",
+        "schedule_gtfs_dataset_key",
+        "schedule_source_record_id",
+        "typology",
+        "portfolio_organization_name",
+        "year_quarter",
+        "direction_id",
+        "time_period",
+        "recent_combined_name"
+    ]
 
 def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -104,8 +106,9 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
 
     # Create a crosswalk with string descriptives such as
     # organization_name, route_long_name, etc that were excluded from the groupby_cols
-    crosswalk = df[groupby_cols + crosswalk_cols]
-
+    # crosswalk = df[crosswalk_cols].drop_duplicates()
+    crosswalk = df[crosswalk_cols].drop_duplicates()
+    
     # Merge all the dataframes
     m1 = (
         pd.merge(rt_metrics, schd_metrics, on=groupby_cols)
@@ -135,13 +138,11 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     
     # Rearrange columns to match original df
     col_proper_order = list(df.columns) 
+    col_proper_order.remove("service_date")
+    col_proper_order.remove("year")
+    col_proper_order.remove("quarter")
     m2 = m2[col_proper_order]
     
-    # Drop service_date & duplicates
-    m2 = (m2
-          .drop(columns=["service_date", "year","quarter"])
-          .drop_duplicates(subset = groupby_cols)
-          .reset_index(drop=True))
     return m2
 
 if __name__ == "__main__":
@@ -149,7 +150,7 @@ if __name__ == "__main__":
     DIGEST_RT_SCHED_MONTH = GTFS_DATA_DICT.digest_tables.monthly_route_schedule_vp 
     DIGEST_RT_SCHED_QTR = GTFS_DATA_DICT.digest_tables.quarterly_route_schedule_vp
     
-    # Save metrics on a monthly candence.
+    # Open metrics on a monthly candence.
     monthly_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED_MONTH}.parquet"
     )

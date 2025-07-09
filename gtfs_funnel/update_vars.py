@@ -1,5 +1,6 @@
 from shared_utils import catalog_utils, rt_dates
 
+apr2025_week = rt_dates.get_week("apr2025", exclude_wed=True)
 oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
@@ -8,7 +9,7 @@ apr2023_week = rt_dates.get_week("apr2023", exclude_wed=True)
 all_dates = (
     #rt_dates.y2025_dates + rt_dates.y2024_dates + rt_dates.y2023_dates 
     oct2023_week + apr2023_week + 
-    apr2024_week + oct2024_week
+    apr2024_week + oct2024_week + apr2025_week
 )
 
 analysis_date_list = [rt_dates.DATES['jun2025']]
