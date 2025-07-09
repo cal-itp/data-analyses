@@ -275,9 +275,6 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
 
 
 if __name__ == "__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
-    #from dask.distributed import Client
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
@@ -288,20 +285,7 @@ if __name__ == "__main__":
     
     fs = get_fs()
     
-#  shift to new script which will add collinearity checks
-#     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
-#     # takes 1 min
-#     max_arrivals_by_stop = helpers.import_scheduled_stop_times(
-#         analysis_date,
-#         get_pandas = True,
-#     ).pipe(prep_stop_times).pipe(stop_times_aggregation_max_by_stop, analysis_date)
-    
-#     max_arrivals_by_stop.to_parquet(
-#         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
-    
-# new step 1!
-    
-    ## (2) Spatial join stops and stop times to hqta segments
+    ## (1) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
     hqta_segments = gpd.read_parquet(
         f"{GCS_FILE_PATH}hqta_segments.parquet",
