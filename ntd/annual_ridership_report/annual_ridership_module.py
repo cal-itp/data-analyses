@@ -46,7 +46,8 @@ if __name__ == "__main__":
         cover_sheet_path = annual_cover_sheet_path,
         cover_sheet_index_col = annual_index_col,
         output_file_name = annual_data_file_name,
-        report_type = "annual"
+        report_type = "annual",
+        annual_upload_to_public = True
     )
     
     print("removing local folder")
