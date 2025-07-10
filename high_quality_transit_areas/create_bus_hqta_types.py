@@ -29,7 +29,7 @@ credentials, _ = google.auth.default()
 
 def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame: 
     """
-    Draw 50 m buffers around intersections to better catch stops
+    Draw 500 ft buffers around intersections to better catch stops
     that might fall within it.
     """
     gdf = gpd.read_parquet(

@@ -181,20 +181,21 @@ def add_azimuth(row: pd.Series, geodesic: pyproj.Geod) -> pd.Series:
     Given a row of a GeoDataFrame with origin and destination points in WGS84,
     find forward and back azimuth. 
     pyproj method returns signed azimuth -180(south) - -90(west) - 0(north) - +90(east) - +180(south),
-    convert this to degrees 0-360 and keep the higher one to enable consistent comparison later
+    maybe convert this to degrees 0-360 and keep the higher one to enable consistent comparison later
     '''
     # print(geodesic)
     long1, lat1 = row.origin.coords[0]
     long2, lat2 = row.destination.coords[0]
     assert all([abs(x) <= 180 for x in [long1, lat1, long2, lat2]]), 'CRS must be WGS84'
     fwd_azimuth, back_azimuth, _distance = geodesic.inv(long1, lat1, long2, lat2, return_back_azimuth=True)
-    # signed_azimuth_to_360_deg = lambda x: 360 + x if x <= 0 else x
+    signed_azimuth_to_360_deg = lambda x: 360 + x if x <= 0 else x
     # fwd_azimuth = signed_azimuth_to_360_deg(fwd_azimuth)
     # back_azimuth = signed_azimuth_to_360_deg(back_azimuth)
-    max_azimuth = max(fwd_azimuth, back_azimuth)
+    # max_azimuth = max(fwd_azimuth, back_azimuth)
     row['fwd_azimuth'] = fwd_azimuth
-    row['back_azimuth'] = back_azimuth
-    row['max_azimuth'] = max_azimuth
+    row['fwd_azimuth_360'] = signed_azimuth_to_360_deg(fwd_azimuth)
+    # row['back_azimuth'] = back_azimuth
+    # row['max_azimuth'] = max_azimuth
     return row
 
 
