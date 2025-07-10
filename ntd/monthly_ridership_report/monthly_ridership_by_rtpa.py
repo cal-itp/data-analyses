@@ -67,7 +67,8 @@ if __name__ == "__main__":
         cover_sheet_path = monthly_cover_sheet_path,
         cover_sheet_index_col = monthly_index_col,
         output_file_name = monthly_data_file_name,
-        report_type = "monthly"
+        report_type = "monthly",
+        monthly_upload_to_public= True
     )
     
     print("execute remove_local_outputs")
