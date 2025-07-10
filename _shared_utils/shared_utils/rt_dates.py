@@ -61,7 +61,13 @@ DATES = {
     "jan2025": "2025-01-15",
     "feb2025": "2025-02-12",
     "mar2025": "2025-03-12",
+    "apr2025a": "2025-04-14",
+    "apr2025b": "2025-04-15",
     "apr2025": "2025-04-16",  # main April date
+    "apr2025c": "2025-04-17",
+    "apr2025d": "2025-04-18",
+    "apr2025e": "2025-04-19",
+    "apr2025f": "2025-04-20",
     "may2025": "2025-05-14",
     "jun2025": "2025-06-11",
 }
@@ -82,7 +88,7 @@ DATES_BY_YEAR_DICT = {
     2025: y2025_dates,
 }
 
-valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024"]
+valid_weeks = ["apr2023", "oct2023", "apr2024", "oct2024", "apr2025"]
 
 
 # Remove all the one-offs
@@ -101,6 +107,7 @@ apr2023_week = get_week(month="apr2023", exclude_wed=False)
 oct2023_week = get_week(month="oct2023", exclude_wed=False)
 apr2024_week = get_week(month="apr2024", exclude_wed=False)
 oct2024_week = get_week(month="oct2024", exclude_wed=False)
+apr2025_week = get_week(month="apr2025", exclude_wed=False)
 
 MONTH_DICT = {
     1: "January",

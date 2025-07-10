@@ -27,8 +27,9 @@ if __name__ == "__main__":
     CROSSWALK = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     ROUTES = GTFS_DATA_DICT.schedule_tables.route_identification
     
-    analysis_date_list = rt_dates.all_dates
-                         
+    #analysis_date_list = rt_dates.all_dates
+    analysis_date_list = (rt_dates.apr2025_week)
+    
     df = pd.concat(
         [pd.read_parquet(
             f"{SCHED_GCS}{MONTHLY_SERVICE}_{y}.parquet") 

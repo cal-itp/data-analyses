@@ -2,27 +2,27 @@ lost_rt:
   - name: Desert Roadrunner GMV Schedule
     portfolio_organization_name: Palo Verde Valley Transit Agency
     schedule_and_vp: 2024-05-22
-    schedule_only: 2025-04-16
-  - name: Foothill Schedule
-    portfolio_organization_name: Foothill Transit
-    schedule_and_vp: 2025-02-12
-    schedule_only: 2025-04-16
+    schedule_only: 2025-05-14
+  - name: Elk Grove Schedule
+    portfolio_organization_name: City of Elk Grove
+    schedule_and_vp: 2025-04-16
+    schedule_only: 2025-05-14
   - name: LAX FlyAway Schedule
     portfolio_organization_name: Los Angeles World Airports
     schedule_and_vp: 2024-11-13
     schedule_only: 2025-03-12
+  - name: OmniTrans Schedule
+    portfolio_organization_name: OmniTrans
+    schedule_and_vp: 2025-04-16
+    schedule_only: 2025-05-14
   - name: Santa Ynez Mecatran Schedule
     portfolio_organization_name: City of Solvang
     schedule_and_vp: 2025-02-12
-    schedule_only: 2025-04-16
+    schedule_only: 2025-05-14
   - name: Tahoe Transportation District Schedule
     portfolio_organization_name: Tahoe Transportation District
     schedule_and_vp: 2023-11-15
-    schedule_only: 2025-04-16
-  - name: WeHo Schedule
-    portfolio_organization_name: City of West Hollywood
-    schedule_and_vp: 2025-03-12
-    schedule_only: 2025-04-16
+    schedule_only: 2025-05-14
 operators_last6_months:
   - name: 190
     service_date: 2025-05-14

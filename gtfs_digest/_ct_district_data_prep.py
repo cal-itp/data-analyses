@@ -37,33 +37,15 @@ def data_wrangling_operator_profile(district:str)->pd.DataFrame:
     Display only values in the column portfolio_organization_names
     that are in the organization grain GTFS Digest. Rename columns.
     """
-    OPERATOR_PROFILE_REPORT = GTFS_DATA_DICT.digest_tables.operator_profiles_report
-    # OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
-    
-    #portfolio_organization_names_to_keep = (
-    #deploy_portfolio_yaml.generate_operator_grain_yaml(OPERATOR_PROFILE)
-    #)[["organization_name"]].drop_duplicates()
-    
-    #operator_df = pd.read_parquet(
-    #f"{RT_SCHED_GCS}{OPERATOR_PROFILE_REPORT}.parquet",
-    #filters=[[("caltrans_district", "==", district)]],
-    #)
+    OPERATOR_PROFILE = GTFS_DATA_DICT.digest_tables.operator_profiles
     
     operator_df = pd.read_parquet(
-    f"{RT_SCHED_GCS}{OPERATOR_PROFILE_REPORT}.parquet",
+    f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet",
     )
-    
-    #operator_df2 = pd.merge(
-    #operator_df,
-    #portfolio_organization_names_to_keep,
-    #left_on=["portfolio_organization_name"],
-    #right_on=["organization_name"],
-    #how="inner",)
     
     operator_df2 = operator_df.loc[operator_df.caltrans_district == district]
     
-    # operator_df2 = operator_df2.rename(columns = operator_profile_report_readable_columns)
-    
+    operator_df2 = operator_df2.drop_duplicates(subset = ["portfolio_organization_name"])
     return operator_df2
         
 def data_wrangling_operator_map(portfolio_organization_names:list)->gpd.GeoDataFrame:
@@ -123,10 +105,10 @@ def final_transit_route_shs_outputs(
     # Filter out for any pct_route_on_hwy that we deem too low & for the relevant district.
     open_data_df = open_data_df.loc[
         (open_data_df.pct_route_on_hwy_across_districts > pct_route_intersection)
-        & (open_data_df.District.str.contains(district))
+        & (open_data_df.District.eq(district))
     ]
     intersecting_gdf = intersecting_gdf.loc[
-        intersecting_gdf.District.astype(str).str.contains(district)
+        intersecting_gdf.District.astype(str).eq(district)
     ]
 
     # Join back to get the long gdf with the transit route geometries and the names of the
@@ -196,7 +178,7 @@ def create_gtfs_stats(df:pd.DataFrame)->pd.DataFrame:
     
     gtfs_table_df["Avg Arrivals per Stop"] = gtfs_table_df["# Arrivals"]/gtfs_table_df["# Stops"]
     
-    # string_cols = gtfs_table_df.select_dtypes(include="object").columns.tolist()
+    # gtfs_table_df = gtfs_table_df.drop_duplicates()
     
     return gtfs_table_df
 """
@@ -209,7 +191,7 @@ def load_ct_district(district:int)->gpd.GeoDataFrame:
     caltrans_url = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
     ca_geojson = (gpd.read_file(caltrans_url)
                .to_crs(epsg=3310))
-    district_geojson = ca_geojson.loc[ca_geojson.DISTRICT == district]
+    district_geojson = ca_geojson.loc[ca_geojson.DISTRICT == district][["geometry"]]
     return district_geojson
 
 def load_buffered_shn_map(buffer_amount:int, district:int) -> gpd.GeoDataFrame:

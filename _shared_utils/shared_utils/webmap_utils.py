@@ -7,7 +7,6 @@ or certain predefined styles, for example for speedmaps and the state highway sy
 import base64
 import gzip
 import json
-from typing import Literal
 
 import branca
 import geopandas as gpd
@@ -64,7 +63,7 @@ def set_state_export(
     bucket: str = SPA_MAP_BUCKET,
     subfolder: str = "testing/",
     filename: str = "test2",
-    map_type: Literal = SPA_MAP_TYPES,
+    map_type=None,
     map_title: str = "Map",
     cmap: branca.colormap.ColorMap = None,
     color_col: str = None,
@@ -87,7 +86,12 @@ def set_state_export(
     Returns dict with state dictionary and map URL. Can call multiple times and supply
     previous state as existing_state to create multilayered maps.
     """
+    assert (
+        map_type in SPA_MAP_TYPES
+    ), "map_type must be a supported type from data-infra or None (update list in webmap_utils if applicable)"
     assert not gdf.empty, "geodataframe is empty!"
+    if existing_state and "state_dict" in existing_state.keys():
+        existing_state = existing_state["state_dict"]
     spa_map_state = existing_state or {"name": "null", "layers": [], "lat_lon": (), "zoom": 13}
     path = f"{bucket}{subfolder}{filename}.geojson.gz"
     gdf = gdf.to_crs(geography_utils.WGS84)
@@ -106,6 +110,8 @@ def set_state_export(
     if map_type in ["new_speedmap", "speedmap"]:
         this_layer[0]["properties"]["tooltip_speed_key"] = "p20_mph"
     spa_map_state["layers"] += this_layer
+    layer_names = [layer["name"] for layer in spa_map_state["layers"]]
+    assert len(layer_names) == len(set(layer_names)), "Layer map_title must be unique!"
     if manual_centroid:
         centroid = manual_centroid
     else:
@@ -137,3 +143,61 @@ def display_spa_map(spa_map_url: str, width: int = 1000, height: int = 650) -> N
     i = IFrame(spa_map_url, width=width, height=height)
     display(i)
     return
+
+
+def add_lines_header(svg):
+    """
+    reformat branca cmap export for successful display
+    """
+    # add newlines
+    svg = svg.replace("<", "\n<")
+
+    # svg from _repr_html_ missing this apperently essential header
+    svg_header = """<?xml version="1.0" standalone="no"?>
+    <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+     "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+     <svg version="1.0" xmlns="http://www.w3.org/2000/svg" height="60" width="500"
+     viewBox ="0 0 500 60">
+    """
+    # strip first svg tag from original string (already in header)
+    svg_strip_tag = svg.split('width="500">\n')[1]
+    export_svg = svg_header + svg_strip_tag
+    return export_svg
+
+
+def add_inner_labels_caption(svg, labels, spacing, caption):
+    """
+    reformat branca cmap export for successful display
+    """
+    labels = [round(n, 1) for n in list(labels)]
+    inner_labels_str = "".join(
+        [
+            f'<text x="{spacing + 100 * labels.index(label)}" y="35" style="text-anchor:end;">{label}\n</text>'
+            for label in labels
+        ]
+    )
+
+    inner_labels_str += f'<text x="0" y="50">{caption}\n</text>'
+    inner_labels_str += "\n</svg>"
+    export_svg = svg.replace("\n</svg>", inner_labels_str)
+
+    return export_svg
+
+
+def export_legend(cmap: branca.colormap.StepColormap, filename: str, inner_labels: list = []):
+    """
+    Given a branca colormap, export its html and reformat for successful display in webmap.
+
+    inner_labels is optional, but if provided should be four labels for correct spacing.
+    """
+    assert len(inner_labels) in [
+        0,
+        4,
+    ], "currently must supply 4 or 0 inner labels for spacing, outer labels are provided by default"
+    legend = add_lines_header(cmap._repr_html_())
+    legend = add_inner_labels_caption(legend, inner_labels, 100, cmap.caption)
+
+    path = f"calitp-map-tiles/{filename}"
+    with fs.open(path, "w") as writer:  # write out to public-facing GCS?
+        writer.write(legend)
+    print(f"legend written to {path}, public_url https://storage.googleapis.com/{path}")
