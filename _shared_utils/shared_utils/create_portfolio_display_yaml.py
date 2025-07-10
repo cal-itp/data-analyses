@@ -38,7 +38,7 @@ PORTFOLIO_ORGANIZATION_NAMES = {
 # but likely would represent the same info (same n_routes)
 duplicated_feed_info = [
     "Basin Transit GMV Schedule",  # dupe with Morongo Basin Schedule
-    "Cerritos on Wheels Schedule"  # dupe wtih Cerritos on Wheels Website Schedule (different n_routes, but website has more routes)
+    "Cerritos on Wheels Schedule",  # dupe wtih Cerritos on Wheels Website Schedule (different n_routes, but website has more routes)
     "LAX Shuttles Schedule",  # dupe with LAX Flyaway Bus Schedule
     "Lawndale Beat GMV Schedule",  # dupe with Lawndale Schedule
     "Merced GMV Schedule",  # dupe with Merced Schedule
@@ -46,6 +46,7 @@ duplicated_feed_info = [
     "Roseville Transit GMV Schedule",  # dupe with Roseville Schedule
     "South San Francisco Schedule",  # dupe with Bay Area 511 South San Francisco Shuttle
     "Tahoe Transportation District GMV Schedule",  # dupe with Tahoe Transportation District Schedule
+    "LAX Flyaway Schedule",  # dupe with LAX Flyaway Bus Schedule
     "Victor Valley GMV Schedule",  # dupe with Victor Valley Schedule
     "Desert Roadrunner GMV Schedule",  # dupe with Desert Roadrunner Schedule
 ]
