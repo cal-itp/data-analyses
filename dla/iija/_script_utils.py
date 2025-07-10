@@ -80,20 +80,26 @@ def add_county_abbrev(df, county_name_col):
     '''
     ### read county data in from the shared_data catalog
     catalog = intake.open_catalog("../../_shared_utils/shared_utils/shared_data_catalog.yml")
-    counties = to_snakecase((catalog.ca_counties.read())>>select(_.COUNTY_NAME,_.COUNTY_ABBREV,))
-    
+    # counties = to_snakecase((catalog.ca_counties.read()))[["name", "cnty_fips"]]
+    # counties.cnty_fips   = counties.cnty_fips.astype(int)
+    counties = to_snakecase((catalog.ca_counties.read()))[["name"]]
     county_codes = to_snakecase((pd.read_excel(f"{GCS_FILE_PATH}/CountyNameToCodeLookUp.xlsx")))
     
     ### add county 
-    counties['county_name_full'] = counties['county_name'] + ' County'
+    # counties['county_name_full'] = counties['name'] + ' County'
     
     ### create dict to map
-    county_mapping = dict(county_codes[['county_name', 'rca_county_code']].values)
+    county_mapping = pd.merge(county_codes, counties, left_on ="county_name", right_on = "name",how = "inner")
+    county_mapping = county_mapping.drop(columns = ["name"])
+    county_mapping = county_mapping.rename(columns = {"rca_county_code":"county_name_abbrev"})
+
+    df = pd.merge(df, county_mapping, on = ["county_name"], how = "left")
+    # df = df.drop(columns = ["cnty_fips"])
     
     ### map values to the df
-    df[f"{county_name_col}_abbrev"] = df[county_name_col].map(county_mapping)
+    #df[f"{county_name_col}_abbrev"] = df[county_name_col].map(county_mapping)
     
-    df[f"{county_name_col}_abbrev"] = df[f"{county_name_col}_abbrev"].fillna('NA')
+    #df[f"{county_name_col}_abbrev"] = df[f"{county_name_col}_abbrev"].fillna('NA')
     
     return df
 
@@ -284,14 +290,15 @@ def condense_df(df):
      'implementing_agency_locode', 'district',
      'program_code_description', 'recipient_project_number',
        "funding_type_code"]] = df[['county_code', 'improvement_type',
-                                                                     'implementing_agency_locode', 'district',
-                                                                     'program_code_description', 'recipient_project_number',
+                                   'implementing_agency_locode', 'district',
+                                   'program_code_description', 'recipient_project_number',
                                   "funding_type_code"]].astype(str)
     # copy county column over to use for project title name easier
     df['county_name_title'] = df['county_name'] 
     # copy program code column over to use for project description column easier
     df['program_code_description_for_description'] = df['program_code_description'] 
-    
+    df["county_name_abbrev"] = df["county_name_abbrev"].fillna("NA")
+    # print(df.info())
     # aggreate df using .agg function and join in the unique values into one row
     df_agg = (df
            .assign(count=1)
@@ -655,6 +662,7 @@ def run_script(file_name, recipient_column, df_agg_level):
     
     ### Read in data
     proj_list = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
+    proj_list = proj_list.rename(columns = {"summary_recipient": "summary_recipient_defined_text_field_1_value"})
     
     ### run function to get new program codes
     proj_cleaned = _data_utils.add_new_codes(proj_list)
@@ -672,9 +680,11 @@ def run_script2(file_name, recipient_column, df_agg_level):
     
     ### Read in data
     proj_list = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
+    proj_list = proj_list.rename(columns = {"summary_recipient": "summary_recipient_defined_text_field_1_value"})
     
     ### run function to get new program codes
     proj_cleaned = _data_utils.add_new_codes(proj_list)
+    
     
     ## function that adds known agency name to df 
     df = identify_agency2(proj_cleaned)
