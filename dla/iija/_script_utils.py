@@ -80,13 +80,12 @@ def add_county_abbrev(df, county_name_col):
     '''
     ### read county data in from the shared_data catalog
     catalog = intake.open_catalog("../../_shared_utils/shared_utils/shared_data_catalog.yml")
+    
     # counties = to_snakecase((catalog.ca_counties.read()))[["name", "cnty_fips"]]
     # counties.cnty_fips   = counties.cnty_fips.astype(int)
+    
     counties = to_snakecase((catalog.ca_counties.read()))[["name"]]
     county_codes = to_snakecase((pd.read_excel(f"{GCS_FILE_PATH}/CountyNameToCodeLookUp.xlsx")))
-    
-    ### add county 
-    # counties['county_name_full'] = counties['name'] + ' County'
     
     ### create dict to map
     county_mapping = pd.merge(county_codes, counties, left_on ="county_name", right_on = "name",how = "inner")
@@ -94,6 +93,7 @@ def add_county_abbrev(df, county_name_col):
     county_mapping = county_mapping.rename(columns = {"rca_county_code":"county_name_abbrev"})
 
     df = pd.merge(df, county_mapping, on = ["county_name"], how = "left")
+    
     # df = df.drop(columns = ["cnty_fips"])
     
     ### map values to the df
@@ -107,15 +107,18 @@ def add_county_abbrev(df, county_name_col):
 #add project information for all projects
 def identify_agency(df, identifier_col):
     #projects wtih locodes
+    
+    # Filter out rows that contain spaces.
     locode_proj = ((df[~df[identifier_col].str.contains(" ")]))
-    locode_proj = locode_proj>>filter(_[identifier_col]!='None')
+    
+    #locode_proj = locode_proj>>filter(_[identifier_col]!='None')
+    locode_proj = locode_proj.loc[locode_proj[identifier_col]!='None']
     
     locode_proj = (_data_utils.add_name_from_locode(locode_proj, 'summary_recipient_defined_text_field_1_value'))
-    
 
     #projects with no locodes
     no_locode = ((df[df[identifier_col].str.contains(" ")]))
-    no_entry = df>>filter(_[identifier_col]=='None')
+    no_entry = df.loc[df[identifier_col]=='None']
     
     #concat no locodes and those with no entry
     no_locode = pd.concat([no_locode, no_entry])
@@ -127,8 +130,16 @@ def identify_agency(df, identifier_col):
     
     #read in locode info
     locodes = to_snakecase(pd.read_excel(f"gs://calitp-analytics-data/data-analyses/dla/e-76Obligated/locodes_updated7122021.xlsx"))
-    county_district = locodes>>group_by(_.district, _.county_name)>>count(_.county_name)>>select(_.district, _.county_name)>>filter(_.county_name!='Multi-County', _.district !=53)
+    locodes["county_name_copy"] = locodes["county_name"]
+    county_district = (
+    locodes.groupby(["district", "county_name"])
+    .agg({"county_name_copy": "count"})
+    .reset_index()
+)
+    county_district = county_district.loc[(county_district.county_name != "Multi-County")
+                                       & (county_district.district != 53)]
     
+    county_district = county_district[["district", "county_name"]]
     # merge county information to add districts
     county_info = (pd.merge(county_base, county_district, how='left', left_on= 'county_description', right_on = 'county_name'))
     county_info.drop(columns =['county_name'], axis=1, inplace=True)
@@ -203,7 +214,7 @@ def county_district_crosswalk()->pd.DataFrame:
     ).drop(columns=["county_name"])
     return county_info
 
-def identify_agency2(df: pd.DataFrame) -> pd.DataFrame:
+def identify_agency_2025(df: pd.DataFrame) -> pd.DataFrame:
     """
     Fill in locodes, using the column rk_locode first
     then use the original function from Natalie.
@@ -245,11 +256,6 @@ def identify_agency2(df: pd.DataFrame) -> pd.DataFrame:
         columns=["rk_locode"]
     )
 
-    # Fill in summary_recipient_defined_text_field_1_value
-    #missing_locode_df.summary_recipient_defined_text_field_1_value = (
-    #    missing_locode_df.summary_recipient_defined_text_field_1_value.fillna("None")
-    #)
-
     # Try add_name_from_locode from _data_utils
     missing_locode_df2 = _data_utils.add_name_from_locode(
         missing_locode_df, "summary_recipient_defined_text_field_1_value"
@@ -286,19 +292,34 @@ def condense_df(df):
     Function to return one row for each project and keep valuable unique information for the project
     """
     # make sure columns are in string format
-    df[['county_code', 'improvement_type',
-     'implementing_agency_locode', 'district',
-     'program_code_description', 'recipient_project_number',
-       "funding_type_code"]] = df[['county_code', 'improvement_type',
-                                   'implementing_agency_locode', 'district',
-                                   'program_code_description', 'recipient_project_number',
-                                  "funding_type_code"]].astype(str)
+    df[
+    [
+        "county_code",
+        "improvement_type",
+        "implementing_agency_locode",
+        "district",
+        "program_code_description",
+        "recipient_project_number",
+        "funding_type_code",
+    ]
+    ] = df[
+        [
+            "county_code",
+            "improvement_type",
+            "implementing_agency_locode",
+            "district",
+            "program_code_description",
+            "recipient_project_number",
+            "funding_type_code",
+        ]
+    ].astype(
+        str
+    )
     # copy county column over to use for project title name easier
     df['county_name_title'] = df['county_name'] 
     # copy program code column over to use for project description column easier
     df['program_code_description_for_description'] = df['program_code_description'] 
     df["county_name_abbrev"] = df["county_name_abbrev"].fillna("NA")
-    # print(df.info())
     # aggreate df using .agg function and join in the unique values into one row
     df_agg = (df
            .assign(count=1)
@@ -654,11 +675,9 @@ def get_clean_data(df, full_or_agg = ''):
     
         df['new_project_title'] = df.project_number.map(proj_title_mapping)
     
-
         return df
 
-    
-def run_script(file_name, recipient_column, df_agg_level):
+def run_script_original(file_name, recipient_column, df_agg_level):
     
     ### Read in data
     proj_list = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
@@ -676,7 +695,7 @@ def run_script(file_name, recipient_column, df_agg_level):
     
     return agg
     
-def run_script2(file_name, recipient_column, df_agg_level):
+def run_script_2025(file_name, recipient_column, df_agg_level):
     
     ### Read in data
     proj_list = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
@@ -685,9 +704,8 @@ def run_script2(file_name, recipient_column, df_agg_level):
     ### run function to get new program codes
     proj_cleaned = _data_utils.add_new_codes(proj_list)
     
-    
     ## function that adds known agency name to df 
-    df = identify_agency2(proj_cleaned)
+    df = identify_agency_2025(proj_cleaned)
     
     ### run the data through the rest of the script
     ### return a dataset that is aggregated at the project and program code
@@ -704,30 +722,3 @@ def export_to_gcs(df, export_date):
     df.to_csv(f"{GCS_FILE_PATH}/FMIS_Projects_Universe_IIJA_Reporting_{export_date}.csv")
     
     
-# '''
-# another approach (not as effective for creating new titles)
-# '''
-# ## code help: https://stackoverflow.com/questions/70995812/extract-keyword-from-sentences-in-a-pandas-text-column-using-nltk-and-or-regex
-# def key_word_intersection(df, text_col):
-#     summaries = []
-#     for x in tokenize(df[text_col].to_numpy()):
-#         keywords = np.concatenate([
-#                                 np.intersect1d(x, ['BRIDGE REPLACEMENT', 'BRIDGE', 'INSTALL', 'CONSTRUCT', 'REPLACE',
-#                                                    'SIGNAL', 'SIGNALS', 'TRAFFIC', 'IMPROVEMENT', 'PEDESTRIAN', 
-#                                                    'LANES', 'NEW', 'REHABILITATION','UPGRADE', 'CLASS',
-#                                                    'BIKE', 'WIDEN', 'LANDSCAPING', 'SAFETY', 'RAISED', 
-#                                                    'SEISMIC', 'SIGNAGE', 'RETROFIT', 'ADD', 'PLANNING', 'PAVE',
-#                                                    'PREVENTIVE','MAINTENANCE', 'REHAB', 'RESURFACE', 'REPAIR', 'ROUNDABOUT'
-#                                                   'COMPLETE STREET', 'VIDEO DETECTION EQUIPMENT', 'SYNCHRONIZE CORRIDOR', 'ROADWAY REALIGNMENTS']),
-#                                 np.intersect1d(x, [
-#                                     # 'BRIDGE', 'ROAD', 'RD', 'AVENUE', 'AVE', 'STREET' , 'ST',
-#                                                    # 'FRACTURED', 'LANE', 'DRIVE', 'BOULEVARD', 'BLVD',
-#                                                    'INTERSECTION', 'INTERSECTIONS', 'SIDEWALK', 
-#                                     # 'WAY', 'DR', 'CURB', 'ROADWAY',
-#                                                    # 'TRAIL', 'PATH', 'CREEK', 'RIVER', 
-#                                     # 'CORRIDOR', 'CROSSING','PARKWAY','RAMPS', 'GUARDRAIL'
-#                                 ]), 
-#                                 np.intersect1d(x, ['CITY', 'COUNTY', 'STATE', 'UNINCORPORATED'])])
-    
-#         summaries.append(np.array(x)[[i for i, keyword in enumerate(x) if keyword in keywords]])
-#     return summaries 
