@@ -199,6 +199,7 @@ def hqta_segment_keep_one_stop(
     
     return segment_to_stop_gdf
 
+#  use this for azimuth, too?
 def find_inconclusive_directions(hqta_segments: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
     Where individual segments loop tightly, segment_direction becomes arbitrary.
