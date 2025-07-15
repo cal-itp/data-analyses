@@ -16,6 +16,7 @@ GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
 # from nltk.corpus import stopwords
 # from nltk.tokenize import word_tokenize, sent_tokenize
 # import re
+
 def read_data_all():
     proj = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/CopyofFMIS_Projects_Universe_IIJA_Reporting_4.xls", 
                            # sheet_name='FMIS 5 Projects  ', header=[3]
@@ -37,23 +38,6 @@ def read_data_all():
 Program Code
 Functions
 '''
-# def update_program_code_list():
-    
-#     ## read in the program codes
-#     updated_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/FY21-22ProgramCodesAsOf5-25-2022.v2_expanded090823.xlsx"))
-#     updated_codes = updated_codes>>select(_.iija_program_code, _.new_description)
-#     original_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/Copy of lst_IIJA_Code_20230908.xlsx"))
-#     original_codes = original_codes>>select(_.iija_program_code, _.description, _.program_name)
-    
-#     program_codes = pd.merge(updated_codes, original_codes, on='iija_program_code', how = 'outer', indicator=True)
-#     program_codes['new_description'] = program_codes['new_description'].str.strip()
-
-#     program_codes.new_description.fillna(program_codes['description'], inplace=True)
-    
-#     program_codes = program_codes.drop(columns={'description' , '_merge'})
-    
-#     return program_codes 
-
 def update_program_code_list2():
     updated_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/FY21-22ProgramCodesAsOf5-25-2022.v2_expanded090823.xlsx"))
     updated_codes = updated_codes>>select(_.iija_program_code, _.new_description)
@@ -245,31 +229,3 @@ def add_name_from_locode(df, df_locode_extract_col):
     df_all.drop(columns =['active_e76s______7_12_2021_', 'mpo_locode_fads', 'agency_locode'], axis=1, inplace=True)
         
     return df_all
-
-
-# def tokenize(texts):
-#     return [nltk.tokenize.word_tokenize(t) for t in texts]
-
-
-# def get_list_of_words(df, col):
-#     nltk.download('stopwords')
-#     nltk.download('punkt')
-    
-#     #get just the one col
-#     column = df[[col]]
-#     #remove single-dimensional entries from the shape of an array
-#     col_text = column.squeeze()
-#     # get list of words
-#     text_list = col_text.tolist()
-#     #join list of words 
-#     text_list = ' '.join(text_list).lower()
-    
-#     # remove punctuation 
-#     text_list = re.sub(r'[^\w\s]','',text_list)
-#     swords = [re.sub(r"[^A-z\s]", "", sword) for sword in stopwords.words('english')]
-#     # remove stopwords
-#     clean_text_list = [word for word in word_tokenize(text_list.lower()) if word not in swords] 
-#     # turn into a dataframe
-#     clean_text_list = pd.DataFrame(np.array(clean_text_list))
-
-#     return clean_text_list
