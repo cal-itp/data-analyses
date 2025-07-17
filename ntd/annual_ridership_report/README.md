@@ -51,7 +51,7 @@ Per the [SB125 Final Guidelines](https://calsta.ca.gov/-/media/calsta-media/docu
 Hyperlinking this report on your RTPA's/Agency's webpage is a common method to meeting this requirement.
 
 ## Datasets / Data Sources
-- [NTD Annual Service data](https://www.transit.dot.gov/ntd/data-product/2022-annual-database-service 
+- [NTD Annual Service data](https://www.transit.dot.gov/ntd/data-product/2022-annual-database-service) 
 - [California RTPA list](https://gis.data.ca.gov/datasets/CAEnergy::regional-transportation-planning-agencies/explore?appid=cf412a17daaa47bca93c6d6b7e77aff0&edit=true)
 - [Fully Processed Data Download](https://console.cloud.google.com/storage/browser/calitp-publish-data-analysis)
 
