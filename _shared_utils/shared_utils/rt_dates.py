@@ -70,6 +70,7 @@ DATES = {
     "apr2025f": "2025-04-20",
     "may2025": "2025-05-14",
     "jun2025": "2025-06-11",
+    "jul2025": "2025-07-16",
 }
 
 years_available = list(range(2023, datetime.datetime.now().year + 1))
