@@ -342,8 +342,9 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         'route_id', 'route_type', 'route_name_used']
     shape_cols = ['shape_id', 'n_trips']
     agency_ids = ['base64_url']
-    shn_cols = ["shn_route","on_shs","shn_districts","pct_route_on_hwy_across_districts"]
-    col_order = route_cols + shape_cols + agency_ids + shn_cols + ['geometry']
+    # shn_cols = ["shn_route","on_shs","shn_districts","pct_route_on_hwy_across_districts"]
+    # col_order = route_cols + shape_cols + agency_ids + shn_cols + ['geometry']
+    col_order = route_cols + shape_cols + agency_ids + ['geometry']
     df2 = (df[col_order]
            .reindex(columns = col_order)
            .rename(columns = open_data_utils.STANDARDIZED_COLUMNS_DICT)
@@ -373,7 +374,9 @@ if __name__ == "__main__":
     published_routes = patch_previous_dates(
         routes, 
         analysis_date,
-    ).pipe(add_shn_information).pipe(finalize_export_df)
+    # ).pipe(add_shn_information).pipe(finalize_export_df) #  this errors, need to specify buffer_amt...
+    ).pipe(finalize_export_df)
+
         
     utils.geoparquet_gcs_export(
         published_routes, 
