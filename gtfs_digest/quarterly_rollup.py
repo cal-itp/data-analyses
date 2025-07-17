@@ -72,12 +72,6 @@ def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     
     # Remove underscore
     df.year_quarter = df.year_quarter.str.replace("_", " ")
-    
-    # Create copies of the original df before aggregating because I noticed applying
-    #  segment_calcs.calculate_weighted_averages impacts the original df
-    #rt_df = df.copy()
-    #schd_df = df.copy()
-    #timeliness_df = df.copy()
 
     # Calculate RT Metrics that need to have a weighted average
     rt_metrics = segment_calcs.calculate_weighted_averages(

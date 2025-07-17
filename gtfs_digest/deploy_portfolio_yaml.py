@@ -15,13 +15,13 @@ def generate_operator_grain_yaml(filename: str) -> pd.DataFrame:
     FILEPATH_URL = f"{GTFS_DATA_DICT.digest_tables.dir}{filename}.parquet"
     
     # Keep only organizations with RT and schedule OR only schedule.
-    df = pd.read_parquet(
+    df = (pd.read_parquet(
         FILEPATH_URL, 
         filters=[[("sched_rt_category", "in", ["schedule_and_vp", "schedule_only"])]],
         columns = ["caltrans_district", "portfolio_organization_name"]
-    ).dropna(subset=["caltrans_district"]).rename(
-        columns = {"portfolio_organization_name": "organization_name"}
-    ).sort_values(["caltrans_district", "organization_name"]).reset_index(drop=True)
+    ).dropna(subset=["caltrans_district"])
+    .sort_values(["caltrans_district", "portfolio_organization_name"]).reset_index(drop=True)
+         )
                      
     return df
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
             "caption_suffix": "",
         },
         section_info = {
-            "column": "organization_name",
-            "name": "organization_name",
+            "column": "portfolio_organization_name",
+            "name": "portfolio_organization_name",
         },
     )
