@@ -8,7 +8,7 @@ import pandas as pd
 import yaml
 
 import open_data_utils
-from calitp_data_analysis.geography_utils import WGS84
+from calitp_data_analysis import geography_utils
 from calitp_data_analysis import utils
 from shared_utils import portfolio_utils, publish_utils
 from segment_speed_utils import helpers
@@ -38,7 +38,7 @@ def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
         date,
         columns = ["shape_array_key", "n_trips", "geometry"],
         get_pandas = True,
-        crs = WGS84
+        crs = geography_utils.WGS84
     ).dropna(subset="shape_array_key")
     
     df = pd.merge(
