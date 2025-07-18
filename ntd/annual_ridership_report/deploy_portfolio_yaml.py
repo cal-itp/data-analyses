@@ -14,7 +14,6 @@ from pathlib import Path
 from calitp_data_analysis.tables import tbls
 import pandas as pd
 from shared_utils import portfolio_utils
-from siuba import _, collect, filter, select, show_query
 from update_vars import GCS_FILE_PATH
 from _01_ntd_ridership_utils import ntd_id_to_rtpa_crosswalk
 

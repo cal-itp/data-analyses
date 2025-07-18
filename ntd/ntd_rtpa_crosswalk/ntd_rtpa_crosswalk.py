@@ -10,7 +10,7 @@
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.tables import tbls
-from siuba import _, collect, count, filter, select, show_query
+from siuba import _, collect, filter, select
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
