@@ -15,7 +15,6 @@ import sys
 sys.path.append("../")  # up one level
 
 from calitp_data_analysis.tables import tbls
-from siuba import _, collect, count, filter, show_query #, distinct
 from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils.project_vars import PUBLIC_GCS
 from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS, MONTH, YEAR

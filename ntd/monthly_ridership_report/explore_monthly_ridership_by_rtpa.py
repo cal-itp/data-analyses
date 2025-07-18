@@ -12,7 +12,7 @@ import pandas as pd
 import shutil
 
 from calitp_data_analysis.tables import tbls
-from siuba import _, collect, count, filter, show_query
+from siuba import _, collect
 from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils.project_vars import PUBLIC_GCS
 #from shared_utils.rt_dates import MONTH_DICT
