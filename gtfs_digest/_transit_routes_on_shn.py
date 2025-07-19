@@ -3,21 +3,11 @@ from functools import cache
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis import geography_utils
+from shared_utils import publish_utils
 
-from calitp_data_analysis import geography_utils, utils
-# from segment_speed_utils import gtfs_schedule_wrangling, helpers
-from shared_utils import (
-    #catalog_utils,
-    #dask_utils,
-    #gtfs_utils_v2,
-    #portfolio_utils,
-    publish_utils,
-    #rt_dates,
-    #rt_utils,
-)
-from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS, SCHED_GCS, SEGMENT_GCS
+from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/state_highway_network/"
 
