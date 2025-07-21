@@ -34,10 +34,10 @@ SiteChoices = enum.Enum('SiteChoices', {
 
 DEPLOY_OPTION = typer.Option(
     False,
-    help="Actually deploy this component to netlify.",
+    help="Actually deploy this component.",
 )
 
-app = typer.Typer(help="CLI to tie together papermill, jupyter book, and netlify")
+app = typer.Typer(help="CLI to tie together papermill, jupyter book, and gcs")
 
 env = Environment(loader=FileSystemLoader("./portfolio/templates/"), autoescape=select_autoescape())
 
@@ -222,11 +222,6 @@ class Site(BaseModel):
 
         for part in self.parts:
             part.site = self
-
-    @validator("name")
-    def convert_to_underscores(cls, v):
-        # netlify converts stuff to underscores so we should do it too
-        return v.replace("_", "-")
 
     @validator('readme', pre=True, always=True)
     def default_readme(cls, v, *, values, **kwargs):
