@@ -45,17 +45,17 @@ All source code for these analyses and reports may be found [on GitHub](https://
    * Check the files in with `make git_check_sections`, which adds all the parameterized notebooks in `portfolio/MY_NEW_REPORT/*.ipynb`, but doesn't check in the notebooks or HTML files in `_build/`.
      
    ```
-   build_portfolio_site:
-   	cd portfolio/ && pip install -r requirements.txt && cd ../
-	#need git rm because otherwise, just local removal, but git change is untracked
-	#git rm portfolio/$(site)/ -rf
-	python portfolio/portfolio.py clean $(site)
-	python portfolio/portfolio.py build $(site) --deploy 
-	git add portfolio/sites/$(site).yml     
-	#make production_portfolio #(deploy onto the main page)
+    build_portfolio_site:
+    cd portfolio/ && pip install -r requirements.txt && cd ../
+    # need git rm because otherwise, just local removal, but git change is untracked
+    rm portfolio/$(site)/ -rf
+    python portfolio/portfolio.py clean $(site)
+    python portfolio/portfolio.py build $(site) --deploy 
+    add portfolio/sites/$(site).yml     
+    # make production_portfolio #(deploy onto the main page)
 
-   git_check_sections:
-   	git add portfolio/$(site)/*.ipynb # this one is most common, where operators nested under district
+    git_check_sections:
+    git add portfolio/$(site)/*.ipynb # this one is most common, where operators nested under district
    ```
 
 6. We use Git Large File Storage `git lfs` to store these parameterized notebooks. However, we are also moving to storing these parameterized notebooks in Google Cloud Storage in the long run.

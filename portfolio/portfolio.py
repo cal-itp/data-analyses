@@ -317,24 +317,19 @@ def index(
             sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
             
     Path("./portfolio/index").mkdir(parents=True, exist_ok=True)
-    for template in ["index.html", "_redirects"]:
+    for template in ["index.html"]:
         fname = f"./portfolio/index/{template}"
         with open(fname, "w") as f:
             typer.echo(f"writing out to {fname}")
             f.write(env.get_template(template).render(sites=sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
 
     args = [
-        "netlify",
-        "deploy",
-        "--site=cal-itp-data-analyses",
-        "--dir=portfolio/index",
+        "gcloud",
+        "storage",
+        "cp",
+        "portfolio/index/index.html",
+        "gs://calitp-analysis/"
     ]
-
-    if alias:
-        args.append(f"--alias={alias}")
-
-    if prod:
-        args.append("--prod")
 
     if deploy:
         typer.secho(f"deploying with args {args}", fg=typer.colors.GREEN)
@@ -421,12 +416,14 @@ def build(
             assert int(ans) == len(errors)
 
         args = [
-            "netlify",
-            "deploy",
-            "--site=cal-itp-data-analyses",
-            f"--dir=portfolio/{site_yml_name}/_build/html/",
-            f"--alias={site.name}",
+            "gcloud",
+            "storage",
+            "cp",
+            "--recursive",
+            f"portfolio/{site_yml_name}/_build/html/",
+            f"gs://calitp-analysis/{site_yml_name}"
         ]
+
         typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
         subprocess.run(args).check_returncode()
 
