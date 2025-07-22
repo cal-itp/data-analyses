@@ -16,7 +16,7 @@ from loguru import logger
 
 from calitp_data_analysis import geography_utils, utils
 from shared_utils import rt_utils
-from segment_speed_utils import helpers, gtfs_schedule_wrangling
+from segment_speed_utils import gtfs_schedule_wrangling
 from update_vars import GCS_FILE_PATH, analysis_date, HQTA_SEGMENT_LENGTH, PROJECT_CRS
 import pyproj
                         
