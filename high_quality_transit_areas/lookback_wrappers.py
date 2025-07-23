@@ -1,7 +1,7 @@
 import pandas as pd
 import geopandas as gpd
 
-from segment_speed_utils import helpers
+from segment_speed_utils import helpers, gtfs_schedule_wrangling
 import datetime as dt
 import yaml
 
@@ -43,3 +43,65 @@ def lookback_trips_ix(lookback_trips: pd.DataFrame) -> pd.DataFrame:
     lookback_trips_ix = lookback_trips[['name', 'feed_key', 'schedule_gtfs_dataset_key',
                                    'shape_array_key', 'lookback_date']].drop_duplicates()
     return lookback_trips_ix
+
+def get_lookback_st(published_operators_dict: dict, lookback_trips_ix: pd.DataFrame, st_cols: list) -> pd.DataFrame:
+    '''
+    Get stop_times according to published_operators_dict.
+    stop_times reflect the most recent date each operator appeared.
+    '''
+    lookback_st = []
+    assert 'feed_key' in st_cols, 'must include feed key for filtering'
+    for date in published_operators_dict.keys():
+        feed_keys = lookback_trips_ix.query('lookback_date == @date').feed_key.unique()
+        st = helpers.import_scheduled_stop_times(
+            date,
+            columns = st_cols,
+            filters = [["feed_key", "in", feed_keys]],
+            with_direction = False, #  required to include rail/ferry/brt stops w/out shapes
+            get_pandas = True
+        )
+        # display(st)
+        lookback_st += [st]
+    return pd.concat(lookback_st)
+
+def get_lookback_stops(published_operators_dict: dict, lookback_trips_ix: pd.DataFrame, stops_cols: list):
+    '''
+    Get stops according to published_operators_dict.
+    stops reflect the most recent date each operator appeared.
+    '''
+    lookback_stops = []
+    assert 'feed_key' in stops_cols, 'must include feed key for filtering'
+    for date in published_operators_dict.keys():
+        feed_keys = lookback_trips_ix.query('lookback_date == @date').feed_key.unique()
+        stops = helpers.import_scheduled_stops(
+            date,
+            columns = stops_cols,
+            filters = [["feed_key", "in", feed_keys]],
+            get_pandas = True
+        )
+        # display(st)
+        lookback_stops += [stops]
+    return pd.concat(lookback_stops)
+
+def get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix):
+    '''
+    Get shapes according to published_operators_dict.
+    Shapes reflect the most recent date each operator appeared,
+    and additionally implement the same processing steps as current shapes
+    '''
+    lookback_shapes = []
+    for date in published_operators_dict.keys():
+        feed_keys = lookback_trips_ix.query('lookback_date == @date').feed_key.unique()
+        # Only include certain Amtrak routes
+        outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips(
+            analysis_date = date, inside_ca = False).shape_array_key.unique()
+
+        gdf = gtfs_schedule_wrangling.longest_shape_by_route_direction(
+            analysis_date = date
+        ).query(
+            'shape_array_key not in @outside_amtrak_shapes & feed_key.isin(@feed_keys)'
+        ).drop(
+            columns = ["feed_key", "shape_array_key", "route_length"]
+        ).fillna({"direction_id": 0}).astype({"direction_id": "int"})
+        lookback_shapes += [gdf]
+    return pd.concat(lookback_shapes)
