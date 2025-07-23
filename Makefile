@@ -100,7 +100,7 @@ install_env:
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ..
 
 production_portfolio:
-	python portfolio/portfolio.py index --deploy --prod
+	python portfolio/portfolio.py index --deploy
 
 # Create .egg to upload to dask cloud cluster
 egg_modules:
