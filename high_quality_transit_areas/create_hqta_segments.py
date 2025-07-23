@@ -19,6 +19,7 @@ from shared_utils import rt_utils
 from segment_speed_utils import gtfs_schedule_wrangling
 from update_vars import GCS_FILE_PATH, analysis_date, HQTA_SEGMENT_LENGTH, PROJECT_CRS
 import pyproj
+import lookback_wrappers
                         
 
 def difference_overlay_by_route(
@@ -117,6 +118,14 @@ def select_shapes_and_segment(
     ).drop(
         columns = ["feed_key", "shape_array_key", "route_length"]
     ).fillna({"direction_id": 0}).astype({"direction_id": "int"})
+    
+    published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
+    print(published_operators_dict)
+    trips_cols = ['name', 'feed_key', 'gtfs_dataset_key']
+    lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
+    lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
+    gdf_lookback = lookback_wrappers.get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix)
+    gdf = pd.concat([gdf, gdf_lookback])
     
     routes_both_dir = (gdf.route_key
                        .value_counts()

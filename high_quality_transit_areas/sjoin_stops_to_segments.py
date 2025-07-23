@@ -17,14 +17,15 @@ from loguru import logger
 from calitp_data_analysis import utils, get_fs
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD
+import lookback_wrappers
 
 am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
 pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
 both_peaks_hrs = am_peak_hrs + pm_peak_hrs
 peaks_dict = {key: 'am_peak' for key in am_peak_hrs} | {key: 'pm_peak' for key in pm_peak_hrs}
 
-import google.auth
-credentials, _ = google.auth.default()
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 
 def max_trips_by_group(
     df: pd.DataFrame, 
@@ -212,15 +213,21 @@ if __name__ == "__main__":
     
     ## (1) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
-    hqta_segments = gpd.read_parquet(
-        f"{GCS_FILE_PATH}hqta_segments.parquet",
-        storage_options={"token": credentials}
-    )
+    hqta_segments = gcsgp.read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
+    stops_cols = ["feed_key", "stop_id", "stop_name", "geometry"]
     stops = helpers.import_scheduled_stops(
         analysis_date,
         get_pandas = True,
         crs = PROJECT_CRS
     )
+    published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
+    print(published_operators_dict)
+    trips_cols = ['name', 'feed_key', 'gtfs_dataset_key']
+    lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
+    lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
+    lookback_stops = lookback_wrappers.get_lookback_stops(published_operators_dict, lookback_trips_ix, stops_cols)
+    stops = pd.concat([stops, lookback_stops])
+    
     max_arrivals_by_stop = pd.read_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet"
     ) 

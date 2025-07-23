@@ -41,7 +41,7 @@ def lookback_trips_ix(lookback_trips: pd.DataFrame) -> pd.DataFrame:
     functions.
     '''
     lookback_trips_ix = lookback_trips[['name', 'feed_key', 'schedule_gtfs_dataset_key',
-                                   'shape_array_key', 'lookback_date']].drop_duplicates()
+                                   'lookback_date']].drop_duplicates()
     return lookback_trips_ix
 
 def get_lookback_st(published_operators_dict: dict, lookback_trips_ix: pd.DataFrame, st_cols: list) -> pd.DataFrame:

@@ -6,7 +6,7 @@ from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from loguru import logger
 import sys
 import datetime
-
+import lookback_wrappers
 
 from update_vars import (analysis_date, AM_PEAK, PM_PEAK, EXPORT_PATH, GCS_FILE_PATH, PROJECT_CRS,
 SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD, SHARED_STOP_THRESHOLD,
@@ -17,7 +17,36 @@ pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
 both_peaks_hrs = am_peak_hrs + pm_peak_hrs
 peaks_dict = {key: 'am_peak' for key in am_peak_hrs} | {key: 'pm_peak' for key in pm_peak_hrs}
 
+def get_st_trips(analysis_date: str) -> (pd.DataFrame, pd.DataFrame):
+    
+    trips_cols = ["name", "feed_key", "gtfs_dataset_key", "trip_id",
+               "route_id", "direction_id", "route_type"]
+    trips = helpers.import_scheduled_trips(
+    analysis_date,
+    columns = trips_cols,
+    get_pandas = True
+    )
+    published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
+    print(published_operators_dict)
+    lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
+    lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
+    
+    trips = pd.concat([trips, lookback_trips])
+    
+    st_cols = ["feed_key", "trip_id", "stop_id",
+              "arrival_hour"]
+    stop_times = helpers.import_scheduled_stop_times(
+        analysis_date,
+        columns = st_cols,
+        get_pandas = True,
+    )
+    lookback_stop_times = lookback_wrappers.get_lookback_st(published_operators_dict, lookback_trips_ix, st_cols)
+    stop_times = pd.concat([stop_times, lookback_stop_times])
+    
+    return stop_times, trips
+
 def add_route_dir(
+    trips: pd.DataFrame,
     stop_times: pd.DataFrame,
     analysis_date: str
 )-> pd.DataFrame:
@@ -25,15 +54,8 @@ def add_route_dir(
     add route and direction to stop times,
     also filter to bus and trolleybus only
     """
-    trips = helpers.import_scheduled_trips(
-    analysis_date,
-    columns = ["feed_key", "gtfs_dataset_key", "trip_id",
-               "route_id", "direction_id", "route_type"],
-    get_pandas = True
-    )
     trips = trips[trips['route_type'].isin(['3', '11'])] #  bus only
     
-
     stop_times = stop_times.merge(
         trips,
         on = ["feed_key", "trip_id"]
@@ -51,11 +73,6 @@ def prep_stop_times(
     """
     Add fixed peak period information to stop_times for next calculations.
     """
-
-    stop_times = stop_times.assign(
-            departure_hour = pd.to_datetime(
-                stop_times.departure_sec, unit="s").dt.hour
-        )
 
     stop_times = stop_times[stop_times['arrival_hour'].isin(both_peaks_hrs)]
     stop_times['peak'] = stop_times['arrival_hour'].map(peaks_dict)
@@ -296,9 +313,6 @@ def stop_times_aggregation_max_by_stop(
     return max_trips_by_stop
 
 if __name__ == "__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
-    #from dask.distributed import Client
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
@@ -309,10 +323,8 @@ if __name__ == "__main__":
     
     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
     # takes 1 min
-    st_prepped = helpers.import_scheduled_stop_times(
-        analysis_date,
-        get_pandas = True,
-    ).pipe(add_route_dir, analysis_date).pipe(prep_stop_times)
+    st, trips = get_st_trips(analysis_date) # includes lookback
+    st_prepped = add_route_dir(trips=trips, stop_times=st, analysis_date=analysis_date).pipe(prep_stop_times)
     
     max_arrivals_by_stop_single = st_prepped.pipe(stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=True)
     max_arrivals_by_stop_single.to_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet") #  for branching_derived_intersections.py
