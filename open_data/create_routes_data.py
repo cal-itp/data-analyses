@@ -194,5 +194,11 @@ if __name__ == "__main__":
         "ca_transit_routes"
     )
     
+    utils.geoparquet_gcs_export(
+        published_routes,
+        TRAFFIC_OPS_GCS,
+        f"export/ca_transit_routes_{analysis_date}"
+    )
+    
     time1 = datetime.datetime.now()
     print(f"Execution time for routes script: {time1-time0}")

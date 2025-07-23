@@ -23,3 +23,23 @@ def read_published_operators(current_date: str,
         if key > lookback_limit and key < currant_date}
     
     return patch_operators_dict
+
+def get_lookback_trips(published_operators_dict: dict, trips_cols: list) -> pd.DataFrame:
+    '''
+    Get trips according to published_operators_dict.
+    Trips reflect the most recent date each operator appeared.
+    '''
+    lookback_trips = []
+    for date in published_operators_dict.keys():
+        lookback_trips += [helpers.import_scheduled_trips(date, filters=[['name', 'in', published_operators_dict[date]]],
+                                  columns=trips_cols).assign(lookback_date = date)]
+    return pd.concat(lookback_trips)
+
+def lookback_trips_ix(lookback_trips: pd.DataFrame) -> pd.DataFrame:
+    '''
+    Keep identifier cols and drop duplicates, use for filtering in other lookback
+    functions.
+    '''
+    lookback_trips_ix = lookback_trips[['name', 'feed_key', 'schedule_gtfs_dataset_key',
+                                   'shape_array_key', 'lookback_date']].drop_duplicates()
+    return lookback_trips_ix
