@@ -24,18 +24,16 @@ from update_vars import (GCS_FILE_PATH, analysis_date,
                          PROJECT_CRS, SEGMENT_BUFFER_METERS,
                          INTERSECTION_BUFFER_METERS
                         )
-import google.auth
-credentials, _ = google.auth.default()
+import lookback_wrappers
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 
 def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame: 
     """
     Draw 500 ft buffers around intersections to better catch stops
     that might fall within it.
     """
-    gdf = gpd.read_parquet(
-        f"{GCS_FILE_PATH}all_intersections.parquet",
-        storage_options={"token": credentials.token}
-    )
+    gdf = gcsgp.read_parquet(f"{GCS_FILE_PATH}all_intersections.parquet")
     
     gdf = gdf.assign(
         geometry = gdf.geometry.buffer(buffer_size)
@@ -139,18 +137,30 @@ if __name__ == "__main__":
     bus_intersections = buffer_around_intersections(INTERSECTION_BUFFER_METERS)
 
     # Grab point geom with all stops
+    trips_cols = ["feed_key", "gtfs_dataset_key"]
     gtfs_keys = helpers.import_scheduled_trips(
         analysis_date,
-        columns = ["feed_key", "gtfs_dataset_key"],
+        columns = trips_cols,
         get_pandas=True
     )
+    published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
+    print(published_operators_dict)
+    lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols + ['name'])
+    lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
+    gtfs_keys = pd.concat([gtfs_keys, lookback_trips.drop(columns=['name'])])
     
+    stops_cols = ["feed_key", "stop_id", "geometry"]
     all_stops = helpers.import_scheduled_stops(
         analysis_date,
         get_pandas = True,
-        columns = ["feed_key", "stop_id", "geometry"],
+        columns = stops_cols,
         crs = PROJECT_CRS
-    ).merge(
+    )
+    lookback_stops = lookback_wrappers.get_lookback_stops(published_operators_dict, lookback_trips_ix, stops_cols,
+                                                         crs=PROJECT_CRS)
+    all_stops = pd.concat([all_stops, lookback_stops])
+    
+    all_stops = all_stops.merge(
         gtfs_keys,
         on = "feed_key",
     ).drop(columns = "feed_key")

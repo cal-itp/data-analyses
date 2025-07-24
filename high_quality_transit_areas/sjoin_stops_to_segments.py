@@ -225,7 +225,8 @@ if __name__ == "__main__":
     trips_cols = ['name', 'feed_key', 'gtfs_dataset_key']
     lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
     lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
-    lookback_stops = lookback_wrappers.get_lookback_stops(published_operators_dict, lookback_trips_ix, stops_cols)
+    lookback_stops = lookback_wrappers.get_lookback_stops(published_operators_dict, lookback_trips_ix, stops_cols,
+                                                         crs=PROJECT_CRS)
     stops = pd.concat([stops, lookback_stops])
     
     max_arrivals_by_stop = pd.read_parquet(

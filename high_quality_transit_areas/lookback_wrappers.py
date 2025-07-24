@@ -64,7 +64,7 @@ def get_lookback_st(published_operators_dict: dict, lookback_trips_ix: pd.DataFr
         lookback_st += [st]
     return pd.concat(lookback_st)
 
-def get_lookback_stops(published_operators_dict: dict, lookback_trips_ix: pd.DataFrame, stops_cols: list):
+def get_lookback_stops(published_operators_dict: dict, lookback_trips_ix: pd.DataFrame, stops_cols: list, **kwargs):
     '''
     Get stops according to published_operators_dict.
     stops reflect the most recent date each operator appeared.
@@ -77,7 +77,8 @@ def get_lookback_stops(published_operators_dict: dict, lookback_trips_ix: pd.Dat
             date,
             columns = stops_cols,
             filters = [["feed_key", "in", feed_keys]],
-            get_pandas = True
+            get_pandas = True,
+            **kwargs
         )
         # display(st)
         lookback_stops += [stops]
