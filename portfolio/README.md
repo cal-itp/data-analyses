@@ -35,11 +35,9 @@ All source code for these analyses and reports may be found [on GitHub](https://
      * `_build/html` are the rendered HTML pages corresponding to the parameterized notebooks.
      * Instead of notebooks, now they are replaced with HTML files: `_build/html/district_01_eureka/first_operator / second_operator.html`
      * There are also additional folders within `_build/html`: `_sources`, `_sphyinx_design_static`, and `_static` and other files like `genindex.html`, `index.html`, `search.html`, `searchindex.js`, `README.html`, and `objects.inv`
-  * `python portfolio/portfolio.py build MY_NEW_REPORT --deploy` (when we deploy to Netlify, the HTML files in `portfolio/MY_NEW_REPORT/_build/html` are rendered as a netlify site `https://{MY_NEW_REPORT}--cal-itp-data-analyses.netlify.app`
+  * `python portfolio/portfolio.py build MY_NEW_REPORT --deploy` (when we deploy, the HTML files in `portfolio/MY_NEW_REPORT/_build/html` are available at `https://analysis.dds.dot.ca.gov/MY_NEW_REPORT`
 
-4. After checking the Netlify site that's created and making sure everything looks good, that site can make it onto the main `analysis.calitp.org` page with `python portfolio/portfolio.py index --deploy --prod`
-
-5. All these steps are documented in the [Makefile](https://github.com/cal-itp/data-analyses/blob/main/Makefile). Some of the steps that are commented out should be uncommented depending on your use case.
+4. All these steps are documented in the [Makefile](https://github.com/cal-itp/data-analyses/blob/main/Makefile). Some of the steps that are commented out should be uncommented depending on your use case.
    * If you've already checked in your site to GitHub, the next month you deploy your portfolio, you should use `git rm portfolio/$(site)/ -rf` and `clean $(site)` where `$(site)` is the name of your site based on `portfolio/sites/site_name.yml`. The `git rm` cleans up whatever is checked in and the `clean` removes the local folders that are not checked in. **Both are needed.** Not doing both can result in your `toc.yml` and HTML being out of sync.
    * If you're testing changes to your site, finish that up before you run `make production_portfolio`. 
    * Check the files in with `make git_check_sections`, which adds all the parameterized notebooks in `portfolio/MY_NEW_REPORT/*.ipynb`, but doesn't check in the notebooks or HTML files in `_build/`.

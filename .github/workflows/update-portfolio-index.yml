@@ -6,60 +6,54 @@ on:
     paths:
       - '.github/workflows/update-portfolio-index.yml'
       - 'portfolio/**'
-  pull_request:
-    paths:
-      - '.github/workflows/update-portfolio-index.yml'
-      - 'portfolio/**'
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+  POETRY_VERSION: '2.0.1'
+  SERVICE_ACCOUNT: 'github-actions-service-account@cal-itp-data-infra.iam.gserviceaccount.com'
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/1005246706141/locations/global/workloadIdentityPools/github-actions/providers/analysis'
+  PROJECT_ID: 'cal-itp-data-infra'
+  ANALYSIS_BUCKET: 'calitp-analysis'
 
 jobs:
-  build-docs:
+  deploy-index:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     steps:
-    - name: Check out repo
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.9
+      - name: Authenticate Google Service Account
+        uses: google-github-actions/auth@v2
+        with:
+          create_credentials_file: true
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.SERVICE_ACCOUNT }}
 
-    - name: Install python packages
-      run: |
-        pip install -r portfolio/requirements.txt
+      - name: Setup GCloud utilities
+        uses: google-github-actions/setup-gcloud@v2
 
-    - name: Netlify docs preview
-      if: ${{ github.ref != 'refs/heads/main' }}
-      run: |
-        npm install -g netlify-cli@17.x.x
-        python portfolio/portfolio.py index --deploy --alias=${GITHUB_REPOSITORY#*/}-${PR_NUMBER}
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      env:
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-        PR_NUMBER: ${{ github.event.number }}
+      - name: Cache Python packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.local
+          key: python-cache-${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-${{ hashFiles('.github/workflows/*.yml') }}
 
-    - name: Netlify docs production
-      if: ${{ github.ref == 'refs/heads/main' }}
-      run: |
-        npm install -g netlify-cli@17.x.x
-        python portfolio/portfolio.py index --deploy --prod
-      env:
-        NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      - name: Install python packages
+        run: |
+          pip install -r portfolio/requirements.txt
 
-    - name: Add netlify link PR comment
-      uses: actions/github-script@v7
-      if: ${{ github.event_name == 'pull_request' }}
-      with:
-        github-token: ${{secrets.GITHUB_TOKEN}}
-        script: |
-          const suffix = "--cal-itp-data-analyses.netlify.app"
-          github.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: "Preview url: https://" + context.repo.repo + "-" + process.env.PR_NUMBER + suffix
-          })
-      env:
-        PR_NUMBER: ${{ github.event.number }}
+      - name: Deploy index
+        run: |
+          python portfolio/portfolio.py index --deploy
