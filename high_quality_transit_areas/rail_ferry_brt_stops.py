@@ -253,10 +253,6 @@ def compile_rail_ferry_brt_stops(
 
 
 if __name__ == "__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
-    #from dask.distributed import Client
-    
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
@@ -264,7 +260,7 @@ if __name__ == "__main__":
                level="INFO")
 
     start = datetime.datetime.now()
-    
+    logger.info("A1_rail_ferry_brt_stops {analysis_date} ")
     stops_route_gdf = assemble_stops(analysis_date)
     
     # let's save this to use as a crosswalk to fill in info
