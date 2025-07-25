@@ -84,7 +84,7 @@ def get_lookback_stops(published_operators_dict: dict, lookback_trips_ix: pd.Dat
         lookback_stops += [stops]
     return pd.concat(lookback_stops)
 
-def get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix):
+def get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix, no_drop = False):
     '''
     Get shapes according to published_operators_dict.
     Shapes reflect the most recent date each operator appeared,
@@ -101,8 +101,8 @@ def get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix):
             analysis_date = date
         ).query(
             'shape_array_key not in @outside_amtrak_shapes & feed_key.isin(@feed_keys)'
-        ).drop(
-            columns = ["feed_key", "shape_array_key", "route_length"]
         ).fillna({"direction_id": 0}).astype({"direction_id": "int"})
+        if not no_drop:
+            gdf = gdf.drop(columns = ["feed_key", "shape_array_key", "route_length"])
         lookback_shapes += [gdf]
     return pd.concat(lookback_shapes)
