@@ -260,7 +260,7 @@ if __name__ == "__main__":
                level="INFO")
 
     start = datetime.datetime.now()
-    logger.info("A1_rail_ferry_brt_stops {analysis_date} ")
+    logger.info(f"A1_rail_ferry_brt_stops {analysis_date} ")
     stops_route_gdf = assemble_stops(analysis_date)
     
     # let's save this to use as a crosswalk to fill in info

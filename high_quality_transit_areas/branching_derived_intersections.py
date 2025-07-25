@@ -125,8 +125,6 @@ def find_stops_this_feed(gtfs_dataset_key: str,
         stop_dfs += [these_stops]    
     if len(stop_dfs) > 0:
         feed_add = pd.concat(stop_dfs)
-        # .merge(feeds, on = 'schedule_gtfs_dataset_key')
-        # feed_add = stops.merge(feed_add, on = ['feed_key', 'stop_id'])
         return feed_add
 
 def match_spatial_format(branching_stops_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
