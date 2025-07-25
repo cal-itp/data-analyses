@@ -278,3 +278,4 @@
 2025-07-24 15:38:09.830 | INFO     | __main__:<module>:185 - C1_prep_pairwise_intersections 2025-06-11 execution time: 0:00:28.891888
 2025-07-24 15:38:49.627 | INFO     | __main__:<module>:126 - C2_find_intersections 2025-06-11 execution time: 0:00:14.999066
 2025-07-24 15:39:42.497 | INFO     | __main__:<module>:188 - C3_create_bus_hqta_types 2025-06-11 execution time: 0:00:23.902614
+2025-07-25 11:04:37.458 | INFO     | __main__:<module>:193 - C3_create_bus_hqta_types 2025-06-11 execution time: 0:00:22.881484

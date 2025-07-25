@@ -121,10 +121,7 @@ def create_stops_along_corridors(all_stops: gpd.GeoDataFrame) -> gpd.GeoDataFram
 
 
 if __name__ == "__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
-    #from dask.distributed import Client
-    
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
+
     logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
@@ -164,6 +161,16 @@ if __name__ == "__main__":
         gtfs_keys,
         on = "feed_key",
     ).drop(columns = "feed_key")
+    print(all_stops.columns)
+    print(all_stops.head(3))
+    
+    # add geometry to branching major stops
+    major_stop_bus_branching = pd.read_parquet(f"{GCS_FILE_PATH}branching_major_stops.parquet")
+    major_stop_bus_branching = (all_stops.merge(major_stop_bus_branching, left_on = ['schedule_gtfs_dataset_key', 'stop_id'],
+                                               right_on = ['schedule_gtfs_dataset_key_primary', 'stop_id'])
+                                .drop(columns = ['schedule_gtfs_dataset_key', 'lookback_date'])
+                               )
+    gcsgp.geo_data_frame_to_parquet(major_stop_bus_branching, f"{GCS_FILE_PATH}branching_major_stops.parquet")
         
     # Create hqta_type == major_stop_bus
     major_stop_bus = create_major_stop_bus(all_stops, bus_intersections)
@@ -190,4 +197,3 @@ if __name__ == "__main__":
         f"execution time: {end - start}"
     )
     
-    #client.close()

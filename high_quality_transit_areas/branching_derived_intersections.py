@@ -124,7 +124,8 @@ def find_stops_this_feed(gtfs_dataset_key: str,
         these_stops = find_stops_this_pair(feed_stops, pair)
         stop_dfs += [these_stops]    
     if len(stop_dfs) > 0:
-        feed_add = pd.concat(stop_dfs).merge(feeds, on = 'schedule_gtfs_dataset_key')
+        feed_add = pd.concat(stop_dfs)
+        # .merge(feeds, on = 'schedule_gtfs_dataset_key')
         # feed_add = stops.merge(feed_add, on = ['feed_key', 'stop_id'])
         return feed_add
 
@@ -141,12 +142,9 @@ if __name__ == '__main__':
     
     published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
     trips, lookback_trips_ix = get_trips_with_route_dir(analysis_date, published_operators_dict)
-    trips = trips.drop_duplicates(subset=['schedule_gtfs_dataset_key', 'shape_array_key', 'route_dir'])
                                
     shapes = helpers.import_scheduled_shapes(analysis_date, columns=['shape_array_key', 'geometry'])
     
-    feeds = trips[['feed_key', 'schedule_gtfs_dataset_key']].drop_duplicates()
-
     shapes = get_shapes_with_lookback(analysis_date, published_operators_dict, lookback_trips_ix)
     
     max_arrivals_by_stop_single = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet")
@@ -158,7 +156,6 @@ if __name__ == '__main__':
     
     qualify_dict = {key: share_counts[key] for key in share_counts.keys() if share_counts[key] >= SHARED_STOP_THRESHOLD}
     feeds_to_filter = np.unique([key.split('__')[0] for key in qualify_dict.keys()])
-    trips = trips.query("schedule_gtfs_dataset_key.isin(@feeds_to_filter)")
     
     hcd_branching_stops = []
     for gtfs_dataset_key in feeds_to_filter:

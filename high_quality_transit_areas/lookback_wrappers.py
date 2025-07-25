@@ -13,14 +13,14 @@ def read_published_operators(current_date: str,
     with open(published_operators_yaml) as f:
         published_operators_dict = yaml.safe_load(f)
         
-    currant_date = dt.date.fromisoformat(current_date)
-    lookback_limit = currant_date - dt.timedelta(days=lookback_days)
+    current_date = dt.date.fromisoformat(current_date)
+    lookback_limit = current_date - dt.timedelta(days=lookback_days)
     
     # Convert the published operators file into a dict mapping dates to an iterable of operators
     patch_operators_dict = {
         str(key):published_operators_dict[key] for
         key in published_operators_dict.keys()
-        if key > lookback_limit and key < currant_date}
+        if key > lookback_limit and key < current_date}
     
     return patch_operators_dict
 
