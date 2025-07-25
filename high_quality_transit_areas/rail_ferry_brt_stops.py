@@ -18,6 +18,7 @@ from calitp_data_analysis import utils
 from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
 from update_vars import GCS_FILE_PATH, analysis_date
+import lookback_wrappers
 
 catalog = intake.open_catalog("*.yml")
 
@@ -87,23 +88,33 @@ def assemble_stops(analysis_date: str) -> gpd.GeoDataFrame:
     stop_times must be without direction since some rail/ferry/brt stops
     still have no GTFS shape.
     """
-    
-    stop_times = helpers.import_scheduled_stop_times(
-    analysis_date,
-    columns = ["feed_key", "trip_id", "stop_id"],
-    with_direction = False, #  required to include rail/ferry/brt stops w/out shapes
-    get_pandas = True
-    )
-    
-    trips = helpers.import_scheduled_trips(
-        analysis_date,
-        columns = [
+    trips_cols = [
             "name", "feed_key", "trip_id",
             "route_id", "route_type", "route_desc",
             "gtfs_dataset_key"
-        ],
+        ]
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = trips_cols,
         get_pandas = True
     ).rename(columns={"gtfs_dataset_key":"schedule_gtfs_dataset_key"})
+    
+    published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
+    print(published_operators_dict)
+    lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
+    lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
+    
+    trips = pd.concat([trips, lookback_trips])
+    
+    st_cols = ["feed_key", "trip_id", "stop_id"]
+    stop_times = helpers.import_scheduled_stop_times(
+    analysis_date,
+    columns = st_cols,
+    with_direction = False, #  required to include rail/ferry/brt stops w/out shapes
+    get_pandas = True
+    )
+    lookback_stop_times = lookback_wrappers.get_lookback_st(published_operators_dict, lookback_trips_ix, st_cols)
+    stop_times = pd.concat([stop_times, lookback_stop_times])
            
     stops_with_route = pd.merge(
         stop_times,
@@ -115,12 +126,14 @@ def assemble_stops(analysis_date: str) -> gpd.GeoDataFrame:
     ).drop_duplicates().reset_index(drop=True)
         
     # Attach stop geometry
+    stops_cols = ["feed_key", "stop_id", "stop_name", "geometry"]
     stops = helpers.import_scheduled_stops(
         analysis_date,
-        columns = ["feed_key", "stop_id", "stop_name", "geometry"],
+        columns = stops_cols,
         get_pandas = True
     )
-    
+    lookback_stops = lookback_wrappers.get_lookback_stops(published_operators_dict, lookback_trips_ix, stops_cols)
+    stops = pd.concat([stops, lookback_stops])
     stops_with_geom = pd.merge(
         stops, 
         stops_with_route,
@@ -240,10 +253,6 @@ def compile_rail_ferry_brt_stops(
 
 
 if __name__ == "__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
-    #from dask.distributed import Client
-    
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
@@ -251,7 +260,7 @@ if __name__ == "__main__":
                level="INFO")
 
     start = datetime.datetime.now()
-    
+    logger.info(f"A1_rail_ferry_brt_stops {analysis_date} ")
     stops_route_gdf = assemble_stops(analysis_date)
     
     # let's save this to use as a crosswalk to fill in info

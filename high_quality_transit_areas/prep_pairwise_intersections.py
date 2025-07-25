@@ -48,6 +48,31 @@ def prep_bus_corridors(is_ms_precursor: bool = False, is_hq_corr: bool = False) 
     
     return hqtc_or_ms_pre
 
+def azimuth_360_compare(azi1, azi2) -> float:
+    '''
+    compare two 360-degree azimuths
+    '''
+    if azi1 >= azi2:
+        return azi1 - azi2
+    else:
+        return azi2 - azi1
+    
+back_azi = lambda x: x - 180 if x >= 180 else x + 180
+def find_intersections_azimuth(azi1, azi2, threshold_degrees = 45) -> bool:
+    '''
+    With two 360-degree azimuths, compare all combininations of forward
+    and back azimuths to see if all are more than a specified degree threshold apart.
+    
+    find_intersections_azimuth(360, 45) should return True
+    find_intersections_azimuth(40, 80) should return False
+    '''
+    back_azi_2 = back_azi(azi2)
+    back_azi_1 = back_azi(azi1)
+    to_compare = [(azi1, azi2), (azi1, back_azi_2), (back_azi_1, azi2), (back_azi_1, back_azi_2)]
+    compare_all = [azimuth_360_compare(x, y) for x, y in to_compare]
+    # print(compare_all)
+    return not(any([x < threshold_degrees for x in compare_all]))
+
 
 def sjoin_against_other_operators(
     in_group_df: gpd.GeoDataFrame, 
@@ -56,10 +81,9 @@ def sjoin_against_other_operators(
     """
     Spatial join of the in group vs the out group. 
     This could be the operator vs other operators, 
-    or a route vs other routes. This is currently
-    east-west vs north-south segments, which requires
-    the additional step of excluding intersections
-    resulting from the same route changing direction.
+    or a route vs other routes. This is currently all
+    routes vs. all other routes, azimuth comparison
+    is now used to more precisely find intersections.
     
     Create a crosswalk / pairwise table showing these links.
     
@@ -67,7 +91,8 @@ def sjoin_against_other_operators(
     computationally expensive,
     so we want to do it on fewer rows. 
     """
-    route_cols = ["hqta_segment_id", "segment_direction", "route_key"]
+    route_cols = ["hqta_segment_id", "segment_direction", "route_key",
+                  "fwd_azimuth_360"]
     
     s1 = gpd.sjoin(
         in_group_df[route_cols + ["geometry"]], 
@@ -75,19 +100,22 @@ def sjoin_against_other_operators(
         how = "inner",
         predicate = "intersects"
     ).drop(columns = ["index_right", "geometry"])
-    
-    s1 = s1[s1["route_key_left"] != s1["route_key_right"]]
-            
+                
     route_pairs = (
         s1.rename(
             columns = {
                 "hqta_segment_id_left": "hqta_segment_id",
                 "hqta_segment_id_right": "intersect_hqta_segment_id",
+                "fwd_azimuth_360_left": "fwd_azimuth_360",
+                "fwd_azimuth_360_right": "intersect_fwd_azimuth_360"
             })
-          [["hqta_segment_id", "intersect_hqta_segment_id"]]
+          [["hqta_segment_id", "intersect_hqta_segment_id", "fwd_azimuth_360", "intersect_fwd_azimuth_360"]]
           .drop_duplicates()
           .reset_index(drop=True)
-    )    
+    )
+    route_pairs = route_pairs.assign(intersect = route_pairs.apply(
+        lambda x: find_intersections_azimuth(x.fwd_azimuth_360, x.intersect_fwd_azimuth_360), axis=1)
+        )
     
     return route_pairs   
 
@@ -97,16 +125,15 @@ def pairwise_intersections(
 ) -> gpd.GeoDataFrame:
     """
     Do pairwise comparisons of hqta segments.
-    Take all the north-south segments and compare to east-west
-    and vice versa.
+    Compare each route with all other routes to enable
+    azimuth-based comparison.
     """
-    # Route intersections across operators
-    east_west = corridors_gdf[corridors_gdf.segment_direction == "east-west"]
-    north_south = corridors_gdf[corridors_gdf.segment_direction == "north-south"]
-    
+    # Intersect each route with all others
+    corridors_gdf = corridors_gdf[corridors_gdf['segment_direction'] != 'inconclusive']
     results = [
-        sjoin_against_other_operators(north_south, east_west),
-        sjoin_against_other_operators(east_west, north_south)
+        sjoin_against_other_operators(corridors.query('route_key == @route_key'),
+                                      corridors.query('route_key != @route_key'))
+        for route_key in corridors_gdf.route_key.unique()
     ]
     
     pairs = pd.concat(results, axis=0, ignore_index=True)
@@ -142,9 +169,6 @@ def pairwise_intersections(
     
 
 if __name__=="__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
-    #from dask.distributed import Client
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/hqta_processing.log", retention = "3 months")
     logger.add(sys.stderr, 
@@ -162,5 +186,3 @@ if __name__=="__main__":
         f"C1_prep_pairwise_intersections {analysis_date} "
         f"execution time: {end - start}"
     )
-
-    #client.close()

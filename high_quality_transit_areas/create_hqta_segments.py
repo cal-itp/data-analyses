@@ -16,8 +16,10 @@ from loguru import logger
 
 from calitp_data_analysis import geography_utils, utils
 from shared_utils import rt_utils
-from segment_speed_utils import helpers, gtfs_schedule_wrangling
-from update_vars import GCS_FILE_PATH, analysis_date, HQTA_SEGMENT_LENGTH
+from segment_speed_utils import gtfs_schedule_wrangling
+from update_vars import GCS_FILE_PATH, analysis_date, HQTA_SEGMENT_LENGTH, PROJECT_CRS
+import pyproj
+import lookback_wrappers
                         
 
 def difference_overlay_by_route(
@@ -117,6 +119,14 @@ def select_shapes_and_segment(
         columns = ["feed_key", "shape_array_key", "route_length"]
     ).fillna({"direction_id": 0}).astype({"direction_id": "int"})
     
+    published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
+    print(published_operators_dict)
+    trips_cols = ['name', 'feed_key', 'gtfs_dataset_key']
+    lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
+    lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
+    gdf_lookback = lookback_wrappers.get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix)
+    gdf = pd.concat([gdf, gdf_lookback])
+    
     routes_both_dir = (gdf.route_key
                        .value_counts()
                        .loc[lambda x: x > 1]
@@ -175,9 +185,27 @@ def select_shapes_and_segment(
     
     return hqta_segments
 
+def add_azimuth(row: pd.Series, geodesic: pyproj.Geod) -> pd.Series:
+    '''
+    Given a row of a GeoDataFrame with origin and destination points in WGS84,
+    find forward and back azimuth. 
+    pyproj method returns signed azimuth -180(south) - -90(west) - 0(north) - +90(east) - +180(south),
+    convert this to degrees 0-360
+    '''
+    long1, lat1 = row.origin.coords[0]
+    long2, lat2 = row.destination.coords[0]
+    assert all([abs(x) <= 180 for x in [long1, lat1, long2, lat2]]), 'CRS must be WGS84'
+    fwd_azimuth, back_azimuth, _distance = geodesic.inv(long1, lat1, long2, lat2, return_back_azimuth=True)
+    signed_azimuth_to_360_deg = lambda x: 360 + x if x <= 0 else x
+    row['fwd_azimuth'] = fwd_azimuth
+    row['fwd_azimuth_360'] = signed_azimuth_to_360_deg(fwd_azimuth)
+
+    return row
+
 
 def find_primary_direction_across_hqta_segments(
-    hqta_segments_gdf: gpd.GeoDataFrame
+    hqta_segments_gdf: gpd.GeoDataFrame,
+    **kwargs
 ) -> gpd.GeoDataFrame:
     """
     For each hqta_segment_id, grab the origin / destination of 
@@ -191,10 +219,15 @@ def find_primary_direction_across_hqta_segments(
     
     with_od = rt_utils.add_origin_destination(hqta_segments_gdf)
     with_direction = rt_utils.add_route_cardinal_direction(with_od)
+    #  reproject o/d cols to use add_azimuth
+    with_direction.origin = with_direction.origin.to_crs(geography_utils.WGS84)
+    with_direction.destination = with_direction.destination.to_crs(geography_utils.WGS84)
+    #  TODO speed up, try dask?
+    with_azimuth = with_direction.apply(add_azimuth, axis=1, **kwargs)
     
     # Get predominant direction based on segments
     predominant_direction_by_route = (
-        with_direction.groupby(["route_key", "route_direction"])
+        with_azimuth.groupby(["route_key", "route_direction"])
         .agg({"route_primary_direction": "count"})
         .reset_index()
         .sort_values(["route_key", "route_primary_direction"], 
@@ -208,7 +241,7 @@ def find_primary_direction_across_hqta_segments(
     drop_cols = ["origin", "destination", "route_primary_direction"]
     
     routes_with_primary_direction = pd.merge(
-        with_direction.rename(
+        with_azimuth.rename(
             columns = {"route_direction": "segment_direction"}), 
         predominant_direction_by_route,
         on = "route_key",
@@ -235,8 +268,11 @@ if __name__=="__main__":
     # Since route_direction at the route-level could yield both 
     # north-south and east-west 
     # for a given route, use the segments to determine the primary direction
+    
+    # test adding azimuth
+    geodesic = pyproj.Geod(ellps="WGS84")
     hqta_segments_with_dir = find_primary_direction_across_hqta_segments(
-        hqta_segments)
+        hqta_segments, geodesic=geodesic)
         
     utils.geoparquet_gcs_export(
         hqta_segments_with_dir, 

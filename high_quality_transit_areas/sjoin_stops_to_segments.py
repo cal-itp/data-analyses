@@ -17,14 +17,15 @@ from loguru import logger
 from calitp_data_analysis import utils, get_fs
 from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD
+import lookback_wrappers
 
 am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
 pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
 both_peaks_hrs = am_peak_hrs + pm_peak_hrs
 peaks_dict = {key: 'am_peak' for key in am_peak_hrs} | {key: 'pm_peak' for key in pm_peak_hrs}
 
-import google.auth
-credentials, _ = google.auth.default()
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 
 def max_trips_by_group(
     df: pd.DataFrame, 
@@ -42,82 +43,6 @@ def max_trips_by_group(
           )
     
     return df2
-
-def prep_stop_times(
-    stop_times: pd.DataFrame,
-    am_peak: tuple = AM_PEAK,
-    pm_peak: tuple = PM_PEAK
-) -> pd.DataFrame:
-    """
-    Add fixed peak period information to stop_times for next calculations.
-    """
-
-    stop_times = stop_times.assign(
-            departure_hour = pd.to_datetime(
-                stop_times.departure_sec, unit="s").dt.hour
-        )
-
-    stop_times = stop_times[stop_times['arrival_hour'].isin(both_peaks_hrs)]
-    stop_times['peak'] = stop_times['arrival_hour'].map(peaks_dict)
-    
-    return stop_times
-
-
-def stop_times_aggregation_max_by_stop(
-    stop_times: pd.DataFrame, 
-    analysis_date: str,
-    single_route_dir: bool = False,
-) -> pd.DataFrame:
-    """
-    Take the stop_times table 
-    and group by stop_id-departure hour
-    and count how many trips occur.
-    """
-    
-    stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
-    trips_per_hour_cols = ["peak"]
-    
-    if single_route_dir:
-        trips_per_hour_cols += ["route_id", "direction_id"]
-
-    trips = helpers.import_scheduled_trips(
-        analysis_date,
-        columns = ["feed_key", "gtfs_dataset_key", "trip_id",
-                   "route_id", "direction_id"],
-        get_pandas = True
-    )
-    
-    stop_times = stop_times.merge(
-        trips,
-        on = ["feed_key", "trip_id"]
-    )
-    stop_times.direction_id = stop_times.direction_id.fillna(0).astype('int64').astype(str)
-    stop_times['route_dir'] = stop_times[['route_id', 'direction_id']].agg('_'.join, axis=1)  
-    # Aggregate how many trips are made at that stop by departure hour
-    trips_per_peak_period = gtfs_schedule_wrangling.stop_arrivals_per_stop(
-        stop_times,
-        group_cols = stop_cols + trips_per_hour_cols,
-        count_col = "trip_id"
-    ).rename(columns = {"n_arrivals": "n_trips"})
-    
-    am_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'am_peak']).rename(columns = {"n_trips": "am_max_trips"})
-    pm_trips = (trips_per_peak_period[trips_per_peak_period.peak == 'pm_peak']).rename(columns = {"n_trips": "pm_max_trips"})
-    
-    max_trips_by_stop = pd.merge(
-        am_trips, 
-        pm_trips,
-        on = stop_cols,
-        how = "left"
-    )
-    #  divide by length of peak to get trips/hr, keep n_trips a raw sum
-    max_trips_by_stop = max_trips_by_stop.assign(
-        am_max_trips_hr = (max_trips_by_stop.am_max_trips.fillna(0) / len(am_peak_hrs)).astype(int),
-        pm_max_trips_hr = (max_trips_by_stop.pm_max_trips.fillna(0) / len(pm_peak_hrs)).astype(int),
-        n_trips = (max_trips_by_stop.am_max_trips.fillna(0) + 
-                   max_trips_by_stop.pm_max_trips.fillna(0))
-    )
-        
-    return max_trips_by_stop
 
 
 def hqta_segment_to_stop(
@@ -199,6 +124,7 @@ def hqta_segment_keep_one_stop(
     
     return segment_to_stop_gdf
 
+#  use this for azimuth, too?
 def find_inconclusive_directions(hqta_segments: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
     Where individual segments loop tightly, segment_direction becomes arbitrary.
@@ -275,9 +201,6 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
 
 
 if __name__ == "__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
-    #from dask.distributed import Client
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
     
     logger.add("./logs/hqta_processing.log", retention="3 months")
     logger.add(sys.stderr, 
@@ -288,30 +211,24 @@ if __name__ == "__main__":
     
     fs = get_fs()
     
-#  shift to new script which will add collinearity checks
-#     # (1) Aggregate stop times - by stop_id, find max trips in AM/PM peak
-#     # takes 1 min
-#     max_arrivals_by_stop = helpers.import_scheduled_stop_times(
-#         analysis_date,
-#         get_pandas = True,
-#     ).pipe(prep_stop_times).pipe(stop_times_aggregation_max_by_stop, analysis_date)
-    
-#     max_arrivals_by_stop.to_parquet(
-#         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
-    
-# new step 1!
-    
-    ## (2) Spatial join stops and stop times to hqta segments
+    ## (1) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
-    hqta_segments = gpd.read_parquet(
-        f"{GCS_FILE_PATH}hqta_segments.parquet",
-        storage_options={"token": credentials}
-    )
+    hqta_segments = gcsgp.read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
+    stops_cols = ["feed_key", "stop_id", "stop_name", "geometry"]
     stops = helpers.import_scheduled_stops(
         analysis_date,
         get_pandas = True,
         crs = PROJECT_CRS
     )
+    published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
+    print(published_operators_dict)
+    trips_cols = ['name', 'feed_key', 'gtfs_dataset_key']
+    lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
+    lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
+    lookback_stops = lookback_wrappers.get_lookback_stops(published_operators_dict, lookback_trips_ix, stops_cols,
+                                                         crs=PROJECT_CRS)
+    stops = pd.concat([stops, lookback_stops])
+    
     max_arrivals_by_stop = pd.read_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet"
     ) 

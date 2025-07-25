@@ -5,6 +5,7 @@ hqta_data:
 	python sjoin_stops_to_segments.py
 	python prep_pairwise_intersections.py
 	python get_intersections.py
+	python branching_derived_intersections.py
 	python create_bus_hqta_types.py
 	python assemble_hqta_points.py
 	python assemble_hqta_polygons.py 

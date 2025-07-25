@@ -1,11 +1,12 @@
 import geopandas as gpd
 import pandas as pd
 import numpy as np
-from segment_speed_utils import helpers
+from segment_speed_utils import helpers, gtfs_schedule_wrangling
 from update_vars import (analysis_date, EXPORT_PATH, GCS_FILE_PATH, PROJECT_CRS,
 SEGMENT_BUFFER_METERS, MS_TRANSIT_THRESHOLD, SHARED_STOP_THRESHOLD,
 TARGET_AREA_DIFFERENCE, BRANCHING_OVERLAY_BUFFER)
 import create_aggregate_stop_frequencies
+import lookback_wrappers
 
 from tqdm import tqdm
 tqdm.pandas()
@@ -26,20 +27,46 @@ def get_explode_singles(
                   )
     return single_qual
 
-def get_trips_with_route_dir(analysis_date: str) -> pd.DataFrame:
+def get_trips_with_route_dir(analysis_date: str, published_operators_dict: dict) -> pd.DataFrame:
+    '''
+    pass in published_operators_dict to enable lookback, also return lookback index
+    for shapes query
+    '''
+    trips_cols = ["feed_key", "gtfs_dataset_key", "trip_id",
+               "route_id", "direction_id", "route_type",
+              "shape_array_key", "route_short_name", "name"]
     trips = helpers.import_scheduled_trips(
     analysis_date,
-    columns = ["feed_key", "gtfs_dataset_key", "trip_id",
-               "route_id", "direction_id", "route_type",
-              "shape_array_key", "route_short_name", "name"],
+    columns = trips_cols,
     get_pandas = True
     )
+    lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
+    lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
+    trips = pd.concat([trips, lookback_trips])
     trips = trips[trips['route_type'].isin(['3', '11'])] #  bus only
     trips.direction_id = trips.direction_id.fillna(0).astype(int).astype(str)
     trips['route_dir'] = trips[['route_id', 'direction_id']].agg('_'.join, axis=1)
     
-    return trips
+    return trips, lookback_trips_ix
 
+def get_shapes_with_lookback(analysis_date: str, published_operators_dict: dict, lookback_trips_ix: pd.DataFrame):
+    '''
+    Get shapes (including lookback) and add route_dir and area.
+    '''
+    outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips(
+    analysis_date = analysis_date, inside_ca = False).shape_array_key.unique()
+    shapes = gtfs_schedule_wrangling.longest_shape_by_route_direction(
+        analysis_date = analysis_date
+    ).query(
+        'shape_array_key not in @outside_amtrak_shapes'
+    ).fillna({"direction_id": 0}).astype({"direction_id": "int"})
+    lookback_hqta_shapes = lookback_wrappers.get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix, no_drop=True)
+    shapes = pd.concat([shapes, lookback_hqta_shapes])
+    shapes = shapes.assign(route_dir = shapes.apply(lambda x: str(x.route_id) + '_' + str(x.direction_id), axis=1))
+    shapes.geometry = shapes.buffer(BRANCHING_OVERLAY_BUFFER)
+    shapes = shapes.assign(area = shapes.geometry.map(lambda x: x.area))
+    return shapes
+    
 def evaluate_overlaps(gtfs_dataset_key: str, qualify_dict: dict, shapes: gpd.GeoDataFrame, show_map: bool = False) -> list:
     """
     For each route_dir determined to be partially collinear with another, check symmetric difference
@@ -97,8 +124,7 @@ def find_stops_this_feed(gtfs_dataset_key: str,
         these_stops = find_stops_this_pair(feed_stops, pair)
         stop_dfs += [these_stops]    
     if len(stop_dfs) > 0:
-        feed_add = pd.concat(stop_dfs).merge(feeds, on = 'schedule_gtfs_dataset_key')
-        feed_add = stops.merge(feed_add, on = ['feed_key', 'stop_id'])
+        feed_add = pd.concat(stop_dfs)
         return feed_add
 
 def match_spatial_format(branching_stops_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -112,20 +138,12 @@ def match_spatial_format(branching_stops_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFr
 
 if __name__ == '__main__':
     
+    published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
+    trips, lookback_trips_ix = get_trips_with_route_dir(analysis_date, published_operators_dict)
+                               
     shapes = helpers.import_scheduled_shapes(analysis_date, columns=['shape_array_key', 'geometry'])
-    trips = (get_trips_with_route_dir(analysis_date)
-             .drop_duplicates(subset=['schedule_gtfs_dataset_key', 'shape_array_key', 'route_dir'])
-            )
-    feeds = trips[['feed_key', 'schedule_gtfs_dataset_key']].drop_duplicates()
-    stops = helpers.import_scheduled_stops(analysis_date, columns=['feed_key', 'stop_id', 'geometry'])
     
-    shapes = shapes.merge(trips, on='shape_array_key').assign(length = shapes.geometry.length)
-    shapes.geometry = shapes.buffer(BRANCHING_OVERLAY_BUFFER)
-    shapes = shapes.assign(area = shapes.geometry.map(lambda x: x.area))
-    max_by_route_dir = shapes.groupby(['schedule_gtfs_dataset_key', 'route_dir']).length.max().reset_index()
-    shapes = (shapes.merge(max_by_route_dir, on = ['schedule_gtfs_dataset_key', 'route_dir', 'length'])
-          .drop_duplicates(subset = ['schedule_gtfs_dataset_key', 'route_dir', 'length'])
-         )
+    shapes = get_shapes_with_lookback(analysis_date, published_operators_dict, lookback_trips_ix)
     
     max_arrivals_by_stop_single = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet")
     singles_explode = get_explode_singles(max_arrivals_by_stop_single, MS_TRANSIT_THRESHOLD).explode('route_dir')
@@ -136,7 +154,6 @@ if __name__ == '__main__':
     
     qualify_dict = {key: share_counts[key] for key in share_counts.keys() if share_counts[key] >= SHARED_STOP_THRESHOLD}
     feeds_to_filter = np.unique([key.split('__')[0] for key in qualify_dict.keys()])
-    trips = trips.query("schedule_gtfs_dataset_key.isin(@feeds_to_filter)")
     
     hcd_branching_stops = []
     for gtfs_dataset_key in feeds_to_filter:
