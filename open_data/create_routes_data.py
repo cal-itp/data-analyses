@@ -10,7 +10,7 @@ import yaml
 import open_data_utils
 from calitp_data_analysis import geography_utils
 from calitp_data_analysis import utils
-from shared_utils import portfolio_utils, publish_utils
+from shared_utils import portfolio_utils, publish_utils, shared_data
 from segment_speed_utils import helpers
 from update_vars import analysis_date, TRAFFIC_OPS_GCS
 
@@ -147,89 +147,24 @@ def patch_previous_dates(
     
     return published_routes
 
-def dissolve_shn(columns_to_dissolve: list, file_name: str) -> gpd.GeoDataFrame:
-    """
-    Dissolve State Highway Network so there will only be one row for each
-    route name and route type
-    """
-    # Read in the dataset and change the CRS to one to feet.
-    SHN_FILE = catalog_utils.get_catalog(
-        "shared_data_catalog"
-    ).state_highway_network.urlpath
-
-    shn = gpd.read_parquet(
-        SHN_FILE,
-        storage_options={"token": credentials.token},
-    ).to_crs(geography_utils.CA_NAD83Albers_ft)
-
-    # Dissolve by route which represents the the route's name and drop the other columns
-    # because they are no longer relevant.
-    shn_dissolved = (shn.dissolve(by=columns_to_dissolve).reset_index())[
-        columns_to_dissolve + ["geometry"]
-    ]
-
-    # Rename because I don't want any confusion between SHN route and
-    # transit route.
-    shn_dissolved = shn_dissolved.rename(columns={"Route": "shn_route"})
-    shn_dissolved.columns = shn_dissolved.columns.str.lower()
-    # Find the length of each highway.
-    shn_dissolved = shn_dissolved.assign(
-        highway_feet=shn_dissolved.geometry.length,
-        shn_route=shn_dissolved.shn_route.astype(int).astype(str),
-    )
-
-    # Save this out so I don't have to dissolve it each time.
-    shn_dissolved.to_parquet(
-        f"gs://calitp-analytics-data/data-analyses/state_highway_network/shn_dissolved_by_{file_name}.parquet",
-        filesystem=fs,
-    )
-    return shn_dissolved
-
-def buffer_shn(buffer_amount: int, file_name: str) -> gpd.GeoDataFrame:
-    """
-    Add a buffer to the SHN before overlaying it with
-    transit routes.
-    """
-    GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/state_highway_network/"
-
-    # Read in the dissolved SHN file
-    shn_df = gpd.read_parquet(
-        f"{GCS_FILE_PATH}shn_dissolved_by_{file_name}.parquet",
-        storage_options={"token": credentials.token},
-    )
-
-    # Buffer the state highway.
-    shn_df_buffered = shn_df.assign(
-        geometry=shn_df.geometry.buffer(buffer_amount),
-    )
-
-    # Save it out so we won't have to buffer over again and
-    # can just read it in.
-    shn_df_buffered.to_parquet(
-        f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_{file_name}.parquet",
-        filesystem=fs,
-    )
-
-    return shn_df_buffered
-
 def routes_shn_intersection(
-    routes_gdf: gpd.GeoDataFrame, buffer_amount: int, file_name: str
+    routes_gdf: gpd.GeoDataFrame, buffer_amount: int
 ) -> gpd.GeoDataFrame:
     """
     Overlay the most recent transit routes with a buffered version
     of the SHN
     """
-    GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/state_highway_network/"
+    GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 
     # Read in buffered shn here or re buffer if we don't have it available.
-    HWY_FILE = f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_{file_name}.parquet"
+    HWY_FILE = f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_shn_dissolved_by_ct_district_route.parquet"
 
     if fs.exists(HWY_FILE):
         shn_routes_gdf = gpd.read_parquet(
             HWY_FILE, storage_options={"token": credentials.token}
         )
     else:
-        shn_routes_gdf = buffer_shn(buffer_amount)
+        shn_routes_gdf = shared_data.buffer_shn(buffer_amount)
 
     # Process the most recent transit route geographies and ensure the
     # CRS matches the SHN routes' GDF so the overlay doesn't go wonky.
@@ -303,10 +238,6 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
     )
     return agg1
 
-def create_on_shs_column(df):
-    df["on_shs"] = np.where(df["pct_route_on_hwy_across_districts"] == 0, "N", "Y")
-    return df
-
 def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt:int) -> pd.DataFrame:
     """
     Prepare the gdf to join with the existing transit_routes
@@ -324,7 +255,7 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt:int) -> pd.DataFrame:
 
     # Add yes/no column to signify if a transit route intersects
     # with a SHN route
-    agg1 = create_on_shs_column(agg1)
+    agg1["on_shs"] = np.where(agg1["pct_route_on_hwy_across_districts"] == 0, "N", "Y")
 
     # Clean up rows that are tagged as "on_shs==N" but still have values
     # that appear. 
@@ -355,6 +286,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 if __name__ == "__main__":
     
+    SHN_HWY_BUFFER_FEET = 50
     time0 = datetime.datetime.now()
     
     # Make an operator-feed level file (this is published)    
@@ -374,7 +306,7 @@ if __name__ == "__main__":
     published_routes = patch_previous_dates(
         routes, 
         analysis_date,
-    # ).pipe(add_shn_information).pipe(finalize_export_df) #  this errors, need to specify buffer_amt...
+    # ).pipe(add_shn_information, SHN_HWY_BUFFER_FEET).pipe(finalize_export_df) #  this errors, need to specify buffer_amt...
     ).pipe(finalize_export_df)
 
         
@@ -382,12 +314,6 @@ if __name__ == "__main__":
         published_routes, 
         TRAFFIC_OPS_GCS, 
         "ca_transit_routes"
-    )
-    
-    utils.geoparquet_gcs_export(
-        published_routes,
-        TRAFFIC_OPS_GCS,
-        f"export/ca_transit_routes_{analysis_date}"
     )
     
     time1 = datetime.datetime.now()
