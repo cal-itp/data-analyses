@@ -1,241 +1,245 @@
 directory: ./gtfs_digest/
-notebook: ./gtfs_digest/03_report.ipynb
+notebook: ./gtfs_digest/_operator_report.ipynb
 parts:
 - chapters:
   - caption: District 01 - Eureka
     params:
       district: 01 - Eureka
     sections:
-    - organization_name: Curry Public Transit
-    - organization_name: Humboldt Transit Authority
-    - organization_name: Lake Transit Authority
-    - organization_name: Mendocino Transit Authority
-    - organization_name: POINT
-    - organization_name: Redwood Coast Transit Authority
-    - organization_name: Yurok Tribe
+    - portfolio_organization_name: Curry Public Transit
+    - portfolio_organization_name: Humboldt Transit Authority
+    - portfolio_organization_name: Lake Transit Authority
+    - portfolio_organization_name: Mendocino Transit Authority
+    - portfolio_organization_name: POINT
+    - portfolio_organization_name: Redwood Coast Transit Authority
+    - portfolio_organization_name: Yurok Tribe
   - caption: District 02 - Redding
     params:
       district: 02 - Redding
     sections:
-    - organization_name: Lassen Transit Service Agency
-    - organization_name: Modoc Transportation Agency
-    - organization_name: Plumas Transit Systems
-    - organization_name: Redding Area Bus Authority
-    - organization_name: Siskiyou County
-    - organization_name: Tehama County
-    - organization_name: Trinity County
+    - portfolio_organization_name: Lassen Transit Service Agency
+    - portfolio_organization_name: Modoc Transportation Agency
+    - portfolio_organization_name: Plumas Transit Systems
+    - portfolio_organization_name: Redding Area Bus Authority
+    - portfolio_organization_name: Siskiyou County
+    - portfolio_organization_name: Tehama County
+    - portfolio_organization_name: Trinity County
   - caption: District 03 - Marysville / Sacramento
     params:
       district: 03 - Marysville / Sacramento
     sections:
-    - organization_name: Amtrak
-    - organization_name: Butte County Association of Governments
-    - organization_name: City of Auburn
-    - organization_name: City of Elk Grove
-    - organization_name: City of Roseville
-    - organization_name: El Dorado County Transit Authority
-    - organization_name: Glenn County
-    - organization_name: Nevada County
-    - organization_name: Placer County
-    - organization_name: Sacramento County
-    - organization_name: Sacramento Regional Transit District
-    - organization_name: Tahoe Transportation District
-    - organization_name: Tahoe Truckee Area Regional Transportation, North Lake Tahoe
-    - organization_name: University of California, Davis
-    - organization_name: Yolo County Transportation District
-    - organization_name: Yuba-Sutter Transit Authority
+    - portfolio_organization_name: Amtrak
+    - portfolio_organization_name: Butte County Association of Governments
+    - portfolio_organization_name: City of Auburn
+    - portfolio_organization_name: City of Elk Grove
+    - portfolio_organization_name: City of Roseville
+    - portfolio_organization_name: El Dorado County Transit Authority
+    - portfolio_organization_name: Glenn County
+    - portfolio_organization_name: Nevada County
+    - portfolio_organization_name: Placer County
+    - portfolio_organization_name: Sacramento County
+    - portfolio_organization_name: Sacramento Regional Transit District
+    - portfolio_organization_name: Tahoe Transportation District
+    - portfolio_organization_name: Tahoe Truckee Area Regional Transportation, North
+        Lake Tahoe
+    - portfolio_organization_name: University of California, Davis
+    - portfolio_organization_name: Yolo County Transportation District
+    - portfolio_organization_name: Yuba-Sutter Transit Authority
   - caption: District 04 - Bay Area / Oakland
     params:
       district: 04 - Bay Area / Oakland
     sections:
-    - organization_name: Alameda-Contra Costa Transit District
-    - organization_name: Capitol Corridor Joint Powers Authority
-    - organization_name: Central Contra Costa Transit Authority
-    - organization_name: City and County of San Francisco
-    - organization_name: City of Fairfield
-    - organization_name: City of Mountain View
-    - organization_name: City of Petaluma
-    - organization_name: City of Rio Vista
-    - organization_name: City of Santa Rosa
-    - organization_name: City of South San Francisco
-    - organization_name: City of Union City
-    - organization_name: City of Vacaville
-    - organization_name: Commute.org and Menlo Park Community Shuttles Schedule
-    - organization_name: Eastern Contra Costa Transit Authority
-    - organization_name: Emeryville Transportation Management Agency
-    - organization_name: Golden Gate Bridge, Highway and Transportation District
-    - organization_name: Livermore-Amador Valley Transit Authority
-    - organization_name: Marin County Transit District
-    - organization_name: Mission Bay Transportation Management Agency
-    - organization_name: Mountain View Transportation Management Association
-    - organization_name: Napa Valley Transportation Authority
-    - organization_name: Peninsula Corridor Joint Powers Board
-    - organization_name: Presidio Trust
-    - organization_name: San Francisco Bay Area Rapid Transit District
-    - organization_name: San Francisco Bay Ferry and Oakland Alameda Water Shuttle
-        Schedule
-    - organization_name: San Francisco International Airport
-    - organization_name: San Mateo County Transit District
-    - organization_name: Santa Clara Valley Transportation Authority
-    - organization_name: Solano Transportation Authority
-    - organization_name: Sonoma County Transit Schedule
-    - organization_name: Sonoma-Marin Area Rail Transit District
-    - organization_name: Stanford University
-    - organization_name: Treasure Island Community Development
-    - organization_name: University of California, Berkeley
-    - organization_name: Western Contra Costa Transit Authority
+    - portfolio_organization_name: Alameda-Contra Costa Transit District
+    - portfolio_organization_name: Capitol Corridor Joint Powers Authority
+    - portfolio_organization_name: Central Contra Costa Transit Authority
+    - portfolio_organization_name: City and County of San Francisco
+    - portfolio_organization_name: City of Fairfield
+    - portfolio_organization_name: City of Mountain View
+    - portfolio_organization_name: City of Petaluma
+    - portfolio_organization_name: City of Rio Vista
+    - portfolio_organization_name: City of Santa Rosa
+    - portfolio_organization_name: City of South San Francisco
+    - portfolio_organization_name: City of Union City
+    - portfolio_organization_name: City of Vacaville
+    - portfolio_organization_name: Commute.org and Menlo Park Community Shuttles Schedule
+    - portfolio_organization_name: Eastern Contra Costa Transit Authority
+    - portfolio_organization_name: Emeryville Transportation Management Agency
+    - portfolio_organization_name: Golden Gate Bridge, Highway and Transportation
+        District
+    - portfolio_organization_name: Livermore-Amador Valley Transit Authority
+    - portfolio_organization_name: Marin County Transit District
+    - portfolio_organization_name: Mission Bay Transportation Management Agency
+    - portfolio_organization_name: Mountain View Transportation Management Association
+    - portfolio_organization_name: Napa Valley Transportation Authority
+    - portfolio_organization_name: Peninsula Corridor Joint Powers Board
+    - portfolio_organization_name: Presidio Trust
+    - portfolio_organization_name: San Francisco Bay Area Rapid Transit District
+    - portfolio_organization_name: San Francisco Bay Ferry and Oakland Alameda Water
+        Shuttle Schedule
+    - portfolio_organization_name: San Francisco International Airport
+    - portfolio_organization_name: San Mateo County Transit District
+    - portfolio_organization_name: Santa Clara Valley Transportation Authority
+    - portfolio_organization_name: Solano Transportation Authority
+    - portfolio_organization_name: Sonoma County Transit Schedule
+    - portfolio_organization_name: Sonoma-Marin Area Rail Transit District
+    - portfolio_organization_name: Stanford University
+    - portfolio_organization_name: Treasure Island Community Development
+    - portfolio_organization_name: University of California, Berkeley
+    - portfolio_organization_name: Western Contra Costa Transit Authority
   - caption: District 05 - San Luis Obispo / Santa Barbara
     params:
       district: 05 - San Luis Obispo / Santa Barbara
     sections:
-    - organization_name: City of Guadalupe
-    - organization_name: City of Lompoc
-    - organization_name: City of Morro Bay
-    - organization_name: City of Santa Maria
-    - organization_name: City of Solvang
-    - organization_name: Monterey-Salinas Transit
-    - organization_name: San Benito County Local Transportation Authority
-    - organization_name: San Luis Obispo Regional Transit Authority
-    - organization_name: Santa Barbara County Association of Governments
-    - organization_name: Santa Barbara Metropolitan Transit District
-    - organization_name: UCSC and City of Santa Cruz Beach Shuttle
+    - portfolio_organization_name: City of Guadalupe
+    - portfolio_organization_name: City of Lompoc
+    - portfolio_organization_name: City of Morro Bay
+    - portfolio_organization_name: City of Santa Maria
+    - portfolio_organization_name: City of Solvang
+    - portfolio_organization_name: Monterey-Salinas Transit
+    - portfolio_organization_name: San Benito County Local Transportation Authority
+    - portfolio_organization_name: San Luis Obispo Regional Transit Authority
+    - portfolio_organization_name: Santa Barbara County Association of Governments
+    - portfolio_organization_name: Santa Barbara Metropolitan Transit District
+    - portfolio_organization_name: UCSC and City of Santa Cruz Beach Shuttle
   - caption: District 06 - Fresno / Bakersfield
     params:
       district: 06 - Fresno / Bakersfield
     sections:
-    - organization_name: City of Arvin
-    - organization_name: City of Clovis
-    - organization_name: City of Delano
-    - organization_name: City of Fresno
-    - organization_name: City of Madera
-    - organization_name: City of Visalia
-    - organization_name: Fresno County Rural Transit Agency
-    - organization_name: Golden Empire Transit District
-    - organization_name: Kern County
-    - organization_name: Kings County Area Public Transit Agency
-    - organization_name: Madera County
-    - organization_name: Tulare County Regional Transit Agency
+    - portfolio_organization_name: City of Arvin
+    - portfolio_organization_name: City of Clovis
+    - portfolio_organization_name: City of Delano
+    - portfolio_organization_name: City of Fresno
+    - portfolio_organization_name: City of Madera
+    - portfolio_organization_name: City of Visalia
+    - portfolio_organization_name: Fresno County Rural Transit Agency
+    - portfolio_organization_name: Golden Empire Transit District
+    - portfolio_organization_name: Kern County
+    - portfolio_organization_name: Kings County Area Public Transit Agency
+    - portfolio_organization_name: Madera County
+    - portfolio_organization_name: Tulare County Regional Transit Agency
   - caption: District 07 - Los Angeles / Ventura
     params:
       district: 07 - Los Angeles / Ventura
     sections:
-    - organization_name: Antelope Valley Transit Authority
-    - organization_name: City of Alhambra
-    - organization_name: City of Arcadia
-    - organization_name: City of Artesia
-    - organization_name: City of Avalon
-    - organization_name: City of Baldwin Park
-    - organization_name: City of Bell
-    - organization_name: City of Bell Gardens
-    - organization_name: City of Bellflower
-    - organization_name: City of Burbank
-    - organization_name: City of Calabasas
-    - organization_name: City of Cerritos
-    - organization_name: City of Commerce
-    - organization_name: City of Cudahy
-    - organization_name: City of Culver City
-    - organization_name: City of Downey
-    - organization_name: City of El Monte
-    - organization_name: City of El Segundo
-    - organization_name: City of Gardena
-    - organization_name: City of Glendale
-    - organization_name: City of Glendora
-    - organization_name: City of Huntington Park
-    - organization_name: City of Inglewood
-    - organization_name: City of La Puente
-    - organization_name: City of Lawndale
-    - organization_name: City of Los Angeles
-    - organization_name: City of Lynwood
-    - organization_name: City of Maywood
-    - organization_name: City of Montebello
-    - organization_name: City of Monterey Park
-    - organization_name: City of Norwalk
-    - organization_name: City of Pasadena
-    - organization_name: City of Redondo Beach
-    - organization_name: City of Rosemead
-    - organization_name: City of San Fernando
-    - organization_name: City of Santa Clarita
-    - organization_name: City of Santa Monica
-    - organization_name: City of Sierra Madre
-    - organization_name: City of South Gate
-    - organization_name: City of Torrance
-    - organization_name: City of West Covina
-    - organization_name: City of West Hollywood
-    - organization_name: FlixBus and Greyhound
-    - organization_name: Foothill Transit
-    - organization_name: Long Beach Transit
-    - organization_name: Los Angeles County
-    - organization_name: Los Angeles County Metropolitan Transportation Authority
-    - organization_name: Los Angeles World Airports
-    - organization_name: Palos Verdes Peninsula Transit Authority
-    - organization_name: Southern California Regional Rail Authority
-    - organization_name: University of California, Los Angeles
-    - organization_name: Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark,
-        Ojai, Simi Valley, Thousand Oaks)
+    - portfolio_organization_name: Antelope Valley Transit Authority
+    - portfolio_organization_name: City of Alhambra
+    - portfolio_organization_name: City of Arcadia
+    - portfolio_organization_name: City of Artesia
+    - portfolio_organization_name: City of Avalon
+    - portfolio_organization_name: City of Baldwin Park
+    - portfolio_organization_name: City of Bell
+    - portfolio_organization_name: City of Bell Gardens
+    - portfolio_organization_name: City of Bellflower
+    - portfolio_organization_name: City of Burbank
+    - portfolio_organization_name: City of Calabasas
+    - portfolio_organization_name: City of Cerritos
+    - portfolio_organization_name: City of Commerce
+    - portfolio_organization_name: City of Cudahy
+    - portfolio_organization_name: City of Culver City
+    - portfolio_organization_name: City of Downey
+    - portfolio_organization_name: City of El Monte
+    - portfolio_organization_name: City of El Segundo
+    - portfolio_organization_name: City of Gardena
+    - portfolio_organization_name: City of Glendale
+    - portfolio_organization_name: City of Glendora
+    - portfolio_organization_name: City of Huntington Park
+    - portfolio_organization_name: City of Inglewood
+    - portfolio_organization_name: City of La Puente
+    - portfolio_organization_name: City of Lawndale
+    - portfolio_organization_name: City of Los Angeles
+    - portfolio_organization_name: City of Lynwood
+    - portfolio_organization_name: City of Maywood
+    - portfolio_organization_name: City of Montebello
+    - portfolio_organization_name: City of Monterey Park
+    - portfolio_organization_name: City of Norwalk
+    - portfolio_organization_name: City of Pasadena
+    - portfolio_organization_name: City of Redondo Beach
+    - portfolio_organization_name: City of Rosemead
+    - portfolio_organization_name: City of San Fernando
+    - portfolio_organization_name: City of Santa Clarita
+    - portfolio_organization_name: City of Santa Monica
+    - portfolio_organization_name: City of Sierra Madre
+    - portfolio_organization_name: City of South Gate
+    - portfolio_organization_name: City of Torrance
+    - portfolio_organization_name: City of West Covina
+    - portfolio_organization_name: City of West Hollywood
+    - portfolio_organization_name: FlixBus and Greyhound
+    - portfolio_organization_name: Foothill Transit
+    - portfolio_organization_name: Long Beach Transit
+    - portfolio_organization_name: Los Angeles County
+    - portfolio_organization_name: Los Angeles County Metropolitan Transportation
+        Authority
+    - portfolio_organization_name: Los Angeles World Airports
+    - portfolio_organization_name: Palos Verdes Peninsula Transit Authority
+    - portfolio_organization_name: Southern California Regional Rail Authority
+    - portfolio_organization_name: University of California, Los Angeles
+    - portfolio_organization_name: Ventura County (VCTC, Gold Coast, Cities of Camarillo,
+        Moorpark, Ojai, Simi Valley, Thousand Oaks)
   - caption: District 08 - San Bernardino / Riverside
     params:
       district: 08 - San Bernardino / Riverside
     sections:
-    - organization_name: Basin Transit
-    - organization_name: Chemehuevi Indian Tribe
-    - organization_name: City of Banning
-    - organization_name: City of Beaumont
-    - organization_name: City of Corona
-    - organization_name: City of Needles
-    - organization_name: Mountain Area Regional Transit Authority
-    - organization_name: OmniTrans
-    - organization_name: Palo Verde Valley Transit Agency
-    - organization_name: Riverside Transit Agency
-    - organization_name: Southern California Regional Rail Authority
-    - organization_name: SunLine Transit Agency
-    - organization_name: Victor Valley Transit Authority
+    - portfolio_organization_name: Basin Transit
+    - portfolio_organization_name: Chemehuevi Indian Tribe
+    - portfolio_organization_name: City of Banning
+    - portfolio_organization_name: City of Beaumont
+    - portfolio_organization_name: City of Corona
+    - portfolio_organization_name: City of Needles
+    - portfolio_organization_name: Mountain Area Regional Transit Authority
+    - portfolio_organization_name: OmniTrans
+    - portfolio_organization_name: Palo Verde Valley Transit Agency
+    - portfolio_organization_name: Riverside Transit Agency
+    - portfolio_organization_name: Southern California Regional Rail Authority
+    - portfolio_organization_name: SunLine Transit Agency
+    - portfolio_organization_name: Victor Valley Transit Authority
   - caption: District 09 - Bishop
     params:
       district: 09 - Bishop
     sections:
-    - organization_name: Eastern Sierra Transit Authority
+    - portfolio_organization_name: Eastern Sierra Transit Authority
   - caption: District 10 - Stockton
     params:
       district: 10 - Stockton
     sections:
-    - organization_name: Amador Regional Transit System
-    - organization_name: Amtrak
-    - organization_name: Calaveras Transit Agency
-    - organization_name: City of Escalon
-    - organization_name: City of Lodi
-    - organization_name: City of Manteca
-    - organization_name: City of Ripon
-    - organization_name: City of Tracy
-    - organization_name: City of Turlock
-    - organization_name: San Joaquin Regional Rail Commission
-    - organization_name: San Joaquin Regional Transit District
-    - organization_name: Stanislaus Regional Transit Authority
-    - organization_name: Transit Joint Powers Authority for Merced County
-    - organization_name: Tuolumne County Transit Agency
-    - organization_name: Yosemite Area Regional Transportation System
-    - organization_name: Yosemite National Park
+    - portfolio_organization_name: Amador Regional Transit System
+    - portfolio_organization_name: Amtrak
+    - portfolio_organization_name: Calaveras Transit Agency
+    - portfolio_organization_name: City of Escalon
+    - portfolio_organization_name: City of Lodi
+    - portfolio_organization_name: City of Manteca
+    - portfolio_organization_name: City of Ripon
+    - portfolio_organization_name: City of Tracy
+    - portfolio_organization_name: City of Turlock
+    - portfolio_organization_name: San Joaquin Regional Rail Commission
+    - portfolio_organization_name: San Joaquin Regional Transit District
+    - portfolio_organization_name: Stanislaus Regional Transit Authority
+    - portfolio_organization_name: Transit Joint Powers Authority for Merced County
+    - portfolio_organization_name: Tuolumne County Transit Agency
+    - portfolio_organization_name: Yosemite Area Regional Transportation System
+    - portfolio_organization_name: Yosemite National Park
   - caption: District 11 - San Diego
     params:
       district: 11 - San Diego
     sections:
-    - organization_name: Imperial County Transportation Commission
-    - organization_name: North County Transit District
-    - organization_name: San Diego Metropolitan Transit System, Airport, Flagship
-        Cruises
-    - organization_name: University of California, San Diego
-    - organization_name: Yuma County Intergovernmental Public Transportation Authority
+    - portfolio_organization_name: Imperial County Transportation Commission
+    - portfolio_organization_name: North County Transit District
+    - portfolio_organization_name: San Diego Metropolitan Transit System, Airport,
+        Flagship Cruises
+    - portfolio_organization_name: University of California, San Diego
+    - portfolio_organization_name: Yuma County Intergovernmental Public Transportation
+        Authority
   - caption: District 12 - Santa Ana
     params:
       district: 12 - Santa Ana
     sections:
-    - organization_name: Anaheim Transportation Network
-    - organization_name: City of Dana Point
-    - organization_name: City of Irvine
-    - organization_name: City of Laguna Beach
-    - organization_name: City of Mission Viejo
-    - organization_name: City of San Clemente
-    - organization_name: City of San Juan Capistrano
-    - organization_name: Orange County Transportation Authority
-    - organization_name: University of California, Irvine
+    - portfolio_organization_name: Anaheim Transportation Network
+    - portfolio_organization_name: City of Dana Point
+    - portfolio_organization_name: City of Irvine
+    - portfolio_organization_name: City of Laguna Beach
+    - portfolio_organization_name: City of Mission Viejo
+    - portfolio_organization_name: City of San Clemente
+    - portfolio_organization_name: City of San Juan Capistrano
+    - portfolio_organization_name: Orange County Transportation Authority
+    - portfolio_organization_name: University of California, Irvine
 readme: ./gtfs_digest/README.md
 title: GTFS Digest
