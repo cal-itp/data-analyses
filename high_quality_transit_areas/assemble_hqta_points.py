@@ -105,6 +105,20 @@ def get_agency_crosswalk(analysis_date: str) -> pd.DataFrame:
     
     return agency_info
 
+def get_lookback_agency_crosswalk(published_operators_dict: dict, lookback_trips_ix: pd.DataFrame) -> pd.DataFrame:
+    """
+    Get agency crosswalk according to lookback published_operators_dict.
+    Return most recent record for each agency.
+    """
+    
+    lookback_agency_info = []
+    for date in published_operators_dict.keys():
+        schedule_gtfs_dataset_keys = lookback_trips_ix.query('lookback_date == @date').schedule_gtfs_dataset_key.unique()
+        agency_info = (get_agency_crosswalk(analysis_date=date)
+                       .query('schedule_gtfs_dataset_key.isin(@schedule_gtfs_dataset_keys)')
+                      )
+        lookback_agency_info += [agency_info]
+    return pd.concat(lookback_agency_info)
         
 def add_route_agency_info(
     gdf: gpd.GeoDataFrame, 
@@ -118,6 +132,7 @@ def add_route_agency_info(
     """
     stop_with_route_crosswalk = catalog.stops_info_crosswalk(geopandas_kwargs={"storage_options": {"token": credentials}}).read()
     
+    #  TODO lookback and concat
     agency_info = get_agency_crosswalk(analysis_date)
     
     # Make sure all the stops have route_id

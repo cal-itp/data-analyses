@@ -1,11 +1,12 @@
 from shared_utils import rt_dates
 import datetime as dt
+from calitp_data_analysis import geography_utils
 
-analysis_date = rt_dates.DATES["jun2025"]
+analysis_date = rt_dates.DATES["jul2025"]
 
 GCS_FILE_PATH = ("gs://calitp-analytics-data/data-analyses/"
                  "high_quality_transit_areas/")
-PROJECT_CRS = "EPSG:3310"
+PROJECT_CRS = geography_utils.CA_NAD83Albers_m # "EPSG:3310"
 HQTA_SEGMENT_LENGTH = 1_250 # meters
 SEGMENT_BUFFER_METERS = 35 # buffer around segment to sjoin to stops
 INTERSECTION_BUFFER_METERS = 152.4 # ~ 500ft

@@ -4,63 +4,27 @@ parts:
 - caption: Introduction
 - chapters:
   - params:
-      rtpa: Alpine County Local Transportation Commission
-  - params:
-      rtpa: Amador County Transportation Commission
-  - params:
       rtpa: Butte County Association of Governments
-  - params:
-      rtpa: Calaveras Council of Governments
-  - params:
-      rtpa: Colusa County Transportation Commission
-  - params:
-      rtpa: Council of San Benito County Governments
-  - params:
-      rtpa: Del Norte Local Transportation Commission
   - params:
       rtpa: El Dorado County Transportation Commission
   - params:
       rtpa: Fresno Council of Governments
   - params:
-      rtpa: Glenn County Transportation Commission
-  - params:
-      rtpa: Humboldt County Association of Governments
-  - params:
       rtpa: Imperial County Transportation Commission
-  - params:
-      rtpa: Inyo County Local Transportation Commission
   - params:
       rtpa: Kern Council of Governments
   - params:
       rtpa: Kings County Association of Governments
   - params:
-      rtpa: Lake County/City Area Planning Council
-  - params:
-      rtpa: Lassen County Transportation Commission
-  - params:
-      rtpa: Los Angeles County Department of Public Works
-  - params:
       rtpa: Los Angeles County Metropolitan Transportation Authority
-  - params:
-      rtpa: Madera County Transportation Commission
-  - params:
-      rtpa: Mariposa County Local Transportation Commission
-  - params:
-      rtpa: Mendocino Council of Governments
   - params:
       rtpa: Merced County Association of Governments
   - params:
       rtpa: Metropolitan Transportation Commission
   - params:
-      rtpa: Modoc County Transportation Commission
-  - params:
-      rtpa: Nevada County Transportation Commission
-  - params:
       rtpa: Orange County Transportation Authority
   - params:
       rtpa: Placer County Transportation Planning Agency
-  - params:
-      rtpa: Plumas County Transportation Commission
   - params:
       rtpa: Riverside County Transportation Commission
   - params:
@@ -80,23 +44,13 @@ parts:
   - params:
       rtpa: Shasta Regional Transportation Agency
   - params:
-      rtpa: Sierra County Transportation Commission
-  - params:
-      rtpa: Siskiyou County Local Transportation Commission
-  - params:
       rtpa: Stanislaus Council of Governments
   - params:
       rtpa: Tahoe Regional Planning Agency
   - params:
-      rtpa: Tehama County Transportation Commission
-  - params:
       rtpa: Transportation Agency for Monterey County
   - params:
-      rtpa: Trinity County Transportation Commission
-  - params:
       rtpa: Tulare County Association of Governments
-  - params:
-      rtpa: Tuolumne County Transportation Council
   - params:
       rtpa: Ventura County Transportation Commission
 readme: ./ntd/monthly_ridership_report/README.md

@@ -2,7 +2,6 @@
 5311 Utils for Analysis and Charting 
 """
 import pandas as pd
-from siuba import *
 from calitp_data_analysis.sql import *
 
 import altair as alt

@@ -43,7 +43,7 @@ def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
         date,
         columns = ["shape_array_key", "n_trips", "geometry"],
         get_pandas = True,
-        crs = WGS84
+        crs = geography_utils.WGS84
     ).dropna(subset="shape_array_key")
     
     df = pd.merge(
@@ -350,7 +350,8 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     shape_cols = ['shape_id', 'n_trips']
     agency_ids = ['base64_url']
     #shn_cols = ["shn_route","on_shs","shn_districts","pct_route_on_hwy_across_districts"]
-    col_order = route_cols + shape_cols + agency_ids  + ['geometry']
+    # col_order = route_cols + shape_cols + agency_ids + shn_cols + ['geometry']
+    col_order = route_cols + shape_cols + agency_ids + ['geometry']
     df2 = (df[col_order]
            .reindex(columns = col_order)
            .rename(columns = open_data_utils.STANDARDIZED_COLUMNS_DICT)
@@ -386,6 +387,12 @@ if __name__ == "__main__":
         published_routes, 
         TRAFFIC_OPS_GCS, 
         "ca_transit_routes"
+    )
+    
+    utils.geoparquet_gcs_export(
+        published_routes,
+        TRAFFIC_OPS_GCS,
+        f"export/ca_transit_routes_{analysis_date}"
     )
     
     time1 = datetime.datetime.now()
