@@ -199,11 +199,11 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
                 "recent_combined_name",
             ],
             as_index=False,
-        )[["shn_route", "District", "pct_route_on_hwy_across_districts"]]
+        )[["shn_route", "district", "pct_route_on_hwy_across_districts"]]
         .agg(
             {
                 "shn_route": lambda x: ", ".join(set(x.astype(str))),
-                "District": lambda x: ", ".join(set(x.astype(str))),
+                "district": lambda x: ", ".join(set(x.astype(str))),
                 "pct_route_on_hwy_across_districts": pct_route_on_hwy_agg,
             }
         )
