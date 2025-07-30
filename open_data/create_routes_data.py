@@ -6,14 +6,19 @@ import datetime
 import geopandas as gpd
 import pandas as pd
 import yaml
+import numpy as np 
 
 import open_data_utils
 from calitp_data_analysis import geography_utils
 from calitp_data_analysis import utils
 from shared_utils import portfolio_utils, publish_utils, shared_data
 from segment_speed_utils import helpers
-from update_vars import analysis_date, TRAFFIC_OPS_GCS
+from update_vars import analysis_date, TRAFFIC_OPS_GCS, AH_TEST
 
+import google.auth
+credentials, project = google.auth.default()
+import gcsfs
+fs = gcsfs.GCSFileSystem()
 
 def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
     """
@@ -180,31 +185,33 @@ def routes_shn_intersection(
     # shapes.
     gdf = gdf.assign(
         pct_route_on_hwy=(gdf.geometry.length / gdf.route_length_feet).round(3) * 100,
-    ).drop(
-        columns=[
-            "geometry",
-        ]
     )
 
-    # Join back the dataframe above with the original transit route dataframes
-    # so we can have the original transit route geographies.
-    gdf2 = pd.merge(
-        routes_gdf,
-        gdf,
-        on=[
+    # Subset
+    gdf2 = gdf[
+        [
+            "district",
+            "highway_feet",
+            "shn_route",
+            "pct_route_on_hwy",
             "n_trips",
             "schedule_gtfs_dataset_key",
             "route_id",
             "route_type",
             "shape_id",
             "route_name_used",
-            "route_length_feet",
-        ],
-        how="left",
-    )
+        ]
+    ]
 
     # Clean up
     gdf2.district = gdf2.district.fillna(0).astype(int)
+    
+    gdf2 = gdf2.rename(
+        columns={
+            "pct_route_on_hwy": "pct_route_on_hwy_across_districts",
+            "district": "shn_districts",
+        }
+    )
     return gdf2
 
 def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.DataFrame:
@@ -219,7 +226,14 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
 
     agg1 = (
         df.groupby(
-            ["schedule_gtfs_dataset_key", "route_type", "shape_id", "route_id", "route_name_used"],
+            [
+                "n_trips",
+                "schedule_gtfs_dataset_key",
+                "route_id",
+                "route_type",
+                "shape_id",
+                "route_name_used",
+            ],
             as_index=False,
         )[["shn_route", "shn_districts", "pct_route_on_hwy_across_districts"]]
         .agg(
@@ -238,30 +252,44 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
     )
     return agg1
 
-def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt:int) -> pd.DataFrame:
+def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
     """
     Prepare the gdf to join with the existing transit_routes
     dataframe that is published on the Open Data Portal
     """
     # Overlay
-    intersecting = routes_shn_intersection(gdf, buffer_amt, "ct_district_route")
-    # Rename column
-    gdf = gdf.rename(columns={"pct_route_on_hwy": "pct_route_on_hwy_across_districts",
-                             "district":"shn_districts"})
+    intersecting = routes_shn_intersection(gdf, buffer_amt)
     # Group the dataframe so that one route only has one
     # row instead of multiple rows after finding its
     # intersection with any SHN routes.
-    agg1 = group_route_district(gdf, "sum")
+    agg1 = group_route_district(intersecting, "sum")
 
     # Add yes/no column to signify if a transit route intersects
     # with a SHN route
     agg1["on_shs"] = np.where(agg1["pct_route_on_hwy_across_districts"] == 0, "N", "Y")
 
     # Clean up rows that are tagged as "on_shs==N" but still have values
-    # that appear. 
-    agg1.loc[(agg1['on_shs'] == "N") & (agg1['shn_districts'] != "0"), 
-                        ['shn_districts', 'shn_route']] = np.nan
-    return agg1
+    # that appear.
+    agg1.loc[
+        (agg1["on_shs"] == "N") & (agg1["shn_districts"] != "0"),
+        ["shn_districts", "shn_route"],
+    ] = np.nan
+    # Join back the dataframe above with the original transit route dataframes
+    # so we can have the original transit route geographies.
+    m1 = pd.merge(
+        gdf,
+        agg1,
+        on=[
+            "n_trips",
+            "schedule_gtfs_dataset_key",
+            "route_id",
+            "route_type",
+            "shape_id",
+            "route_name_used",
+        ],
+        how="left",
+    )
+    return m1
 
 def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
@@ -273,9 +301,9 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         'route_id', 'route_type', 'route_name_used']
     shape_cols = ['shape_id', 'n_trips']
     agency_ids = ['base64_url']
-    # shn_cols = ["shn_route","on_shs","shn_districts","pct_route_on_hwy_across_districts"]
-    # col_order = route_cols + shape_cols + agency_ids + shn_cols + ['geometry']
-    col_order = route_cols + shape_cols + agency_ids + ['geometry']
+    shn_cols = ["shn_route","on_shs","shn_districts","pct_route_on_hwy_across_districts"]
+    col_order = route_cols + shape_cols + agency_ids + shn_cols + ['geometry']
+    # col_order = route_cols + shape_cols + agency_ids + ['geometry']
     df2 = (df[col_order]
            .reindex(columns = col_order)
            .rename(columns = open_data_utils.STANDARDIZED_COLUMNS_DICT)
@@ -299,22 +327,21 @@ if __name__ == "__main__":
     # the export/ folder contains the patched versions of the routes
     utils.geoparquet_gcs_export(
         routes,
-        TRAFFIC_OPS_GCS,
+        AH_TEST,
         f"ca_transit_routes_{analysis_date}"
     )
     
     published_routes = patch_previous_dates(
         routes, 
         analysis_date,
-    # ).pipe(add_shn_information, SHN_HWY_BUFFER_FEET).pipe(finalize_export_df) #  this errors, need to specify buffer_amt...
-    ).pipe(finalize_export_df)
-
+    ).pipe(add_shn_information, SHN_HWY_BUFFER_FEET).pipe(finalize_export_df) 
         
     utils.geoparquet_gcs_export(
         published_routes, 
-        TRAFFIC_OPS_GCS, 
+        AH_TEST, 
         "ca_transit_routes"
     )
+    print(f"ca_transit_routes saved to {AH_TEST}")
     
     time1 = datetime.datetime.now()
     print(f"Execution time for routes script: {time1-time0}")
