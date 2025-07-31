@@ -353,8 +353,7 @@ def dissolve_shn_district() -> gpd.GeoDataFrame:
 
     # Dissolve by route which represents the the route's name and drop the other columns
     # because they are no longer relevant.
-    shn_dissolved = (shn.dissolve(by=["Route", "District"]).reset_index())[[
-        "Route", "District", "geometry"]]
+    shn_dissolved = (shn.dissolve(by=["Route", "District"]).reset_index())[["Route", "District", "geometry"]]
 
     # Rename because I don't want any confusion between SHN route and
     # transit route.
@@ -413,7 +412,7 @@ if __name__ == "__main__":
     make_clean_state_highway_network()
     export_shn_postmiles()
     dissolve_shn_district()
-    buffer_shn(SHN_HWY_BUFFER_FEET,"shn_dissolved_by_ct_district_route")
+    buffer_shn(SHN_HWY_BUFFER_FEET, "shn_dissolved_by_ct_district_route")
     
     # This takes 24 min to run, so if there's a way to optimize in the future, we should
     create_postmile_segments(["district", "county", "routetype", "route", "direction", "routes", "pmrouteid"])
