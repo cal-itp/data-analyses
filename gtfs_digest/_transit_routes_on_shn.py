@@ -170,7 +170,7 @@ def routes_shn_intersection(buffer_amount: int, file_name: str) -> gpd.GeoDataFr
     )
 
     # Clean up
-    gdf2.District = gdf2.District.fillna(0).astype(int)
+    gdf2.district = gdf2.district.fillna(0).astype(int)
     return gdf2
 
 def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.DataFrame:
@@ -184,11 +184,11 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
                 "recent_combined_name",
             ],
             as_index=False,
-        )[["shn_route", "District", "pct_route_on_hwy_across_districts"]]
+        )[["shn_route", "district", "pct_route_on_hwy_across_districts"]]
         .agg(
             {
                 "shn_route": lambda x: ", ".join(set(x.astype(str))),
-                "District": lambda x: ", ".join(set(x.astype(str))),
+                "district": lambda x: ", ".join(set(x.astype(str))),
                 "pct_route_on_hwy_across_districts": pct_route_on_hwy_agg,
             }
         )
@@ -233,7 +233,7 @@ def dissolve_buffered_for_map(buffer_amount: str) -> gpd.GeoDataFrame:
     gdf = gcs_geopandas().read_parquet(HWY_FILE)
 
     # Dissolve by district
-    gdf2 = gdf.dissolve("District").reset_index()[["geometry", "District", "shn_route"]]
+    gdf2 = gdf.dissolve("district").reset_index()[["geometry", "district", "shn_route"]]
 
     # Save
     gcs_geopandas().geo_data_frame_to_parquet(
@@ -259,11 +259,11 @@ def final_transit_route_shs_outputs(
     # Filter out for any pct_route_on_hwy that we deem too low & for the relevant district.
     open_data_df = open_data_df.loc[
         (open_data_df.pct_route_on_hwy_across_districts > pct_route_intersection)
-        & (open_data_df.District.str.contains(district))
+        & (open_data_df.district.str.contains(district))
     ]
-    # intersecting_gdf.District = intersecting_gdf.District
+    # intersecting_gdf.district = intersecting_gdf.district
     intersecting_gdf = intersecting_gdf.loc[
-        intersecting_gdf.District.astype(str).str.contains(district)
+        intersecting_gdf.district.astype(str).str.contains(district)
     ]
 
     # Join back to get the original transit route geometries and the names of the
@@ -289,7 +289,7 @@ def final_transit_route_shs_outputs(
                 "portfolio_organization_name",
                 "recent_combined_name",
                 "shn_route",
-                "District",
+                "district",
             ]
         ],
         open_data_df[
