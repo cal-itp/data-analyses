@@ -5,13 +5,13 @@ route_id, route_name, operator name.
 import datetime
 import geopandas as gpd
 import pandas as pd
+import numpy as np
 import yaml
 import numpy as np 
 
 import open_data_utils
-from calitp_data_analysis import geography_utils
-from calitp_data_analysis import utils
 from shared_utils import portfolio_utils, publish_utils, shared_data
+from calitp_data_analysis import utils, geography_utils
 from segment_speed_utils import helpers
 from update_vars import analysis_date, TRAFFIC_OPS_GCS, AH_TEST
 
@@ -186,7 +186,6 @@ def routes_shn_intersection(
     gdf = gdf.assign(
         pct_route_on_hwy=(gdf.geometry.length / gdf.route_length_feet).round(3) * 100,
     )
-
     # Subset
     gdf2 = gdf[
         [
@@ -212,7 +211,7 @@ def routes_shn_intersection(
             "district": "shn_districts",
         }
     )
-    return gdf2
+    return gdf
 
 def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.DataFrame:
     """
@@ -233,6 +232,11 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
                 "route_type",
                 "shape_id",
                 "route_name_used",
+                "name",
+                "base64_url",
+                "organization_source_record_id",
+                "organization_name",
+                "caltrans_district",
             ],
             as_index=False,
         )[["shn_route", "shn_districts", "pct_route_on_hwy_across_districts"]]
@@ -250,13 +254,17 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
     agg1.pct_route_on_hwy_across_districts = (
         agg1.pct_route_on_hwy_across_districts.astype(float).round(2)
     )
+    
+    
     return agg1
 
-def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
+def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt:int) -> pd.DataFrame:
     """
     Prepare the gdf to join with the existing transit_routes
     dataframe that is published on the Open Data Portal
     """
+    # Drop duplicates
+    gdf = gdf.drop_duplicates()
     # Overlay
     intersecting = routes_shn_intersection(gdf, buffer_amt)
     # Group the dataframe so that one route only has one
@@ -264,6 +272,11 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
     # intersection with any SHN routes.
     agg1 = group_route_district(intersecting, "sum")
 
+    # Merge the dataframe with all the SHS info with the original
+    # gdf so we can get the original transit route geometries & 
+    # any routes that don't intersect with the state highway routes.
+    m1 = pd.merge(gdf, agg1, how="left")
+    
     # Add yes/no column to signify if a transit route intersects
     # with a SHN route
     agg1["on_shs"] = np.where(agg1["pct_route_on_hwy_across_districts"] == 0, "N", "Y")
@@ -289,6 +302,12 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
         ],
         how="left",
     )
+    m1 = create_on_shs_column(m1)
+
+    # Clean up rows that are tagged as "on_shs==N" but still have values
+    # that appear. 
+    m1.loc[(m1['on_shs'] == "N") & (m1['shn_districts'] != "0"), 
+                        ['shn_districts', 'shn_route']] = np.nan
     return m1
 
 def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -303,7 +322,10 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     agency_ids = ['base64_url']
     shn_cols = ["shn_route","on_shs","shn_districts","pct_route_on_hwy_across_districts"]
     col_order = route_cols + shape_cols + agency_ids + shn_cols + ['geometry']
-    # col_order = route_cols + shape_cols + agency_ids + ['geometry']
+    
+    #shn_cols = ["shn_route","on_shs","shn_districts","pct_route_on_hwy_across_districts"]
+    # col_order = route_cols + shape_cols + agency_ids + shn_cols + ['geometry']
+    col_order = route_cols + shape_cols + agency_ids + ['geometry']
     df2 = (df[col_order]
            .reindex(columns = col_order)
            .rename(columns = open_data_utils.STANDARDIZED_COLUMNS_DICT)
@@ -313,12 +335,11 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return df2
 
 if __name__ == "__main__":
-    
     SHN_HWY_BUFFER_FEET = 50
     time0 = datetime.datetime.now()
-    
     # Make an operator-feed level file (this is published)    
-    routes = create_routes_file_for_export(analysis_date)  
+    routes = create_routes_file_for_export(analysis_date)
+    # routes = add_shn_information(routes, SHN_HWY_BUFFER_FEET)  
     
     # Export into GCS (outside export/)
     # create_routes is different than create_stops, which already has
@@ -327,18 +348,20 @@ if __name__ == "__main__":
     # the export/ folder contains the patched versions of the routes
     utils.geoparquet_gcs_export(
         routes,
-        AH_TEST,
+        TRAFFIC_OPS_GCS,
         f"ca_transit_routes_{analysis_date}"
     )
     
     published_routes = patch_previous_dates(
         routes, 
         analysis_date,
-    ).pipe(add_shn_information, SHN_HWY_BUFFER_FEET).pipe(finalize_export_df) 
+    ).pipe(finalize_export_df)
+    # Amanda, not sure if we want to run this in mid August
+    #.pipe(add_shn_information, SHN_HWY_BUFFER_FEET).pipe(finalize_export_df)
         
     utils.geoparquet_gcs_export(
         published_routes, 
-        AH_TEST, 
+        TRAFFIC_OPS_GCS, 
         "ca_transit_routes"
     )
     print(f"ca_transit_routes saved to {AH_TEST}")
