@@ -11,6 +11,7 @@ RT_SCHED_GCS = GTFS_DATA_DICT.gcs_paths.RT_SCHED_GCS
 SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
 TRAFFIC_OPS_GCS = f"{GTFS_DATA_DICT.gcs_paths.GCS}traffic_ops/"
 HQTA_GCS = f"{GTFS_DATA_DICT.gcs_paths.GCS}high_quality_transit_areas/"
+AH_TEST = f"{GTFS_DATA_DICT.gcs_paths.GCS}ah_testing/"
 
 ESRI_BASE_URL = "https://gisdata.dot.ca.gov/arcgis/rest/services/CHrailroad/"
 XML_FOLDER = Path("xml")

@@ -105,8 +105,10 @@ def final_transit_route_shs_outputs(
     # Filter out for any pct_route_on_hwy that we deem too low & for the relevant district.
     open_data_df = open_data_df.loc[
         (open_data_df.pct_route_on_hwy_across_districts > pct_route_intersection)
-        & (open_data_df.District.eq(district))
     ]
+    
+    open_data_df = open_data_df[open_data_df['District'].apply(lambda x: district in x.split(', '))]
+    
     intersecting_gdf = intersecting_gdf.loc[
         intersecting_gdf.District.astype(str).eq(district)
     ]

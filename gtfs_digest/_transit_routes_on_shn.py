@@ -234,7 +234,6 @@ def dissolve_buffered_for_map(buffer_amount: str) -> gpd.GeoDataFrame:
 
     # Dissolve by district
     gdf2 = gdf.dissolve("district").reset_index()[["geometry", "district", "shn_route"]]
-
     # Save
     gcs_geopandas().geo_data_frame_to_parquet(
         gdf2,
@@ -337,3 +336,4 @@ if __name__ == "__main__":
         open_data_portal_df,
         f"{GCS_FILE_PATH}transit_route_shn_open_data_portal_{SHN_HWY_BUFFER_FEET}.parquet"
     )
+    print("successfully saved out results.")
