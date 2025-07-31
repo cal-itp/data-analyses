@@ -1,30 +1,24 @@
+from functools import cache
+
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis import geography_utils
+from shared_utils import publish_utils
 
-import google.auth
-credentials, project = google.auth.default()
-import gcsfs
-fs = gcsfs.GCSFileSystem()
-
-from calitp_data_analysis import geography_utils, utils
-# from segment_speed_utils import gtfs_schedule_wrangling, helpers
-from shared_utils import (
-    #catalog_utils,
-    #dask_utils,
-    #gtfs_utils_v2,
-    #portfolio_utils,
-    publish_utils,
-    #rt_dates,
-    #rt_utils,
-)
-from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS, SCHED_GCS, SEGMENT_GCS
+from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/state_highway_network/"
 
 """
 Functions
 """
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
 def process_transit_routes() -> gpd.GeoDataFrame:
     """
     Select the most recent transit route to
@@ -41,10 +35,8 @@ def process_transit_routes() -> gpd.GeoDataFrame:
         "recent_combined_name",
         # "route_id",
     ]
-    op_geography_df = gpd.read_parquet(
-        f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet",
-        storage_options={"token": credentials.token},
-    )[subset]
+
+    op_geography_df = gcs_geopandas().read_parquet(f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet")[subset]
 
     # Keep the row for each portfolio_organization_name/recent_combined_name
     # that is the most recent.
@@ -80,10 +72,7 @@ def dissolve_shn(columns_to_dissolve: list, file_name: str) -> gpd.GeoDataFrame:
         "shared_data_catalog"
     ).state_highway_network.urlpath
 
-    shn = gpd.read_parquet(
-        SHN_FILE,
-        storage_options={"token": credentials.token},
-    ).to_crs(geography_utils.CA_NAD83Albers_ft)
+    shn = gcs_geopandas().read_parquet(SHN_FILE).to_crs(geography_utils.CA_NAD83Albers_ft)
 
     # Dissolve by route which represents the the route's name and drop the other columns
     # because they are no longer relevant.
@@ -102,10 +91,11 @@ def dissolve_shn(columns_to_dissolve: list, file_name: str) -> gpd.GeoDataFrame:
     )
 
     # Save this out so I don't have to dissolve it each time.
-    shn_dissolved.to_parquet(
-        f"gs://calitp-analytics-data/data-analyses/state_highway_network/shn_dissolved_by_{file_name}.parquet",
-        filesystem=fs,
+    shn_dissolved = gcs_geopandas().geo_data_frame_to_parquet(
+        shn_dissolved,
+        f"gs://calitp-analytics-data/data-analyses/state_highway_network/shn_dissolved_by_{file_name}.parquet"
     )
+
     return shn_dissolved
 
 def buffer_shn(buffer_amount: int, file_name: str) -> gpd.GeoDataFrame:
@@ -114,10 +104,7 @@ def buffer_shn(buffer_amount: int, file_name: str) -> gpd.GeoDataFrame:
     transit routes.
     """
     # Read in the dissolved SHN file
-    shn_df = gpd.read_parquet(
-        f"{GCS_FILE_PATH}shn_dissolved_by_{file_name}.parquet",
-        storage_options={"token": credentials.token},
-    )
+    shn_df = gcs_geopandas().read_parquet(f"{GCS_FILE_PATH}shn_dissolved_by_{file_name}.parquet")
 
     # Buffer the state highway.
     shn_df_buffered = shn_df.assign(
@@ -126,9 +113,9 @@ def buffer_shn(buffer_amount: int, file_name: str) -> gpd.GeoDataFrame:
 
     # Save it out so we won't have to buffer over again and
     # can just read it in.
-    shn_df_buffered.to_parquet(
-        f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_{file_name}.parquet",
-        filesystem=fs,
+    shn_df_buffered = gcs_geopandas().geo_data_frame_to_parquet(
+        shn_df_buffered,
+        f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_{file_name}.parquet"
     )
 
     return shn_df_buffered
@@ -143,10 +130,8 @@ def routes_shn_intersection(buffer_amount: int, file_name: str) -> gpd.GeoDataFr
     # Read in buffered shn here or re buffer if we don't have it available.
     HWY_FILE = f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_{file_name}.parquet"
 
-    if fs.exists(HWY_FILE):
-        shn_routes_gdf = gpd.read_parquet(
-            HWY_FILE, storage_options={"token": credentials.token}
-        )
+    if gcs_geopandas().gcs_filesystem.exists(HWY_FILE):
+        shn_routes_gdf = gcs_geopandas().read_parquet(HWY_FILE)
     else:
         shn_routes_gdf = buffer_shn(buffer_amount)
 
@@ -185,7 +170,7 @@ def routes_shn_intersection(buffer_amount: int, file_name: str) -> gpd.GeoDataFr
     )
 
     # Clean up
-    gdf2.District = gdf2.District.fillna(0).astype(int)
+    gdf2.district = gdf2.district.fillna(0).astype(int)
     return gdf2
 
 def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.DataFrame:
@@ -199,11 +184,11 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
                 "recent_combined_name",
             ],
             as_index=False,
-        )[["shn_route", "District", "pct_route_on_hwy_across_districts"]]
+        )[["shn_route", "district", "pct_route_on_hwy_across_districts"]]
         .agg(
             {
                 "shn_route": lambda x: ", ".join(set(x.astype(str))),
-                "District": lambda x: ", ".join(set(x.astype(str))),
+                "district": lambda x: ", ".join(set(x.astype(str))),
                 "pct_route_on_hwy_across_districts": pct_route_on_hwy_agg,
             }
         )
@@ -243,16 +228,17 @@ def dissolve_buffered_for_map(buffer_amount: str) -> gpd.GeoDataFrame:
     # Read in buffered shn here
     HWY_FILE = (
         f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_ct_district_route.parquet"
+
     )
-    gdf = gpd.read_parquet(HWY_FILE, storage_options={"token": credentials.token})
+    gdf = gcs_geopandas().read_parquet(HWY_FILE)
 
     # Dissolve by district
-    gdf2 = gdf.dissolve("District").reset_index()[["geometry", "District", "shn_route"]]
+    gdf2 = gdf.dissolve("district").reset_index()[["geometry", "district", "shn_route"]]
 
     # Save
-    gdf2.to_parquet(
-        f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_gtfs_digest.parquet",
-        filesystem=fs,
+    gcs_geopandas().geo_data_frame_to_parquet(
+        gdf2,
+        f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_gtfs_digest.parquet"
     )
     
 def final_transit_route_shs_outputs(
@@ -273,11 +259,11 @@ def final_transit_route_shs_outputs(
     # Filter out for any pct_route_on_hwy that we deem too low & for the relevant district.
     open_data_df = open_data_df.loc[
         (open_data_df.pct_route_on_hwy_across_districts > pct_route_intersection)
-        & (open_data_df.District.str.contains(district))
+        & (open_data_df.district.str.contains(district))
     ]
-    # intersecting_gdf.District = intersecting_gdf.District
+    # intersecting_gdf.district = intersecting_gdf.district
     intersecting_gdf = intersecting_gdf.loc[
-        intersecting_gdf.District.astype(str).str.contains(district)
+        intersecting_gdf.district.astype(str).str.contains(district)
     ]
 
     # Join back to get the original transit route geometries and the names of the
@@ -303,7 +289,7 @@ def final_transit_route_shs_outputs(
                 "portfolio_organization_name",
                 "recent_combined_name",
                 "shn_route",
-                "District",
+                "district",
             ]
         ],
         open_data_df[
@@ -342,13 +328,12 @@ if __name__ == "__main__":
     open_data_portal_df = prep_open_data_portal(intersection_gdf)
     
     # Save everything out for now
-    intersection_gdf.to_parquet(
-        f"{GCS_FILE_PATH}transit_route_intersect_shn_{SHN_HWY_BUFFER_FEET}_gtfs_digest.parquet",
-        filesystem=fs,
+    gcs_geopandas().geo_data_frame_to_parquet(
+        intersection_gdf,
+        f"{GCS_FILE_PATH}transit_route_intersect_shn_{SHN_HWY_BUFFER_FEET}_gtfs_digest.parquet"
     )
-    
-    open_data_portal_df.to_parquet(
-        f"{GCS_FILE_PATH}transit_route_shn_open_data_portal_{SHN_HWY_BUFFER_FEET}.parquet",
-        filesystem=fs,
+
+    gcs_geopandas().geo_data_frame_to_parquet(
+        open_data_portal_df,
+        f"{GCS_FILE_PATH}transit_route_shn_open_data_portal_{SHN_HWY_BUFFER_FEET}.parquet"
     )
-    
