@@ -351,4 +351,4 @@ if __name__ == "__main__":
         f"{GCS_FILE_PATH}transit_route_shn_open_data_portal_{SHN_HWY_BUFFER_FEET}.parquet",
         filesystem=fs,
     )
-    
+    print("successfully saved out results.")
