@@ -19,8 +19,12 @@ portfolio_names =[
     "district-digest/", 
 ]
 
-def portfolio_site_checker(base_url,site_names):
-    
+def portfolio_site_checker(base_url:str, site_names:list):
+    """
+    Function to check status codes for URLs in porfolio sites.
+    base_url is the root URL path, then concats with each site in the site_names list.
+    Full URL is checked for status code 200 (OK), 404 (Not Found), or returns other. 
+    """
     for site in sorted(site_names):
         r = requests.get(base_url+site)
         if r.status_code == 200:
