@@ -3,29 +3,37 @@
 
 import requests
 
-portfolio_urls = [
-        "https://analysis.calitp.org/legislative-district-digest/",
-        "https://analysis.calitp.org/sb125-fund-split-analysis/",
-        "https://analysis.calitp.org/ntd-monthly-ridership/",
-        "https://analysis.calitp.org/ahsc/",
-        "https://analysis.calitp.org/rt/",
-        "https://analysis.calitp.org/ntd-annual-ridership-report/",
-        "https://analysis.calitp.org/gtfs-digest/",
-        "https://analysis.calitp.org/ha-starterkit-district/",
-        "https://analysis.calitp.org/new-transit-metrics/",
-        "https://analysis.calitp.org/district-digest/",
-    ]
+dds_url = "https://analysis.dds.dot.ca.gov/"
+calitp_url = "https://analysis.calitp.org/"
 
-def portfolio_site_checker(portfolio_urls):
+portfolio_names =[
+    "legislative-district-digest/",
+    "sb125-fund-split-analysis/",
+    "ntd-monthly-ridership/",
+    "ahsc/",
+    "rt/",
+    "ntd-annual-ridership-report/",
+    "gtfs-digest/",
+    "ha-starterkit-district/",
+    "new-transit-metrics/",
+    "district-digest/", 
+]
+
+def portfolio_site_checker(base_url,site_names):
     
-    for i in portfolio_urls:
-        r = requests.get(i)
+    for site in sorted(site_names):
+        r = requests.get(base_url+site)
         if r.status_code == 200:
-            print(f"Site: {i} is up")
+            print(f"Site: {base_url+site} is up")
         elif r.status_code == 404:
-            print(f"Site: {i} is down")
+            print(f"Site: {base_url+site} is down")
         else:
-            print(f"Site: {i}. status code:{r.status_code}")
+            print(f"Site: {base_url+site}. status code:{r.status_code}")
 
 if __name__ == "__main__":
-    portfolio_site_checker(portfolio_urls)
+    print("\nChecking dds.dot.ca.gov portfolio sites")
+    portfolio_site_checker(base_url= dds_url, site_names=portfolio_names)
+    
+    print("\nChecking calitp.org portfolio sites")
+    portfolio_site_checker(base_url= calitp_url, site_names=portfolio_names)
+    
