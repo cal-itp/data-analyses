@@ -1,0 +1,2 @@
+date,schedule_local_path,schedule_name,output_feed_path
+2025-04-16,./bbb_original.zip,Big Blue Bus Schedule,output_feeds/bbb_rt_2025-04-16.zip
