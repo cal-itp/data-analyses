@@ -10,7 +10,7 @@ RTPA names will become the navigation panel on the portfolio site
 import sys
 
 sys.path.append("../")  # up one level
-
+sys.path.append("../monthly_ridership_report")
 import pandas as pd
 
 from pathlib import Path
