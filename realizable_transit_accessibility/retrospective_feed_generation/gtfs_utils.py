@@ -1,7 +1,7 @@
 from gtfslite import GTFS
 import pandas as pd
 import datetime as dt
-from constants import ARBITRARY_SERVICE_ID, GTFS_DATE_STRFTIME
+from .constants import ARBITRARY_SERVICE_ID, GTFS_DATE_STRFTIME
 import copy
 
 def subset_schedule_feed_to_one_date(feed: GTFS, service_date: dt.datetime) -> GTFS:
