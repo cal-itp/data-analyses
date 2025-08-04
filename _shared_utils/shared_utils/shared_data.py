@@ -1,6 +1,7 @@
 """
 One-off functions, run once, save datasets for shared use.
 """
+import gcsfs
 import geopandas as gpd
 import google.auth
 import numpy as np
@@ -11,7 +12,6 @@ from calitp_data_analysis.sql import to_snakecase
 from shared_utils import arcgis_query, catalog_utils
 
 credentials, project = google.auth.default()
-import gcsfs
 
 fs = gcsfs.GCSFileSystem()
 
