@@ -1,13 +1,19 @@
 """
 One-off functions, run once, save datasets for shared use.
 """
+import gcsfs
 import geopandas as gpd
+import google.auth
 import numpy as np
 import pandas as pd
 import shapely
 from calitp_data_analysis import geography_utils, utils
 from calitp_data_analysis.sql import to_snakecase
-from shared_utils import arcgis_query
+from shared_utils import arcgis_query, catalog_utils
+
+credentials, project = google.auth.default()
+
+fs = gcsfs.GCSFileSystem()
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
@@ -337,9 +343,76 @@ def make_transit_operators_to_legislative_district_crosswalk(date_list: list) ->
     return
 
 
+def dissolve_shn_district() -> gpd.GeoDataFrame:
+    """
+    Dissolve State Highway Network so there will only be one row for each
+    route name, route type, and Caltrans district. Find the length
+    of the highway and do some light cleaning.
+    """
+    # Read in the dataset and change the CRS to one to feet.
+    SHN_FILE = catalog_utils.get_catalog("shared_data_catalog").state_highway_network.urlpath
+
+    shn = gpd.read_parquet(
+        SHN_FILE,
+        storage_options={"token": credentials.token},
+    ).to_crs(geography_utils.CA_NAD83Albers_ft)
+
+    # Dissolve by route which represents the the route's name and drop the other columns
+    # because they are no longer relevant.
+    shn_dissolved = (shn.dissolve(by=["Route", "District"]).reset_index())[["Route", "District", "geometry"]]
+
+    # Rename because I don't want any confusion between SHN route and
+    # transit route.
+    shn_dissolved = shn_dissolved.rename(columns={"Route": "shn_route"})
+    shn_dissolved.columns = shn_dissolved.columns.str.lower()
+    # Find the length of each highway.
+    shn_dissolved = shn_dissolved.assign(
+        highway_feet=shn_dissolved.geometry.length,
+        shn_route=shn_dissolved.shn_route.astype(int).astype(str),
+    )
+
+    # Save this out so I don't have to dissolve it each time.
+    shn_dissolved.to_parquet(
+        f"{GCS_FILE_PATH}shn_dissolved_by_ct_district_route.parquet",
+        filesystem=fs,
+    )
+    return shn_dissolved
+
+
+def buffer_shn(buffer_amount: int, file_name: str) -> gpd.GeoDataFrame:
+    """
+    Add a buffer to the SHN before overlaying it with
+    transit routes.
+    """
+    # GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/state_highway_network/"
+
+    # Read in the dissolved SHN file
+    shn_df = gpd.read_parquet(
+        f"{GCS_FILE_PATH}{file_name}.parquet",
+        storage_options={"token": credentials.token},
+    )
+
+    # Buffer the state highway.
+    shn_df_buffered = shn_df.assign(
+        geometry=shn_df.geometry.buffer(buffer_amount),
+    )
+
+    # Save it out so we won't have to buffer over again and
+    # can just read it in.
+    shn_df_buffered.to_parquet(
+        f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_{file_name}.parquet",
+        filesystem=fs,
+    )
+
+    return shn_df_buffered
+
+
 if __name__ == "__main__":
     # Run functions to create these datasets...store in GCS
     from shared_utils import rt_dates
+
+    SHN_HWY_BUFFER_FEET = 50
+    PARALLEL_HWY_BUFFER_FEET = geography_utils.FEET_PER_MI * 0.5
 
     # CA counties
     make_county_centroids()
@@ -347,6 +420,8 @@ if __name__ == "__main__":
     # State Highway Network
     make_clean_state_highway_network()
     export_shn_postmiles()
+    dissolve_shn_district()
+    buffer_shn(SHN_HWY_BUFFER_FEET, "shn_dissolved_by_ct_district_route")
 
     # This takes 24 min to run, so if there's a way to optimize in the future, we should
     create_postmile_segments(["district", "county", "routetype", "route", "direction", "routes", "pmrouteid"])
