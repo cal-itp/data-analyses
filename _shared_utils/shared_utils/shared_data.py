@@ -12,6 +12,7 @@ from shared_utils import arcgis_query
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
 
+
 def make_county_centroids():
     """
     Find a county's centroids from county polygons.
@@ -335,16 +336,15 @@ def make_transit_operators_to_legislative_district_crosswalk(date_list: list) ->
 
     return
 
+
 def dissolve_shn_district() -> gpd.GeoDataFrame:
     """
     Dissolve State Highway Network so there will only be one row for each
-    route name, route type, and Caltrans district. Find the length 
+    route name, route type, and Caltrans district. Find the length
     of the highway and do some light cleaning.
     """
     # Read in the dataset and change the CRS to one to feet.
-    SHN_FILE = catalog_utils.get_catalog(
-        "shared_data_catalog"
-    ).state_highway_network.urlpath
+    SHN_FILE = catalog_utils.get_catalog("shared_data_catalog").state_highway_network.urlpath
 
     shn = gpd.read_parquet(
         SHN_FILE,
@@ -371,6 +371,7 @@ def dissolve_shn_district() -> gpd.GeoDataFrame:
         filesystem=fs,
     )
     return shn_dissolved
+
 
 def buffer_shn(buffer_amount: int, file_name: str) -> gpd.GeoDataFrame:
     """
@@ -399,9 +400,11 @@ def buffer_shn(buffer_amount: int, file_name: str) -> gpd.GeoDataFrame:
 
     return shn_df_buffered
 
+
 if __name__ == "__main__":
     # Run functions to create these datasets...store in GCS
     from shared_utils import rt_dates
+
     SHN_HWY_BUFFER_FEET = 50
     PARALLEL_HWY_BUFFER_FEET = geography_utils.FEET_PER_MI * 0.5
 
@@ -413,7 +416,7 @@ if __name__ == "__main__":
     export_shn_postmiles()
     dissolve_shn_district()
     buffer_shn(SHN_HWY_BUFFER_FEET, "shn_dissolved_by_ct_district_route")
-    
+
     # This takes 24 min to run, so if there's a way to optimize in the future, we should
     create_postmile_segments(["district", "county", "routetype", "route", "direction", "routes", "pmrouteid"])
 
