@@ -302,7 +302,6 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt:int) -> pd.DataFrame:
         ],
         how="left",
     )
-    m1 = create_on_shs_column(m1)
 
     # Clean up rows that are tagged as "on_shs==N" but still have values
     # that appear. 
