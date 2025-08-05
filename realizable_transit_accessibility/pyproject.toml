@@ -1,0 +1,17 @@
+[tool.poetry]
+requires-poetry = "~=2.0"
+description = "Code for retrospective feed generation"
+package-mode = false
+authors = ["Anna Paten", "Rae Bonifanti"]
+
+[tool.poetry.dependencies]
+python = "~3.11"
+shared_utils = { git = "https://github.com/cal-itp/data-analyses.git", rev = "24478949100fd1a389f0b6605bc9b2a371f76193", subdirectory = "_shared_utils" }
+segment_speed_utils = {git = "https://github.com/cal-itp/data-analyses.git", rev = "24478949100fd1a389f0b6605bc9b2a371f76193", subdirectory="rt_segment_speeds"}
+gtfs-lite = "0.2.1"
+
+[tool.black]
+line-length = 120
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.1"
