@@ -1,5 +1,5 @@
 from segment_speed_utils import helpers, segment_calcs
-from constants import GTFS_DATA_DICT
+from .constants import GTFS_DATA_DICT
 import pandas as pd
 
 SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
