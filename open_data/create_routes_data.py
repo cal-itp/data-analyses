@@ -63,12 +63,12 @@ def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
         .drop_duplicates(subset=route_shape_cols)
         .reset_index(drop=True)
     )
-    
+  
     routes_assembled2 = open_data_utils.standardize_operator_info_for_exports(
         routes_assembled, 
         date
     ).pipe(remove_erroneous_shapes)    
-    
+
     routes_assembled2 = routes_assembled2.assign(
     route_length_feet=routes_assembled2.geometry.to_crs(
         geography_utils.CA_NAD83Albers_ft

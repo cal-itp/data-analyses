@@ -19,7 +19,8 @@ transit_shn_map_columns = {
     "pct_route_on_hwy_across_districts": "Percentage of Transit Route on SHN Across All Districts",
 }
 
-shn_map_readable_columns = {"shn_route": "State Highway Network Route",}
+shn_map_readable_columns = {"shn_route": "State Highway Network Route",
+                           "district":"District"}
 
 gtfs_table_readable_columns = {
     "portfolio_organization_name": "Portfolio Organization Name",
@@ -83,7 +84,7 @@ def data_wrangling_operator_map(portfolio_organization_names:list)->gpd.GeoDataF
 
 def final_transit_route_shs_outputs(
     pct_route_intersection: int,
-    district: str,
+    district: int,
 ):
     """
     Take the dataframes from prep_open_data_portal and routes_shn_intersection.
@@ -104,13 +105,11 @@ def final_transit_route_shs_outputs(
 
     # Filter out for any pct_route_on_hwy that we deem too low & for the relevant district.
     open_data_df = open_data_df.loc[
-        (open_data_df.pct_route_on_hwy_across_districts > pct_route_intersection)
+        (open_data_df.pct_route_on_hwy_across_districts >= pct_route_intersection)
     ]
     
-    open_data_df = open_data_df[open_data_df['District'].apply(lambda x: district in x.split(', '))]
-    
     intersecting_gdf = intersecting_gdf.loc[
-        intersecting_gdf.District.astype(str).eq(district)
+        intersecting_gdf.district == district
     ]
 
     # Join back to get the long gdf with the transit route geometries and the names of the
@@ -134,7 +133,7 @@ def final_transit_route_shs_outputs(
                 "portfolio_organization_name",
                 "recent_combined_name",
                 "shn_route",
-               "District",
+               "district",
             ]
         ],
         open_data_df[
@@ -149,7 +148,7 @@ def final_transit_route_shs_outputs(
 
     # Now we have to aggregate again so each route will only have one row with the
     # district and SHN route info delinated by commas if there are multiple values.
-    text_table = _transit_routes_on_shn.group_route_district(text_table_df, "max").drop(columns = ["District"])
+    text_table = _transit_routes_on_shn.group_route_district(text_table_df, "max").drop(columns = ["district"])
 
     # Rename for clarity
     text_table = text_table.rename(
@@ -201,15 +200,15 @@ def load_buffered_shn_map(buffer_amount:int, district:int) -> gpd.GeoDataFrame:
     Overlay the most recent transit routes with a buffered version
     of the SHN
     """
-    GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/state_highway_network/"
+    GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 
     # Read in buffered shn here or re buffer if we don't have it available.
-    HWY_FILE = f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_gtfs_digest.parquet"
+    HWY_FILE = f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_ct_district_route.parquet"
     shn_routes_gdf = gpd.read_parquet(
             HWY_FILE, storage_options={"token": credentials.token}
-        )
+        ).drop(columns = ["highway_feet"])
     
     # Clean
-    shn_routes_gdf = shn_routes_gdf.loc[shn_routes_gdf.District == district]
+    shn_routes_gdf = shn_routes_gdf.loc[shn_routes_gdf.district == district]
     shn_routes_gdf = shn_routes_gdf.rename(columns = shn_map_readable_columns)
     return shn_routes_gdf

@@ -11,7 +11,7 @@ assemble_route_direction_data:
 assemble_operator_data:
 	python merge_operator_data.py
 	python _operator_data_prep.py # filters only to recent date for each operator
-	# python merge_operator_service.py   
+	python merge_operator_service.py   
     
 portfolio_deploy:
 	python _yml_gtfs_digest_orgs.py # run this after the files are created in merge_*
