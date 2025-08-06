@@ -10,6 +10,7 @@ parts:
     -   file: district_06-fresno-bakersfield/00__district_report__district_06-fresno-bakersfield.ipynb
     -   file: district_07-los-angeles-ventura/00__district_report__district_07-los-angeles-ventura.ipynb
     -   file: district_08-san-bernardino-riverside/00__district_report__district_08-san-bernardino-riverside.ipynb
+    -   file: district_09-bishop/00__district_report__district_09-bishop.ipynb
     -   file: district_10-stockton/00__district_report__district_10-stockton.ipynb
     -   file: district_11-san-diego/00__district_report__district_11-san-diego.ipynb
     -   file: district_12-santa-ana/00__district_report__district_12-santa-ana.ipynb
