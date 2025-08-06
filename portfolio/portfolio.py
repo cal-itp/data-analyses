@@ -21,6 +21,10 @@ from pydantic import BaseModel
 from pydantic.class_validators import validator
 from slugify import slugify
 
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from axe_selenium_python import Axe
+
 assert os.getcwd().endswith("data-analyses"), "this script must be run from the root of the data-analyses repo!"
 
 GOOGLE_ANALYTICS_TAG_ID = "G-JCX3Z8JZJC"
@@ -367,19 +371,19 @@ def build(
     site_output_dir.mkdir(parents=True, exist_ok=True)
 
     with open(SITES_DIR / Path(f"{site_yml_name}.yml")) as f:
-        site = Site(output_dir=site_output_dir, name=site_yml_name, **yaml.safe_load(f))
+        portfolio_site = Site(output_dir=site_output_dir, name=site_yml_name, **yaml.safe_load(f))
 
-    typer.echo(f"copying readme from {site.directory} to {site_output_dir}")
-    shutil.copy(site.readme, site_output_dir / site.readme.name)
+    typer.echo(f"copying readme from {portfolio_site.directory} to {site_output_dir}")
+    shutil.copy(portfolio_site.readme, site_output_dir / portfolio_site.readme.name)
 
     fname = site_output_dir / Path("_config.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing config to {fname}", fg=typer.colors.GREEN)
-        f.write(env.get_template("_config.yml").render(site=site, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
+        f.write(env.get_template("_config.yml").render(site=portfolio_site, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
     fname = site_output_dir / Path("_toc.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing toc to {fname}", fg=typer.colors.GREEN)
-        f.write(site.toc_yaml)
+        f.write(portfolio_site.toc_yaml)
 
     errors = []
 
@@ -405,17 +409,23 @@ def build(
         cwd=site_output_dir,
     ).check_returncode()
 
+    accessibilty_errors = check_accessibility(site)
+
     if deploy:
         if continue_on_error and errors:
             ans = input(f"{len(errors)} encountered during papermill; enter that number to continue: ")
             assert int(ans) == len(errors)
+
+        if accessibilty_errors > 0:
+            ans = input(f"{accessibilty_errors} serious accessibility errors: type 'ignore' to deploy anyway: ")
+            if ans != 'ignore': return
 
         args = [
             "gcloud",
             "storage",
             "cp",
             "--recursive",
-            f"portfolio/{site_yml_name}/_build/html/",
+            f"{site_output_dir}/_build/html/",
             f"gs://calitp-analysis/{site_yml_name}"
         ]
 
@@ -425,6 +435,66 @@ def build(
     if errors:
         typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
         sys.exit(1)
-        
+
+@app.command()
+def check_accessibility(
+    site: SiteChoices
+):
+
+    site_output_dir = PORTFOLIO_DIR / Path(site.value)
+    directory_path = f"{site_output_dir}/_build/html/"
+    opts = webdriver.ChromeOptions()
+    opts.headless = True
+    opts.add_argument("--no-sandbox")
+    opts.add_argument("--headless")
+    driver = webdriver.Chrome(options=opts)
+    axe = Axe(driver)
+
+    serious_count=0
+
+    def find_key_recursive(obj, target_key):
+        if isinstance(obj, dict):
+            if target_key in obj:
+                return obj[target_key]
+            for key, value in obj.items():
+                result = find_key_recursive(value, target_key)
+                if result is not None:
+                    return result
+        elif isinstance(obj, list):
+            for item in obj:
+                result = find_key_recursive(item, target_key)
+                if result is not None:
+                    return result
+        return None
+
+    for filename in os.listdir(directory_path):
+        if filename.endswith(".html"):
+            file_path = os.path.join(os.getcwd(), directory_path, filename)
+
+            driver.get(f"file:///{file_path}")
+            axe.inject()
+            results = axe.run(options={'resultTypes': ['violations']})
+
+            # print violations
+            if results["violations"]:
+                print(f"Accessibility violations found in {filename}:")
+                for violation in results["violations"]:
+                    if violation['impact'] in ('serious', 'critical'):
+                        serious_count += 1
+                    impact = {'minor': '❔', 'moderate': '⚠️', 'serious': '🛑', 'critical': '🛑‼️'}.get(violation['impact'])
+                    print(f"- {impact}  {violation['help']} ({violation['helpUrl']}):")
+                    print(f"  {find_key_recursive(violation, 'failureSummary')}")
+                    print(f"  {find_key_recursive(violation, 'html')}")
+                    # print("-----")
+                    # print(violation)
+                    # print("-----")
+            else:
+                print(f"✅ {filename}.")
+            # print("Press Enter to continue...")
+            # input()
+
+    driver.quit()
+    return serious_count
+
 if __name__ == "__main__":
     app()

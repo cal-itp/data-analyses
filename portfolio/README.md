@@ -35,6 +35,7 @@ All source code for these analyses and reports may be found [on GitHub](https://
      * `_build/html` are the rendered HTML pages corresponding to the parameterized notebooks.
      * Instead of notebooks, now they are replaced with HTML files: `_build/html/district_01_eureka/first_operator / second_operator.html`
      * There are also additional folders within `_build/html`: `_sources`, `_sphyinx_design_static`, and `_static` and other files like `genindex.html`, `index.html`, `search.html`, `searchindex.js`, `README.html`, and `objects.inv`
+  * During build you will see any accessibility violations that are detected in the generated site. If you have already built your site and wish to run only the accessibilty checks: `python portfolio/portfolio.py check-accessibility MY_NEW_REPORT`
   * `python portfolio/portfolio.py build MY_NEW_REPORT --deploy` (when we deploy, the HTML files in `portfolio/MY_NEW_REPORT/_build/html` are available at `https://analysis.dds.dot.ca.gov/MY_NEW_REPORT`
 
 4. All these steps are documented in the [Makefile](https://github.com/cal-itp/data-analyses/blob/main/Makefile). Some of the steps that are commented out should be uncommented depending on your use case.
