@@ -21,6 +21,7 @@ dependencies = [
     "polars==1.22.0",
     "quarto-cli==1.6.40",
     "quarto==0.1.0",
+    "ydata-profiling[notebook] (>=4.9.0, <5.0.0)",
 ]
 
 [tool.poetry]
