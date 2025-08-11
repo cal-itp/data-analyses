@@ -6,7 +6,20 @@ import requests
 dds_url = "https://analysis.dds.dot.ca.gov/"
 calitp_url = "https://analysis.calitp.org/"
 
-portfolio_names =[
+dds_portfolio_names =[
+    "legislative_district_digest/",
+    "sb125_fund_split_analysis/",
+    "ntd_monthly_ridership/",
+    "ahsc/",
+    "rt/",
+    "ntd_annual_ridership_report/",
+    "gtfs_digest/",
+    "ha_starterkit_district/",
+    "new_transit_metrics/",
+    "district_digest/", 
+]
+
+calitp_portfolio_names =[
     "legislative-district-digest/",
     "sb125-fund-split-analysis/",
     "ntd-monthly-ridership/",
@@ -36,8 +49,8 @@ def portfolio_site_checker(base_url:str, site_names:list):
 
 if __name__ == "__main__":
     print("\nChecking dds.dot.ca.gov portfolio sites")
-    portfolio_site_checker(base_url= dds_url, site_names=portfolio_names)
+    portfolio_site_checker(base_url= dds_url, site_names=dds_portfolio_names)
     
     print("\nChecking calitp.org portfolio sites")
-    portfolio_site_checker(base_url= calitp_url, site_names=portfolio_names)
+    portfolio_site_checker(base_url= calitp_url, site_names=calitp_portfolio_names)
     
