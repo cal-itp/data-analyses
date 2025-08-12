@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from gtfslite import GTFS
 from retrospective_feed_generation import retrospective_feed_generation
-from .constants import DEFAULT_TEST_FEED_GENERATION_KWARGS
+from .constants import DEFAULT_TEST_FEED_GENERATION_KWARGS, STOP_SEQUENCE_NAME, TRIP_ID_NAME, RT_ARRIVAL_SEC_NAME
 
 def _get_test_data_path(request):
     return request.path.parent / "test_data"
@@ -120,3 +120,58 @@ def test_trips_in_schedule_only_are_dropped_from_stop_times(two_trip_schedule: G
     output_len = len(output_stop_times_trip_ids)
     input_rt_len = len(minimal_rt_table_schedule_rt_different.trip_id)
     assert output_len == input_rt_len, f"Output feed stop times has a different number of trip id values ({output_len}) than input RT table ({input_rt_len})"
+    
+def test_rt_stop_times_match_output_stop_times(two_trip_schedule: GTFS, two_trip_rt_table_schedule_rt_different: pd.DataFrame):
+    """Test that arrival_time and departure_time in the output stop times table match rt stop times at matching trip id and stop sequence"""
+    # Run feed generation
+    output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
+        filtered_input_feed=two_trip_schedule,
+        stop_times_table=two_trip_rt_table_schedule_rt_different,
+        **DEFAULT_TEST_FEED_GENERATION_KWARGS
+    )
+    
+    # Check output
+    # Check that both expected trips are present and there are no new trip ids
+    assert 1 in output_feed.stop_times.trip_id
+    assert 2 in output_feed.stop_times.trip_id
+    assert output_feed.stop_times.trip_id.isin([1,2]).all()
+    # Merge output stop times and rt stop times by trip id and stop sequence
+    merged_output_rt = output_feed.stop_times.merge(
+        two_trip_rt_table_schedule_rt_different[[TRIP_ID_NAME, STOP_SEQUENCE_NAME, RT_ARRIVAL_SEC_NAME]],
+        on=[TRIP_ID_NAME, STOP_SEQUENCE_NAME],
+        how="outer",
+        validate="one_to_one"
+    )
+    def gtfs_time_to_seconds(gtfs_time_series: pd.Series) -> pd.Series:
+        split_series = gtfs_time_series.str.split(":")
+        # not the best way to do this, but simple!
+        hours = split_series.map(lambda x: x[0]).astype(int)
+        minutes = split_series.map(lambda x: x[1]).astype(int)
+        seconds = split_series.map(lambda x: x[2]).astype(int)
+        return (hours * 3600) + (minutes * 60) + seconds
+    merged_output_rt["output_arrival_time_seconds"] = gtfs_time_to_seconds(merged_output_rt["arrival_time"])
+    
+    # Check that output times match
+    assert merged_output_rt[RT_ARRIVAL_SEC_NAME].equals(merged_output_rt["output_arrival_time_seconds"]), "Rt arrival sec does not match output arrival sec at same trip id and stop sequence"
+    # Check that output departure time is the same as arrival time
+    assert (merged_output_rt["arrival_time"] == merged_output_rt["departure_time"]).all(), "Arrival times do not match departure times in output"
+    
+#TODO need to check that other columns are maintained in this scenario
+    
+def test_no_mutability_issues(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different: pd.DataFrame, expected_tables: list[str]):
+    """Check that altering non-schedule tables in the output feed does not alter the input feed"""
+    ignored_tables = ["stop_times", "stops"]
+    output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
+        filtered_input_feed=schedule_feed_minimal,
+        stop_times_table=minimal_rt_table_schedule_rt_different,
+        **DEFAULT_TEST_FEED_GENERATION_KWARGS
+    )
+    for table in np.setdiff1d(expected_tables, ignored_tables):
+        output_table = getattr(output_feed, table)
+        original_table = getattr(schedule_feed_minimal, table)
+        assert output_table is not original_table, "make_retrospective_feed_single_date is returning the original update"
+        
+
+    
+#TODO: there should also be tests to check that the validate=True options work as expected
+    
