@@ -1,4 +1,5 @@
-"""Fucntions for the Monthly/Annual NTD Ridership reports.
+"""
+Fucntions for the Monthly/Annual NTD Ridership reports.
 """
 
 import gcsfs
@@ -65,7 +66,7 @@ def get_percent_change(
     """
     df["pct_change_1yr"] = (
         (df["upt"] - df[change_col])
-        .divide(df["upt"])
+        .divide(df[change_col])
         .round(4)
     )
     
