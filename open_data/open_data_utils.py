@@ -14,16 +14,13 @@ catalog = intake.open_catalog(
     "../_shared_utils/shared_utils/shared_data_catalog.yml")
     
     
-def standardize_operator_info_for_exports(
-    df: pd.DataFrame, 
-    date: str
-) -> pd.DataFrame:
+def standardize_operator_info_for_exports(df: pd.DataFrame, date: str) -> pd.DataFrame:
     """
     Use our crosswalk file created in gtfs_funnel
-    and add in the organization columns we want to 
+    and add in the organization columns we want to
     publish on.
     """
-    
+
     CROSSWALK_FILE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
 
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
@@ -31,28 +28,36 @@ def standardize_operator_info_for_exports(
     # Get the crosswalk file
     crosswalk = pd.read_parquet(
         f"{SCHED_GCS}{CROSSWALK_FILE}_{date}.parquet",
-        columns = [
-            "schedule_gtfs_dataset_key", "name", "base64_url", 
-            "organization_source_record_id", "organization_name",
+        columns=[
+            "schedule_gtfs_dataset_key",
+            "name",
+            "base64_url",
+            "organization_source_record_id",
+            "organization_name",
             "caltrans_district",
         ],
-        filters = [[("schedule_gtfs_dataset_key", "in", public_feeds)]]
+        filters=[[("schedule_gtfs_dataset_key", "in", public_feeds)]],
     )
-    
+
     # Checked whether we need a left merge to keep stops outside of CA
     # that may not have caltrans_district
     # and inner merge is fine. All operators are assigned a caltrans_district
     # so Amtrak / FlixBus stops have values populated
-        
+
     # Merge the crosswalk and the input DF
     crosswalk_input_merged = pd.merge(
         df,
         crosswalk,
-        on = ["schedule_gtfs_dataset_key"],
-        suffixes = ["_original", None], # Keep the source record id from the crosswalk as the "definitive" version
-        how = "inner"
+        on=["schedule_gtfs_dataset_key"],
+        suffixes=[
+            "_original",
+            None,
+        ],  # Keep the source record id from the crosswalk as the "definitive" version
+        how="inner",
     )
-    
+
+    # Drop dups
+    crosswalk_input_merged = crosswalk_input_merged.drop_duplicates()
     return crosswalk_input_merged
     
     
