@@ -78,7 +78,7 @@ def minimal_rt_table_schedule_rt_different_stop_id_altered(test_data_path) -> pd
     return pd.read_csv(path)
 
 def test_feed_tables_exist(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different: pd.DataFrame, expected_tables: list[str]):
-    """Test whether a feed created through retrospective accessibility has all expected tables"""
+    """Test whether a feed has all tables from `filtered_input_feed`"""
     
     output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
         filtered_input_feed=schedule_feed_minimal,
@@ -90,7 +90,7 @@ def test_feed_tables_exist(schedule_feed_minimal: GTFS, minimal_rt_table_schedul
         assert expected_table is not None, f"{table} is not present"
 
 def test_feed_tables_same(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different: pd.DataFrame, expected_tables: list[str]):
-    """Test whether all tables except stops.txt and stop_times.txt are unchanged in the output"""
+    """Test whether all tables from `filtered_input_feed` except stops.txt and stop_times.txt are unchanged in the output"""
     ignored_tables = ["stop_times", "stops"]
     output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
         filtered_input_feed=schedule_feed_minimal,
@@ -105,7 +105,7 @@ def test_feed_tables_same(schedule_feed_minimal: GTFS, minimal_rt_table_schedule
         assert output_table.equals(schedule_table), f"{table} is not identical in the input and output"
 
 def test_trips_present_in_rt_only_leads_to_exception(schedule_feed_minimal: GTFS, two_trip_rt_table_schedule_rt_different: pd.DataFrame):
-    """Check that, if there are trips in the rt table that are not in the schedule, a key error is raised"""
+    """Test that, if there are trips in `stop_times_table` that are not in the schedule, a key error is raised"""
     # Check setup conditions
     assert (schedule_feed_minimal.trips.trip_id == 1).all(), "Missing or extraneous trip ID in schedule feed (inficates bad test setup)"
     assert two_trip_rt_table_schedule_rt_different.trip_id.isin([1, 2]).all(), "Missing or extraneous trip ID in RT table (indicates bad test setup)"
@@ -119,7 +119,7 @@ def test_trips_present_in_rt_only_leads_to_exception(schedule_feed_minimal: GTFS
         )
     
 def test_trips_in_schedule_only_are_dropped_from_trips(two_trip_schedule: GTFS, minimal_rt_table_schedule_rt_different: pd.DataFrame):
-    """Test that trips that are only present in the schedule feed are dropped from the output trips table"""
+    """Test that trips that are only present in `filtered_input_feed` are dropped from the output trips table"""
     # Check setup conditions
     assert two_trip_schedule.trips.trip_id.isin([1, 2]).all(), "Missing or extraneous trip ID in RT table (indicates bad test setup)"
     assert (minimal_rt_table_schedule_rt_different.trip_id == 1).all(), "Missing or extraneous trip ID in schedule feed (inficates bad test setup)"
@@ -135,7 +135,7 @@ def test_trips_in_schedule_only_are_dropped_from_trips(two_trip_schedule: GTFS, 
 
 def test_trips_in_schedule_only_are_dropped_from_stop_times(two_trip_schedule: GTFS, minimal_rt_table_schedule_rt_different: pd.DataFrame):
     # Test setup
-    """Test that trips that are only present in the schedule feed are dropped from the output stop times table"""
+    """Test that trips that are only present in `filtered_input_feed` are dropped from the output stop times table"""
     assert two_trip_schedule.stop_times.trip_id.isin([1, 2]).all(), "Missing or extraneous trip ID in RT table (indicates bad test setup)"
     assert (minimal_rt_table_schedule_rt_different.trip_id == 1).all(), "Missing or extraneous trip ID in schedule feed (inficates bad test setup)"
     
@@ -156,7 +156,7 @@ def test_trips_in_schedule_only_are_dropped_from_stop_times(two_trip_schedule: G
     assert output_len == input_rt_len, f"Output feed stop times has a different number of trip id values ({output_len}) than input RT table ({input_rt_len})"
     
 def test_rt_stop_times_match_output_stop_times(two_trip_schedule: GTFS, two_trip_rt_table_schedule_rt_different: pd.DataFrame):
-    """Test that arrival_time and departure_time in the output stop times table match rt stop times at matching trip id and stop sequence"""
+    """Test that `arrival_time` and `departure_time` in the output `stop_times` match `stop_times_table` where `trip_id` and `stop_sequence` are equal"""
     # Run feed generation
     output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
         filtered_input_feed=two_trip_schedule,
@@ -176,6 +176,7 @@ def test_rt_stop_times_match_output_stop_times(two_trip_schedule: GTFS, two_trip
         how="outer",
         validate="one_to_one"
     )
+    
     def gtfs_time_to_seconds(gtfs_time_series: pd.Series) -> pd.Series:
         split_series = gtfs_time_series.str.split(":")
         # not the best way to do this, but simple!
@@ -191,7 +192,7 @@ def test_rt_stop_times_match_output_stop_times(two_trip_schedule: GTFS, two_trip
     assert (merged_output_rt["arrival_time"] == merged_output_rt["departure_time"]).all(), "Arrival times do not match departure times in output"
         
 def test_no_mutability_issues(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different: pd.DataFrame, expected_tables: list[str]):
-    """Check that altering non-schedule tables in the output feed does not alter the input feed"""
+    """Test that all attributes in the output are not the same object as the input in `filtered_input_feed` (to ensure that there aren't mutability issues)"""
     ignored_tables = ["stop_times", "stops"]
     output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
         filtered_input_feed=schedule_feed_minimal,
@@ -204,7 +205,7 @@ def test_no_mutability_issues(schedule_feed_minimal: GTFS, minimal_rt_table_sche
         assert output_table is not original_table, "make_retrospective_feed_single_date is returning the original update"
         
 def test_validation_stop_ids(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different_stop_id_altered: pd.DataFrame):
-    """Test that an assertion appears if the schedule feed and rt table do not have matching stop ids at the same value of trip_id and stop_sequence"""
+    """Test that if `validate=True` and `filtered_input_feed` and `stop_times_table` do not have matching stop ids at the same value of trip_id and stop_sequence, an `AssertionError` is raised"""
     with pytest.raises(AssertionError):
         output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
         filtered_input_feed=schedule_feed_minimal,
@@ -214,7 +215,7 @@ def test_validation_stop_ids(schedule_feed_minimal: GTFS, minimal_rt_table_sched
     )
         
 def test_validation_schedule_times(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different_schedule_arrival_altered: pd.DataFrame):
-    """Test that an assertion appears if the schedule feed and rt table do not have matching schedule arrival times at the same value of trip_id and stop_sequence"""
+    """Test that if `validate=True` and `filtered_input_feed` and `stop_times_table` do not have matching schedule arrival times at the same value of trip_id and stop_sequence, an `AssertionError` is raised"""
     with pytest.raises(AssertionError):
         output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
         filtered_input_feed=schedule_feed_minimal,
@@ -224,7 +225,7 @@ def test_validation_schedule_times(schedule_feed_minimal: GTFS, minimal_rt_table
     )
 
 def test_schedule_rt_equal_stop_times(two_trip_schedule: GTFS, two_trip_rt_table_schedule_rt_same: pd.DataFrame):
-    """Test that, if the schedule and rt data are the same in the rt intake, that the schedule and rt stop_times tables are identical to the schedule version except that columns are the same as and in the same order as the specified column order"""
+    """Test that, if the data in `filtered_input_feed` and `stop_times_table` represent identical trips, the `stop_times` table in the output feed is identical to the schedule version except that columns are as specified in `stop_times_desired_columns`"""
     # Get the the expected columns from the default args
     expected_columns = EXTRA_COLUMNS_FEED_GENERATION_KWARGS["stop_times_desired_columns"]
     
