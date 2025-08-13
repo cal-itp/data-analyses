@@ -10,10 +10,10 @@ import yaml
 import numpy as np 
 
 import open_data_utils
-from shared_utils import portfolio_utils, publish_utils, shared_data
+from shared_utils import portfolio_utils, publish_utils, shared_data, rt_dates, dask_utils
 from calitp_data_analysis import utils, geography_utils
 from segment_speed_utils import helpers
-from update_vars import analysis_date, TRAFFIC_OPS_GCS, AH_TEST
+from update_vars import analysis_date, TRAFFIC_OPS_GCS, AH_TEST, GTFS_DATA_DICT, SCHED_GCS
 
 import google.auth
 credentials, project = google.auth.default()
@@ -155,6 +155,56 @@ def patch_previous_dates(
 
     return published_routes
 
+def add_route_typologies(gdf:gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Concatenate the years available for
+    route typologies on the operator-route_id
+    grain.
+    """
+    ROUTE_TYPOLOGIES_FILE = GTFS_DATA_DICT.schedule_tables.route_typologies
+
+    route_typology_paths = [
+        f"{SCHED_GCS}{ROUTE_TYPOLOGIES_FILE}" for year in rt_dates.years_available
+    ]
+    route_typology_df = dask_utils.get_ddf(
+        route_typology_paths,
+        rt_dates.years_available,
+        data_type="df",
+        get_pandas=True,
+        columns=[
+            "name",
+            "route_id",
+            "is_express",
+            "is_ferry",
+            "is_rail",
+            "is_coverage",
+            "is_local",
+            "is_downtown_local",
+            "is_rapid",
+        ],
+        add_date=False,
+        add_year=True,
+    )
+
+    # Drop duplicates of operator-route_id to keep only the
+    # row with the most current year.
+    route_typology_df2 = route_typology_df.sort_values(
+        by=["name", "route_id", "year"], ascending=[True, True, False]
+    ).drop_duplicates(
+        subset=[
+            "name",
+            "route_id",
+        ]
+    )
+    
+    m1 = pd.merge(
+    gdf,
+    route_typology_df2,
+    on=["name", "route_id"],
+    how="left",
+)
+    return m1
+
 def routes_shn_intersection(
     routes_gdf: gpd.GeoDataFrame, buffer_amount: int
 ) -> gpd.GeoDataFrame:
@@ -251,13 +301,6 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
     """
     # Retain only the longest shape for each name-route_id combo
     # so finding the intersection with SHN won't take as long
-    """
-    gdf = gdf.sort_values(
-        by=["name", "route_id", "route_length_feet"], ascending=[True, True, False]
-    )[["name", "route_id", "route_length_feet", "geometry"]].drop_duplicates(
-        subset=["name", "route_id"]
-    )
-    """
     # Overlay
     intersecting = routes_shn_intersection(gdf, buffer_amt)
 
@@ -277,7 +320,7 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
     m1.pct_route_on_hwy_across_districts = m1.pct_route_on_hwy_across_districts.fillna(
         0
     )
-    m1["on_shs"] = np.where(m1["pct_route_on_hwy_across_districts"] == 0, "N", "Y")
+    m1["on_shs"] = np.where(m1["pct_route_on_hwy_across_districts"] == 0, 0, 1)
 
     # Clean up rows that are tagged as "on_shs==N" but still have values
     # that appear.
@@ -294,8 +337,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     # Change column order
     route_cols = [
-        "organization_source_record_id",
-        "organization_name",
+        "portfolio_organization_name",
         "route_id",
         "route_type",
         "route_name_used",
@@ -309,12 +351,24 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "shn_districts",
         "pct_route_on_hwy_across_districts",
     ]
-    col_order = route_cols + shape_cols + agency_ids + shn_cols + ["geometry"]
+
+    route_typology = [
+        "is_express",
+        "is_ferry",
+        "is_rail",
+        "is_coverage",
+        "is_local",
+        "is_downtown_local",
+        "is_rapid",
+    ]
+    col_order = (
+        route_cols + shape_cols + agency_ids + shn_cols + route_typology + ["geometry"]
+    )
 
     df2 = (
         df[col_order]
         .reindex(columns=col_order)
-        .rename(columns=open_data_utils.STANDARDIZED_COLUMNS_DICT)
+        .rename(columns=STANDARDIZED_COLUMNS_DICT)
         .reset_index(drop=True)
     )
 
@@ -325,7 +379,6 @@ if __name__ == "__main__":
     time0 = datetime.datetime.now()
     # Make an operator-feed level file (this is published)    
     routes = create_routes_file_for_export(analysis_date)
-    # routes = add_shn_information(routes, SHN_HWY_BUFFER_FEET)  
     
     # Export into GCS (outside export/)
     # create_routes is different than create_stops, which already has
@@ -334,18 +387,24 @@ if __name__ == "__main__":
     # the export/ folder contains the patched versions of the routes
     utils.geoparquet_gcs_export(
         routes,
-        TRAFFIC_OPS_GCS,
+        AH_TEST,
         f"ca_transit_routes_{analysis_date}"
     )
     
-    published_routes = patch_previous_dates(
-        routes, 
+    # Patch previous dates and add SHN + Route Typology
+    published_routes = (
+    patch_previous_dates(
+        routes,
         analysis_date,
-    ).pipe(add_shn_information, SHN_HWY_BUFFER_FEET).pipe(finalize_export_df)
-        
+    )
+    .pipe(add_shn_information, SHN_HWY_BUFFER_FEET)
+    .pipe(add_route_typologies)
+    .pipe(open_data_utils.standardize_operator_info_for_exports, analysis_date)
+    .pipe(finalize_export_df)
+) 
     utils.geoparquet_gcs_export(
         published_routes, 
-        TRAFFIC_OPS_GCS, 
+        AH_TEST, 
         "ca_transit_routes"
     )
     

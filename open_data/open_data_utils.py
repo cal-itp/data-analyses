@@ -32,11 +32,25 @@ def standardize_operator_info_for_exports(df: pd.DataFrame, date: str) -> pd.Dat
             "schedule_gtfs_dataset_key",
             "name",
             "base64_url",
-            "organization_source_record_id",
-            "organization_name",
             "caltrans_district",
         ],
         filters=[[("schedule_gtfs_dataset_key", "in", public_feeds)]],
+    )
+
+    # Add portfolio_organization_name
+    crosswalk = (
+        crosswalk.assign(
+            caltrans_district=crosswalk.caltrans_district.map(
+                portfolio_utils.CALTRANS_DISTRICT_DICT
+            )
+        )
+        .pipe(
+            portfolio_utils.standardize_portfolio_organization_names,
+            PORTFOLIO_ORGANIZATIONS_DICT,
+        )
+        .drop_duplicates(
+            subset=["schedule_gtfs_dataset_key", "name", "portfolio_organization_name"]
+        )
     )
 
     # Checked whether we need a left merge to keep stops outside of CA
@@ -138,7 +152,8 @@ STANDARDIZED_COLUMNS_DICT = {
     "agency_name_secondary": "agency_secondary",
     "route_name_used": "route_name",
     "route_types_served": "routetypes",
-    "meters_to_shn": "meters_to_ca_state_highway"
+    "meters_to_shn": "meters_to_ca_state_highway",
+    "portfolio_organization_name":"agency"
 }
 
 
