@@ -365,7 +365,7 @@ def make_retrospective_feed_single_date(
             | stop_times_merged["feed_arrival_sec"].isna()
             | stop_times_merged["warehouse_scheduled_arrival_sec"].isna()
         ).all()
-        # All RT stop times have an arrival sec
+        # All schedule feed stop times have an arrival second
         assert (
             ~stop_times_merged["feed_arrival_sec"].isna()
             | stop_times_merged[
@@ -398,12 +398,12 @@ def make_retrospective_feed_single_date(
     # Alter the feed with the new trips and stop times
     altered_feed = copy.deepcopy(filtered_input_feed)
     altered_feed.trips = schedule_trips_in_rt.reset_index()
-    altered_feed.stop_times = stop_times_gtfs_format_with_rt_times[
-        np.intersect1d(
-            stop_times_desired_columns, stop_times_merged_filtered.columns
-        )
+    stop_times_keep_columns = [
+        column 
+        for column in stop_times_desired_columns 
+        if column in stop_times_gtfs_format_with_rt_times.columns
     ]
-
+    altered_feed.stop_times = stop_times_gtfs_format_with_rt_times[stop_times_keep_columns]
     # Not sure if this is appropriate or not, since we're altering. Leaving commented out for now
     # Possibly should go in subset_schedule_feed_to_one_date
     """

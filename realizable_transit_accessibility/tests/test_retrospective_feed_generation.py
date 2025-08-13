@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from gtfslite import GTFS
 from retrospective_feed_generation import retrospective_feed_generation
-from .constants import DEFAULT_TEST_FEED_GENERATION_KWARGS, STOP_SEQUENCE_NAME, TRIP_ID_NAME, RT_ARRIVAL_SEC_NAME
+from .constants import DEFAULT_TEST_FEED_GENERATION_KWARGS, STOP_SEQUENCE_NAME, TRIP_ID_NAME, RT_ARRIVAL_SEC_NAME, EXTRA_COLUMNS_FEED_GENERATION_KWARGS
 
 @pytest.fixture
 def test_data_path(request):
@@ -226,13 +226,13 @@ def test_validation_schedule_times(schedule_feed_minimal: GTFS, minimal_rt_table
 def test_schedule_rt_equal_stop_times(two_trip_schedule: GTFS, two_trip_rt_table_schedule_rt_same: pd.DataFrame):
     """Test that, if the schedule and rt data are the same in the rt intake, that the schedule and rt stop_times tables are identical to the schedule version except that columns are the same as and in the same order as the specified column order"""
     # Get the the expected columns from the default args
-    expected_columns = DEFAULT_TEST_FEED_GENERATION_KWARGS["stop_times_desired_columns"]
+    expected_columns = EXTRA_COLUMNS_FEED_GENERATION_KWARGS["stop_times_desired_columns"]
     
     # Run feed generation
     output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
         filtered_input_feed=two_trip_schedule,
         stop_times_table=two_trip_rt_table_schedule_rt_same,
-        **DEFAULT_TEST_FEED_GENERATION_KWARGS
+        **EXTRA_COLUMNS_FEED_GENERATION_KWARGS
     )
     
     # Get the stop times table

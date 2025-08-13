@@ -1,10 +1,18 @@
-TEST_STOP_TIMES_DESIRED_COLUMNS = [
+TEST_STOP_TIMES_DESIRED_COLUMNS_DEFAULT = [
     "trip_id",
     "arrival_time",
     "departure_time",
+    "stop_id",
+    "stop_sequence",
+]
+
+TEST_STOP_TIMES_DESIRED_COLUMNS_EXTRA_COLUMNS = [
+    "trip_id",
+    "arrival_time",
     "drop_off_type",
     "stop_headsign",
     "stop_id",
+    "departure_time",
     "stop_sequence",
 ]
 
@@ -45,6 +53,11 @@ TEST_DEFAULT_COLUMN_MAP = {
 }
 
 DEFAULT_TEST_FEED_GENERATION_KWARGS = {
-    "stop_times_desired_columns": TEST_STOP_TIMES_DESIRED_COLUMNS,
+    "stop_times_desired_columns": TEST_STOP_TIMES_DESIRED_COLUMNS_DEFAULT,
     "stop_times_table_columns": TEST_DEFAULT_COLUMN_MAP,
+}
+
+EXTRA_COLUMNS_FEED_GENERATION_KWARGS = {
+    **DEFAULT_TEST_FEED_GENERATION_KWARGS,
+    "stop_times_desired_columns": TEST_STOP_TIMES_DESIRED_COLUMNS_EXTRA_COLUMNS
 }
