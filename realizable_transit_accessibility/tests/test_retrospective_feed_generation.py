@@ -6,42 +6,76 @@ from gtfslite import GTFS
 from retrospective_feed_generation import retrospective_feed_generation
 from .constants import DEFAULT_TEST_FEED_GENERATION_KWARGS, STOP_SEQUENCE_NAME, TRIP_ID_NAME, RT_ARRIVAL_SEC_NAME
 
-def _get_test_data_path(request):
+@pytest.fixture
+def test_data_path(request):
     return request.path.parent / "test_data"
 
-def _gtfslite_from_folder(path: pathlib.Path | str) -> GTFS:
-    txt_files = pathlib.Path(path).glob("*.txt")
+def _gtfslite_from_folder(
+    folder_path: pathlib.Path | str,
+    alt_trips_path: pathlib.Path | str | None = None,
+    alt_stop_times_path: pathlib.Path | str | None = None
+) -> GTFS:
+    txt_files = pathlib.Path(folder_path).glob("*.txt")
     found_files = {
         path.stem: pd.read_csv(path) for path in txt_files
     }
-    print(found_files.keys())
+    if alt_trips_path is not None:
+        found_files["trips"] = pd.read_csv(alt_trips_path)
+    if alt_stop_times_path is not None:
+        found_files["stop_times"] = pd.read_csv(alt_stop_times_path)
     return GTFS(**found_files)
     
 @pytest.fixture
-def schedule_feed_minimal(request) -> GTFS:
-    path = _get_test_data_path(request) / "minimal_schedule"
+def schedule_feed_minimal(test_data_path) -> GTFS:
+    path = test_data_path / "minimal_schedule"
     return _gtfslite_from_folder(path)
 
 @pytest.fixture
-def two_trip_schedule(request) -> GTFS:
-    path = _get_test_data_path(request) / "two_trip_schedule"
-    return _gtfslite_from_folder(path)
+def two_trip_schedule(test_data_path) -> GTFS:
+    return _gtfslite_from_folder(
+        test_data_path / "minimal_schedule",
+        alt_trips_path=(test_data_path / "two_trip_schedule" / "trips.txt"),
+        alt_stop_times_path=(test_data_path / "two_trip_schedule" / "stop_times.txt"),
+    )
 
 @pytest.fixture
-def minimal_rt_table_schedule_rt_different(request) -> pd.DataFrame:
-    path = _get_test_data_path(request) / "minimal_rt_table_schedule_rt_different.csv"
+def minimal_rt_table_schedule_rt_different(test_data_path) -> pd.DataFrame:
+    path = test_data_path / "minimal_rt_table_schedule_rt_different.csv"
     return pd.read_csv(path)
 
 @pytest.fixture
-def two_trip_rt_table_schedule_rt_different(request) -> pd.DataFrame:
-    path = _get_test_data_path(request) / "two_trip_rt_table_schedule_rt_different.csv"
+def two_trip_rt_table_schedule_rt_different(test_data_path) -> pd.DataFrame:
+    path = test_data_path / "two_trip_rt_table_schedule_rt_different.csv"
+    return pd.read_csv(path)
+
+
+@pytest.fixture
+def two_trip_rt_table_schedule_rt_same(test_data_path) -> pd.DataFrame:
+    path = test_data_path / "two_trip_rt_table_schedule_rt_same.csv"
     return pd.read_csv(path)
 
 @pytest.fixture
-def expected_tables(request) -> list[str]:
-    path = _get_test_data_path(request) / "minimal_schedule"
+def expected_tables(test_data_path) -> list[str]:
+    path = test_data_path / "minimal_schedule"
     tables = [file.stem for file in path.glob("*.txt")]
     return tables
+
+@pytest.fixture
+def minimal_rt_table_schedule_rt_different_schedule_arrival_altered(test_data_path) -> pd.DataFrame:
+    path = (
+        test_data_path
+        / "minimal_rt_table_schedule_rt_different_schedule_arrival_altered.csv"
+    )
+    return pd.read_csv(path)
+
+
+@pytest.fixture
+def minimal_rt_table_schedule_rt_different_stop_id_altered(test_data_path) -> pd.DataFrame:
+    path = (
+        test_data_path
+        / "minimal_rt_table_schedule_rt_different_stop_id_altered.csv"
+    )
+    return pd.read_csv(path)
 
 def test_feed_tables_exist(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different: pd.DataFrame, expected_tables: list[str]):
     """Test whether a feed created through retrospective accessibility has all expected tables"""
@@ -155,9 +189,7 @@ def test_rt_stop_times_match_output_stop_times(two_trip_schedule: GTFS, two_trip
     assert merged_output_rt[RT_ARRIVAL_SEC_NAME].equals(merged_output_rt["output_arrival_time_seconds"]), "Rt arrival sec does not match output arrival sec at same trip id and stop sequence"
     # Check that output departure time is the same as arrival time
     assert (merged_output_rt["arrival_time"] == merged_output_rt["departure_time"]).all(), "Arrival times do not match departure times in output"
-    
-#TODO need to check that other columns are maintained in this scenario
-    
+        
 def test_no_mutability_issues(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different: pd.DataFrame, expected_tables: list[str]):
     """Check that altering non-schedule tables in the output feed does not alter the input feed"""
     ignored_tables = ["stop_times", "stops"]
@@ -171,7 +203,60 @@ def test_no_mutability_issues(schedule_feed_minimal: GTFS, minimal_rt_table_sche
         original_table = getattr(schedule_feed_minimal, table)
         assert output_table is not original_table, "make_retrospective_feed_single_date is returning the original update"
         
+def test_validation_stop_ids(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different_stop_id_altered: pd.DataFrame):
+    """Test that an assertion appears if the schedule feed and rt table do not have matching stop ids at the same value of trip_id and stop_sequence"""
+    with pytest.raises(AssertionError):
+        output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
+        filtered_input_feed=schedule_feed_minimal,
+        stop_times_table=minimal_rt_table_schedule_rt_different_stop_id_altered,
+        validate=True,
+        **DEFAULT_TEST_FEED_GENERATION_KWARGS
+    )
+        
+def test_validation_schedule_times(schedule_feed_minimal: GTFS, minimal_rt_table_schedule_rt_different_schedule_arrival_altered: pd.DataFrame):
+    """Test that an assertion appears if the schedule feed and rt table do not have matching schedule arrival times at the same value of trip_id and stop_sequence"""
+    with pytest.raises(AssertionError):
+        output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
+        filtered_input_feed=schedule_feed_minimal,
+        stop_times_table=minimal_rt_table_schedule_rt_different_schedule_arrival_altered,
+        validate=True,
+        **DEFAULT_TEST_FEED_GENERATION_KWARGS
+    )
 
+def test_schedule_rt_equal_stop_times(two_trip_schedule: GTFS, two_trip_rt_table_schedule_rt_same: pd.DataFrame):
+    """Test that, if the schedule and rt data are the same in the rt intake, that the schedule and rt stop_times tables are identical to the schedule version except that columns are the same as and in the same order as the specified column order"""
+    # Get the the expected columns from the default args
+    expected_columns = DEFAULT_TEST_FEED_GENERATION_KWARGS["stop_times_desired_columns"]
     
-#TODO: there should also be tests to check that the validate=True options work as expected
+    # Run feed generation
+    output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
+        filtered_input_feed=two_trip_schedule,
+        stop_times_table=two_trip_rt_table_schedule_rt_same,
+        **DEFAULT_TEST_FEED_GENERATION_KWARGS
+    )
     
+    # Get the stop times table
+    schedule_table = two_trip_schedule.stop_times
+    output_table = output_feed.stop_times
+    # Check that the expected columns are present
+    #TODO: this assert currently fails, because the column order does not match the order specified in the input
+    assert list(expected_columns) == list(output_table.columns), "Check that the output table has the specified columns"
+    output_table_columns_selected = output_table[expected_columns].copy()
+    schedule_table_columns_selected = schedule_table[expected_columns].copy()
+    # Check that contents and order of stop times tables are maintained in the output
+    assert schedule_table_columns_selected.equals(output_table_columns_selected), "stop_times is not identical between the schedule input and output"
+
+def test_schedule_rt_equal_trips(two_trip_schedule: GTFS, two_trip_rt_table_schedule_rt_same: pd.DataFrame):
+    """Test that, if the schedule and rt data are the same in the rt intake, that the schedule and rt trips tables are identical to the schedule version"""
+    #TODO: this test currently fails, since the trips table is returned in the wrong order
+    # Run feed generation
+    output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
+        filtered_input_feed=two_trip_schedule,
+        stop_times_table=two_trip_rt_table_schedule_rt_same,
+        **DEFAULT_TEST_FEED_GENERATION_KWARGS
+    )
+    
+    # Get the trips table
+    schedule_table = two_trip_schedule.trips
+    output_table = output_feed.trips
+    assert schedule_table.equals(output_table), "trips table is not identical between the schedule input and output"

@@ -2,9 +2,8 @@ TEST_STOP_TIMES_DESIRED_COLUMNS = [
     "trip_id",
     "arrival_time",
     "departure_time",
-    #"drop_off_type",
-    #"pickup_type",
-    #"stop_headsign",
+    "drop_off_type",
+    "stop_headsign",
     "stop_id",
     "stop_sequence",
 ]
