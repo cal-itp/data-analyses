@@ -239,7 +239,6 @@ def test_schedule_rt_equal_stop_times(two_trip_schedule: GTFS, two_trip_rt_table
     schedule_table = two_trip_schedule.stop_times
     output_table = output_feed.stop_times
     # Check that the expected columns are present
-    #TODO: this assert currently fails, because the column order does not match the order specified in the input
     assert list(expected_columns) == list(output_table.columns), "Check that the output table has the specified columns"
     output_table_columns_selected = output_table[expected_columns].copy()
     schedule_table_columns_selected = schedule_table[expected_columns].copy()
