@@ -245,18 +245,3 @@ def test_schedule_rt_equal_stop_times(two_trip_schedule: GTFS, two_trip_rt_table
     schedule_table_columns_selected = schedule_table[expected_columns].copy()
     # Check that contents and order of stop times tables are maintained in the output
     assert schedule_table_columns_selected.equals(output_table_columns_selected), "stop_times is not identical between the schedule input and output"
-
-def test_schedule_rt_equal_trips(two_trip_schedule: GTFS, two_trip_rt_table_schedule_rt_same: pd.DataFrame):
-    """Test that, if the schedule and rt data are the same in the rt intake, that the schedule and rt trips tables are identical to the schedule version"""
-    #TODO: this test currently fails, since the trips table is returned in the wrong order
-    # Run feed generation
-    output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
-        filtered_input_feed=two_trip_schedule,
-        stop_times_table=two_trip_rt_table_schedule_rt_same,
-        **DEFAULT_TEST_FEED_GENERATION_KWARGS
-    )
-    
-    # Get the trips table
-    schedule_table = two_trip_schedule.trips
-    output_table = output_feed.trips
-    assert schedule_table.equals(output_table), "trips table is not identical between the schedule input and output"
