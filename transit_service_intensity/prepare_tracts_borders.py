@@ -61,8 +61,7 @@ if __name__ == "__main__":
     print(f'prepare_tracts_borders {ANALYSIS_DATE}')
     tracts = read_census_tracts(ANALYSIS_DATE)
     shapes = helpers.import_scheduled_shapes(ANALYSIS_DATE)
-    # borders = find_borders(tracts)
-    borders = gpd.read_parquet(f'borders_{ANALYSIS_DATE}.parquet')
+    borders = find_borders(tracts)
     st = helpers.import_scheduled_stop_times(analysis_date=ANALYSIS_DATE,
                                              columns=['feed_key', 'trip_id', 'stop_id'],
                                              get_pandas=True)
