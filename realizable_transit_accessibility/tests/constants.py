@@ -54,5 +54,5 @@ DEFAULT_TEST_FEED_GENERATION_KWARGS = {
 # For tests checking that non-default columns are present
 EXTRA_COLUMNS_FEED_GENERATION_KWARGS = {
     **DEFAULT_TEST_FEED_GENERATION_KWARGS,
-    "stop_times_desired_columns": TEST_STOP_TIMES_DESIRED_COLUMNS_EXTRA_COLUMNS
+    "stop_times_desired_columns": TEST_STOP_TIMES_DESIRED_COLUMNS_EXTRA_COLUMNS,
 }
