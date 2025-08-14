@@ -7,15 +7,9 @@ If using the get_list_of_words function, remove the comment out hashtag from the
 AND run a `! pip install nltk` in the first cell of your notebook
 '''
 import pandas as pd
-from siuba import *
 from calitp_data_analysis.sql import to_snakecase
 import _script_utils
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
-
-# import nltk
-# from nltk.corpus import stopwords
-# from nltk.tokenize import word_tokenize, sent_tokenize
-# import re
 
 def read_data_all():
     proj = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/CopyofFMIS_Projects_Universe_IIJA_Reporting_4.xls", 
@@ -27,10 +21,6 @@ def read_data_all():
     proj = proj.dropna(how='all') 
     proj['summary_recipient_defined_text_field_1_value'] = proj['summary_recipient_defined_text_field_1_value'].fillna(value='None')
     
-    # new_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/FY21-22ProgramCodesAsOf5-25-2022.v2.xlsx"))
-    # code_map = dict(new_codes[['iija_program_code', 'new_description']].values)
-    # proj['program_code_description'] = proj.program_code.map(code_map)
-    
     return proj
 
 
@@ -38,6 +28,41 @@ def read_data_all():
 Program Code
 Functions
 '''
+def update_program_code_list2():
+    updated_codes = to_snakecase(
+        pd.read_excel(
+            f"{GCS_FILE_PATH}/program_codes/FY21-22ProgramCodesAsOf5-25-2022.v2_expanded090823.xlsx"
+        )
+    )[["iija_program_code", "new_description"]]
+    original_codes = to_snakecase(
+        pd.read_excel(
+            f"{GCS_FILE_PATH}/program_codes/Copy of lst_IIJA_Code_20230908.xlsx"
+        )
+    )[["iija_program_code", "description", "program_name"]]
+
+    program_codes = pd.merge(
+        updated_codes,
+        original_codes,
+        on="iija_program_code",
+        how="outer",
+        indicator=True,
+    )
+    program_codes["new_description"] = program_codes["new_description"].str.strip()
+
+    program_codes.new_description.fillna(program_codes["description"], inplace=True)
+
+    program_codes = program_codes.drop(columns={"description", "_merge"})
+
+    def add_program_to_row(row):
+        if "Program" not in row["program_name"]:
+            return row["program_name"] + " Program"
+        else:
+            return row["program_name"]
+
+    program_codes["program_name"] = program_codes.apply(add_program_to_row, axis=1)
+
+    return program_codes
+"""
 def update_program_code_list2():
     updated_codes = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/program_codes/FY21-22ProgramCodesAsOf5-25-2022.v2_expanded090823.xlsx"))
     updated_codes = updated_codes>>select(_.iija_program_code, _.new_description)
@@ -60,7 +85,7 @@ def update_program_code_list2():
     program_codes['program_name'] = program_codes.apply(add_program_to_row, axis=1)
     
     return program_codes
-
+"""
 def add_program_to_row(row):
     if "Program" not in row["program_name"]:
         return row["program_name"] + " Program"

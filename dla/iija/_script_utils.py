@@ -8,18 +8,12 @@ Functions here to be used in cleaning script that will
 '''
 import numpy as np
 import pandas as pd
-from siuba import *
 
 import dla_utils
 from calitp_data_analysis.sql import to_snakecase
 import _data_utils
 import intake
 
-# import nltk
-# from nltk.corpus import stopwords
-# from nltk.tokenize import word_tokenize, sent_tokenize
-
-# import re
 
 GCS_FILE_PATH  = 'gs://calitp-analytics-data/data-analyses/dla/dla-iija'
 
@@ -34,14 +28,11 @@ def _prep_data(file_name):
     
     return df
 
-
 #get column names in Title Format (for exporting)
 def title_column_names(df):
     df.columns = df.columns.map(str.title) 
     df.columns = df.columns.map(lambda x : x.replace("_", " "))
-    
     return df
-
 
 def change_district_format(df, district_col):
     """
@@ -110,8 +101,6 @@ def identify_agency(df, identifier_col):
     
     # Filter out rows that contain spaces.
     locode_proj = ((df[~df[identifier_col].str.contains(" ")]))
-    
-    #locode_proj = locode_proj>>filter(_[identifier_col]!='None')
     locode_proj = locode_proj.loc[locode_proj[identifier_col]!='None']
     
     locode_proj = (_data_utils.add_name_from_locode(locode_proj, 'summary_recipient_defined_text_field_1_value'))
@@ -186,11 +175,9 @@ def load_county()->pd.DataFrame:
     df['county_description'] = df['county_description'] + " County"
     return df
 
+"""
 def county_district_crosswalk()->pd.DataFrame:
-    """
-    Aggregate locodes dataset to find which
-    districts a county lies in.
-    """
+   
     # Load locodes
     locodes_df = load_locodes()
     
@@ -205,6 +192,29 @@ def county_district_crosswalk()->pd.DataFrame:
         >> filter(_.county_name != "Multi-County", _.district != 53)
     )
     
+    county_info = pd.merge(
+        county_base,
+        county_district,
+        how="left",
+        left_on="county_description",
+        right_on="county_name",
+    ).drop(columns=["county_name"])
+    return county_info
+"""
+
+def county_district_crosswalk() -> pd.DataFrame:
+    """
+    Aggregate locodes dataset to find which
+    districts a county lies in.
+    """
+    # Load locodes
+    locodes_df = _script_utils.load_locodes()
+
+    # Load counties
+    county_base = _script_utils.load_county()
+
+    county_district = locodes_df[["district", "county_name"]].drop_duplicates()
+
     county_info = pd.merge(
         county_base,
         county_district,
