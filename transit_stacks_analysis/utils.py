@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from siuba import *
 from calitp import *
 from plotnine import *
 import intake
