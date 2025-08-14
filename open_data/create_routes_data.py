@@ -159,7 +159,8 @@ def add_route_typologies(gdf:gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Concatenate the years available for
     route typologies on the operator-route_id
-    grain.
+    grain. Join this dataframe with the gdf
+    created by patch_previous_dates. 
     """
     ROUTE_TYPOLOGIES_FILE = GTFS_DATA_DICT.schedule_tables.route_typologies
 
@@ -368,7 +369,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df2 = (
         df[col_order]
         .reindex(columns=col_order)
-        .rename(columns=STANDARDIZED_COLUMNS_DICT)
+        .rename(columns=open_data_utils.STANDARDIZED_COLUMNS_DICT)
         .reset_index(drop=True)
     )
 

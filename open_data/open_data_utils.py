@@ -5,14 +5,17 @@ and get it ready for GTFS schedule routes / stops datasets.
 import geopandas as gpd
 import intake
 import pandas as pd
+import yaml
 
 from calitp_data_analysis import geography_utils
-from shared_utils import gtfs_utils_v2, schedule_rt_utils
+from shared_utils import gtfs_utils_v2, schedule_rt_utils, portfolio_utils
 from update_vars import TRAFFIC_OPS_GCS, analysis_date, GTFS_DATA_DICT, SCHED_GCS
 
 catalog = intake.open_catalog(
     "../_shared_utils/shared_utils/shared_data_catalog.yml")
-    
+
+with open("../_shared_utils/shared_utils/portfolio_organization_name.yml", "r") as f:
+    PORTFOLIO_ORGANIZATIONS_DICT = yaml.safe_load(f)    
     
 def standardize_operator_info_for_exports(df: pd.DataFrame, date: str) -> pd.DataFrame:
     """
