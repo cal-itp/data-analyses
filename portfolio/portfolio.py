@@ -425,8 +425,8 @@ def build(
             "storage",
             "cp",
             "--recursive",
-            f"{site_output_dir}/_build/html/",
-            f"gs://calitp-analysis/{site_yml_name}"
+            f"{site_output_dir}/_build/html/*",
+            f"gs://calitp-analysis/{site_yml_name}/"
         ]
 
         typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
