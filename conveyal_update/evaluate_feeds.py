@@ -4,7 +4,6 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 from shared_utils import gtfs_utils_v2
 from calitp_data_analysis.tables import tbls
 from calitp_data_analysis.sql import query_sql
-from siuba import *
 import pandas as pd
 import datetime as dt
 import conveyal_vars
@@ -21,13 +20,8 @@ INT_TO_GTFS_WEEKDAY = {
     6: "sunday"
 }
 
-def check_defined_elsewhere(row, df):
-    '''
-    for feeds without service defined, check if the same service is captured in another feed that does include service
-    '''
-    is_defined = ((df >> filter(-_.n.isna())).service_key == row.service_key).any()
-    row['service_any_feed'] = is_defined
-    return row
+def _stringify_iterable(l) -> str:
+    return "('" + "', '".join(l) + "')" 
 
 def get_feeds_check_service():
     feeds_on_target = gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(selected_date=TARGET_DATE)
@@ -35,31 +29,33 @@ def get_feeds_check_service():
     # default will use mtc subfeeds (prev Conveyal behavior), can spec customer facing if we wanna switch
 
     operator_feeds = feeds_on_target.feed_key
-    trips = (
-        tbls.mart_gtfs.fct_scheduled_trips()
-        >> filter(_.feed_key.isin(operator_feeds), _.service_date == TARGET_DATE)
-        >> group_by(_.feed_key)
-        >> count(_.feed_key)
-        # >> collect()
-        # >> mutate(any_trip = True)
+    operator_feeds_str = _stringify_iterable(operator_feeds)
+    trips = query_sql(
+        f"""
+        SELECT feed_key, COUNT(feed_key) AS trip_count 
+        FROM cal-itp-data-infra.mart_gtfs.fct_scheduled_trips
+        WHERE feed_key IN {operator_feeds_str} AND service_date = "{TARGET_DATE}"
+        GROUP BY feed_key"""
     )
-    service_defined = trips >> collect()
-    feeds_on_target = feeds_on_target >> left_join(_, service_defined, on = 'feed_key') >> select(-_.name)
+    feeds_on_target = feeds_on_target.merge(
+        trips,
+        how="left",
+        on="feed_key",
+        validate="one_to_one",
+    )
+    feeds_on_target.to_csv("test.csv")
     return feeds_on_target
     
 def attach_transit_services(feeds_on_target: pd.DataFrame):
     """Associate each feed in feeds_on_target.gtfs_dataset_key with a transit service"""
     target_dt = dt.datetime.combine(dt.date.fromisoformat(TARGET_DATE), dt.time(0))
 
-    services = (tbls.mart_transit_database.dim_gtfs_service_data()
-        >> filter(
-            _._valid_from <= target_dt, _._valid_to > target_dt
-        )
-        # >> filter(_.gtfs_dataset_key == 'da7e9e09d3eec6c7686adc21c8b28b63') # test with BCT
-        # >> filter(_.service_key == '5bc7371dca26d74a99be945b18b3174e')
-        >> select(_.service_key, _.gtfs_dataset_key, _.customer_facing)
-        >> collect()
+    services = query_sql(
+        f"""
+        SELECT service_key, gtfs_dataset_key, customer_facing FROM cal-itp-data-infra.mart_transit_database.dim_gtfs_service_data
+        WHERE _valid_from <= "{target_dt}" AND _valid_to >= "{target_dt}\""""
     )
+    
 
     feeds_services_merged = feeds_on_target.merge(
         services, how="left", on='gtfs_dataset_key', validate="one_to_many"
@@ -71,7 +67,14 @@ def attach_transit_services(feeds_on_target: pd.DataFrame):
         
 def get_undefined_feeds(feeds_on_target: pd.DataFrame) -> pd.DataFrame:
     """Return feeds in feeds_on_target that do not have service and where service is not defined in another feed"""
-    undefined = feeds_on_target.apply(check_defined_elsewhere, axis=1, args=[feeds_on_target]) >> filter(-_.service_any_feed)
+    # Get service keys associated with at least one trip
+    feeds_with_trip_counts = feeds_on_target.dropna(subset=["trip_count"])
+    service_keys_with_service = feeds_with_trip_counts.loc[feeds_with_trip_counts.trip_count > 0, "service_key"].drop_duplicates()
+    print(service_keys_with_service)
+    # Get feeds without service
+    feed_undefined = ~feeds_on_target.service_key.isin(service_keys_with_service)
+    print(feed_undefined.any())
+    undefined = feeds_on_target.loc[feed_undefined]
     return undefined
 
 def report_unavailable_feeds(feeds: pd.DataFrame, fname: str) -> None:
