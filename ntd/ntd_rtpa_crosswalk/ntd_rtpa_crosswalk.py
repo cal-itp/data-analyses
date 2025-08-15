@@ -10,7 +10,8 @@
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis.tables import tbls
-from siuba import _, collect, filter, select
+from calitp_data_analysis.sql import get_engine
+
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
 
@@ -21,36 +22,40 @@ def get_ntd_agencies(min_year:str) -> pd.DataFrame:
     reads in ntd data from warehouse, filters for CA agencies since 2018.
     groups data by agency and sum their UPT.
     """
-    get_ntd_time_series = (
-        tbls.mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt()
-        >> filter(_.state.str.contains("CA") | 
-                  _.state.str.contains("NV"), # to get lake Tahoe Transportation back
-                  _.year >= min_year,
-                  _.city != None,
-                  _.primary_uza_name.str.contains(", CA") | 
-                  _.primary_uza_name.str.contains("CA-NV") |
-                  _.primary_uza_name.str.contains("California Non-UZA") | 
-                  _.primary_uza_name.str.contains("El Paso, TX--NM") # something about Paso Robles 
-                 )
-        >> select(
-            'agency_name',
-            'agency_status',
-            'city',
-            'legacy_ntd_id',
-            'mode',
-            'ntd_id',
-            'reporter_type',
-            'reporting_module',
-            'service',
-            'state',
-            'uace_code',
-            'primary_uza_name',
-            'uza_population',
-            'year',
-            'upt',
-        )
-        >> collect()
-    )
+    
+    db_engine = get_engine()
+    
+    with db_engine.connect() as connection:
+        query = """
+            SELECT 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`agency_name`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`agency_status`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`city`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`legacy_ntd_id`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`mode`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`ntd_id`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`reporter_type`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`reporting_module`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`service`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`state`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`uace_code`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`primary_uza_name`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`uza_population`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`year`, 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`upt` 
+            FROM 
+                `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt` AS `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1` 
+            WHERE 
+                (regexp_contains(`mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`state`, 'CA') 
+                OR regexp_contains(`mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`state`, 'NV')) 
+                AND `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`year` >= 2018 
+                AND `mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`city` IS NOT NULL 
+                AND (regexp_contains(`mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`primary_uza_name`, ', CA') 
+                OR regexp_contains(`mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`primary_uza_name`, 'CA-NV') 
+                OR regexp_contains(`mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`primary_uza_name`, 'California Non-UZA') 
+                OR regexp_contains(`mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt_1`.`primary_uza_name`, 'El Paso, TX--NM'))            
+                """
+        get_ntd_time_series = pd.read_sql(query, connection)
     
     ntd_time_series = get_ntd_time_series.groupby(
         [
