@@ -43,7 +43,6 @@ def get_feeds_check_service():
         on="feed_key",
         validate="one_to_one",
     )
-    feeds_on_target.to_csv("test.csv")
     return feeds_on_target
     
 def attach_transit_services(feeds_on_target: pd.DataFrame):
@@ -70,10 +69,8 @@ def get_undefined_feeds(feeds_on_target: pd.DataFrame) -> pd.DataFrame:
     # Get service keys associated with at least one trip
     feeds_with_trip_counts = feeds_on_target.dropna(subset=["trip_count"])
     service_keys_with_service = feeds_with_trip_counts.loc[feeds_with_trip_counts.trip_count > 0, "service_key"].drop_duplicates()
-    print(service_keys_with_service)
     # Get feeds without service
     feed_undefined = ~feeds_on_target.service_key.isin(service_keys_with_service)
-    print(feed_undefined.any())
     undefined = feeds_on_target.loc[feed_undefined]
     return undefined
 
