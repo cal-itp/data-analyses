@@ -1,32 +1,36 @@
 import datetime as dt
 import pathlib
-
-import columns as col
+from typing import Iterable
 import geopandas as gpd
 import numpy as np
 import pandas as pd
-from gtfs_utils import *
-#  pip install gtfs-lite
+from retrospective_feed_generation.gtfs_utils import *
 from gtfslite import GTFS
-from retrospective_feed_generation import *
-from retrospective_feed_generation import _filter_na_stop_times, _filter_non_rt_trips
+import retrospective_feed_generation.columns as col
+from retrospective_feed_generation.retrospective_feed_generation import *
+from retrospective_feed_generation.retrospective_feed_generation import _filter_na_stop_times, _filter_non_rt_trips
 from shared_utils import catalog_utils, gtfs_utils_v2, rt_dates
-from warehouse_utils import *
+from retrospective_feed_generation.warehouse_utils import *
 import argparse
 
-def process_table_row(rt_date: str, schedule_local_path: str, schedule_name: str, output_local_name: str, max_stop_gap: int = 5) -> None:
-    """Process a row of the input table""" # TODO: make these docstrings actually useful
-    # Get RT data
-    # Get the schedule gtfs dataset key
-    gtfs_dataset_key = (
-        gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(
-            selected_date=rt_date, keep_cols=["name", "gtfs_dataset_key"]
+def process_all_feeds(rt_dates: Iterable[str], schedule_local_paths: Iterable[str], schedule_names: Iterable[str], output_local_paths: Iterable[str], max_stop_gap: int = 5) -> None:
+    gtfs_dataset_key_dict = {}
+    for rt_date in rt_dates:
+        gtfs_dataset_keys = (
+            gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(
+                selected_date=rt_date, keep_cols=["name", "gtfs_dataset_key"]
+            )
+            .set_index("name")
+            .loc[schedule_names, "gtfs_dataset_key"]
         )
-        .set_index("name")
-        .at[schedule_name, "gtfs_dataset_key"]
-    )
-    
-    print("key", gtfs_dataset_key)
+        gtfs_dataset_key_dict[rt_date] = gtfs_dataset_keys
+    gtfs_dataset_key_df = pd.DataFrame(gtfs_dataset_key_dict)
+    for rt_date, schedule_name, schedule_local_path, output_local_path in zip(rt_dates, schedule_names, schedule_local_paths, output_local_paths):
+        gtfs_dataset_key = gtfs_dataset_key_df.at[schedule_name, rt_date]
+        process_table_row(rt_date, gtfs_dataset_key, schedule_local_path, output_local_path, max_stop_gap=max_stop_gap)
+
+def process_table_row(rt_date: str, gtfs_dataset_key: str, schedule_local_path: str, output_local_path: str, max_stop_gap: int = 5) -> None:
+    """Process a row of the input table""" # TODO: make these docstrings actually useful
     # Get the merged schedule/stop times table
     schedule_rt_stop_times_single_agency = _filter_non_rt_trips(
         get_schedule_rt_stop_times_table(gtfs_dataset_key, rt_date),
@@ -66,10 +70,10 @@ def process_table_row(rt_date: str, schedule_local_path: str, schedule_name: str
         },
     )
 
-    print(f"Saving feed to {output_local_name}")
+    print(f"Saving feed to {output_local_path}")
     # Save the output to a zip file
-    output_feed.write_zip(output_local_name)
-    return output_local_name
+    output_feed.write_zip(output_local_path)
+    return output_local_path
 
 if __name__ == "__main__":
     # Read command line args
@@ -80,9 +84,10 @@ if __name__ == "__main__":
     input_table = pd.read_csv(args.input_table)
 
     # Run process_table_row on the input table
-    pd.Series(zip(
-      input_table["date"], input_table["schedule_local_path"], input_table["schedule_name"], input_table["output_feed_path"]
-    )).map(
-        lambda row: process_table_row(row[0], row[1], row[2], row[3])
+    process_all_feeds(
+        input_table["date"].values,
+        input_table["schedule_local_path"].values,
+        input_table["schedule_name"].values,
+        input_table["output_local_path"].values,
     )
     print("Done")
