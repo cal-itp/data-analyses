@@ -15,6 +15,7 @@ import argparse
 
 def process_all_feeds(rt_dates: Iterable[str], schedule_local_paths: Iterable[str], schedule_names: Iterable[str], output_local_paths: Iterable[str], max_stop_gap: int = 5) -> None:
     gtfs_dataset_key_dict = {}
+    schedule_rt_stop_times_table_dict = {}
     for rt_date in rt_dates:
         gtfs_dataset_keys = (
             gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(
@@ -23,17 +24,20 @@ def process_all_feeds(rt_dates: Iterable[str], schedule_local_paths: Iterable[st
             .set_index("name")
             .loc[schedule_names, "gtfs_dataset_key"]
         )
+        schedule_rt_stop_times_table_dict[rt_date] = get_schedule_rt_stop_times_table(gtfs_dataset_keys.values, rt_date)
         gtfs_dataset_key_dict[rt_date] = gtfs_dataset_keys
     gtfs_dataset_key_df = pd.DataFrame(gtfs_dataset_key_dict)
     for rt_date, schedule_name, schedule_local_path, output_local_path in zip(rt_dates, schedule_names, schedule_local_paths, output_local_paths):
         gtfs_dataset_key = gtfs_dataset_key_df.at[schedule_name, rt_date]
-        process_table_row(rt_date, gtfs_dataset_key, schedule_local_path, output_local_path, max_stop_gap=max_stop_gap)
+        schedule_rt_table = schedule_rt_stop_times_table_dict[rt_date]
+        schedule_rt_table_one_feed = schedule_rt_table.loc[schedule_rt_table["schedule_gtfs_dataset_key"] == gtfs_dataset_key]
+        process_table_row(schedule_rt_table_one_feed, rt_date, schedule_local_path, output_local_path, max_stop_gap=max_stop_gap)
 
-def process_table_row(rt_date: str, gtfs_dataset_key: str, schedule_local_path: str, output_local_path: str, max_stop_gap: int = 5) -> None:
+def process_table_row(schedule_rt_table: pd.DataFrame, rt_date: str, schedule_local_path: str, output_local_path: str, max_stop_gap: int = 5) -> None:
     """Process a row of the input table""" # TODO: make these docstrings actually useful
     # Get the merged schedule/stop times table
     schedule_rt_stop_times_single_agency = _filter_non_rt_trips(
-        get_schedule_rt_stop_times_table(gtfs_dataset_key, rt_date),
+        schedule_rt_table,
         col.DEFAULT_COLUMN_MAP,
     ).reset_index(drop=True)
 
