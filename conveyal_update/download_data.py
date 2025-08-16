@@ -1,7 +1,6 @@
 import os
 from calitp_data_analysis import get_fs
 import pandas as pd
-from siuba import *
 
 from tqdm import tqdm
 tqdm.pandas()
@@ -30,7 +29,7 @@ def download_region(feeds_df, region: str):
     path = f'./feeds_{feeds_df.date.iloc[0].strftime("%Y-%m-%d")}/{region}'
     if not os.path.exists(path): 
         os.makedirs(path)
-    region = (feeds_df >> filter(_.region == region)).copy()
+    region = feeds_df.loc[feeds_df.region == region].copy()
     region['path'] = path
     region.progress_apply(download_feed, axis = 1)
     
