@@ -1,0 +1,2 @@
+feed_publisher_name,feed_publisher_url,feed_lang,feed_start_date,feed_end_date,feed_version
+Big Blue Bus,https://www.bigbluebus.com,en,20250416,20250416,S1000070
