@@ -2,6 +2,7 @@ from retrospective_feed_generation.gtfs_utils import seconds_to_gtfs_format_time
 import pytest
 import pandas as pd
 
+
 def test_seconds_to_gtfs_format_time():
     """
     Test that seconds_to_gtfs_format_time works as expected in a simple scenario
