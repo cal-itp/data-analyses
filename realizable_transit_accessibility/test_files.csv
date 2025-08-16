@@ -1,3 +1,5 @@
 date,schedule_local_path,schedule_name,output_local_path
 2025-04-16,./bbb_original.zip,Big Blue Bus Schedule,output_feeds/bbb_rt_2025-04-16.zip
+2025-06-11,./big_blue_bus_input_06-11.zip,"Big Blue Bus Schedule",output_feeds/bbb_rt_2025-06-11.zip
 2025-04-16,./culver_city.zip,"Culver City Schedule",output_feeds/ccb_rt_2025-04-16.zip
+2025-06-11,./culver_city_input_06-11.zip,"Culver City Schedule",output_feeds/ccb_rt_2025-06-11.zip

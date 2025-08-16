@@ -16,13 +16,13 @@ import argparse
 def process_all_feeds(rt_dates: Iterable[str], schedule_local_paths: Iterable[str], schedule_names: Iterable[str], output_local_paths: Iterable[str], max_stop_gap: int = 5) -> None:
     gtfs_dataset_key_dict = {}
     schedule_rt_stop_times_table_dict = {}
-    for rt_date in rt_dates:
+    for rt_date in np.unique(rt_dates):
         gtfs_dataset_keys = (
             gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(
                 selected_date=rt_date, keep_cols=["name", "gtfs_dataset_key"]
             )
             .set_index("name")
-            .loc[schedule_names, "gtfs_dataset_key"]
+            .loc[np.unique(schedule_names), "gtfs_dataset_key"]
         )
         schedule_rt_stop_times_table_dict[rt_date] = get_schedule_rt_stop_times_table(gtfs_dataset_keys.values, rt_date)
         gtfs_dataset_key_dict[rt_date] = gtfs_dataset_keys
