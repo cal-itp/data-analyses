@@ -73,7 +73,7 @@ def get_warehouse_data(path_df):
     warehouse_data = {}
     warehouse_data['shapes'] = shared_utils.gtfs_utils_v2.get_shapes(selected_date=analysis_date, operator_feeds=all_feed_keys,
                                                       shape_cols = ['feed_key', 'shape_id'])
-    warehouse_data['shapes'] = warehouse_data['shapes'].to_crs(geography_utils.CA_NAD83Albers)
+    warehouse_data['shapes'] = warehouse_data['shapes'].to_crs(geography_utils.CA_NAD83Albers_m)
     warehouse_data['trips'] = shared_utils.gtfs_utils_v2.get_trips(selected_date=analysis_date,
                                                                    operator_feeds=all_feed_keys,
                                                                    trip_cols = ['feed_key', 'name', 'trip_id', 'route_id',
@@ -84,7 +84,7 @@ def get_warehouse_data(path_df):
     warehouse_data['st'] = shared_utils.gtfs_utils_v2.get_stop_times(selected_date=analysis_date, operator_feeds=all_feed_keys, trip_df=warehouse_data['trips'])
     warehouse_data['st'] = warehouse_data['st'] >> filter(_.stop_id.isin(all_stops)) >> collect()
     warehouse_data['stops'] = shared_utils.gtfs_utils_v2.get_stops(selected_date=analysis_date, operator_feeds=all_feed_keys, custom_filtering={'stop_id': all_stops})
-    warehouse_data['stops'] = warehouse_data['stops'].to_crs(geography_utils.CA_NAD83Albers)
+    warehouse_data['stops'] = warehouse_data['stops'].to_crs(geography_utils.CA_NAD83Albers_m)
     
     return warehouse_data
 
@@ -143,7 +143,7 @@ def shape_segments_from_row(row, warehouse_data, verbose):
         # percentige of time in analysis window that this route was optimal
         trip_with_pair['total_time'] = row.totalTime
         trip_with_pair['xfer_count'] = len(stop_pairs) - 1
-        trip_with_seg = gpd.GeoDataFrame(trip_with_pair, geometry='segment_geom', crs=geography_utils.CA_NAD83Albers)
+        trip_with_seg = gpd.GeoDataFrame(trip_with_pair, geometry='segment_geom', crs=geography_utils.CA_NAD83Albers_m)
         row_shape_segments += [trip_with_seg]
         
         spatial_routes = pd.concat(row_shape_segments)

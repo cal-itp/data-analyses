@@ -30,7 +30,7 @@ def get_max_frequencies(segment_speeds: gpd.GeoDataFrame) -> pd.DataFrame:
     #  max for each shape across all times of day, then sum all shapes per direction, then max direction
     frequencies = (frequencies.groupby(
         group_cols + ['shape_array_key', 'direction_id']).max().groupby(
-        group_cols + ['direction_id']).sum().groupby(
+        group_cols + ['direction_id']).sum(numeric_only=True).groupby(
         group_cols).max().reset_index().round(1)
               )
     return frequencies
