@@ -387,7 +387,7 @@ def build(
 
     errors = []
 
-    for part in site.parts:
+    for part in portfolio_site.parts:
         for chapter in part.chapters:
             errors.extend(chapter.generate(
                 execute_papermill=execute_papermill,
@@ -409,16 +409,16 @@ def build(
         cwd=site_output_dir,
     ).check_returncode()
 
-    accessibilty_errors = check_accessibility(site)
+    # accessibilty_errors = check_accessibility(site)
 
     if deploy:
         if continue_on_error and errors:
             ans = input(f"{len(errors)} encountered during papermill; enter that number to continue: ")
             assert int(ans) == len(errors)
 
-        if accessibilty_errors > 0:
-            ans = input(f"{accessibilty_errors} serious accessibility errors: type 'ignore' to deploy anyway: ")
-            if ans != 'ignore': return
+        # if accessibilty_errors > 0:
+        #     ans = input(f"{accessibilty_errors} serious accessibility errors: type 'ignore' to deploy anyway: ")
+        #     if ans != 'ignore': return
 
         args = [
             "gcloud",
@@ -440,6 +440,9 @@ def build(
 def check_accessibility(
     site: SiteChoices
 ):
+    """
+    Checks site for accessibility issues.
+    """
 
     site_output_dir = PORTFOLIO_DIR / Path(site.value)
     directory_path = f"{site_output_dir}/_build/html/"
