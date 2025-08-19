@@ -1,0 +1,35 @@
+[project]
+name = "retrospective_feed_generation"
+version = "0.0.0"
+requires-python = ">=3.11.0, <3.12.0"
+description = "Code for retrospective feed generation"
+authors = [{"name" = "Anna Paten"}, {"name" = "Rae Bonifanti"}]
+dependencies = [
+    "gtfs-lite==0.2.1",
+    "intake==0.6.4",
+    "pandas-gbq (>= 0.19.1, <2.0.0)",
+    "pandas < 2",
+    "numpy < 2",
+    "shared_utils @ git+https://github.com/cal-itp/data-analyses.git@24478949100fd1a389f0b6605bc9b2a371f76193#subdirectory=_shared_utils",
+    "segment_speed_utils @ git+https://github.com/cal-itp/data-analyses.git@24478949100fd1a389f0b6605bc9b2a371f76193#subdirectory=rt_segment_speeds",
+    "calitp-data-analysis==2025.6.24",
+    "sqlalchemy-bigquery (>=1.4.4, <2.0.0)", # shared_utils dep
+    "siuba>=0.4.0", # shared_utils dep
+    "altair-transform==0.2.0",
+    "great_tables==0.16.1",
+    "omegaconf==2.3.0", # better yaml configuration
+    "polars==1.22.0",
+    "quarto-cli==1.6.40",
+    "quarto==0.1.0",
+    "ydata-profiling[notebook] (>=4.9.0, <5.0.0)",
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.black]
+line-length = 120
+
+[tool.poetry.group.dev.dependencies]
+black = "24.10.0"
+pytest = "^7.2.1"
