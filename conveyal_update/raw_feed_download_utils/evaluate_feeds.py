@@ -6,25 +6,13 @@ from calitp_data_analysis.tables import tbls
 from calitp_data_analysis.sql import query_sql
 import pandas as pd
 import datetime as dt
-import conveyal_vars
-
-TARGET_DATE = conveyal_vars.TARGET_DATE
-REGIONAL_SUBFEED_NAME = "Regional Subfeed"
-INT_TO_GTFS_WEEKDAY = {
-    0: "monday",
-    1: "tuesday",
-    2: "wednesday",
-    3: "thursday",
-    4: "friday",
-    5: "saturday",
-    6: "sunday"
-}
+from .constants import INT_TO_GTFS_WEEKDAY, REGIONAL_SUBFEED_NAME
 
 def _stringify_iterable(l) -> str:
     return "('" + "', '".join(l) + "')" 
 
-def get_feeds_check_service():
-    feeds_on_target = gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(selected_date=TARGET_DATE)
+def get_feeds_check_service(target_date: str): #TODO: support dt objects as well
+    feeds_on_target = gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(selected_date=target_date)
     feeds_on_target = feeds_on_target.rename(columns={'name':'gtfs_dataset_name'})
     # default will use mtc subfeeds (prev Conveyal behavior), can spec customer facing if we wanna switch
 
@@ -34,7 +22,7 @@ def get_feeds_check_service():
         f"""
         SELECT feed_key, COUNT(feed_key) AS trip_count 
         FROM cal-itp-data-infra.mart_gtfs.fct_scheduled_trips
-        WHERE feed_key IN {operator_feeds_str} AND service_date = "{TARGET_DATE}"
+        WHERE feed_key IN {operator_feeds_str} AND service_date = "{target_date}"
         GROUP BY feed_key"""
     )
     feeds_on_target = feeds_on_target.merge(
@@ -45,9 +33,9 @@ def get_feeds_check_service():
     )
     return feeds_on_target
     
-def attach_transit_services(feeds_on_target: pd.DataFrame):
+def attach_transit_services(feeds_on_target: pd.DataFrame, target_date: str):
     """Associate each feed in feeds_on_target.gtfs_dataset_key with a transit service"""
-    target_dt = dt.datetime.combine(dt.date.fromisoformat(TARGET_DATE), dt.time(0))
+    target_dt = dt.datetime.combine(dt.date.fromisoformat(target_date), dt.time(0))
 
     services = query_sql(
         f"""
@@ -204,16 +192,3 @@ def merge_old_feeds(df_all_feeds: pd.DataFrame, df_undefined_feeds: pd.DataFrame
     return feeds_merged.drop(
         ["date_processed", "feed_key_x", "feed_key_y"], axis=1
     )
-
-if __name__ == '__main__':
-    
-    feeds_on_target = get_feeds_check_service()
-    feeds_on_target = attach_transit_services(feeds_on_target)
-    print(f'feeds on target date shape: {feeds_on_target.shape}')
-    undefined_feeds = get_undefined_feeds(feeds_on_target)
-    feeds_merged = merge_old_feeds(
-        feeds_on_target, undefined_feeds, dt.date.fromisoformat(TARGET_DATE), conveyal_vars.LOOKBACK_TIME
-    )
-    report_unavailable_feeds(feeds_merged, 'no_apparent_service.csv')
-    feeds_merged.to_parquet(f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE}.parquet')
-    
