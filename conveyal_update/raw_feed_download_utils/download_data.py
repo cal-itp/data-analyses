@@ -7,12 +7,9 @@ tqdm.pandas()
 
 fs = get_fs()
 
-import conveyal_vars
 import shutil
 
-regions = conveyal_vars.conveyal_regions
-TARGET_DATE = conveyal_vars.TARGET_DATE
-
+from .entities import BoundingBoxDict
 
 def download_feed(row):
     # need wildcard for file too -- not all are gtfs.zip!
@@ -23,17 +20,17 @@ def download_feed(row):
     except Exception as e:
         print(f'\n could not download feed at {e}')
     
-def download_region(feeds_df, region: str):
+def download_region(feeds_df, region_name: str):
     
-    assert region in regions.keys()
-    path = f'./feeds_{feeds_df.date.iloc[0].strftime("%Y-%m-%d")}/{region}'
+    # assert region in regions.keys()  #TODO: replace with a string enum instead
+    path = f'./feeds_{feeds_df.date.iloc[0].strftime("%Y-%m-%d")}/{region_name}'
     if not os.path.exists(path): 
         os.makedirs(path)
-    region = feeds_df.loc[feeds_df.region == region].copy()
-    region['path'] = path
-    region.progress_apply(download_feed, axis = 1)
+    region_name = feeds_df.loc[feeds_df.region == region_name].copy()
+    region_name['path'] = path
+    region_name.progress_apply(download_feed, axis = 1)
     
-def generate_script(regions):
+def generate_script(regions: BoundingBoxDict):
     #  https://docs.conveyal.com/prepare-inputs#preparing-the-osm-data
     cmds = []
     for region in regions.keys():

@@ -3,15 +3,11 @@ os.environ['USE_PYGEOS'] = '0'
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 from shared_utils import gtfs_utils_v2
 from calitp_data_analysis import geography_utils
+from .entities import BoundingBoxDict
 
 import pandas as pd
 import geopandas as gpd
 import shapely
-
-
-# type defs
-BoundingBox = dict[str, float]
-BoundingBoxDict = dict[str, BoundingBox]
 
 def create_region_gdf(regions: BoundingBoxDict) -> gpd.GeoDataFrame:
     # https://shapely.readthedocs.io/en/stable/reference/shapely.box.html#shapely.box

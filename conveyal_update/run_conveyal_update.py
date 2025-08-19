@@ -1,5 +1,6 @@
 from raw_feed_download_utils.evaluate_feeds import *
 from raw_feed_download_utils.match_feeds_regions import *
+from raw_feed_download_utils.download_data import *
 import conveyal_vars
 
 TARGET_DATE = "2025-06-11"
@@ -28,3 +29,12 @@ if __name__ == "__main__":
         on="feed_key",
     )
     regions_and_feeds_merged.to_parquet(f'{conveyal_vars.GCS_PATH}regions_feeds_{TARGET_DATE}.parquet')
+
+    # copied from download_utils.py
+    regions_and_feeds = pd.read_parquet(f'{conveyal_vars.GCS_PATH}regions_feeds_{TARGET_DATE}.parquet')
+    
+    for region in tqdm(conveyal_vars.conveyal_regions.keys()):
+        download_region(regions_and_feeds, region)
+    shutil.make_archive(f'feeds_{TARGET_DATE}', 'zip', f'./feeds_{TARGET_DATE}/')
+    fs.put(f'feeds_{TARGET_DATE}.zip', f'{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE}.zip')
+    generate_script(conveyal_vars.conveyal_regions)
