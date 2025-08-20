@@ -15,7 +15,7 @@ from .constants import (
 
 @pytest.fixture
 def test_data_path(request):
-    return request.path.parent / "test_data"
+    return request.path.parent.joinpath("test_data")
 
 
 def _gtfslite_from_folder(
@@ -34,40 +34,42 @@ def _gtfslite_from_folder(
 
 @pytest.fixture
 def schedule_feed_minimal(test_data_path) -> GTFS:
-    path = test_data_path / "minimal_schedule"
+    path = test_data_path.joinpath("minimal_schedule")
     return _gtfslite_from_folder(path)
 
 
 @pytest.fixture
 def two_trip_schedule(test_data_path) -> GTFS:
     return _gtfslite_from_folder(
-        test_data_path / "minimal_schedule",
-        alt_trips_path=(test_data_path / "two_trip_schedule" / "trips.txt"),
-        alt_stop_times_path=(test_data_path / "two_trip_schedule" / "stop_times.txt"),
+        test_data_path.joinpath("minimal_schedule"),
+        alt_trips_path=(test_data_path.joinpath("two_trip_schedule", "trips.txt")),
+        alt_stop_times_path=(
+            test_data_path.joinpath("two_trip_schedule", "stop_times.txt")
+        ),
     )
 
 
 @pytest.fixture
 def minimal_rt_table_schedule_rt_different(test_data_path) -> pd.DataFrame:
-    path = test_data_path / "minimal_rt_table_schedule_rt_different.csv"
+    path = test_data_path.joinpath("minimal_rt_table_schedule_rt_different.csv")
     return pd.read_csv(path)
 
 
 @pytest.fixture
 def two_trip_rt_table_schedule_rt_different(test_data_path) -> pd.DataFrame:
-    path = test_data_path / "two_trip_rt_table_schedule_rt_different.csv"
+    path = test_data_path.joinpath("two_trip_rt_table_schedule_rt_different.csv")
     return pd.read_csv(path)
 
 
 @pytest.fixture
 def two_trip_rt_table_schedule_rt_same(test_data_path) -> pd.DataFrame:
-    path = test_data_path / "two_trip_rt_table_schedule_rt_same.csv"
+    path = test_data_path.joinpath("two_trip_rt_table_schedule_rt_same.csv")
     return pd.read_csv(path)
 
 
 @pytest.fixture
 def expected_tables(test_data_path) -> list[str]:
-    path = test_data_path / "minimal_schedule"
+    path = test_data_path.joinpath("minimal_schedule")
     tables = [file.stem for file in path.glob("*.txt")]
     return tables
 
@@ -76,9 +78,8 @@ def expected_tables(test_data_path) -> list[str]:
 def minimal_rt_table_schedule_rt_different_schedule_arrival_altered(
     test_data_path,
 ) -> pd.DataFrame:
-    path = (
-        test_data_path
-        / "minimal_rt_table_schedule_rt_different_schedule_arrival_altered.csv"
+    path = test_data_path.joinpath(
+        "minimal_rt_table_schedule_rt_different_schedule_arrival_altered.csv"
     )
     return pd.read_csv(path)
 
@@ -87,7 +88,9 @@ def minimal_rt_table_schedule_rt_different_schedule_arrival_altered(
 def minimal_rt_table_schedule_rt_different_stop_id_altered(
     test_data_path,
 ) -> pd.DataFrame:
-    path = test_data_path / "minimal_rt_table_schedule_rt_different_stop_id_altered.csv"
+    path = test_data_path.joinpath(
+        "minimal_rt_table_schedule_rt_different_stop_id_altered.csv"
+    )
     return pd.read_csv(path)
 
 
@@ -123,8 +126,6 @@ def test_feed_tables_same(
     for table in np.setdiff1d(expected_tables, ignored_tables):
         schedule_table = getattr(schedule_feed_minimal, table)
         output_table = getattr(output_feed, table)
-        print("schedule", schedule_table)
-        print("output", output_table)
         assert output_table.equals(
             schedule_table
         ), f"{table} is not identical in the input and output"
@@ -137,7 +138,7 @@ def test_trips_present_in_rt_only_leads_to_exception(
     # Check setup conditions
     assert (
         schedule_feed_minimal.trips.trip_id == 1
-    ).all(), "Missing or extraneous trip ID in schedule feed (inficates bad test setup)"
+    ).all(), "Missing or extraneous trip ID in schedule feed (indicates bad test setup)"
     assert two_trip_rt_table_schedule_rt_different.trip_id.isin(
         [1, 2]
     ).all(), "Missing or extraneous trip ID in RT table (indicates bad test setup)"
@@ -161,7 +162,7 @@ def test_trips_in_schedule_only_are_dropped_from_trips(
     ).all(), "Missing or extraneous trip ID in RT table (indicates bad test setup)"
     assert (
         minimal_rt_table_schedule_rt_different.trip_id == 1
-    ).all(), "Missing or extraneous trip ID in schedule feed (inficates bad test setup)"
+    ).all(), "Missing or extraneous trip ID in schedule feed (indicates bad test setup)"
     output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
         filtered_input_feed=two_trip_schedule,
         stop_times_table=minimal_rt_table_schedule_rt_different,
@@ -185,7 +186,7 @@ def test_trips_in_schedule_only_are_dropped_from_stop_times(
     ).all(), "Missing or extraneous trip ID in RT table (indicates bad test setup)"
     assert (
         minimal_rt_table_schedule_rt_different.trip_id == 1
-    ).all(), "Missing or extraneous trip ID in schedule feed (inficates bad test setup)"
+    ).all(), "Missing or extraneous trip ID in schedule feed (indicates bad test setup)"
 
     # Run feed generation
     output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
@@ -220,10 +221,16 @@ def test_rt_stop_times_match_output_stop_times(
     )
 
     # Check output
-    # Check that both expected trips are present and there are no new trip ids
-    assert 1 in output_feed.stop_times.trip_id
-    assert 2 in output_feed.stop_times.trip_id
-    assert output_feed.stop_times.trip_id.isin([1, 2]).all()
+    # Check that both expected trips are present and there are no additional trip ids
+    assert (
+        1 in output_feed.stop_times.trip_id
+    ), "trip_id 1 is missing from the output feed"
+    assert (
+        2 in output_feed.stop_times.trip_id
+    ), "trip_id 2 is missing from the output feed"
+    assert output_feed.stop_times.trip_id.isin(
+        [1, 2]
+    ).all(), f"A trip_id other than 1 or 2 is present in the ouutput feed. Unique trip_ids are: {output_feed.stop_times.trip_id.unique()}"
     # Merge output stop times and rt stop times by trip id and stop sequence
     merged_output_rt = output_feed.stop_times.merge(
         two_trip_rt_table_schedule_rt_different[
