@@ -8,7 +8,6 @@ from retrospective_feed_generation.gtfs_utils import *
 from gtfslite import GTFS
 import retrospective_feed_generation.columns as col
 from retrospective_feed_generation.retrospective_feed_generation import *
-from retrospective_feed_generation.retrospective_feed_generation import _filter_na_stop_times, _filter_non_rt_trips
 from shared_utils import catalog_utils, gtfs_utils_v2, rt_dates
 from retrospective_feed_generation.warehouse_utils import *
 import argparse
@@ -35,8 +34,8 @@ def process_all_feeds(rt_dates: Iterable[str], schedule_local_paths: Iterable[st
 
 def process_table_row(schedule_rt_table: pd.DataFrame, rt_date: str, schedule_local_path: str, output_local_path: str, max_stop_gap: int = 5) -> None:
     """Process a row of the input table""" # TODO: make these docstrings actually useful
-    # Get the merged schedule/stop times table
-    schedule_rt_stop_times_single_agency = _filter_non_rt_trips(
+    # Get the schedule rt table with 
+    schedule_rt_stop_times_single_agency = filter_non_rt_trips(
         schedule_rt_table,
         col.DEFAULT_COLUMN_MAP,
     ).reset_index(drop=True)
@@ -46,7 +45,6 @@ def process_table_row(schedule_rt_table: pd.DataFrame, rt_date: str, schedule_lo
     schedule_rt_stop_times_single_agency["gap_imputed_sec"] = impute_unrealistic_rt_times(
         schedule_rt_stop_times_single_agency,
         max_gap_length=max_stop_gap,
-        columns=col.DEFAULT_COLUMN_MAP,
     )
 
     # Load the schedule feed using gtfs-lite and filter it

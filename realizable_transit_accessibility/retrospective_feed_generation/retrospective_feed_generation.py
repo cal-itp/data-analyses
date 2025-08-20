@@ -25,10 +25,19 @@ ColumnName = typing.Literal[COLUMN_NAMES]
 ColumnMap = dict[ColumnId, ColumnName]
 
 
-def _filter_non_rt_trips(
-    rt_schedule_stop_times: pd.DataFrame, columns: ColumnMap
+def filter_non_rt_trips(
+    rt_schedule_stop_times: pd.DataFrame, columns: ColumnMap = DEFAULT_COLUMN_MAP
 ) -> pd.DataFrame:
-    """Filter out all trips that do not have any rt stop times"""
+    """
+    Filter out all trips in the rt table that do not have any stop times associated
+    
+    Params:
+    rt_schedule_stop_times: A table containing rt trips and stop times
+    columns: a dict specifying column names, defaults to columns.DEFAULT_COLUMN_MAP
+    
+    Returns:
+    A DF with trips that are not associated with any non-na stop times removed
+    """
     trips_by_rt_status = (
         rt_schedule_stop_times[columns[RT_ARRIVAL_SEC]]
         .isna()
@@ -247,12 +256,13 @@ def impute_unrealistic_rt_times(
     rt_schedule_stop_times_sorted: pd.DataFrame,
     max_gap_length: int,
     columns: ColumnMap = DEFAULT_COLUMN_MAP,
+    filter_na_trips: bool = True
 ) -> pd.Series:
     assert (
         not rt_schedule_stop_times_sorted.index.duplicated().any()
     ), "rt_schedule_stop_times_sorted index must be unique"
     # Some imputing functions require a unique index, so reset index
-    stop_times_with_imputed_values = _filter_non_rt_trips(
+    stop_times_with_imputed_values = filter_non_rt_trips(
         rt_schedule_stop_times_sorted, columns
     )
     # Get imputed values
