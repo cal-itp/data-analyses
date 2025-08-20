@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from gtfslite import GTFS
 from retrospective_feed_generation import retrospective_feed_generation
-from .constants import (
+from ..constants import (
     DEFAULT_TEST_FEED_GENERATION_KWARGS,
     STOP_SEQUENCE_NAME,
     TRIP_ID_NAME,
@@ -15,7 +15,7 @@ from .constants import (
 
 @pytest.fixture
 def test_data_path(request):
-    return request.path.parent.joinpath("test_data")
+    return request.path.parent.joinpath("..", "test_data")
 
 
 def _gtfslite_from_folder(
