@@ -15,7 +15,8 @@ from .columns import (
     SCHEDULE_ARRIVAL_SEC,
     STOP_SEQUENCE,
     TRIP_ID,
-    STOP_ID
+    STOP_ID,
+    DEFAULT_COLUMN_MAP
 )
 import copy
 
@@ -50,8 +51,8 @@ def _filter_na_stop_times(
 
 def impute_first_last(
     rt_schedule_stop_times_sorted: pd.DataFrame,
-    columns: ColumnMap,
     non_monotonic_column: typing.Hashable,
+    columns: ColumnMap = DEFAULT_COLUMN_MAP
 ) -> pd.Series:
     """Impute the first and last stop times based on schedule times, regardless of whether rt times are present."""
     assert (
@@ -156,8 +157,8 @@ def impute_first_last(
 
 def impute_labeled_times(
     rt_schedule_stop_times_sorted: pd.DataFrame,
-    columns: ColumnMap,
     impute_flag_column: ColumnName,
+    columns: ColumnMap = DEFAULT_COLUMN_MAP
 ) -> pd.Series:
     """Impute stop times based on schedule for all stop times where the column referred to by impute_flag_column is True"""
     grouped_flag = rt_schedule_stop_times_sorted.groupby(
@@ -205,7 +206,7 @@ def impute_labeled_times(
 
 
 def flag_non_monotonic_sections(
-    rt_schedule_stop_times_sorted: pd.DataFrame, columns: ColumnMap
+    rt_schedule_stop_times_sorted: pd.DataFrame, columns: ColumnMap = DEFAULT_COLUMN_MAP
 ) -> pd.Series:
     """Get a Series corresponding with whether the rt arrival does not monotonically increase relative to all prior stops"""
     assert not rt_schedule_stop_times_sorted.index.duplicated().any()
@@ -227,7 +228,7 @@ def flag_non_monotonic_sections(
 
 
 def flag_short_gaps(
-    rt_schedule_stop_times_sorted: pd.DataFrame, max_gap_length: int, columns: ColumnMap
+    rt_schedule_stop_times_sorted: pd.DataFrame, max_gap_length: int, columns: ColumnMap = DEFAULT_COLUMN_MAP
 ) -> pd.Series:
     trip_id_grouped = rt_schedule_stop_times_sorted.groupby(
         columns[TRIP_INSTANCE_KEY]
@@ -245,7 +246,7 @@ def flag_short_gaps(
 def impute_unrealistic_rt_times(
     rt_schedule_stop_times_sorted: pd.DataFrame,
     max_gap_length: int,
-    columns: ColumnMap,
+    columns: ColumnMap = DEFAULT_COLUMN_MAP,
 ) -> pd.Series:
     assert (
         not rt_schedule_stop_times_sorted.index.duplicated().any()
@@ -297,7 +298,7 @@ def make_retrospective_feed_single_date(
     filtered_input_feed: GTFS,
     stop_times_table: pd.DataFrame,
     stop_times_desired_columns: list[str],
-    stop_times_table_columns: ColumnMap,
+    stop_times_table_columns: ColumnMap = DEFAULT_COLUMN_MAP,
     validate: bool = True,
 ) -> GTFS:
     """
