@@ -8,7 +8,7 @@ dependencies = [
     "intake==0.6.4",
     "pandas-gbq (>= 0.19.1, <2.0.0)",
     "pandas < 2",
-    "shared_utils @ git+https://github.com/cal-itp/data-analyses.git@24478949100fd1a389f0b6605bc9b2a371f76193#subdirectory=_shared_utils",
+    "shared_utils @ git+https://github.com/cal-itp/data-analyses.git@10fb6a88d3054da7162f1486a00aedc5122ecdd9#subdirectory=_shared_utils",
     "calitp-data-analysis==2025.6.24",
     "sqlalchemy-bigquery (>=1.4.4, <2.0.0)", # shared_utils dep
     "siuba>=0.4.0", # shared_utils dep
