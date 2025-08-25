@@ -135,7 +135,6 @@ def get_old_feeds(undefined_feeds_base64_urls: pd.Series, target_date: dt.date |
         )
     response_grouped = response.groupby("base64_url")
     feed_info_by_url = response_grouped[["valid_feed_date", "feed_key"]].first()
-    print(feed_info_by_url["valid_feed_date"])
     feed_info_by_url["date_processed"] = feed_info_by_url["valid_feed_date"].dt.date - dt.timedelta(days=1) 
     # we have the day the feed becomes invalid, so the day we are interested in where the feed *is* valid is the day after
     return feed_info_by_url.drop("valid_feed_date", axis=1)

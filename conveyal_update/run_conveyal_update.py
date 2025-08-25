@@ -5,7 +5,7 @@ from raw_feed_download_utils.get_feed_info import get_feed_info
 import datetime as dt
 import conveyal_vars
 
-TARGET_DATE = "2025-06-11"
+TARGET_DATE = conveyal_vars.TARGET_DATE
 
 if __name__ == "__main__":
     region_gdf = create_region_gdf(conveyal_vars.conveyal_regions)
@@ -14,6 +14,7 @@ if __name__ == "__main__":
         lookback_period=dt.timedelta(days=60),
         filter_geometry=region_gdf,
         filter_geometry_id="region",
+        report_unavailable=True
     )
     # copied from old download_utils.py
     for region in tqdm(conveyal_vars.conveyal_regions.keys()):
