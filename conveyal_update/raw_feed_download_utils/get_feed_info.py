@@ -4,7 +4,7 @@ import datetime as dt
 from .evaluate_feeds import get_feeds_check_service, attach_transit_services, get_undefined_feeds, merge_old_feeds
 from .match_feeds_regions import join_stops_regions
 
-def generate_feed_info(
+def get_feed_info(
     target_date: str,
     lookback_period: dt.timedelta | None,
     filter_geometry: gpd.GeoDataFrame | None,
