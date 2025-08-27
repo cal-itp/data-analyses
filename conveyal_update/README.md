@@ -8,10 +8,10 @@
     
 ## Scripts
 
-* Set target date in `conveyal_vars.py`. Region boundaries are also set here, but these should remain static unless the decision is made to use entirely different regions in Conveyal. Target date should be a mid-week day.
-* `evaluate_feeds.py` includes functions to check to see which feeds have service defined on the target date, and show feeds without any apparent service, including if that service is apparently captured in another feed. This helps check for potential coverage gaps, likely due to GTFS feed expirations and/or the [publishing future service issue](https://github.com/MobilityData/GTFS_Schedule_Best-Practices/issues/48). You may have to shift the target date around to find the best overall coverage, and/or manually edit important but missing feeds to define service if reasonable.
-* `match_feeds_regions.py` matches feeds to Conveyal regions, based on if the feed contains _any_ stops within each region.
-* `download_data.py` downloads and zips original GTFS feeds, and additionally generates a shell script that can be used to download, crop, and filter OSM data for each region using Osmosis (not currently able to do so via hub, use other platform). Downloaded feeds are labelled `{row.gtfs_dataset_name.replace(" ", "_")}_{row.feed_key}_gtfs.zip`
+* Set target date in `conveyal_vars.py`. Region boundaries are also set here, but these should remain static unless the decision is made to use entirely different regions in Conveyal. Target date should be a mid-week day. 
+* Run `make` to install dependencies to a venv and to run the project
+  * If you get an update about your selected RT_DATE not being present, try updating the hash for `shared_utils` in `pyproject.toml`, then running `poetry lock && make`
+  * To avoid calling poetry install for reruns, you can run just the script with `poetry run python run_conveyal_update.py`
 
 ## Workflow
 
@@ -19,3 +19,11 @@
 * using generated `crop_filter_osm.sh` or other means, [update Conveyal network bundle](https://docs.conveyal.com/prepare-inputs#creating-a-network-bundle) for each region with cropped and filtered OSM data and feeds.
 * after updating network bundle, use bundles.json (linked in `dev_conveyal_ids.ipynb`) and that notebook to match Conveyal feed ids with our warehouse.
     * exports both all-region and region-specific parquets to GCS at: `gs://calitp-analytics-data/data-analyses/conveyal_update/`, these can be used to join Conveyal feedIds with our warehouse identifiers
+
+
+## Package
+This folder includes the package `raw_feed_download_utils`. It is managed through `pyproject.toml`, which includes `shared_utils`, a local dependency included in the `data-analyses` repo.
+* `evaluate_feeds.py` includes functions to check to see which feeds have service defined on the target date, and show feeds without any apparent service, including if that service is apparently captured in another feed. This helps check for potential coverage gaps, likely due to GTFS feed expirations and/or the [publishing future service issue](https://github.com/MobilityData/GTFS_Schedule_Best-Practices/issues/48). You may have to shift the target date around to find the best overall coverage, and/or manually edit important but missing feeds to define service if reasonable.
+* `match_feeds_regions.py` includes functions to match feeds to Conveyal regions, based on if the feed contains _any_ stops within each region.
+* `download_data.py` downloads and zips original GTFS feeds, and additionally generates a shell script that can be used to download, crop, and filter OSM data for each region using Osmosis (not currently able to do so via hub, use other platform). Downloaded feeds are labelled `{row.gtfs_dataset_name.replace(" ", "_")}_{row.feed_key}_gtfs.zip`
+* `get_feed_info.py` includes a single function `get_feed_info` to get a dataframe with feed info and regions, using functions from `evaluate_feeds.py` and `match_feeds_regions.py`
