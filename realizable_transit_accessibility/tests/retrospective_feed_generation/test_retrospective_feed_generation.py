@@ -94,6 +94,11 @@ def minimal_rt_table_schedule_rt_different_stop_id_altered(
     return pd.read_csv(path)
 
 
+@pytest.fixture
+def two_trip_rt_table_schedule_one_trip_na(test_data_path) -> pd.DataFrame:
+    path = test_data_path.joinpath("two_trip_rt_table_schedule_one_trip_na.csv")
+    return pd.read_csv(path)
+
 def test_feed_tables_exist(
     schedule_feed_minimal: GTFS,
     minimal_rt_table_schedule_rt_different: pd.DataFrame,
@@ -340,3 +345,8 @@ def test_schedule_rt_equal_stop_times(
     assert schedule_table_columns_selected.equals(
         output_table_columns_selected
     ), "stop_times is not identical between the schedule input and output"
+
+def test_filter_non_rt_trips(two_trip_rt_table_schedule_one_trip_na: pd.DataFrame):
+    """Test that, if a trip has all na stop times, retrospective_feed_generation.filter_non_rt_trips will remove it from the DF"""
+    filtered = retrospective_feed_generation.filter_non_rt_trips(two_trip_rt_table_schedule_one_trip_na)
+    assert (filtered.trip_instance_key == "key2").all(), "Unexpected trip found in filtered output"
