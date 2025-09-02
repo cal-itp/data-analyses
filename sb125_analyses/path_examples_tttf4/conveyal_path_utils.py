@@ -6,7 +6,6 @@ os.environ["CALITP_BQ_MAX_BYTES"] = str(1_000_000_000_000) ## 1TB?
 import pandas as pd
 import numpy as np
 import geopandas as gpd
-from siuba import *
 import json
 
 import shared_utils
@@ -95,33 +94,32 @@ def shape_segments_from_row(row, warehouse_data, verbose):
         # print(stop_pair)
         first_filter = warehouse_data['st'].query('stop_id.isin(@stop_pair)')
         # display(first_filter)
-        good_trips = first_filter >> count(_.trip_id) >> filter(_.n > 1)
+        good_trips = first_filter.groupby('trip_id')[['stop_id']].count().reset_index().rename(columns={'stop_id':'n'}).query('n > 1')
         #  TODO count frequency using departure sec?
-        better_trips = good_trips >> filter(_.n == _.n.max())
+        better_trips = good_trips.query('n == @good_trips.n.max()')
         # display(good_trips)
         assert better_trips.shape[0] > 0
-        trip_with_pair = first_filter >> filter(_.trip_id == better_trips.trip_id.iloc[0]) >> arrange(_.stop_sequence)
-        trip_with_pair = trip_with_pair >> select(_.feed_key, _.trip_id, _.stop_id, _.stop_sequence)
-        trip_with_pair = trip_with_pair >> inner_join(_, warehouse_data['stops'] >> select(_.feed_key, _.stop_id, _.geometry),
+        trip_with_pair = first_filter.query('trip_id == @better_trips.trip_id.iloc[0]').sort_values('stop_sequence')
+        trip_with_pair = trip_with_pair[['feed_key', 'trip_id', 'stop_id', 'stop_sequence']]
+        trip_with_pair = trip_with_pair.merge(warehouse_data['stops'][['feed_key', 'stop_id', 'geometry']],
                                                       on = ['feed_key', 'stop_id'])
-        trip_with_pair = trip_with_pair >> inner_join(_,
-                                                      warehouse_data['trips'] >> select(_.feed_key, _.name, _.trip_id, _.shape_id,
-                                                                            _.route_short_name, _.route_long_name, _.route_id),
+        trip_with_pair = trip_with_pair.merge(warehouse_data['trips'][['feed_key', 'name', 'trip_id', 'shape_id',
+                                                                            'route_short_name', 'route_long_name', 'route_id']],
                                                       on = ['feed_key', 'trip_id'])
-        paired_shape = warehouse_data['shapes'] >> filter(_.feed_key == trip_with_pair.feed_key.iloc[0], _.shape_id == trip_with_pair.shape_id.iloc[0])
+        paired_shape = warehouse_data['shapes'].query('feed_key == @trip_with_pair.feed_key.iloc[0] & shape_id == @trip_with_pair.shape_id.iloc[0]')
             
         if not trip_with_pair.stop_id.is_unique:
             if verbose:
                 print('warning, trip has duplicate stops at a single stop')
-            trip_with_pair = trip_with_pair >> distinct(_.stop_id, _keep_all=True)
-        stop0 =  (trip_with_pair >> filter(_.stop_sequence == _.stop_sequence.min())).geometry.iloc[0]
-        stop1 =  (trip_with_pair >> filter(_.stop_sequence == _.stop_sequence.max())).geometry.iloc[0]
+            trip_with_pair = trip_with_pair.drop_duplicates(subset=['stop_id'])
+        stop0 =  trip_with_pair.query('stop_sequence == @trip_with_pair.stop_sequence.min()').geometry.iloc[0]
+        stop1 =  trip_with_pair.query('stop_sequence == @trip_with_pair.stop_sequence.max()').geometry.iloc[0]
         # display(trip_with_pair)
         # print(stop0, stop1)
         if paired_shape.empty:
             if verbose:
                 print('warning, trip has no shape')
-            trip_with_pair = trip_with_pair >> distinct(_.stop_id, _keep_all=True)
+            trip_with_pair = trip_with_pair.drop_duplicates(subset=['stop_id'])
             paired_segment = LineString([stop0, stop1])
         # stop0_proj = shape_geom.project(stop0)
         # stop1_proj = shape_geom.project(stop1)
@@ -132,9 +130,9 @@ def shape_segments_from_row(row, warehouse_data, verbose):
         
         trip_with_pair['segment_geom'] = paired_segment
         trip_with_pair.set_geometry('segment_geom')
-        trip_with_pair = trip_with_pair >> rename(stop_geom = _.geometry)
+        trip_with_pair = trip_with_pair.rename(columns={'geometry':'stop_geom'})
         # display(stop_pair)
-        trip_with_pair = trip_with_pair >> distinct(_.shape_id, _keep_all=True)
+        trip_with_pair = trip_with_pair.drop_duplicates(subset=['shape_id'])
         trip_with_pair['stop_pair'] = [stop_pair]
         trip_with_pair['trip_group_id'] = row.trip_group_id
         trip_with_pair['optimal_pct'] = row.nIterations / row.total_iterations #  more human-friendly name
