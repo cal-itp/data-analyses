@@ -30,10 +30,8 @@ def read_conveyal_path_df(path):
         return df
 
     df = pd.read_csv(path)
-    df['total_iterations'] = (df >> filter(_.origin == 0, _.destination == 0)).nIterations.iloc[0]
-    df = (df >> filter(_.origin == 0, _.destination == 1)
-             >> select(-_.group)
-         )
+    df['total_iterations'] = df.query('origin == 0 & destination == 0').nIterations.iloc[0]
+    df = df.query('origin == 0 & destination == 1').drop(columns=['group'])
     df.reset_index(drop=True, inplace=True)
     df.index.rename('trip_group_id', inplace=True)
     #  won't be in Conveyal order but maps will be less confusing
@@ -50,9 +48,8 @@ def add_warehouse_identifiers(conveyal_df):
     # all example feeds present?
     unique_feeds = conveyal_df.feedIds.explode().unique()
     assert np.isin(unique_feeds, warehouse_conveyal_joined.feedId).all()
-
-    warehouse_conveyal_joined = warehouse_conveyal_joined >> select(_.feedId, _.feed_key, _.gtfs_dataset_name, _.base64_url, _.date)
-
+    warehouse_conveyal_joined = warehouse_conveyal_joined[['feedId', 'feed_key', 'gtfs_dataset_name',
+                                                           'base64_url', 'date']]
     as_dict = warehouse_conveyal_joined.set_index('feedId').to_dict()
 
     conveyal_df['feed_keys'] = conveyal_df.feedIds.apply(lambda x: [as_dict['feed_key'][item] for item in x])
@@ -80,9 +77,10 @@ def get_warehouse_data(path_df):
                                                                                 'route_short_name', 'route_long_name', 'shape_id',
                                                                                 'trip_first_departure_ts']
                                                                   )
-    warehouse_data['trips'] = warehouse_data['trips'] >> filter(_.route_id.isin(all_route_ids))
-    warehouse_data['st'] = shared_utils.gtfs_utils_v2.get_stop_times(selected_date=analysis_date, operator_feeds=all_feed_keys, trip_df=warehouse_data['trips'])
-    warehouse_data['st'] = warehouse_data['st'] >> filter(_.stop_id.isin(all_stops)) >> collect()
+    warehouse_data['trips'] = warehouse_data['trips'].query('route_id.isin(@all_route_ids)')
+    warehouse_data['st'] = shared_utils.gtfs_utils_v2.get_stop_times(selected_date=analysis_date, operator_feeds=all_feed_keys, trip_df=warehouse_data['trips'],
+                                                                    get_df=True)
+    warehouse_data['st'] = warehouse_data['st'].query('stop_id.isin(@all_stops)')
     warehouse_data['stops'] = shared_utils.gtfs_utils_v2.get_stops(selected_date=analysis_date, operator_feeds=all_feed_keys, custom_filtering={'stop_id': all_stops})
     warehouse_data['stops'] = warehouse_data['stops'].to_crs(geography_utils.CA_NAD83Albers_m)
     
@@ -95,7 +93,7 @@ def shape_segments_from_row(row, warehouse_data, verbose):
     row_shape_segments = []
     for stop_pair in stop_pairs:
         # print(stop_pair)
-        first_filter = warehouse_data['st'] >> filter(_.stop_id.isin(stop_pair))
+        first_filter = warehouse_data['st'].query('stop_id.isin(@stop_pair)')
         # display(first_filter)
         good_trips = first_filter >> count(_.trip_id) >> filter(_.n > 1)
         #  TODO count frequency using departure sec?
