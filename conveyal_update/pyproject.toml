@@ -1,0 +1,38 @@
+[project]
+name = "raw_feed_download_utils"
+version = "0.0.0"
+requires-python = ">=3.11.0, <3.12.0"
+description = "Code for downloading GTFS feeds from the calitp warehouse"
+authors = [{"name" = "Eric Dasmalchi"}, {"name" = "Anna Paten"}]
+dependencies = [
+    "intake==0.6.4",
+    "pandas-gbq (>= 0.19.1, <2.0.0)",
+    "pandas < 2",
+    "numpy < 2",
+    "shared_utils",
+    "calitp-data-analysis==2025.6.24",
+    "sqlalchemy-bigquery (>=1.4.4, <2.0.0)", # shared_utils dep
+    "siuba>=0.4.0", # shared_utils dep
+    "altair-transform==0.2.0",
+    "great_tables==0.16.1",
+    "omegaconf==2.3.0", # better yaml configuration
+    "polars==1.22.0",
+    "quarto-cli==1.6.40",
+    "quarto==0.1.0",
+    "ydata-profiling[notebook] (>=4.9.0, <5.0.0)",
+]
+
+[tool.poetry]
+package-mode = true
+packages = [
+    {include = "raw_feed_download_utils"}
+]
+
+[tool.poetry.dependencies]
+shared_utils = {path = "../_shared_utils"}
+
+[tool.black]
+line-length = 120
+
+[tool.poetry.group.dev.dependencies]
+black = "24.10.0"
