@@ -123,7 +123,6 @@ def final_transit_route_shs_outputs(
         on=["portfolio_organization_name", "recent_combined_name"],
     )
 
-
     # We want a text table to display.
     # Have to rejoin and to find only the SHN routes that are in the district
     # we are interested in.
@@ -182,6 +181,7 @@ def create_gtfs_stats(df:pd.DataFrame)->pd.DataFrame:
     # gtfs_table_df = gtfs_table_df.drop_duplicates()
     
     return gtfs_table_df
+    
 """
 Functions to load maps
 """
