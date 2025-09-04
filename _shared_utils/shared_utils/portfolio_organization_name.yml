@@ -71,7 +71,7 @@
 'Calabasas Schedule': City of Calabasas
 'Calaveras Schedule': Calaveras Transit Agency
 'Carson Circuit Schedule': City of Carson
-'Cerritos on Wheels Schedule': City of Cerritos
+'CatTracks Schedule': 'University of California, Merced'
 'Cerritos on Wheels Website Schedule': City of Cerritos
 'Clean Air Express Schedule': Santa Barbara County Association of Governments
 'Clovis Schedule': City of Clovis
@@ -83,7 +83,6 @@
 'Curry Public Transit Schedule': Curry Public Transit
 'Dana Point Trolley Schedule': City of Dana Point
 'Delano Schedule': City of Delano
-'Desert Roadrunner GMV Schedule': Palo Verde Valley Transit Agency
 'Desert Roadrunner Schedule': Palo Verde Valley Transit Agency
 'DowneyLINK GMV Schedule': City of Downey
 'DowneyLINK Schedule': City of Downey
@@ -125,7 +124,6 @@
 'LADPW Schedule': Los Angeles County
 'LAX FlyAway Schedule': Los Angeles World Airports
 'LAX Flyaway Bus Schedule': Los Angeles World Airports
-'LAX Shuttles Schedule': Los Angeles World Airports
 'La Campana Schedule': City of Bell
 'La Puente Schedule': City of La Puente
 'Laguna Beach Flex': City of Laguna Beach
@@ -168,6 +166,7 @@
 'Placer Schedule': Placer County
 'Plumas Schedule': Plumas Transit Systems
 'PresidiGo Schedule': Presidio Trust
+'Redding Flex': Redding Area Bus Authority
 'Redding Schedule': Redding Area Bus Authority
 'Redwood Coast Schedule': Redwood Coast Transit Authority
 'Redwood Coast Schedulel': Redwood Coast Transit Authority
@@ -182,6 +181,7 @@
 'Sacramento Schedule': Sacramento Regional Transit District
 'Sage Stage Schedule': Modoc Transportation Agency
 'San Clemente Trolley Schedule': City of San Clemente
+'San Diego International Airport Shuttles Schedule': San Diego International Airport
 'San Diego Schedule': 'San Diego Metropolitan Transit System, Airport, Flagship Cruises'
 'San Fernando Schedule': City of San Fernando
 'San Joaquin Flex': San Joaquin Regional Transit District
