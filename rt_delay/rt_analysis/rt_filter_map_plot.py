@@ -2,6 +2,8 @@ from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers_m
 from shared_utils.rt_utils import *
 from shared_utils import webmap_utils
 from calitp_data_analysis.utils import geoparquet_gcs_export
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 from calitp_data_analysis.calitp_color_palette import CALITP_CATEGORY_BOLD_COLORS, CALITP_CATEGORY_BRIGHT_COLORS
 import branca
 import mapclassify
@@ -53,7 +55,7 @@ class RtFilterMapper:
             self.organization_name = rt_trips.organization_name.iloc[0]
             self.caltrans_district = self.rt_trips.caltrans_district.iloc[0]
             self.ct_dist_numeric = int(self.caltrans_district.split(' ')[0])
-            self.shn = (gpd.read_parquet(SHN_PATH)
+            self.shn = (gcsgp.read_parquet(SHN_PATH)
                         >> select(_.Route, _.County, _.District,
                                   _.RouteType, _.geometry)
                         >> filter(_.District == self.ct_dist_numeric)
@@ -334,7 +336,7 @@ class RtFilterMapper:
         cached_periods = ['PM_Peak', 'AM_Peak', 'Midday', 'All_Day']
         if (check_cached(filename = f'{gcs_filename}.parquet', subfolder = subfolder) and self.filter_period in cached_periods
             and self._time_only_filter and not corridor):
-            self.stop_segment_speed_view = gpd.read_parquet(f'{GCS_FILE_PATH}{subfolder}{gcs_filename}.parquet')
+            self.stop_segment_speed_view = gcsgp.read_parquet(f'{GCS_FILE_PATH}{subfolder}{gcs_filename}.parquet')
         else:
             gdf = self._filter(self.stop_delay_view)
             if corridor:
@@ -839,15 +841,16 @@ def from_gcs(itp_id, analysis_date, pbar = None):
         shapes = get_routelines(itp_id, analysis_date)
         trips = (pd.read_parquet(f'{GCS_FILE_PATH}rt_trips/{itp_id}_{date_iso}.parquet')
             .reset_index(drop=True))
-        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
+        stop_delay = (gcsgp.read_parquet(f'{GCS_FILE_PATH}stop_delay_views/{itp_id}_{date_iso}.parquet')
                  .reset_index(drop=True))
     else:
     
         # always use v2 warehouse, v1 warehouse deprecated/gone
-        index_df = get_speedmaps_ix_df(analysis_date = analysis_date, itp_id = itp_id)
+        index_df = get_legacy_speedmaps_ix_df(analysis_date = analysis_date)
+        index_df = index_df.query('organization_itp_id == @itp_id')
         trips = (pd.read_parquet(f'{GCS_FILE_PATH}v2_rt_trips/{itp_id}_{date_iso}.parquet')
             .reset_index(drop=True))
-        stop_delay = (gpd.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
+        stop_delay = (gcsgp.read_parquet(f'{GCS_FILE_PATH}v2_stop_delay_views/{itp_id}_{date_iso}.parquet')
                  .reset_index(drop=True))
         shapes = get_shapes(index_df)
 

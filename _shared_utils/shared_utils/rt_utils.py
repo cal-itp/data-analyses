@@ -10,12 +10,15 @@ import numpy as np
 import pandas as pd
 import shapely
 from calitp_data_analysis import geography_utils, get_fs, utils
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from calitp_data_analysis.sql import query_sql
 from IPython.display import display
 from numba import jit
 from shared_utils import gtfs_utils_v2, portfolio_utils, rt_dates
 
 fs = get_fs()
+gcsgp = GCSGeoPandas()
+
 
 # set system time
 os.environ["TZ"] = "America/Los_Angeles"
@@ -263,7 +266,7 @@ def get_shapes(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
 
     if path:
         print(f"found shapes parquet at {path}")
-        org_shapes = gpd.read_parquet(path)
+        org_shapes = gcsgp.read_parquet(path)
     else:
         feed_key_list = list(ix_df.feed_key.unique())
         org_shapes = gtfs_utils_v2.get_shapes(
@@ -291,7 +294,7 @@ def get_routelines(
 
     if path and not force_clear:
         print("found parquet")
-        cached = gpd.read_parquet(path)
+        cached = gcsgp.read_parquet(path)
         if not cached.empty:
             return cached
         else:
