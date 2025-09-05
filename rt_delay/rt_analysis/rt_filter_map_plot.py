@@ -17,7 +17,7 @@ import datetime as dt
 from tqdm import tqdm
 
 import numpy as np
-import seaborn as sns
+# import seaborn as sns
 import matplotlib.pyplot as plt
 
 from IPython.display import display, Markdown, IFrame
@@ -621,67 +621,67 @@ class RtFilterMapper:
         return
 
     
-    def chart_speeds(self, no_title = False):
-        '''
-        A bar chart showing delays grouped by arrival hour for current filtered selection.
-        Currently hardcoded to 0600-2200.
-        '''
-        filtered_trips = (self._filter(self.rt_trips)
-                             >> mutate(median_hour = _.median_time.apply(lambda x: x.hour))
-                             >> filter(_.median_hour > 5)
-                             >> filter(_.median_hour < 23)
-                            )
-        grouped = (filtered_trips >> group_by(_.median_hour)
-                   >> summarize(median_trip_mph = _.mean_speed_mph.median())
-                  )
-        grouped['Median Trip Speed (mph)'] = grouped.median_trip_mph.apply(lambda x: round(x, 1))
-        grouped['Hour'] = grouped.median_hour
-        if no_title:
-            title = ''
-        else:
-            title = f"{self.organization_name} Median Trip Speeds by Arrival Hour{self.filter_formatted}"
+#     def chart_speeds(self, no_title = False):
+#         '''
+#         A bar chart showing delays grouped by arrival hour for current filtered selection.
+#         Currently hardcoded to 0600-2200.
+#         '''
+#         filtered_trips = (self._filter(self.rt_trips)
+#                              >> mutate(median_hour = _.median_time.apply(lambda x: x.hour))
+#                              >> filter(_.median_hour > 5)
+#                              >> filter(_.median_hour < 23)
+#                             )
+#         grouped = (filtered_trips >> group_by(_.median_hour)
+#                    >> summarize(median_trip_mph = _.mean_speed_mph.median())
+#                   )
+#         grouped['Median Trip Speed (mph)'] = grouped.median_trip_mph.apply(lambda x: round(x, 1))
+#         grouped['Hour'] = grouped.median_hour
+#         if no_title:
+#             title = ''
+#         else:
+#             title = f"{self.organization_name} Median Trip Speeds by Arrival Hour{self.filter_formatted}"
             
-        sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Median Trip Speed (mph)'], ci=None, 
-                       palette=[CALITP_CATEGORY_BOLD_COLORS[1]])
-            .set_title(title)
-           )
-        chart = sns_plot.get_figure()
-        chart.tight_layout()
-        return chart
+#         sns_plot = (sns.barplot(x=grouped['Hour'], y=grouped['Median Trip Speed (mph)'], ci=None, 
+#                        palette=[CALITP_CATEGORY_BOLD_COLORS[1]])
+#             .set_title(title)
+#            )
+#         chart = sns_plot.get_figure()
+#         chart.tight_layout()
+#         return chart
     
-    def chart_variability(self, min_stop_seq = None, max_stop_seq = None, num_segments = None,
-                         no_title = False):
-        '''
-        Chart trip speed variability, as speed between each stop segments.
-        stop_sequence_range: (min_stop, max_stop)
-        '''
-        sns.set(rc = {'figure.figsize':(13,6)})
-        assert (self.filter['shape_ids']
-                and len(self.filter['shape_ids']) == 1), 'must filter to a single shape_id'
-        _map = self.segment_speed_map()
-        to_chart = self.stop_segment_speed_view.copy()
-        to_chart = to_chart.dropna(subset=['stop_id'])
-        if num_segments:
-            unique_stops = list(to_chart.stop_sequence.unique())[:num_segments]
-            min_stop_seq = min(unique_stops)
-            max_stop_seq = max(unique_stops)
-        if min_stop_seq:
-            to_chart = to_chart >> filter(_.stop_sequence >= min_stop_seq)
-        if max_stop_seq:
-            to_chart = to_chart >> filter(_.stop_sequence <= max_stop_seq)
-        to_chart.stop_name = to_chart.stop_name.str.split('&').map(lambda x: x[-1])
-        to_chart = to_chart.rename(columns={'speed_mph': 'Segement Speed (mph)',
-                                      'delay_chg_sec': 'Increase in Delay (seconds)',
-                                      'stop_sequence': 'Stop Segment ID',
-                                      'stop_name': 'Segment Cross Street'})
-        plt.xticks(rotation=65)
-        title = f"{self.organization_name} Speed Variability by Stop Segment{self.filter_formatted}"
-        if no_title:
-            title = None
-        variability_plt = sns.swarmplot(x = to_chart['Segment Cross Street'], y=to_chart['Segement Speed (mph)'],
-              palette=CALITP_CATEGORY_BRIGHT_COLORS,
-             ).set_title(title)
-        return variability_plt
+    # def chart_variability(self, min_stop_seq = None, max_stop_seq = None, num_segments = None,
+    #                      no_title = False):
+    #     '''
+    #     Chart trip speed variability, as speed between each stop segments.
+    #     stop_sequence_range: (min_stop, max_stop)
+    #     '''
+    #     sns.set(rc = {'figure.figsize':(13,6)})
+    #     assert (self.filter['shape_ids']
+    #             and len(self.filter['shape_ids']) == 1), 'must filter to a single shape_id'
+    #     _map = self.segment_speed_map()
+    #     to_chart = self.stop_segment_speed_view.copy()
+    #     to_chart = to_chart.dropna(subset=['stop_id'])
+    #     if num_segments:
+    #         unique_stops = list(to_chart.stop_sequence.unique())[:num_segments]
+    #         min_stop_seq = min(unique_stops)
+    #         max_stop_seq = max(unique_stops)
+    #     if min_stop_seq:
+    #         to_chart = to_chart >> filter(_.stop_sequence >= min_stop_seq)
+    #     if max_stop_seq:
+    #         to_chart = to_chart >> filter(_.stop_sequence <= max_stop_seq)
+    #     to_chart.stop_name = to_chart.stop_name.str.split('&').map(lambda x: x[-1])
+    #     to_chart = to_chart.rename(columns={'speed_mph': 'Segement Speed (mph)',
+    #                                   'delay_chg_sec': 'Increase in Delay (seconds)',
+    #                                   'stop_sequence': 'Stop Segment ID',
+    #                                   'stop_name': 'Segment Cross Street'})
+    #     plt.xticks(rotation=65)
+    #     title = f"{self.organization_name} Speed Variability by Stop Segment{self.filter_formatted}"
+    #     if no_title:
+    #         title = None
+    #     variability_plt = sns.swarmplot(x = to_chart['Segment Cross Street'], y=to_chart['Segement Speed (mph)'],
+    #           palette=CALITP_CATEGORY_BRIGHT_COLORS,
+    #          ).set_title(title)
+    #     return variability_plt
     
     def describe_slow_routes(self):
         try:
