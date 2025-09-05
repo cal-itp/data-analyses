@@ -1,14 +1,6 @@
-# rt_delay (rt_analysis) tooling
+# Legacy Speedmaps / `rt_analysis`
 
-## Documentation
-
-See docs site: https://docs.calitp.org/data-infra/analytics_tools/rt_analysis.html#example-workflow-sccp
-
-## What's here?
-
-* The `rt_analysis` package, which supports the California Transit Speed Maps and other analyses. Install with `make setup_rt_analysis`, and see the docs and the tutorial notebook for an intro.
-
-* Various other notebooks from past analyses (ongoing workflows will be parameterized/documented/migrated as appropriate)
+This codebase is no longer used to generate new data, but you can still use `rt_analysis/rt_filter_map_plot` to access speed datasets processed on select dates in the v1 warehouse.
 
 ## Where are speedmaps and SCCP/LPP?
 
