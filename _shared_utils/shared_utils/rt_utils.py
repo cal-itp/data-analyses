@@ -11,9 +11,9 @@ import pandas as pd
 import shapely
 from calitp_data_analysis import geography_utils, get_fs, utils
 from calitp_data_analysis.sql import query_sql
+from IPython.display import display
 from numba import jit
-from shared_utils import gtfs_utils_v2, rt_dates
-from siuba import *
+from shared_utils import gtfs_utils_v2, portfolio_utils, rt_dates
 
 fs = get_fs()
 
@@ -298,8 +298,6 @@ def get_routelines(
             print("v1 cached parquet empty -- unable to generate")
             return
 
-        return routelines
-
 
 @jit(nopython=True)  # numba gives huge speedup here (~60x)
 def time_at_position_numba(desired_position, shape_array, dt_float_array):
@@ -377,7 +375,7 @@ def arrowize_by_frequency(row, frequency_col="trips_per_hour", frequency_thresho
 
 
 def describe_slowest(row):
-    description = which_desc(row)
+    description = portfolio_utils(row, target="description")
     full_description = (
         f"{row.route_short_name}{description}, {row.direction}: "
         f"{round(row.median_trip_mph, 1)} mph median trip speed for "
