@@ -362,10 +362,10 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "is_downtown_local",
         "is_rapid",
     ]
-    col_order = (
-        route_cols + shape_cols + agency_ids + shn_cols + route_typology + ["geometry"]
-    )
-
+    #col_order = (
+    #    route_cols + shape_cols + agency_ids + shn_cols + route_typology + ["geometry"]
+    # )
+    col_order = route_cols + shape_cols + agency_ids + ['geometry']
     df2 = (
         df[col_order]
         .reindex(columns=col_order)
@@ -388,11 +388,13 @@ if __name__ == "__main__":
     # the export/ folder contains the patched versions of the routes
     utils.geoparquet_gcs_export(
         routes,
-        AH_TEST,
+        TRAFFIC_OPS_GCS,
         f"ca_transit_routes_{analysis_date}"
     )
     
     # Patch previous dates and add SHN + Route Typology
+    """
+    Amanda: commenting this out for now.
     published_routes = (
     patch_previous_dates(
         routes,
@@ -403,9 +405,15 @@ if __name__ == "__main__":
     .pipe(open_data_utils.standardize_operator_info_for_exports, analysis_date)
     .pipe(finalize_export_df)
 ) 
+    """
+    published_routes = patch_previous_dates(
+        routes, 
+        analysis_date,
+    ).pipe(finalize_export_df)
+    
     utils.geoparquet_gcs_export(
         published_routes, 
-        AH_TEST, 
+        TRAFFIC_OPS_GCS, 
         "ca_transit_routes"
     )
     

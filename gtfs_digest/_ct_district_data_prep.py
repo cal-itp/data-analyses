@@ -1,9 +1,9 @@
-import _report_utils
-import deploy_portfolio_yaml
-from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
 import geopandas as gpd
 import pandas as pd
 import _transit_routes_on_shn
+from shared_utils import catalog_utils, webmap_utils
+from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS
+from calitp_data_analysis import geography_utils
 
 import google.auth
 credentials, project = google.auth.default()
@@ -80,6 +80,12 @@ def data_wrangling_operator_map(portfolio_organization_names:list)->gpd.GeoDataF
 ].str.replace(" Schedule", "")
     
     operator_route_gdf = operator_route_gdf.rename(columns = operator_route_gdf_readable_columns)
+    
+    operator_route_gdf = operator_route_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
+    
+    # Need to create a number column in order for webmaps to work
+    operator_route_gdf = operator_route_gdf.reset_index(drop=False)
+    operator_route_gdf = operator_route_gdf.rename(columns={"index": "number"})
     return operator_route_gdf
 
 def final_transit_route_shs_outputs(
@@ -121,7 +127,7 @@ def final_transit_route_shs_outputs(
         ].drop_duplicates(),
         open_data_df,
         on=["portfolio_organization_name", "recent_combined_name"],
-    )
+    ).to_crs(geography_utils.CA_NAD83Albers_m)
 
     # We want a text table to display.
     # Have to rejoin and to find only the SHN routes that are in the district
@@ -158,7 +164,8 @@ def final_transit_route_shs_outputs(
 
     text_table = text_table.rename(columns = transit_shn_map_columns)
     map_gdf = map_gdf.rename(columns = transit_shn_map_columns).drop(columns = ["on_shs"])
-    
+    map_gdf = map_gdf.reset_index(drop=False)
+    map_gdf = map_gdf.rename(columns={"index": "number"})
     return map_gdf, text_table
 
 def create_gtfs_stats(df:pd.DataFrame)->pd.DataFrame:
@@ -190,25 +197,33 @@ def load_ct_district(district:int)->gpd.GeoDataFrame:
     Load in Caltrans Shape.
     """
     caltrans_url = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
-    ca_geojson = (gpd.read_file(caltrans_url)
-               .to_crs(epsg=3310))
+    ca_geojson = (gpd.read_file(caltrans_url)).to_crs(geography_utils.CA_NAD83Albers_m)
     district_geojson = ca_geojson.loc[ca_geojson.DISTRICT == district][["geometry"]]
     return district_geojson
 
 def load_buffered_shn_map(buffer_amount:int, district:int) -> gpd.GeoDataFrame:
     """
-    Overlay the most recent transit routes with a buffered version
-    of the SHN
+    Load buffered and dissolved version of the SHN that we can
+    use with the webmaps.
     """
-    GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
+    SHN_FILE = catalog_utils.get_catalog("shared_data_catalog").state_highway_network.urlpath
 
-    # Read in buffered shn here or re buffer if we don't have it available.
-    HWY_FILE = f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_ct_district_route.parquet"
-    shn_routes_gdf = gpd.read_parquet(
-            HWY_FILE, storage_options={"token": credentials.token}
-        ).drop(columns = ["highway_feet"])
+    gdf = gpd.read_parquet(
+        SHN_FILE,
+        storage_options={"token": credentials.token},
+    ).to_crs(geography_utils.CA_NAD83Albers_m)
     
-    # Clean
-    shn_routes_gdf = shn_routes_gdf.loc[shn_routes_gdf.district == district]
-    shn_routes_gdf = shn_routes_gdf.rename(columns = shn_map_readable_columns)
-    return shn_routes_gdf
+    # Filter for the relevant district
+    gdf2 = gdf.loc[gdf.District == district]
+    
+    # Dissolve
+    gdf2 = gdf2.dissolve(by = ["Route","County","District", "RouteType"]).reset_index().drop(columns = ["Direction"])
+    
+    # Buffer - make it a bit bigger so we can actually see stuff
+    buffer_amount = buffer_amount + 50
+    gdf2.geometry = gdf2.geometry.buffer(buffer_amount)
+    
+    # Rename the columns
+    gdf2 = gdf2.rename(columns = shn_map_readable_columns)
+    
+    return gdf2
