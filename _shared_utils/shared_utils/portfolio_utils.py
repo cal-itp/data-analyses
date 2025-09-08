@@ -81,6 +81,21 @@ def add_route_name(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def label_visualization(word: str, labeling_dict: dict = {}) -> str:
+    """
+    Supply a labeling dictionary where
+    keys are existing column names and
+    values are what's to be displayed on visualization.
+
+    If not in dict, replace underscores with spaces and Title Case.
+    """
+    if word in labeling_dict.keys():
+        word = labeling_dict[word]
+    else:
+        word = word.replace("_", " ").title()
+    return word
+
+
 def create_portfolio_yaml_chapters_no_sections(portfolio_site_yaml: Path, chapter_name: str, chapter_values: list):
     """
     Overwrite a portfolio site yaml by filling in all the parameters.

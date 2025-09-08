@@ -29,19 +29,16 @@ remove_competitive_corridors:
     
 build_ntd_report:
 	$(eval export site = ntd_monthly_ridership)
-	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	cd ntd/monthly_ridership_report/ && python deploy_portfolio_yaml.py && cd ..   
 	make build_portfolio_site
 
 build_ntd_annual_report:
 	$(eval export site = ntd_annual_ridership_report)
-	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	cd ntd/annual_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
 	make build_portfolio_site
 
 build_new_transit_metrics_report:
 	$(eval export site = new_transit_metrics)
-	cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	cd ntd/new_transit_metrics/ && python deploy_portfolio_yaml.py && cd ..
 	make build_portfolio_site
 
