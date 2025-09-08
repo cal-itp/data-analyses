@@ -87,7 +87,7 @@ speed_graph:
   title: "Average Speed (MPH)"
   subtitle: "The average miles per hour a vehicle travels by direction and time of day."
   tooltip: ["Date","Route","Direction","Period","Speed (MPH)",]
-  colors: ${color_palettes.tri_color}
+  colors: ${color_palettes.full_color_scale}
 
 vp_per_min_graph:
   title: "Vehicle Positions per Minute"

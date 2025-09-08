@@ -194,7 +194,7 @@ if __name__ == "__main__":
         operator_aggregated,
         ntd_data,
         on = operator_date_cols,
-        how = "inner"
+        how = "left" # used to be inner
     ).pipe(
         publish_utils.filter_to_recent_date, 
         ["portfolio_organization_name"]
