@@ -127,8 +127,12 @@ def final_transit_route_shs_outputs(
         ].drop_duplicates(),
         open_data_df,
         on=["portfolio_organization_name", "recent_combined_name"],
-    ).to_crs(geography_utils.CA_NAD83Albers_m)
-
+    )
+    
+    # Buffer so we can see stuff and change the CRS
+    map_gdf = map_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
+    map_gdf.geometry = map_gdf.geometry.buffer(75)
+    
     # We want a text table to display.
     # Have to rejoin and to find only the SHN routes that are in the district
     # we are interested in.
