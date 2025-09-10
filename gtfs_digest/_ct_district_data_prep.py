@@ -203,6 +203,9 @@ def load_ct_district(district:int)->gpd.GeoDataFrame:
     caltrans_url = "https://gis.data.ca.gov/datasets/0144574f750f4ccc88749004aca6eb0c_0.geojson?outSR=%7B%22latestWkid%22%3A3857%2C%22wkid%22%3A102100%7D"
     ca_geojson = (gpd.read_file(caltrans_url)).to_crs(geography_utils.CA_NAD83Albers_m)
     district_geojson = ca_geojson.loc[ca_geojson.DISTRICT == district][["geometry"]]
+    
+    # Add color column
+    district_geojson["color"] = [(235, 240, 235)]
     return district_geojson
 
 def load_buffered_shn_map(buffer_amount:int, district:int) -> gpd.GeoDataFrame:
