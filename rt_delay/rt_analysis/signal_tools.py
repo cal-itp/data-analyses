@@ -54,7 +54,7 @@ def concatenate_speedmap_segments(progress_df: pd.DataFrame = None,
                                  no_render=True
                                 )
 
-            dmv_proj = rt_day.detailed_map_view.to_crs(CA_NAD83Albers)
+            dmv_proj = rt_day.detailed_map_view.to_crs(CA_NAD83Albers_m)
             # re-add some identifiers since we won't have the instance handy
             # dmv_proj['feed_key'] = rt_day.rt_trips.feed_key.iloc[0]
             dmv_proj['gtfs_dataset_key'] = rt_day.rt_trips.gtfs_dataset_key.iloc[0]
@@ -122,25 +122,25 @@ def sjoin_signals(signal_gdf: gpd.GeoDataFrame,
     '''
     
     signals = (signal_gdf
-                   >> filter(_.tms_unit_type != 'Freeway Ramp Meters')
-                   >> select(_.imms_id, _.location, _.geometry)
+                   >> filter(_.tms_unit_type != 'Freeway Ramp Meters') # TODO de-siubafy, make sure we also exlude CCTV
+                   >> select(_.imms_id, _.objectid, _.location, _.geometry) # TODO: imms_id isn't unique, why do we use it?
                ).copy()
-    signals_points = signals.to_crs(CA_NAD83Albers)
+    signals_points = signals.to_crs(CA_NAD83Albers_m)
     signals_buffered = signals_points.copy()
     signals_buffered.geometry = signals_buffered.buffer(150)
 
     joined = gpd.sjoin(segments_gdf, signals_buffered) >> select(-_.index_right)
 
-    points_for_join = signals_points >> select(_.imms_id, _.signal_pt_geom == _.geometry)
-    joined_signal_points = joined >> inner_join(_, points_for_join, on ='imms_id')
+    points_for_join = signals_points >> select(_.imms_id, _.objectid, _.signal_pt_geom == _.geometry)
+    joined_signal_points = joined >> inner_join(_, points_for_join, on ='objectid')
 
     # add line geometries from stop_segment_speed_view
     seg_lines = (segments_lines_gdf
-                >> select(_.line_geom == _.geometry, _.shape_id, _.stop_sequence, _.stop_id)
-                >> distinct(_.line_geom, _.shape_id, _.stop_sequence, _.stop_id)
+                >> select(_.line_geom == _.geometry, _.shape_id, _.segment_id, _.organization_source_record_id)
+                >> distinct(_.line_geom, _.shape_id, _.segment_id, _.organization_source_record_id)
             )
     # ideally a more robust join in the future
-    joined_seg_lines = joined_signal_points >> inner_join(_, seg_lines, on = ['shape_id', 'stop_sequence', 'stop_id'])
+    joined_seg_lines = joined_signal_points >> inner_join(_, seg_lines, on = ['shape_id', 'segment_id'])
     return joined_seg_lines
 
 @np.vectorize
@@ -155,7 +155,7 @@ def vector_end(linestring):
 def vector_distance(point1, point2):
     return point1.distance(point2)
 
-def determine_approaching(joined_seg_lines_gdf: gpd.GeoDataFrame):
+def determine_approaching(joined_seg_lines_gdf: gpd.GeoDataFrame) -> pd.Series:
     
     '''
     using vectorized shapely functions,
@@ -168,8 +168,9 @@ def determine_approaching(joined_seg_lines_gdf: gpd.GeoDataFrame):
     end_distances = vector_distance(end_array, joined_seg_lines_gdf.signal_pt_geom)
     approaching = start_distances > end_distances
     assert len(approaching) == len(joined_seg_lines_gdf)
-    joined_seg_lines_gdf['approaching'] = approaching
-    return joined_seg_lines_gdf
+    return approaching
+    joined_seg_lines_gdf['approaching'] = approaching # lets not mess with mutability
+    #return pd.concat([joined_seg_lines_gdf, pd.Series(approaching, name="approaching")], axis=1)
 
 def calculate_speed_score(df):
     twenty_mph = 20
