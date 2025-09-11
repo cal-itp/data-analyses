@@ -1,187 +1,278 @@
+"""
+(1a) daily time-series stop df
+* % completeness, % accuracy - 2D histogram?
+scatterplot is similar, but this groups them
+* avg_prediction_error_minutes
+layered histogram or several histograms by day_of_week
+* avg_prediction_spread_minutes
+layered histogram or several histograms by day_of_week
+* n_predictions in the 30 min interval
+
+(1b) aggregated day_type stop df
+* % completeness, % accuracy by day_type - 2D histogram?
+* avg_prediction_error_minutes
+* avg_prediction_spread_minutes
+* daily_predictions_per_stop
+* can we put the above all in a table, pivoted wide so it's weekday/sat/sun?
+
+would be nice to merge in trip grain, and trip grain has a column
+for an array of stop_ids, so when we aggregate to route-direction,
+we can unpack the stops for that and grab it from the stop grain
+
+(2a)
+(2b)
+"""
 import altair as alt
+import folium
+import geopandas as gpd
 import pandas as pd
-from calitp_data_analysis import calitp_color_palette as cp
 
-def altair_dropdown(df, column_for_dropdown:str, title_of_dropdown:str):
-    """
-    Create a dropdown menu. Selects the first 
-    value as the default display option.
-    """
-    dropdown_list = df[column_for_dropdown].unique().tolist()
-    initialize_first_op = sorted(dropdown_list)[0]
-    input_dropdown = alt.binding_select(options=sorted(dropdown_list), name=title_of_dropdown)
-    
-    selection = alt.selection_single(
-    name=title_of_dropdown,
-    fields=[column_for_dropdown],
-    bind=input_dropdown,
-    init={column_for_dropdown: initialize_first_op},)
-    
-    return selection
-
-def reverse_snakecase(df):
-    """
-    Clean up columns to remove underscores and spaces.
-    """
-    df.columns = df.columns.str.replace("_", " ").str.strip().str.title()
-    return df
-
-def chart_size(chart: alt.Chart) -> alt.Chart:
-    """
-    Resize charts.
-    """
-    chart = chart.properties(width=500, height=400)
-    return chart
-
-def describe_to_df(df, operator: str, metric_cols: list) -> pd.DataFrame:
-    """
-    Convert df.column.describe() to a 
-    horizontally concatted dataframe.
-    """
-    # Filter for operator
-    df = df[df._gtfs_dataset_name == operator].reset_index(drop=True)
-    
-    operator = operator.replace('TripUpdates','').strip()
-    
-    final = pd.DataFrame()
-
-    for i in metric_cols:
-        df2 = pd.DataFrame({i: df[i].describe()})
-        final = pd.concat([final, df2], axis=1)
-
-    final = final.reset_index().rename(columns={"index": "Measure"})
-
-    final = reverse_snakecase(final)
-
-    final.Measure = final.Measure.str.title()
-    
-    # https://stackoverflow.com/questions/59535426/can-you-change-the-caption-font-size-using-pandas-styling
-    final = final.style.set_caption(f"Summary for {operator}").set_table_styles([{
-    'selector': 'caption',
-    'props': [
-        ('color', 'black'),
-        ('font-size', '16px')
-    ]}]).format(precision=1)
-
-    return final
-
-def prep_df_for_chart(df, 
-                      percentage_column: str, 
-                      columns_to_round: list, 
-                      columns_to_keep: list):
-    """
-    Clean up dataframe before creating charts. 
-    Round certain columns, round it to one decimal place,
-    sort by stop sequence, etc. 
-    """
-    # Mulitply percentage column
-    df[percentage_column] = df[percentage_column] * 100
-    
-    # Sort by operator, trip_id, and stop sequence
-    # Stops go from smallest to largest
-    df = df.sort_values(
-        by=["_gtfs_dataset_name", "trip_id", "stop_sequence"]
-    ).reset_index(drop=True)
-
-    # Subset
-    df = df[columns_to_keep]
-
-    # Rounds down. 96 becomes 90.
-    for i in columns_to_round:
-        df[f"rounded_{i}"] = ((df[i] / 100) * 10).astype(int) * 10
-    
-    df = reverse_snakecase(df)
-
-    df = df.round(1)
-
-    return df
-
-def scatter_plot_domain(
-    df,
-    operator,
-    x_col: str,
-    y_col: str,
-    color_col: str,
-    dropdown_col: str,
-    dropdown_col_title: str,
+def make_layered_histogram(
+    df: pd.DataFrame, 
+    plot_col:str,
+    step_size: float
 ):
     """
-    Create scatterplot with a bounded x_col/y_col.
-    For Metrics 1 and 4.
+    Might be useful for distributions of the metrics by day_type
+    https://altair-viz.github.io/gallery/layered_histogram.html
+    
+    Make a symmetrical distribution, centered on 0.
+    Find the larger of min and max and use that as bounds.
     """
-    df = df[df['Gtfs Dataset Name'] == operator].reset_index(drop = True)
+    vertical_line = alt.Chart(
+        pd.DataFrame({'line_x': [0]})).mark_rule(
+        color='red'
+    ).encode(
+        x=alt.X('line_x:Q', title="")
+    )
     
-    operator_title = df['Gtfs Dataset Name'].iloc[0].replace('TripUpdates','').strip()
-    
-    selection = altair_dropdown(df, dropdown_col, dropdown_col_title)
-
     chart = (
         alt.Chart(df)
-        .mark_circle(size=250)
-        .encode(
-            x=alt.X(f"{x_col}:Q",
-                scale=alt.Scale(domain=[df[x_col].min(), df[x_col].max()]),
-            ),
-            y=alt.Y(y_col, scale=alt.Scale(domain=[0, 100])),
-            color=alt.Color(
-                color_col,
-                scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS, domain=[0, 100]),
-            ),
-            tooltip=df.columns.to_list(),
+        .mark_bar(
+            opacity=0.3,
+            binSpacing=0
+    ).encode(
+        alt.X(f'{plot_col}:Q', bin=alt.Bin(step=step_size), 
+             #scale=alt.Scale(domain=[bounds * -1, bounds])
+             ),
+        alt.Y('count()', stack=None),
+        alt.Color(
+            'weekday_weekend:N',
+            scale=alt.Scale(
+                range=["#ccbb44","#5b8efd","#dd217d"]) # tri_color color_palette
+            )
         )
-        .properties(title=f"{operator_title} - Metric {y_col}")
-        .interactive()
+    )
+    
+    return chart + vertical_line
+
+
+def counts_for_2d_histogram(
+    df: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Group by the combinations of the 2 percent columns.
+    Otherwise, each stop is overlaying the other, and we can't actually see.
+    """
+    df2 = (
+        df
+        .groupby(["pct_complete_minutes", "pct_accurate_minutes", "weekday_weekend"])
+        .agg({"stop_id": "count"})
+        .reset_index()
+        .rename(columns = {"stop_id": "n_stops"})
+    )
+    
+    return df2
+    
+def make_2d_histogram(
+    df: pd.DataFrame,
+    title: str = "",
+):
+    """
+    https://altair-viz.github.io/gallery/histogram_scatterplot.html
+    prefer this one: https://altair-viz.github.io/gallery/histogram_heatmap.html
+    """
+    aggregated_df = counts_for_2d_histogram(df)
+    
+    chart = (
+        alt.Chart(aggregated_df)
+        .mark_rect()
+        .encode(
+            x = alt.X(
+                "pct_complete_minutes:Q", 
+                bin=alt.Bin(maxbins=20), 
+                title = "% complete"
+            ),
+            y = alt.Y(
+                "pct_accurate_minutes:Q", 
+                bin=alt.Bin(maxbins=20), 
+                title = "% accurate"
+            ),
+            color=alt.Color(
+                'sum(n_stops):Q', 
+                scale=alt.Scale(scheme="greenblue")
+                #range=["#ccbb44","#5b8efd","#dd217d"] # color_palette
+            ), 
+            #size='sum(n_stops)',
+            tooltip=["weekday_weekend", "n_stops",
+                     "pct_complete_minutes", "pct_accurate_minutes"]
+        ).properties(title=title).interactive()
+    )
+    
+    return chart
+        
+def make_boxplot_by_day_type(
+    df: pd.DataFrame, 
+    plot_col: str,
+    title: str
+) -> alt.Chart:
+    """
+    """
+    boxplot = (
+        alt.Chart(
+            df[["weekday_weekend", "service_date", "stop_id", "stop_name", plot_col]]
+        ).mark_boxplot(size=4, opacity=0.7)
+        .encode(
+            x="service_date:T",
+            y=f"{plot_col}:Q",
+            color=alt.Color(
+                'weekday_weekend:N', 
+                scale = alt.Scale(range=["#ccbb44","#5b8efd","#dd217d"])
+            ),
+            tooltip=["stop_id", "stop_name", plot_col]
+        ).interactive().properties(title = title)
     )
 
-    chart = chart_size(chart)
-    chart = chart.add_selection(selection).transform_filter(selection)
+    return boxplot
+   
+    
+def test_jitter(plot_col):
+    plot_col = "avg_prediction_error_minutes"
 
-    return chart
+    subset_gdf = gdf1[["weekday_weekend", "service_date", "stop_id", "stop_name", plot_col]]
 
-def basic_scatter_plot(
-    df,
-    operator,
-    x_col:str,
-    y_col:str,
-    dropdown_col:str,
-    dropdown_col_title:str):
+    jitter = alt.Chart(subset_gdf).mark_circle(size=8).encode(
+        x="service_date:T",
+        y=f"{plot_col}:Q",
+        xOffset="jitter:Q",
+        yOffset="jitter:Q",
+        color=alt.Color('weekday_weekend:N', legend=None)
+    ).transform_calculate(
+        # Generate Gaussian jitter with a Box-Muller transform
+        #jitter="sqrt(-2*log(random()))*cos(2*PI*random())"
+        jitter='random()'
+    )
+
+    return jitter
+
+def stop_map_of_metric(
+    gdf: gpd.GeoDataFrame,
+    plot_col: str
+):
+    subset_gdf = gdf[["stop_id", "stop_name", "weekday_weekend", plot_col, "geometry"]]
+    
+    weekday_df = subset_gdf[subset_gdf.weekday_weekend=="Weekday"] 
+    sat_df = subset_gdf[subset_gdf.weekday_weekend=="Saturday"] 
+    sun_df = subset_gdf[subset_gdf.weekday_weekend=="Sunday"]
+    
+    m = weekday_df.explore(
+        plot_col,
+        tiles = "CartoDB Positron",
+        name="Weekday"
+    )
+    
+    if len(sat_df) > 0:
+        m = sat_df.explore(plot_col, m=m, name="Saturday", legend=False)
+    
+    if len(sun_df) > 0:
+        m = sun_df.explore(plot_col, m=m, name="Sunday", legend=False)
+    
+    folium.LayerControl().add_to(m)
+    
+    return m
+
+def manual_quartiles(
+    df: pd.DataFrame
+) -> pd.DataFrame:
     """
-    Create a scatterplot with only a bounded
-    X column. 
-    
-    Used for metric 3. 
+    For percents, start with 0.25, 0.5, 0.75.
+    For other metrics, divide into 4 groups?
     """
-    df = df[df['Gtfs Dataset Name'] == operator].reset_index(drop = True)
-    operator_title = df['Gtfs Dataset Name'].iloc[0].replace('TripUpdates','').strip()
+    pct_scale_cols = ["pct_accurate_minutes", "pct_complete_minutes"]
+    other_metric_cols = ["avg_prediction_error_sec", "avg_prediction_spread_minutes", "avg_predictions_per_trip"]
+
+    for c in pct_scale_cols:
+        df[f"{c}_categorized"] = pd.qcut(df[c], q=[0, 0.25, 0.5, 0.75, 1], labels=['< 25%', '25-50%', '50-75%', '> 75%'])
     
-    selection = altair_dropdown(df, dropdown_col, dropdown_col_title)
+    for c in other_metric_cols:
+        df[f"{c}_categorized"] = pd.qcut(df[c], q=4)
+
+    return df
+        
     
+def make_bar_chart(df: pd.DataFrame, plot_col: str): 
+    """
+    Put a daily chart, x=service_date, y=metric,
+    see if we can merge in the avg for the day_type
+    """
     chart = (
         alt.Chart(df)
-        .mark_circle(size=200)
+        .mark_bar()
         .encode(
             x=alt.X(
-                f"{x_col}:Q",
-                scale=alt.Scale(domain=[df[x_col].min(), df[x_col].max()]),
+                "yearmonthdate(service_date):O", 
+                title="Date", 
+                axis=alt.Axis(labelAngle=-45)
             ),
-            y=alt.Y(y_col),
-            color=alt.Color(y_col,scale=alt.Scale(range=cp.CALITP_DIVERGING_COLORS)),
-            tooltip=df.columns.to_list(),
+            y=alt.Y(plot_col),
+            column=alt.Column("day_type:N")
         )
-        .properties(title=f"{operator_title} - Metric {y_col}")
-        .interactive()
     )
-    
-    chart = chart_size(chart)
-    chart = chart.add_selection(selection).transform_filter(selection)
+
     return chart
 
-def quick_descriptives(df: pd.DataFrame, 
-                       operator: str,
-                       cols_to_describe: list):
-    print(f"------------- {operator}-------------")
-    subset_df = df[df._gtfs_dataset_name==operator] 
+#make_layered_histogram(df, "avg_prediction_spread_minutes")
+#make_layered_histogram(df, "avg_prediction_error_sec")
+#make_layered_histogram(df, "pct_accurate_minutes")
+#make_layered_histogram(df, "n_predictions") # this covers the period that's 30 minutes before arrival
+
+
+def base_facet_line_chart(
+    df: pd.DataFrame,
+    y_col: str,
+    facet_col: str,
+    ruler_col: str
+) -> alt.Chart:
+
+    # Create the ruler chart
+    ruler = (
+            alt.Chart(df)
+            .mark_rule(color="red", strokeDash=[10, 7])
+            .encode(y=f"{ruler_col}:Q")
+        )
+
+    chart = (
+            alt.Chart(df)
+            .mark_line()
+            .encode(
+                x=alt.X(
+                    "stop_name:O",
+                    title="Stop",
+                    order = "stop_sequence",
+                    axis=alt.Axis(labelAngle=-45),
+                ),
+            )
+        )
+    # Add ruler plus main chart
+    chart = (chart + ruler).properties(width=200, height=250)
+    chart = chart.facet(
+            column=alt.Column("{facet_col}:N"),
+        ).properties(
+            #title={
+            #    "text": [title],
+            #    "subtitle": [subtitle],
+            #}
+        )
     
-    for c in cols_to_describe:
-        print(subset_df[c].describe())
-        print("\n")
+    return chart
+

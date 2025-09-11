@@ -2,10 +2,11 @@
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 
 build_portfolio_site:
-	cd portfolio/ && pip install -r requirements.txt && cd ../
+	#cd portfolio/ && pip install -r requirements.txt && cd ../
 	#need git rm because otherwise, just local removal, but git change is untracked
 	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
+	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra
 	python portfolio/portfolio.py build $(site) --deploy 
 	git add portfolio/sites/$(site).yml     
 	#make production_portfolio
@@ -19,13 +20,7 @@ git_check_no_sections:
 remove_portfolio_site:
 	python portfolio/portfolio.py clean $(site)
 	git rm portfolio/sites/$(site).yml
-	git rm portfolio/$(site)/ -rf
-
-
-remove_competitive_corridors:
-	$(eval export site = competitive_corridors) 
-	make remove_portfolio_site
-
+	git rm portfolio/$(site)/ -rf 
     
 build_ntd_report:
 	$(eval export site = ntd_monthly_ridership)
@@ -48,8 +43,8 @@ build_gtfs_digest:
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && make assemble_data && cd ..   
 	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..       
 	make build_portfolio_site
-	make git_check_sections
-
+	make git_check_sections   
+    
 build_district_digest:
 	$(eval export site = district_digest)
 	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
@@ -57,24 +52,11 @@ build_district_digest:
 	cd gtfs_digest/ && python deploy_district_yaml.py district && cd .. 
 	make build_portfolio_site 
 	make git_check_no_sections
-    
+   
 build_legislative_district_digest:
 	$(eval export site = legislative_district_digest)
 	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd .. 
-	make build_portfolio_site 
-	make git_check_no_sections
-    
-    
-build_starterkit_ha:
-	$(eval export site = ha_starterkit_district)
-	pip install -r portfolio/requirements.txt
-	make build_portfolio_site 
-	make git_check_no_sections
-    
-build_starterkit_LASTNAME:
-	$(eval export site = YOUR_SITE_NAME)
-	pip install -r portfolio/requirements.txt
 	make build_portfolio_site 
 	make git_check_no_sections
 
