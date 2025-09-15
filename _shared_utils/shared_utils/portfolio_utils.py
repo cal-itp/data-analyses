@@ -11,8 +11,8 @@ import pandas as pd
 import yaml
 
 from calitp_data_analysis.sql import get_engine
-from calitp_data_analysis.tables import tbls
 db_engine = get_engine()
+
 
 def decode_base64_url(row):
     """
@@ -247,15 +247,17 @@ CALTRANS_DISTRICT_DICT = {
     },
 }
 
+
 """
 def standardize_portfolio_organization_names(df: pd.DataFrame, preferred_organization_name_dict: dict) -> pd.DataFrame:
     # Map the preferred organization name using schedule_gtfs_dataset_name.
     df = df.assign(portfolio_organization_name=df.name.map(preferred_organization_name_dict))
     # drop the ones that were removed with duplicated feed info (create_portfolio_display_yaml.py)
     df = df.dropna(subset="portfolio_organization_name")
-
     return df
 """
+
+
 def load_portfolio_names() -> pd.DataFrame:
     with db_engine.connect() as connection:
         query = f"""
@@ -265,7 +267,6 @@ def load_portfolio_names() -> pd.DataFrame:
             FROM
             cal-itp-data-infra.mart_transit_database.dim_gtfs_datasets
             WHERE _is_current = TRUE 
-            
             """
         df = pd.read_sql(query, connection)
     df = df.rename(
@@ -275,6 +276,7 @@ def load_portfolio_names() -> pd.DataFrame:
         }
     )
     return df
+
 
 def standardize_portfolio_organization_names(df: pd.DataFrame) -> pd.DataFrame:
     portfolio_name_df = load_portfolio_names()
