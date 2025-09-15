@@ -49,7 +49,6 @@ def standardize_operator_info_for_exports(df: pd.DataFrame, date: str) -> pd.Dat
         )
         .pipe(
             portfolio_utils.standardize_portfolio_organization_names,
-            PORTFOLIO_ORGANIZATIONS_DICT,
         )
         .drop_duplicates(
             subset=["schedule_gtfs_dataset_key", "name", "portfolio_organization_name"]

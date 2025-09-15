@@ -10,6 +10,9 @@ from typing import Literal
 import pandas as pd
 import yaml
 
+from calitp_data_analysis.sql import get_engine
+from calitp_data_analysis.tables import tbls
+db_engine = get_engine()
 
 def decode_base64_url(row):
     """
@@ -253,3 +256,37 @@ def standardize_portfolio_organization_names(df: pd.DataFrame, preferred_organiz
 
     return df
 """
+def load_portfolio_names() -> pd.DataFrame:
+    with db_engine.connect() as connection:
+        query = f"""
+            SELECT
+            name,
+            analysis_name,
+            FROM
+            cal-itp-data-infra.mart_transit_database.dim_gtfs_datasets
+            WHERE _is_current = TRUE 
+            
+            """
+        df = pd.read_sql(query, connection)
+    df = df.rename(
+        columns={
+            "key": "schedule_gtfs_dataset_key",
+            "analysis_name": "portfolio_organization_name",
+        }
+    )
+    return df
+
+def standardize_portfolio_organization_names(df: pd.DataFrame) -> pd.DataFrame:
+    portfolio_name_df = load_portfolio_names()
+    # Map the preferred organization name using schedule_gtfs_dataset_name.
+    m1 = pd.merge(
+        df,
+        portfolio_name_df,
+        on="name",
+        how="left",
+    )
+
+    # drop the ones that were removed with duplicated feed info
+    m1 = m1.dropna(subset="portfolio_organization_name")
+
+    return m1

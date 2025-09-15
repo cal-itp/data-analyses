@@ -155,12 +155,12 @@ def patch_previous_dates(
 
     return published_routes
 
-def add_route_typologies(gdf:gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def add_route_typologies(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Concatenate the years available for
     route typologies on the operator-route_id
     grain. Join this dataframe with the gdf
-    created by patch_previous_dates. 
+    created by patch_previous_dates.
     """
     ROUTE_TYPOLOGIES_FILE = GTFS_DATA_DICT.schedule_tables.route_typologies
 
@@ -197,13 +197,13 @@ def add_route_typologies(gdf:gpd.GeoDataFrame) -> gpd.GeoDataFrame:
             "route_id",
         ]
     )
-    
+
     m1 = pd.merge(
-    gdf,
-    route_typology_df2,
-    on=["name", "route_id"],
-    how="left",
-)
+        gdf,
+        route_typology_df2,
+        on=["name", "route_id"],
+        how="left",
+    )
     return m1
 
 def routes_shn_intersection(
@@ -235,8 +235,7 @@ def routes_shn_intersection(
     )
 
     # Calcuate the percent of the transit route that runs on a highway, round it up and
-    # multiply it by 100. Drop the geometry because we want the original transit route
-    # shapes.
+    # multiply it by 100
     gdf = gdf.assign(
         pct_route_on_hwy=(gdf.geometry.length / gdf.route_length_feet).round(3) * 100,
     )
@@ -261,9 +260,15 @@ def routes_shn_intersection(
             "district": "shn_districts",
         }
     )
-    return gdf2
 
-def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.DataFrame:
+    # Delete duplicates
+    gdf2 = gdf2.drop_duplicates().reset_index()
+    gdf3 = gdf2.drop_duplicates(
+        subset=["name", "route_id", "shape_id", "shn_route", "shn_districts"]
+    )
+    return gdf3
+
+def group_route_district(df: pd.DataFrame) -> pd.DataFrame:
     """
     Aggregate by adding all the districts and SHN to a single row, rather than
     multiple and sum up the total % of SHN a transit route intersects with.
@@ -282,7 +287,7 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
             {
                 "shn_route": lambda x: ", ".join(set(x.astype(str))),
                 "shn_districts": lambda x: ", ".join(set(x.astype(str))),
-                "pct_route_on_hwy_across_districts": pct_route_on_hwy_agg,
+                "pct_route_on_hwy_across_districts": "sum",
             }
         )
         .reset_index(drop=True)
@@ -309,7 +314,7 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
     # row instead of multiple rows after finding its
     # intersection with any SHN routes.
     # print(intersecting.columns)
-    agg1 = group_route_district(intersecting, "sum")
+    agg1 = group_route_district(intersecting)
 
     # Merge the dataframe with all the SHS info with the original
     # gdf so we can get the original transit route geometries &
@@ -362,17 +367,18 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "is_downtown_local",
         "is_rapid",
     ]
-    #col_order = (
-    #    route_cols + shape_cols + agency_ids + shn_cols + route_typology + ["geometry"]
-    # )
-    col_order = route_cols + shape_cols + agency_ids + ['geometry']
+    col_order = (
+        route_cols + shape_cols + agency_ids + shn_cols + route_typology + ["geometry"]
+    )
+    # col_order = route_cols + shape_cols + agency_ids + ['geometry']
     df2 = (
-        df[col_order]
-        .reindex(columns=col_order)
+        df[col_order].reindex(columns=col_order)
         .rename(columns=open_data_utils.STANDARDIZED_COLUMNS_DICT)
         .reset_index(drop=True)
     )
 
+    # Drop duplicates
+    df2 = df2.drop_duplicates()
     return df2
 
 if __name__ == "__main__":
@@ -388,13 +394,13 @@ if __name__ == "__main__":
     # the export/ folder contains the patched versions of the routes
     utils.geoparquet_gcs_export(
         routes,
-        TRAFFIC_OPS_GCS,
+        AH_TEST,
         f"ca_transit_routes_{analysis_date}"
     )
     
     # Patch previous dates and add SHN + Route Typology
-    """
-    Amanda: commenting this out for now.
+    
+    # Amanda: commenting this out for now.
     published_routes = (
     patch_previous_dates(
         routes,
@@ -410,10 +416,10 @@ if __name__ == "__main__":
         routes, 
         analysis_date,
     ).pipe(finalize_export_df)
-    
+    """
     utils.geoparquet_gcs_export(
         published_routes, 
-        TRAFFIC_OPS_GCS, 
+        AH_TEST, 
         "ca_transit_routes"
     )
     
