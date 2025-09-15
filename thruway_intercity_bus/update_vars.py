@@ -1,4 +1,7 @@
-ANALYSIS_DATE = '2025-09-01'
+ANALYSIS_DATE = '2025-09-10'
+
+GCS_PATH = 'gs://calitp-analytics-data/data-analyses/thruway_intercity_bus/'
+RIDERSHIP_PATH = f'{GCS_PATH}source_data/25.09.08CABusODPairRidershipFFY24-FFY25TD.xlsx'
 
 shape_cols = ['feed_key', 'shape_array_key']
 
