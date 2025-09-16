@@ -343,7 +343,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     # Change column order
     route_cols = [
-        "portfolio_organization_name",
+        "analysis_name",
         "route_id",
         "route_type",
         "route_name_used",

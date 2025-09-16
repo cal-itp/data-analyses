@@ -9,8 +9,8 @@ from typing import Literal
 
 import pandas as pd
 import yaml
-
 from calitp_data_analysis.sql import get_engine
+
 db_engine = get_engine()
 
 
@@ -248,31 +248,20 @@ CALTRANS_DISTRICT_DICT = {
 }
 
 
-"""
-def standardize_portfolio_organization_names(df: pd.DataFrame, preferred_organization_name_dict: dict) -> pd.DataFrame:
-    # Map the preferred organization name using schedule_gtfs_dataset_name.
-    df = df.assign(portfolio_organization_name=df.name.map(preferred_organization_name_dict))
-    # drop the ones that were removed with duplicated feed info (create_portfolio_display_yaml.py)
-    df = df.dropna(subset="portfolio_organization_name")
-    return df
-"""
-
-
 def load_portfolio_names() -> pd.DataFrame:
     with db_engine.connect() as connection:
-        query = f"""
+        query = """
             SELECT
             name,
             analysis_name,
             FROM
             cal-itp-data-infra.mart_transit_database.dim_gtfs_datasets
-            WHERE _is_current = TRUE 
+            WHERE _is_current = TRUE
             """
         df = pd.read_sql(query, connection)
     df = df.rename(
         columns={
             "key": "schedule_gtfs_dataset_key",
-            "analysis_name": "portfolio_organization_name",
         }
     )
     return df
@@ -289,6 +278,15 @@ def standardize_portfolio_organization_names(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # drop the ones that were removed with duplicated feed info
-    m1 = m1.dropna(subset="portfolio_organization_name")
-
+    m1 = m1.dropna(subset="analysis_name")
     return m1
+
+
+"""
+def standardize_portfolio_organization_names(df: pd.DataFrame, preferred_organization_name_dict: dict) -> pd.DataFrame:
+    # Map the preferred organization name using schedule_gtfs_dataset_name.
+    df = df.assign(portfolio_organization_name=df.name.map(preferred_organization_name_dict))
+    # drop the ones that were removed with duplicated feed info (create_portfolio_display_yaml.py)
+    df = df.dropna(subset="portfolio_organization_name")
+    return df
+"""
