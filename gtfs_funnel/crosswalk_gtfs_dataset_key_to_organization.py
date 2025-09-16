@@ -11,12 +11,13 @@ import os
 import pandas as pd
 
 from calitp_data_analysis.tables import tbls
-from siuba import *
+from calitp_data_analysis.sql import get_engine
 
 from shared_utils import schedule_rt_utils
 from segment_speed_utils import helpers
 from update_vars import GTFS_DATA_DICT, SCHED_GCS
 
+db_engine = get_engine()
 
 def create_gtfs_dataset_key_to_organization_crosswalk(
     analysis_date: str
@@ -53,104 +54,67 @@ def create_gtfs_dataset_key_to_organization_crosswalk(
 
     return df_with_org
 
-def load_ntd(year: int) -> pd.DataFrame:
-    """
-    Load NTD Data stored in our warehouse.
-    Select certain columns.
-    """
-    try:
-        df = (
-        tbls.mart_ntd.dim_annual_agency_information()
-        >> filter(_.year == year, _.state == "CA", _._is_current == True)
-        >> select(
-            _.number_of_state_counties,
-            _.primary_uza_name,
-            _.density,
-            _.number_of_counties_with_service,
-            _.state_admin_funds_expended,
-            _.service_area_sq_miles,
-            _.population,
-            _.service_area_pop,
-            _.subrecipient_type,
-            _.primary_uza_code,
-            _.reporter_type,
-            _.organization_type,
-            _.agency_name,
-            _.voms_pt,
-            _.voms_do,
-            _.ntd_id,
-            _.year,
-        )
-        >> collect()
-        )
-    except:
-        df = (
-        tbls.mart_ntd.dim_annual_agency_information()
-        >> filter(_.year == year, _.state == "CA", _._is_current == True)
-        >> select(
-            _.number_of_state_counties,
-            _.uza_name,
-            _.density,
-            _.number_of_counties_with_service,
-            _.state_admin_funds_expended,
-            _.service_area_sq_miles,
-            _.population,
-            _.service_area_pop,
-            _.subrecipient_type,
-            _.reporter_type,
-            _.organization_type,
-            _.agency_name,
-            _.voms_pt,
-            _.voms_do,
-            _.ntd_id,
-            _.year,
-            _.primary_uza,
-        )
-        >> collect()
-        )
-        df = df.rename(columns = {"uza_name":"primary_uza_name",
-                                 "primary_uza":"primary_uza_code"})
+def load_ntd() -> pd.DataFrame:
+    with db_engine.connect() as connection:
+        query = f"""
+            SELECT
+            number_of_state_counties,
+            primary_uza_name,
+            density,
+            number_of_counties_with_service,
+            state_admin_funds_expended,
+            service_area_sq_miles,
+            population,
+            service_area_pop,
+            subrecipient_type,
+            primary_uza_code,
+            reporter_type,
+            organization_type,
+            agency_name,
+            voms_pt,
+            voms_do,
+            ntd_id,
+            year
+            FROM
+            cal-itp-data-infra.mart_ntd.dim_annual_agency_information  
+            WHERE state = 'CA' AND _is_current = TRUE
+            """
+        df = pd.read_sql(query,connection)
     df2 = df.sort_values(by=df.columns.tolist(), na_position="last")
     df3 = df2.groupby("agency_name").first().reset_index()
-    
     return df3
 
-def load_mobility(
-    cols: list = [
-        "agency_name", "counties_served",
-        "hq_city", "hq_county",
-        "is_public_entity", "is_publicly_operating",
-        "funding_sources",
-        "on_demand_vehicles_at_max_service",
-        "vehicles_at_max_service"
-    ]
-) -> pd.DataFrame:
-    """
-    Load mobility data (dim_mobility_mart_providers) 
-    from our warehouse.
-    """
-    df = (
-        tbls.mart_transit_database.dim_mobility_mart_providers()
-        >> select(*cols)
-        >> collect()
-    )
-    
+def load_mobility()->pd.DataFrame:
+    with db_engine.connect() as connection:
+        query = f"""
+            SELECT
+            agency_name,
+            counties_served,
+            hq_city,
+            hq_county,
+            is_public_entity,
+            is_publicly_operating,
+            funding_sources,
+            on_demand_vehicles_at_max_service,
+            vehicles_at_max_service
+            FROM
+            cal-itp-data-infra.mart_transit_database.dim_mobility_mart_providers  
+            """
+        df = pd.read_sql(query,connection)
     df2 = df.sort_values(
         by=["on_demand_vehicles_at_max_service","vehicles_at_max_service"], 
         ascending = [False, False]
     )
-    
     df3 = df2.groupby('agency_name').first().reset_index()
-    
     return df3
 
-def merge_ntd_mobility(year:int)->pd.DataFrame:
+def merge_ntd_mobility()->pd.DataFrame:
     """
     Merge NTD (dim_annual_ntd_agency_information) with 
     mobility providers (dim_mobility_mart_providers)
     and dedupe and keep 1 row per agency.
     """
-    ntd = load_ntd(year)
+    ntd = load_ntd()
     mobility = load_mobility()
     
     m1 = pd.merge(
@@ -189,26 +153,29 @@ if __name__ == "__main__":
         t0 = datetime.datetime.now()
         df = create_gtfs_dataset_key_to_organization_crosswalk(
             analysis_date
-        )
+        ).rename(columns = {"ntd_id_2022": "ntd_id"})
         
         # Add some NTD data: if I want to delete this, simply take out
         # ntd_df and the crosswalk_df merge.
-        ntd_df = merge_ntd_mobility(ntd_latest_year)
+        ntd_df = merge_ntd_mobility()
         
         crosswalk_df = pd.merge(
             df,
-            ntd_df.rename(columns = {"ntd_id": "ntd_id_2022"}),
-            on = ["ntd_id_2022"],
+            ntd_df,
+            on = ["ntd_id"],
             how = "left"
         )
 
         # Drop ntd_id from ntd_df to avoid confusion
-        crosswalk_df = crosswalk_df.drop(columns = ["ntd_id_2022"])
-        
         # Drop duplicates since we're getting a lot. 
-        crosswalk_df.to_parquet(
-            f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
-        )
+        crosswalk_df = (crosswalk_df
+                        .drop(columns = ["ntd_id"])
+                        .drop_duplicates()
+                       )
+        
+        #crosswalk_df.to_parquet(
+        #    f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
+        #)
         t1 = datetime.datetime.now()
         print(f"finished {analysis_date}: {t1-t0}")
     
