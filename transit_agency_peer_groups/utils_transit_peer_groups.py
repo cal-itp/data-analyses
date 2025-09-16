@@ -57,3 +57,5 @@ def make_dendrogram_data(
     feature_df = pd.DataFrame(feature_array, columns = feature_names)
     
     z = linkage(feature_df, method="ward")
+    
+    return z
