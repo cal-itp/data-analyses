@@ -3,7 +3,6 @@ from rt_analysis import rt_filter_map_plot
 import pandas as pd
 import geopandas as gpd
 import datetime as dt
-from siuba import *
 from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers_m
 import shapely
 
@@ -121,26 +120,32 @@ def sjoin_signals(signal_gdf: gpd.GeoDataFrame,
     segments_lines_gdf: geometry is linestrings (need for later approaching calc)
     '''
     
-    signals = (signal_gdf
-                   >> filter(_.tms_unit_type != 'Freeway Ramp Meters') # TODO de-siubafy, make sure we also exlude CCTV
-                   >> select(_.imms_id, _.objectid, _.location, _.geometry) # TODO: imms_id isn't unique, why do we use it?
-               ).copy()
+    signals = signal_gdf.loc[
+        signal_gdf["tms_unit_type"] != "Freeway Ramp Meters",
+        ["imms_id", "objectid", "location", signal_gdf.geometry.name]
+    ].copy()
+    
     signals_points = signals.to_crs(CA_NAD83Albers_m)
     signals_buffered = signals_points.copy()
     signals_buffered.geometry = signals_buffered.buffer(150)
 
-    joined = gpd.sjoin(segments_gdf, signals_buffered) >> select(-_.index_right)
+    joined = gpd.sjoin(segments_gdf, signals_buffered).drop("index_right", axis=1)
 
-    points_for_join = signals_points >> select(_.imms_id, _.objectid, _.signal_pt_geom == _.geometry)
-    joined_signal_points = joined >> inner_join(_, points_for_join, on ='objectid')
+    points_for_join = signals_points.rename_geometry("signal_pt_geom")[["signal_pt_geom", "imms_id", "objectid"]]
+    joined_signal_points = joined.merge(points_for_join, on="objectid", how="inner", validate="many_to_one")
 
     # add line geometries from stop_segment_speed_view
     seg_lines = (segments_lines_gdf
-                >> select(_.line_geom == _.geometry, _.shape_id, _.segment_id, _.organization_source_record_id)
-                >> distinct(_.line_geom, _.shape_id, _.segment_id, _.organization_source_record_id)
-            )
+        .rename_geometry("line_geom")[
+            ["line_geom", "shape_id", "segment_id", "organization_source_record_id"]
+        ].drop_duplicates(keep="first")
+    )
     # ideally a more robust join in the future
-    joined_seg_lines = joined_signal_points >> inner_join(_, seg_lines, on = ['shape_id', 'segment_id'])
+    joined_seg_lines = joined_signal_points.merge(
+        seg_lines,
+        how="inner",
+        on=["shape_id", "segment_id"],
+    )
     return joined_seg_lines
 
 @np.vectorize
@@ -171,7 +176,8 @@ def determine_approaching(joined_seg_lines_gdf: gpd.GeoDataFrame) -> pd.Series:
     return approaching
     joined_seg_lines_gdf['approaching'] = approaching # lets not mess with mutability
     #return pd.concat([joined_seg_lines_gdf, pd.Series(approaching, name="approaching")], axis=1)
-
+    
+# Archivable
 def calculate_speed_score(df):
     twenty_mph = 20
     decile_raw = ((df.p50_mph - df.system_p50_median) / df.system_p50_median) * 10
@@ -183,40 +189,3 @@ def calculate_speed_score(df):
     decile_score = np.absolute(decile_masked)
     df['speed_score'] = decile_score
     return df
-
-def calculate_variability_score(df):
-    variability = df.fast_slow_ratio
-    variability_low_mask = variability.mask(variability <= 1, 0)
-    variability_scaled = np.round(variability * 3, 0)
-    variability_high_mask = variability_scaled.mask(variability_scaled > 10, 10)
-    variability_score = variability_high_mask.astype('int64')
-    df['variability_score'] = variability_score
-    return df
-
-def calculate_frequency_score(df):
-    frequency = df.trips_per_hour
-    frequency_scaled = np.round(frequency * 2, 0)
-    frequency_score = frequency_scaled.mask(frequency_scaled > 10, 10).astype('int64')
-    df['frequency_score'] = frequency_score
-    return df
-
-def calculate_scores(joined_seg_lines_gdf):
-    
-    to_calculate = (joined_seg_lines_gdf
-          >> filter(_.p50_mph < 20) # filter out fast segments
-          >> filter(_.approaching)
-          >> select(-_.signal_pt_geom, -_.line_geom)
-      )
-    
-    to_calculate = calculate_speed_score(to_calculate)
-    to_calculate = calculate_variability_score(to_calculate)
-    to_calculate = calculate_frequency_score(to_calculate)
-    
-    median_by_signal = (to_calculate >> group_by(_.imms_id, _.location)
-                        >> summarize(speed_score = _.speed_score.median(),
-                                            variability_score = _.variability_score.median(),
-                                            frequency_score = _.frequency_score.median(),
-                                           )
-                        >> mutate(overall_transit_score = _.speed_score + _.variability_score + _.frequency_score)
-                       )
-    return median_by_signal >> arrange(-_.overall_transit_score)
