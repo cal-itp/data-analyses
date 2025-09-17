@@ -8,8 +8,9 @@ import os
 import pandas as pd
 import shutil
 
-from calitp_data_analysis.tables import tbls
-from siuba import _, collect, count, filter, show_query, select, distinct
+from calitp_data_analysis.sql import query_sql
+from calitp_data_analysis.tables import tbls # REMOVE LATER
+from siuba import _, collect, count, filter, show_query, select, distinct # REMOVE LATER
 from calitp_data_analysis.sql import to_snakecase
 from segment_speed_utils.project_vars import PUBLIC_GCS
 from typing import Literal
@@ -115,44 +116,29 @@ def ntd_id_to_rtpa_crosswalk(split_scag:bool) -> pd.DataFrame:
         "Imperial": "Imperial County Transportation Commission"
     }
     
-    # Get agencies and RTPA name
-    ntd_rtpa_orgs = (
-        tbls.mart_transit_database.dim_organizations()
-        >> filter(
-            _._is_current == True,
-            _.ntd_id_2022.notna(),
-            _.rtpa_name.notna(),
-        )
-        >> select(
-            _.name, 
-            _.ntd_id_2022, 
-            _.rtpa_name, 
-            _.mpo_name, 
-            _.key
-        )
-        >> collect()
-    )
+    ntd_rtpa_query ="""
+    SELECT
+      dim_org.name,
+      dim_org.ntd_id_2022,
+      dim_org.rtpa_name,
+      dim_org.key,
+      bridge.county_geography_name,
+      bridge.organization_key
+    FROM
+      `cal-itp-data-infra.mart_transit_database.dim_organizations` AS dim_org
+    LEFT JOIN
+      `cal-itp-data-infra.mart_transit_database.bridge_organizations_x_headquarters_county_geography` AS bridge
+    ON
+      dim_org.key = bridge.organization_key
+    WHERE
+      dim_org._is_current is TRUE
+      AND dim_org.ntd_id_2022 IS NOT NULL
+      AND dim_org.rtpa_name IS NOT NULL
+      AND bridge._is_current is TRUE
+    """
 
-    # join bridge org county geo to get agency counties
-    bridge_counties = (
-        tbls.mart_transit_database.bridge_organizations_x_headquarters_county_geography()
-        >> filter(
-            _._is_current == True
-        )
-        >> select(
-            _.county_geography_name, 
-            _.organization_key
-        )
-        >> collect()
-    )
+    ntd_to_rtpa_crosswalk = query_sql(rtpa_query, as_df=True)
     
-    # merge to get crosswalk
-    ntd_to_rtpa_crosswalk = ntd_rtpa_orgs.merge(
-        bridge_counties, 
-        left_on="key", 
-        right_on="organization_key", 
-        how="left"
-    )
     
     # locate SoCal counties, replace initial RTPA name with dictionary.
     if split_scag == True:
@@ -487,53 +473,40 @@ def produce_annual_ntd_ridership_data_by_rtpa(min_year: str, split_scag: bool) -
     
     print("ingest annual ridership data from warehouse")
     
-    ntd_service =(
-        tbls.mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt()
-        >> filter(
-            _.year >= min_year,
-            _.last_report_year >= min_year,
-            _.primary_uza_name.str.contains(", CA") | 
-            _.primary_uza_name.str.contains("CA-NV") |
-            _.primary_uza_name.str.contains("California Non-UZA") 
-        )
-        >> select(
-            'source_agency',
-            'agency_status',
-            'legacy_ntd_id',
-            'last_report_year',
-            'mode',
-            'ntd_id',
-            'reporter_type',
-            'reporting_module',
-            'service',
-            'uace_code',
-            'primary_uza_name',
-            'uza_population',
-            'year',
-            'upt',
-        )
-        >> collect())
+    query_annual_ntd_data ="""
+    SELECT
+      source_agency,
+      agency_status,
+      mode,
+      service,
+      ntd_id,
+      reporter_type,
+      primary_uza_name,
+      year,
+      SUM(COALESCE(upt, 0)) AS upt
+    FROM
+      `cal-itp-data-infra.mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt`
+    WHERE
+      year >= 2018
+      AND last_report_year >= 2018
+      AND ( primary_uza_name LIKE "%, CA%"
+        OR primary_uza_name LIKE "%CA-NV%"
+        OR primary_uza_name LIKE "%California Non-UZA%" )
+    GROUP BY
+      source_agency,
+      agency_status,
+      ntd_id,
+      primary_uza_name,
+      reporter_type,
+      mode,
+      service,
+      year
+    ORDER BY
+      ntd_id
+    """
     
-    ntd_service = (
-        ntd_service.groupby(
-            [
-                "source_agency",
-                "agency_status",
-                #"city",
-                #"state",
-                "ntd_id",
-                "primary_uza_name",
-                "reporter_type",
-                "mode",
-                "service",
-                "last_report_year",
-                "year",
-            ]
-        )
-        .agg({"upt": "sum"})
-        .sort_values(by="ntd_id")
-        .reset_index()
-    )
+    ntd_service = query_sql(query_annual_ntd_data, as_df=True)
+    
     
     print("create crosswalk from ntd_id_to_rtpa_crosswalk function")
     
@@ -552,7 +525,7 @@ def produce_annual_ntd_ridership_data_by_rtpa(min_year: str, split_scag: bool) -
         ],
         right_on="ntd_id_2022",
         indicator=True,
-    )#.rename(columns={"source_agency":"agency"})
+    )
     
     # list of ntd_id with LA County Dept of Public Works name
     lacdpw_list = [
