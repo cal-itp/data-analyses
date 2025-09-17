@@ -122,19 +122,16 @@ def scale_transform_cmaps(cmap_list: list, cmap_origin_dict: dict, with_distance
         max_dist = 0
         #  only consider origins sharing this cmap
         for origin in [key for key in cmap_origin_dict.keys() if cmap_origin_dict[key] == cmap]:
-            # print(origin)
             origin_min = with_distance_df.query('orig == @origin').od_miles.min()
             origin_max = with_distance_df.query('orig == @origin').od_miles.max()
             min_dist = min(origin_min, min_dist)
             max_dist = max(origin_max, max_dist)
-        #     print(min_dist)
-        #     print(max_dist)
-        print(min_dist, end = '->')
-        print(max_dist)
         if min_dist == max_dist:
             min_dist = min_dist - 1
             max_dist = max_dist + 1 #  adjust if equal to use midtone color
-        display(cmap)
+        # print(min_dist, end = '->')
+        # print(max_dist)
+        # display(cmap)
         scaled_cmaps += [cmap.scale(vmin = min_dist, vmax = max_dist)]
         
     return scaled_cmaps
@@ -165,15 +162,15 @@ def color_by_origin_and_distance(with_distance_df: pd.DataFrame, cmaps: list) ->
     return colorscale
 
 def chart_rider_flow(with_distance_df, color_args={}):
-    
+
     flow = alt.Chart(with_distance_df).mark_area().encode(
-    alt.X('route_mileage:Q'),
-    alt.Y('sum(ridership):Q'),
+    alt.X('route_mileage:Q').title('Route Mileage'),
+    alt.Y('sum(ridership):Q').axis().title('Passenger Load (total monthly)'),
     # color=alt.Color('od', scale=scale),
-    color=alt.Color('od', legend=alt.Legend(symbolLimit=0), **color_args),
-    tooltip = ['departing_station', 'od', 'ridership']
+    color=alt.Color('od', legend=alt.Legend(symbolLimit=0, labelFontSize=12, titleFontSize=14), **color_args),
+    tooltip = ['departing_station', 'od', 'ridership'],
         ).properties(width = with_distance_df.route_mileage.max() * 3, height = 600)
-    
+    flow = flow.configure_axis(labelFontSize=14, titleFontSize=16)
     return flow
 
 def flow_chart_from_shape_trip_row(row: pd.Series, stop_times: pd.DataFrame, ridership: pd.DataFrame,
