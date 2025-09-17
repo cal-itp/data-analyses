@@ -394,12 +394,12 @@ if __name__ == "__main__":
     # the export/ folder contains the patched versions of the routes
     utils.geoparquet_gcs_export(
         routes,
-        AH_TEST,
+        TRAFFIC_OPS_GCS,
         f"ca_transit_routes_{analysis_date}"
     )
     
     # Patch previous dates and add SHN + Route Typology
-    
+    """
     # Amanda: commenting this out for now.
     published_routes = (
     patch_previous_dates(
@@ -416,10 +416,10 @@ if __name__ == "__main__":
         routes, 
         analysis_date,
     ).pipe(finalize_export_df)
-    """
+    
     utils.geoparquet_gcs_export(
         published_routes, 
-        AH_TEST, 
+        TRAFFIC_OPS_GCS, 
         "ca_transit_routes"
     )
     
