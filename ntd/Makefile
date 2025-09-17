@@ -4,5 +4,5 @@ ntd_monthly_export:
 	cd ../ && make build_ntd_report -f Makefile
     
 annual_ntd_report:
-	cd annual_ridership_report && python annual_ridership_module.py
+	cd annual_ridership_report && python annual_ridership_script.py
 	cd ../ && make build_ntd_annual_report -f Makefile

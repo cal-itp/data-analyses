@@ -8,10 +8,7 @@ import os
 import pandas as pd
 import shutil
 
-from calitp_data_analysis.sql import query_sql
-from calitp_data_analysis.tables import tbls # REMOVE LATER
-from siuba import _, collect, count, filter, show_query, select, distinct # REMOVE LATER
-from calitp_data_analysis.sql import to_snakecase
+from calitp_data_analysis.sql import query_sql, to_snakecase
 from segment_speed_utils.project_vars import PUBLIC_GCS
 from typing import Literal
 
@@ -137,7 +134,7 @@ def ntd_id_to_rtpa_crosswalk(split_scag:bool) -> pd.DataFrame:
       AND bridge._is_current is TRUE
     """
 
-    ntd_to_rtpa_crosswalk = query_sql(rtpa_query, as_df=True)
+    ntd_to_rtpa_crosswalk = query_sql(ntd_rtpa_query, as_df=True)
     
     
     # locate SoCal counties, replace initial RTPA name with dictionary.
