@@ -86,6 +86,9 @@ def data_wrangling_operator_map(portfolio_organization_names:list)->gpd.GeoDataF
     # Need to create a number column in order for webmaps to work
     operator_route_gdf = operator_route_gdf.reset_index(drop=False)
     operator_route_gdf = operator_route_gdf.rename(columns={"index": "number"})
+    
+    # Buffer
+    # operator_route_gdf.geometry = operator_route_gdf.geometry.buffer(100)
     return operator_route_gdf
 
 def final_transit_route_shs_outputs(

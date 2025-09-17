@@ -18,7 +18,7 @@ def labeling(word: str) -> str:
         .replace("Ttl", "Total")
     )
 
-with open("readable.yml") as f:
+with open("readable2.yml") as f:
     readable_dict = yaml.safe_load(f)
     
 def replace_column_names(df: pd.DataFrame) -> pd.DataFrame:
