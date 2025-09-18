@@ -1,8 +1,6 @@
 import pandas as pd
 import geopandas as gpd
 from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers_m
-import shapely
-import numpy as np
 
 def sjoin_signals(signal_gdf: gpd.GeoDataFrame,
                   segments_gdf: gpd.GeoDataFrame,
@@ -42,33 +40,3 @@ def sjoin_signals(signal_gdf: gpd.GeoDataFrame,
         on=["shape_id", "segment_id"],
     )
     return joined_seg_lines
-
-@np.vectorize
-def vector_start(linestring):
-    return shapely.ops.substring(linestring, 0, 0)
-
-@np.vectorize
-def vector_end(linestring):
-    return shapely.ops.substring(linestring, linestring.length, linestring.length)
-
-@np.vectorize
-def vector_distance(point1, point2):
-    return point1.distance(point2)
-
-def determine_approaching(joined_seg_lines_gdf: gpd.GeoDataFrame) -> pd.Series:
-    
-    '''
-    using vectorized shapely functions,
-    determine if segment is approaching a signal or departing a signal.
-    '''
-    
-    start_array = vector_start(joined_seg_lines_gdf.line_geom)
-    end_array = vector_end(joined_seg_lines_gdf.line_geom)
-    start_distances = vector_distance(start_array, joined_seg_lines_gdf.signal_pt_geom)
-    end_distances = vector_distance(end_array, joined_seg_lines_gdf.signal_pt_geom)
-    approaching = start_distances > end_distances
-    assert len(approaching) == len(joined_seg_lines_gdf)
-    return approaching
-    joined_seg_lines_gdf['approaching'] = approaching # lets not mess with mutability
-    #return pd.concat([joined_seg_lines_gdf, pd.Series(approaching, name="approaching")], axis=1)
-    
