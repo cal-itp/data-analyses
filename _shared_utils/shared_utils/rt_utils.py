@@ -10,12 +10,15 @@ import numpy as np
 import pandas as pd
 import shapely
 from calitp_data_analysis import geography_utils, get_fs, utils
-from calitp_data_analysis.tables import tbls
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.sql import query_sql
+from IPython.display import display
 from numba import jit
-from shared_utils import gtfs_utils_v2, rt_dates
-from siuba import *
+from shared_utils import gtfs_utils_v2, portfolio_utils, rt_dates
 
 fs = get_fs()
+gcsgp = GCSGeoPandas()
+
 
 # set system time
 os.environ["TZ"] = "America/Los_Angeles"
@@ -207,50 +210,36 @@ def check_cached(
         return None
 
 
-def get_speedmaps_ix_df(analysis_date: dt.date, itp_id: int | None = None) -> pd.DataFrame:
+def get_legacy_speedmaps_ix_df(analysis_date: dt.date) -> pd.DataFrame:
     """
+    v1/legacy data only
+
     Collect relevant keys for finding all schedule and rt data for a reports-assessed organization.
     Note that organizations may have multiple sets of feeds, or share feeds with other orgs.
-
-    Used with specific itp_id in rt_analysis.rt_parser.OperatorDayAnalysis, or without specifying itp_id
-    to get an overall table of which datasets were processed and how to deduplicate if needed
     """
-    analysis_dt = dt.datetime.combine(analysis_date, dt.time(0))
 
-    daily_service = tbls.mart_gtfs.fct_daily_feed_scheduled_service_summary() >> select(
-        _.schedule_gtfs_dataset_key == _.gtfs_dataset_key, _.feed_key, _.service_date
+    daily_service = query_sql(
+        f"""
+    SELECT gtfs_dataset_key AS schedule_gtfs_dataset_key, feed_key, service_date
+    FROM cal-itp-data-infra.mart_gtfs.fct_daily_feed_scheduled_service_summary
+    WHERE service_date = '{analysis_date}'
+    """
     )
 
-    dim_orgs = (
-        tbls.mart_transit_database.dim_organizations()
-        >> filter(_._valid_from <= analysis_dt, _._valid_to > analysis_dt)
-        >> select(_.source_record_id, _.caltrans_district)
+    org_feeds_datasets = query_sql(
+        f"""
+    SELECT schedule_gtfs_dataset_key, vehicle_positions_gtfs_dataset_key, organization_itp_id, organization_name
+    FROM cal-itp-data-infra.mart_transit_database.dim_provider_gtfs_data
+    WHERE _valid_from <= '{analysis_date}'
+    AND _valid_to >= '{analysis_date}'
+    AND public_customer_facing_or_regional_subfeed_fixed_route
+    AND NOT vehicle_positions_gtfs_dataset_key IS NULL
+    """
     )
 
-    org_feeds_datasets = (
-        tbls.mart_transit_database.dim_provider_gtfs_data()
-        >> filter(_._valid_from <= analysis_dt, _._valid_to >= analysis_dt)
-        >> filter(
-            _.public_customer_facing_or_regional_subfeed_fixed_route, _.vehicle_positions_gtfs_dataset_key != None
-        )
-        >> inner_join(_, daily_service, by="schedule_gtfs_dataset_key")
-        >> inner_join(_, dim_orgs, on={"organization_source_record_id": "source_record_id"})
-        >> filter(_.service_date == analysis_date)
-        >> select(
-            _.feed_key,
-            _.schedule_gtfs_dataset_key,
-            _.vehicle_positions_gtfs_dataset_key,
-            _.organization_itp_id,
-            _.caltrans_district,
-            _.organization_name,
-            _.service_date,
-        )
-    )
+    daily_service = daily_service.merge(org_feeds_datasets, on="schedule_gtfs_dataset_key")
 
-    if itp_id:
-        org_feeds_datasets = org_feeds_datasets >> filter(_.organization_itp_id == itp_id)
-
-    return org_feeds_datasets >> collect()
+    return daily_service
 
 
 def compose_filename_check(ix_df: pd.DataFrame, table: str):
@@ -276,7 +265,7 @@ def get_shapes(ix_df: pd.DataFrame) -> gpd.GeoDataFrame:
 
     if path:
         print(f"found shapes parquet at {path}")
-        org_shapes = gpd.read_parquet(path)
+        org_shapes = gcsgp.read_parquet(path)
     else:
         feed_key_list = list(ix_df.feed_key.unique())
         org_shapes = gtfs_utils_v2.get_shapes(
@@ -304,14 +293,12 @@ def get_routelines(
 
     if path and not force_clear:
         print("found parquet")
-        cached = gpd.read_parquet(path)
+        cached = gcsgp.read_parquet(path)
         if not cached.empty:
             return cached
         else:
             print("v1 cached parquet empty -- unable to generate")
             return
-
-        return routelines
 
 
 @jit(nopython=True)  # numba gives huge speedup here (~60x)
@@ -390,7 +377,7 @@ def arrowize_by_frequency(row, frequency_col="trips_per_hour", frequency_thresho
 
 
 def describe_slowest(row):
-    description = which_desc(row)
+    description = portfolio_utils(row, target="description")
     full_description = (
         f"{row.route_short_name}{description}, {row.direction}: "
         f"{round(row.median_trip_mph, 1)} mph median trip speed for "
