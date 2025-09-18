@@ -2,7 +2,7 @@
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 
 build_portfolio_site:
-	#cd portfolio/ && pip install -r requirements.txt && cd ../
+	cd portfolio/ && pip install -r requirements.txt && cd ../
 	#need git rm because otherwise, just local removal, but git change is untracked
 	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
