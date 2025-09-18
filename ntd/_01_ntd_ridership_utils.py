@@ -461,124 +461,118 @@ def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame
 
 
 
-def produce_annual_ntd_ridership_data_by_rtpa(min_year: str, split_scag: bool) -> pd.DataFrame:
+def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame:
     """
-    Function that ingest time series ridership data from `mart_ntd_funding_and_expenses.fct_service..._by_mode_upt`. 
-    Filters for CA agencies with last report year and year of data greater than min_year
-    Merges in ntd_id_to_rtpa_crosswalk function. Aggregates by agency, mode and TOS. calculates change in UPT.
+    This function works with the warehouse `dim_monthly_ntd_ridership_with_adjustments` long data format.
+    Import NTD data from warehouse, filter to CA,
+    merge in crosswalk, checks for unmerged rows, then creates new columns for full Mode and TOS name.
+
     """
-    
-    print("ingest annual ridership data from warehouse")
-    
-    query_annual_ntd_data ="""
-    SELECT
-      source_agency,
-      agency_status,
-      mode,
-      service,
+    monthly_query ="""
+    SELECT 
       ntd_id,
+      agency,
       reporter_type,
-      primary_uza_name,
-      year,
-      SUM(COALESCE(upt, 0)) AS upt
+      period_year_month,
+      period_year,
+      period_month,
+      mode,
+      tos,
+      mode_type_of_service_status AS Status,
+      primary_uza_name as uza_name,
+      upt
+    FROM
+      `cal-itp-data-infra.mart_ntd.dim_monthly_ridership_with_adjustments`
+    WHERE
+      period_year IN ("2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025")
+      AND agency IS NOT NULL
+    """
+    full_upt = query_sql(monthly_query, as_df=True)
+
+    full_upt.to_parquet(
+        f"{GCS_FILE_PATH}ntd_monthly_ridership_{year}_{month}.parquet"
+    )
+
+    ca = full_upt[
+        (full_upt["uza_name"].str.contains(", CA")) & (full_upt.agency.notna())
+    ].reset_index(drop=True)
+
+    # use new crosswalk function
+    crosswalk = ntd_id_to_rtpa_crosswalk(split_scag=True)
+
+    min_year = 2018
+
+    # get agencies with last report year and data after > 2018.
+    last_report_query = """
+    SELECT DISTINCT
+      source_agency,
+      last_report_year,
+      ntd_id,
     FROM
       `cal-itp-data-infra.mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt`
     WHERE
       year >= 2018
       AND last_report_year >= 2018
-      AND ( primary_uza_name LIKE "%, CA%"
+      AND (
+        primary_uza_name LIKE "%, CA%"
         OR primary_uza_name LIKE "%CA-NV%"
-        OR primary_uza_name LIKE "%California Non-UZA%" )
-    GROUP BY
-      source_agency,
-      agency_status,
-      ntd_id,
-      primary_uza_name,
-      reporter_type,
-      mode,
-      service,
-      year
-    ORDER BY
-      ntd_id
+        OR primary_uza_name LIKE "%California Non-UZA%"
+      )
     """
-    
-    ntd_service = query_sql(query_annual_ntd_data, as_df=True)
-    
-    
-    print("create crosswalk from ntd_id_to_rtpa_crosswalk function")
-    
-    # Creating crosswalk using function, enable splitting scag to indivdual CTC
-    ntd_to_rtpa_crosswalk = ntd_id_to_rtpa_crosswalk(split_scag=split_scag)
-    
-    
-    print("merge ntd data to crosswalk")
-    # merge service data to crosswalk
-    ntd_data_by_rtpa = ntd_service.merge(
-        ntd_to_rtpa_crosswalk,
-        how="left",
-        left_on=[
-            "ntd_id",
-            # "agency", "reporter_type", "city" # sometime agency name, reporter type and city name change or are inconsistent, causing possible fanout
-        ],
+
+    last_report_year = query_sql(last_report_query, as_df=True)
+
+    # merge last report year to CA UPT data
+    df = pd.merge(ca, last_report_year, left_on="ntd_id", right_on="ntd_id", how="inner")
+    # merge crosswalk to CA last report year
+    df = pd.merge(
+        df,
+        # Merging on too many columns can create problems
+        # because csvs and dtypes aren't stable / consistent
+        # for NTD ID, Legacy NTD ID, and UZA
+        crosswalk[["ntd_id_2022", "rtpa_name"]],
+        left_on="ntd_id",
         right_on="ntd_id_2022",
+        how="left",
         indicator=True,
     )
-    
-    # list of ntd_id with LA County Dept of Public Works name
-    lacdpw_list = [
-        "90269",
-        "90270",
-        "90272",
-        "90273",
-        "90274",
-        "90275",
-        "90276",
-        "90277",
-        "90278",
-        "90279",
-    ]
-    
-    # replace LA County Public Works agencies with their own RTPA
-    ntd_data_by_rtpa.loc[
-        ntd_data_by_rtpa["ntd_id"].isin(lacdpw_list), ["rtpa_name", "_merge"]
-    ] = ["Los Angeles County Department of Public Works", "both"]
-    
-    print(ntd_data_by_rtpa._merge.value_counts())
-        
-    if len(ntd_data_by_rtpa[ntd_data_by_rtpa._merge=="left_only"]) > 0:
+
+    print(df._merge.value_counts())
+
+    # check for unmerged rows
+    if len(df[df._merge == "left_only"]) > 0:
         raise ValueError("There are unmerged rows to crosswalk")
     
-    print("add `change_column` to data")
-    
-    annual_sort_cols =  [
-        "ntd_id",
-        "year",
-        "mode", 
-        "service",
-    ] # got the order correct with ["period_month", "period_year"]! sorted years with grouped months
+    monthly_sort_cols =  [
+    "ntd_id",
+    "mode", 
+    "tos",
+    "period_month", 
+    "period_year"
+] # got the order correct with ["period_month", "period_year"]! sorted years with grouped months
 
-    annual_group_cols = [
+    monthly_group_cols = [
         "ntd_id",
         "mode", 
-        "service"
+        "tos"
                   ]
 
-    annual_change_col ="previous_y_upt"
+    monthly_change_col ="previous_y_m_upt"
 
-    ntd_data_by_rtpa = add_change_columns(
-        ntd_data_by_rtpa,
-        sort_cols = annual_sort_cols,
-        group_cols = annual_group_cols,
-        change_col = annual_change_col
+    df = add_change_columns(
+        df,
+        sort_cols = monthly_sort_cols,
+        group_cols = monthly_group_cols,
+        change_col = monthly_change_col
+    )
+
+    
+    df = df.assign(
+        Mode_full = df["mode"].map(NTD_MODES),
+        TOS_full = df["tos"].map(NTD_TOS)
     )
     
-    print("map mode and tos desc.")
-    ntd_data_by_rtpa = ntd_data_by_rtpa.assign(
-        mode_full = ntd_data_by_rtpa["mode"].map(NTD_MODES),
-        service_full = ntd_data_by_rtpa["service"].map(NTD_TOS)
-    )
-    print("complete")
-    return ntd_data_by_rtpa
+    return df
 
 
 def remove_local_outputs(
