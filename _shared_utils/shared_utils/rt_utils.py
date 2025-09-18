@@ -228,8 +228,7 @@ def get_legacy_speedmaps_ix_df(analysis_date: dt.date) -> pd.DataFrame:
 
     org_feeds_datasets = query_sql(
         f"""
-    SELECT schedule_gtfs_dataset_key, vehicle_positions_gtfs_dataset_key, organization_itp_id,
-    organization_name
+    SELECT schedule_gtfs_dataset_key, vehicle_positions_gtfs_dataset_key, organization_itp_id, organization_name
     FROM cal-itp-data-infra.mart_transit_database.dim_provider_gtfs_data
     WHERE _valid_from <= '{analysis_date}'
     AND _valid_to >= '{analysis_date}'
