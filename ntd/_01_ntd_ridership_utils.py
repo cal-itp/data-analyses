@@ -325,142 +325,6 @@ def save_rtpa_outputs(
     return
 
 
-def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame:
-    """
-    This function works with the warehouse `dim_monthly_ntd_ridership_with_adjustments` long data format.
-    Import NTD data from warehouse, filter to CA,
-    merge in crosswalk, checks for unmerged rows, then creates new columns for full Mode and TOS name.
-
-    """
-
-    full_upt = (
-        tbls.mart_ntd.dim_monthly_ridership_with_adjustments()
-        >> filter(
-            _.period_year.isin(
-                ["2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"]
-            )
-        )
-        >>select(
-            _.ntd_id,
-            _.agency,
-            _.reporter_type,
-            _.period_year_month,
-            _.period_year,
-            _.period_month,
-            _.mode,
-            _.tos,
-            _.mode_type_of_service_status,
-            _.primary_uza_name,
-            _.upt
-            
-        )
-        >> collect()
-    ).rename(
-        columns={
-            "mode_type_of_service_status": "Status",
-            "primary_uza_name": "uza_name",
-        }
-    )
-
-    full_upt = full_upt[full_upt.agency.notna()].reset_index(drop=True)
-
-    full_upt.to_parquet(
-        f"{GCS_FILE_PATH}ntd_monthly_ridership_{year}_{month}.parquet"
-    )
-
-    ca = full_upt[
-        (full_upt["uza_name"].str.contains(", CA")) & (full_upt.agency.notna())
-    ].reset_index(drop=True)
-
-    # use new crosswalk function
-    crosswalk = ntd_id_to_rtpa_crosswalk(split_scag=True)
-
-    min_year = 2018
-
-    # get agencies with last report year and data after > 2018.
-    last_report_year = (
-        tbls.mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt()
-        >> filter(
-            _.year >= min_year,  # see if this changes anything
-            _.last_report_year >= min_year,
-            _.primary_uza_name.str.contains(", CA")
-            | _.primary_uza_name.str.contains("CA-NV")
-            | _.primary_uza_name.str.contains("California Non-UZA"),
-        )
-        >> distinct(
-            "source_agency",
-            #'agency_status',
-            #'legacy_ntd_id',
-            "last_report_year",
-            #'mode',
-            "ntd_id",
-            #'reporter_type',
-            #'reporting_module',
-            #'service',
-            #'uace_code',
-            #'primary_uza_name',
-            #'uza_population',
-            #'year',
-            #'upt',
-        )
-        >> collect()
-    )
-
-    # merge last report year to CA UPT data
-    df = pd.merge(ca, last_report_year, left_on="ntd_id", right_on="ntd_id", how="inner")
-
-    # merge crosswalk to CA last report year
-    df = pd.merge(
-        df,
-        # Merging on too many columns can create problems
-        # because csvs and dtypes aren't stable / consistent
-        # for NTD ID, Legacy NTD ID, and UZA
-        crosswalk[["ntd_id_2022", "rtpa_name"]],
-        left_on="ntd_id",
-        right_on="ntd_id_2022",
-        how="left",
-        indicator=True,
-    )
-
-    print(df._merge.value_counts())
-
-    # check for unmerged rows
-    if len(df[df._merge == "left_only"]) > 0:
-        raise ValueError("There are unmerged rows to crosswalk")
-    
-    monthly_sort_cols =  [
-    "ntd_id",
-    "mode", 
-    "tos",
-    "period_month", 
-    "period_year"
-] # got the order correct with ["period_month", "period_year"]! sorted years with grouped months
-
-    monthly_group_cols = [
-        "ntd_id",
-        "mode", 
-        "tos"
-                  ]
-
-    monthly_change_col ="previous_y_m_upt"
-
-    df = add_change_columns(
-        df,
-        sort_cols = monthly_sort_cols,
-        group_cols = monthly_group_cols,
-        change_col = monthly_change_col
-    )
-
-    
-    df = df.assign(
-        Mode_full = df["mode"].map(NTD_MODES),
-        TOS_full = df["tos"].map(NTD_TOS)
-    )
-    
-    return df
-
-
-
 def produce_annual_ntd_ridership_data_by_rtpa(min_year: str, split_scag: bool) -> pd.DataFrame:
     """
     Function that ingest time series ridership data from `mart_ntd_funding_and_expenses.fct_service..._by_mode_upt`. 
@@ -579,6 +443,121 @@ def produce_annual_ntd_ridership_data_by_rtpa(min_year: str, split_scag: bool) -
     )
     print("complete")
     return ntd_data_by_rtpa
+
+
+
+def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame:
+    """
+    This function works with the warehouse `dim_monthly_ntd_ridership_with_adjustments` long data format.
+    Import NTD data from warehouse, filter to CA,
+    merge in crosswalk, checks for unmerged rows, then creates new columns for full Mode and TOS name.
+
+    """
+    monthly_query ="""
+    SELECT 
+      ntd_id,
+      agency,
+      reporter_type,
+      period_year_month,
+      period_year,
+      period_month,
+      mode,
+      tos,
+      mode_type_of_service_status AS Status,
+      primary_uza_name as uza_name,
+      upt
+    FROM
+      `cal-itp-data-infra.mart_ntd.dim_monthly_ridership_with_adjustments`
+    WHERE
+      period_year IN ("2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025")
+      AND agency IS NOT NULL
+    """
+    full_upt = query_sql(monthly_query, as_df=True)
+
+    full_upt.to_parquet(
+        f"{GCS_FILE_PATH}ntd_monthly_ridership_{year}_{month}.parquet"
+    )
+
+    ca = full_upt[
+        (full_upt["uza_name"].str.contains(", CA")) & (full_upt.agency.notna())
+    ].reset_index(drop=True)
+
+    # use new crosswalk function
+    crosswalk = ntd_id_to_rtpa_crosswalk(split_scag=True)
+
+    min_year = 2018
+
+    # get agencies with last report year and data after > 2018.
+    last_report_query = """
+    SELECT DISTINCT
+      source_agency,
+      last_report_year,
+      ntd_id,
+    FROM
+      `cal-itp-data-infra.mart_ntd_funding_and_expenses.fct_service_data_and_operating_expenses_time_series_by_mode_upt`
+    WHERE
+      year >= 2018
+      AND last_report_year >= 2018
+      AND (
+        primary_uza_name LIKE "%, CA%"
+        OR primary_uza_name LIKE "%CA-NV%"
+        OR primary_uza_name LIKE "%California Non-UZA%"
+      )
+    """
+
+    last_report_year = query_sql(last_report_query, as_df=True)
+
+    # merge last report year to CA UPT data
+    df = pd.merge(ca, last_report_year, left_on="ntd_id", right_on="ntd_id", how="inner")
+    # merge crosswalk to CA last report year
+    df = pd.merge(
+        df,
+        # Merging on too many columns can create problems
+        # because csvs and dtypes aren't stable / consistent
+        # for NTD ID, Legacy NTD ID, and UZA
+        crosswalk[["ntd_id_2022", "rtpa_name"]],
+        left_on="ntd_id",
+        right_on="ntd_id_2022",
+        how="left",
+        indicator=True,
+    )
+
+    print(df._merge.value_counts())
+
+    # check for unmerged rows
+    if len(df[df._merge == "left_only"]) > 0:
+        raise ValueError("There are unmerged rows to crosswalk")
+    
+    monthly_sort_cols =  [
+    "ntd_id",
+    "mode", 
+    "tos",
+    "period_month", 
+    "period_year"
+] # got the order correct with ["period_month", "period_year"]! sorted years with grouped months
+
+    monthly_group_cols = [
+        "ntd_id",
+        "mode", 
+        "tos"
+                  ]
+
+    monthly_change_col ="previous_y_m_upt"
+
+    df = add_change_columns(
+        df,
+        sort_cols = monthly_sort_cols,
+        group_cols = monthly_group_cols,
+        change_col = monthly_change_col
+    )
+
+    
+    df = df.assign(
+        Mode_full = df["mode"].map(NTD_MODES),
+        TOS_full = df["tos"].map(NTD_TOS)
+    )
+    
+    return df
 
 
 def remove_local_outputs(
