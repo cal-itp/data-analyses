@@ -43,6 +43,7 @@ def make_dendrogram_data(
     """
     Creates feature array data for dendrogram.
     returns linkage
+    Note: need !pip install scipy==1.11.4 to make scipy dendrogram function work
     """
     
     preprocessor = ColumnTransformer(
