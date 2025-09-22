@@ -11,9 +11,8 @@ import sys
 from loguru import logger
 
 from segment_speed_utils import gtfs_schedule_wrangling, time_series_utils
-from shared_utils import dask_utils, gtfs_utils_v2, portfolio_utils, publish_utils
+from shared_utils import dask_utils, gtfs_utils_v2, portfolio_utils, publish_utils, rt_dates
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS, RT_SCHED_GCS, SCHED_GCS
-from shared_utils import rt_dates
 
 route_time_cols = [
     "schedule_gtfs_dataset_key", 
