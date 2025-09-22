@@ -1,4 +1,5 @@
 import pandas as pd
+import update_vars
 
 def format_stop_times(trip_st_merged_df: pd.DataFrame) -> pd.DataFrame:
     
@@ -10,3 +11,18 @@ def format_stop_times(trip_st_merged_df: pd.DataFrame) -> pd.DataFrame:
                  'arrival_sec', 'sort_trip_id', 'geometry']
     view_cols = route_cols + [col for col in view_cols if col in trip_st_merged_df.columns]
     return trip_st_merged_df[view_cols].sort_values(route_cols + ['trip_id', 'stop_sequence'])
+
+def read_format_ridership() -> pd.DataFrame:
+    
+    source_ridership = pd.read_excel(update_vars.RIDERSHIP_PATH)
+    source_ridership = source_ridership.assign(od = source_ridership.orig + '->' + source_ridership.dest)
+    source_ridership = source_ridership.assign(route_short_name = source_ridership.ca_bus_route.str.replace('Rt', 'Route'))
+
+    rider_to_gtfs_dict = {'Route 1A': 'Route 1', 'Route 1B': 'Route 1', 'Route 1C': 'Route 1c',
+                         'Route 20 - B': 'Route 20', 'Route 3R': 'Route 3'}
+    strip_zero = lambda route_str: ' '.join([x.lstrip('0') for x in route_str.split(' ')])
+    rider_to_gtfs = lambda route_str: rider_to_gtfs_dict[route_str] if route_str in rider_to_gtfs_dict.keys() else route_str
+
+    source_ridership = source_ridership.assign(route_short_name = source_ridership.route_short_name.map(strip_zero).map(rider_to_gtfs))
+    
+    return source_ridership
