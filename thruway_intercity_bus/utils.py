@@ -26,3 +26,13 @@ def read_format_ridership() -> pd.DataFrame:
     source_ridership = source_ridership.assign(route_short_name = source_ridership.route_short_name.map(strip_zero).map(rider_to_gtfs))
     
     return source_ridership
+
+def longest_by_route_dir(shape_trip_df):
+    #  https://github.com/cal-itp/data-analyses/blob/1abcd5d05163176567f644f6f245366dd9cc53fc/rt_segment_speeds/segment_speed_utils/gtfs_schedule_wrangling.py#L426
+    sort_cols = ['route_id', 'direction_id']
+    df = (shape_trip_df.query('route_type == "3"')
+     .sort_values(sort_cols + ['length_meters'], ascending=[True for i in sort_cols] + [False])
+     .drop_duplicates(subset=sort_cols)
+     .reset_index(drop=True)
+    )
+    return df
