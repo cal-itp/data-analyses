@@ -409,16 +409,16 @@ def build(
         cwd=site_output_dir,
     ).check_returncode()
 
-    # accessibilty_errors = check_accessibility(site)
+    accessibilty_errors = check_accessibility(site)
 
     if deploy:
         if continue_on_error and errors:
             ans = input(f"{len(errors)} encountered during papermill; enter that number to continue: ")
             assert int(ans) == len(errors)
 
-        # if accessibilty_errors > 0:
-        #     ans = input(f"{accessibilty_errors} serious accessibility errors: type 'ignore' to deploy anyway: ")
-        #     if ans != 'ignore': return
+        if accessibilty_errors > 0:
+            ans = input(f"{accessibilty_errors} serious accessibility errors: type 'ignore' to deploy anyway: ")
+            if ans != 'ignore': return
 
         args = [
             "gcloud",
@@ -470,31 +470,31 @@ def check_accessibility(
                     return result
         return None
 
-    for filename in os.listdir(directory_path):
-        if filename.endswith(".html"):
-            file_path = os.path.join(os.getcwd(), directory_path, filename)
+    html_files = list(Path(directory_path).rglob('*.html'))
+    for file_path in html_files:
 
-            driver.get(f"file:///{file_path}")
-            axe.inject()
-            results = axe.run(options={'resultTypes': ['violations']})
+        driver.get(f"file:///{file_path}")
+        axe.inject()
+        results = axe.run(options={'resultTypes': ['violations']})
 
-            # print violations
-            if results["violations"]:
-                print(f"Accessibility violations found in {filename}:")
-                for violation in results["violations"]:
-                    if violation['impact'] in ('serious', 'critical'):
-                        serious_count += 1
-                    impact = {'minor': '❔', 'moderate': '⚠️', 'serious': '🛑', 'critical': '🛑‼️'}.get(violation['impact'])
-                    print(f"- {impact}  {violation['help']} ({violation['helpUrl']}):")
-                    print(f"  {find_key_recursive(violation, 'failureSummary')}")
-                    print(f"  {find_key_recursive(violation, 'html')}")
-                    # print("-----")
-                    # print(violation)
-                    # print("-----")
-            else:
-                print(f"✅ {filename}.")
-            # print("Press Enter to continue...")
-            # input()
+        # print violations
+        if results["violations"]:
+            print(f"Accessibility violations found in {file_path}:")
+            for violation in results["violations"]:
+                if violation['impact'] in ('serious', 'critical'):
+                    serious_count += 1
+                impact = {'minor': '❔', 'moderate': '⚠️', 'serious': '🛑', 'critical': '🛑‼️'}.get(violation['impact'])
+                print(f"- {impact}  {violation['help']} ({violation['helpUrl']}):")
+                print(f"  {find_key_recursive(violation, 'failureSummary')}")
+                print(f"  {find_key_recursive(violation, 'html')}")
+                # print("-----")
+                # print(violation)
+                # print("-----")
+                print("\n")
+        else:
+            print(f"✅ {file_path}.\n")
+        # print("Press Enter to continue...")
+        # input()
 
     driver.quit()
     return serious_count
