@@ -43,26 +43,6 @@ def localize_timestamp_col(df: dd.DataFrame, timestamp_col: Union[str, list]) ->
     return df
 
 
-def get_rt_schedule_feeds_crosswalk(
-    date: str, keep_cols: list, get_df: bool = True, custom_filtering: dict = None
-) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
-    """
-    Get fct_daily_rt_feeds, which provides the schedule_feed_key
-    to use when merging with schedule data.
-    """
-    fct_rt_feeds = tbls.mart_gtfs.fct_daily_rt_feed_files() >> filter(_.date == date)
-
-    if get_df:
-        fct_rt_feeds = (
-            fct_rt_feeds
-            >> collect()
-            >> gtfs_utils_v2.filter_custom_col(custom_filtering)
-            >> gtfs_utils_v2.subset_cols(keep_cols)
-        )
-
-    return fct_rt_feeds >> gtfs_utils_v2.subset_cols(keep_cols)
-
-
 def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
     """
     Use fct_daily_feed_scheduled_service to find
@@ -314,34 +294,3 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
 
     return feeds_with_district
 
-
-def sample_schedule_feed_key_to_organization_crosswalk(
-    df: pd.DataFrame,
-    date: str,
-    quartet_data: Literal["schedule", "vehicle_positions", "service_alerts", "trip_updates"] = "schedule",
-    **kwargs,
-) -> pd.DataFrame:
-    """
-    From schedule data, using feed_key as primary key,
-    grab the gtfs_dataset_key associated.
-    Pass this through function to attach quartet data identifier columns
-    and organization info.
-    """
-    # Start with schedule feed_key, and grab gtfs_dataset_key associated
-    # with that feed_key
-    feeds = df[["feed_key"]].drop_duplicates().reset_index(drop=True)
-
-    crosswalk_feed_to_gtfs_dataset_key = get_schedule_gtfs_dataset_key(date, get_df=True)
-
-    feeds_with_gtfs_dataset_key = pd.merge(
-        feeds,
-        crosswalk_feed_to_gtfs_dataset_key,
-        on="feed_key",
-        how="inner",
-    )
-
-    feeds_with_district = sample_gtfs_dataset_key_to_organization_crosswalk(
-        feeds_with_gtfs_dataset_key, date, quartet_data=quartet_data, **kwargs
-    )
-
-    return feeds_with_district
