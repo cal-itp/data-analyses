@@ -182,7 +182,7 @@ def chart_rider_flow(with_distance_df, col:str, color_args={}):
     # color=alt.Color('od', scale=scale),
     color=alt.Color('od', legend=alt.Legend(symbolLimit=0, labelFontSize=12, titleFontSize=14), **color_args),
     tooltip = ['departing_station', 'od', 'ridership'],
-        ).properties(width = with_distance_df[col].max() * 3, height = 600)
+        ).properties(width = min(with_distance_df[col].max() * 3, 1200), height = 600)
     flow = flow.configure_axis(labelFontSize=14, titleFontSize=16)
     return flow
 
