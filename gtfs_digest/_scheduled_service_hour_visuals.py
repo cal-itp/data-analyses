@@ -6,7 +6,7 @@ from omegaconf import OmegaConf
 readable_dict = OmegaConf.load("readable2.yml")
 
 readable_col_names = {
-    "portfolio_organization_name": "Portfolio Organization Name",
+    "analysis_name": "Analysis Name",
     "month_year": "Month",
     "weekday_weekend": "Weekday or Weekend",
     "departure_hour": "Departure Hour (in Military Time)",
@@ -31,6 +31,7 @@ def prep_operator_service_hours() -> pd.DataFrame:
     
     # Save out the dataframe
     df.to_parquet(f"{GTFS_DATA_DICT.digest_tables.dir}{SCHEDULED_SERVICES_REPORT}.parquet")
+    # print(df.columns)
     return df
 
 def create_bg_service_chart() -> alt.Chart:
@@ -120,3 +121,8 @@ def scheduled_service_hr_graph(
     chart = chart.add_params(selection)
 
     return chart
+
+if __name__ == "__main__":
+    
+    df = prep_operator_service_hours()
+    

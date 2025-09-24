@@ -45,7 +45,7 @@ def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
     melted_df = df.melt(
         id_vars=[
             "Date",
-            "Portfolio Organization Name",
+            "Analysis Name",
             "Route",
             "Period",
             "Direction",
@@ -70,7 +70,7 @@ def reshape_pct_journey_with_vp(df: pd.DataFrame) -> pd.DataFrame:
     """
     to_keep = [
         "Date",
-        "Portfolio Organization Name",
+        "Analysis Name",
         "Direction",
         "% Scheduled Trip w/ 1+ VP/Minute",
         "% Scheduled Trip w/ 2+ VP/Minute",
@@ -82,7 +82,7 @@ def reshape_pct_journey_with_vp(df: pd.DataFrame) -> pd.DataFrame:
     df3 = df2.melt(
         id_vars=[
             "Date",
-            "Portfolio Organization Name",
+            "Analysis Name",
             "Route",
             "Direction",
             "Period",
@@ -212,7 +212,7 @@ def reshape_timeliness_trips(df: pd.DataFrame) -> pd.DataFrame:
     melted_df = df.melt(
         id_vars=[
             "Date",
-            "Portfolio Organization Name",
+            "Analysis Name",
             "Route",
             "Period",
             "Direction",

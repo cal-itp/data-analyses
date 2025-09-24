@@ -1,5 +1,5 @@
 directory: ./gtfs_digest/
-notebook: ./gtfs_digest/district_report.ipynb
+notebook: ./gtfs_digest/_report_caltrans_district.ipynb
 parts:
 - caption: Introduction
 - chapters:

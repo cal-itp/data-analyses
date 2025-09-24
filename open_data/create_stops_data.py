@@ -124,7 +124,7 @@ def patch_previous_dates(
             date = one_date, 
             crosswalk_col = "schedule_gtfs_dataset_key",
             data_type = "gdf"
-        ).pipe(open_data_utils.standardize_operator_info_for_exports, one_date)
+        )
         
         partial_dfs.append(df_to_add)
 
@@ -173,13 +173,24 @@ if __name__ == "__main__":
     time0 = datetime.datetime.now()
 
     stops = create_stops_file_for_export(analysis_date)  
-
+    """
     published_stops = patch_previous_dates(
         stops, 
         analysis_date,
-    ).pipe(finalize_export_df)    
+    ).pipe(finalize_export_df)
 
     
+    AH: work for later
+    """
+    published_stops = (
+    patch_previous_dates(
+        stops,
+        analysis_date,
+    )
+    
+    .pipe(open_data_utils.standardize_operator_info_for_exports, analysis_date)
+    .pipe(finalize_export_df)
+    )
     utils.geoparquet_gcs_export(
         published_stops,
         AH_TEST,

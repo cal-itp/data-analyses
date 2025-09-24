@@ -180,7 +180,7 @@ def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.Data
     agg1 = (
         df.groupby(
             [
-                "portfolio_organization_name",
+                "analysis_name",
                 "recent_combined_name",
             ],
             as_index=False,

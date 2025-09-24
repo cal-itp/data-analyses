@@ -29,7 +29,7 @@ def load_district_stats(district:str) -> pd.DataFrame:
     # Keep only the most recent rows
     m1 = m1.sort_values(
         ["service_date", "name"], ascending=[False, True]
-    ).drop_duplicates(subset=["portfolio_organization_name"])
+    ).drop_duplicates(subset=["analysis_name"])
 
     return m1
 
@@ -47,7 +47,7 @@ def load_gtfs_data(df: pd.DataFrame) -> pd.DataFrame:
         operator_route_gdf.schedule_gtfs_dataset_key.isin(operators_in_district)
     ][
         [
-            "portfolio_organization_name",
+            "analysis_name",
             "service_date",
             "recent_combined_name",
             "geometry",
@@ -56,14 +56,14 @@ def load_gtfs_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # Only keep the most recent transit route geographies
     operator_route_gdf2 = operator_route_gdf.drop_duplicates(
-        subset=["portfolio_organization_name", "recent_combined_name"]
+        subset=["analysis_name", "recent_combined_name"]
     )
     operator_route_gdf2 = operator_route_gdf2.dissolve(
-        by=["portfolio_organization_name"]
-    ).reset_index()[["portfolio_organization_name", "geometry"]]
+        by=["analysis_name"]
+    ).reset_index()[["analysis_name", "geometry"]]
 
     operator_route_gdf2 = operator_route_gdf2.rename(
-        columns={"portfolio_organization_name": "Transit Operator"}
+        columns={"analysis_name": "Transit Operator"}
     )
     return operator_route_gdf2
 

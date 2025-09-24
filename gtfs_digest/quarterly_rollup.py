@@ -14,7 +14,8 @@ schd_metric_cols = [
 ]
 
 groupby_cols = [
-    "portfolio_organization_name",
+    "analysis_name",
+    "source_record_id",
     "year_quarter",
     "direction_id",
     "time_period",
@@ -34,31 +35,33 @@ rt_metric_no_weighted_avg = [
     "is_ontime",
     "is_late",
 ]
+
 crosswalk_cols = [
-        "base64_url",
-        "caltrans_district",
-        "combined_name",
-        "is_coverage",
-        "is_downtown_local",
-        "is_express",
-        "is_ferry",
-        "is_local",
-        "is_rail",
-        "is_rapid",
-        "name",
-        "recent_route_id",
-        "route_id",
-        "route_primary_direction",
-        "sched_rt_category",
-        "schedule_gtfs_dataset_key",
-        "schedule_source_record_id",
-        "typology",
-        "portfolio_organization_name",
-        "year_quarter",
-        "direction_id",
-        "time_period",
-        "recent_combined_name"
-    ]
+    "base64_url",
+    "caltrans_district",
+    "combined_name",
+    "is_coverage",
+    "is_downtown_local",
+    "is_express",
+    "is_ferry",
+    "is_local",
+    "is_rail",
+    "is_rapid",
+    "name",
+    "recent_route_id",
+    "route_id",
+    "route_primary_direction",
+    "sched_rt_category",
+    "schedule_gtfs_dataset_key",
+    "schedule_source_record_id",
+    "source_record_id",
+    "typology",
+    "analysis_name",
+    "year_quarter",
+    "direction_id",
+    "time_period",
+    "recent_combined_name" ,
+]
 
 def quarterly_metrics(df: pd.DataFrame) -> pd.DataFrame:
     """

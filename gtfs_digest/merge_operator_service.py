@@ -62,8 +62,7 @@ def concatenate_trips(
         col = "name", 
         public_gtfs_dataset_keys = public_feeds
     ).pipe(
-        portfolio_utils.standardize_portfolio_organization_names, 
-        PORTFOLIO_ORGANIZATIONS_DICT
+        portfolio_utils.standardize_portfolio_organization_names
     ).drop(columns = ["name"])
 
     return df
@@ -98,7 +97,7 @@ def total_service_hours(date_list: list) -> pd.DataFrame:
     
     # Total up hourly service hours by weekday, Sunday, and Saturday.
     df2 = (
-        df.groupby(["portfolio_organization_name", 
+        df.groupby(["analysis_name", 
                     "month_year", 
                     "weekday_weekend", 
                     "departure_hour"])

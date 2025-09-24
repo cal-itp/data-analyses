@@ -30,7 +30,7 @@ route_direction_cols_for_viz = [
     "pct_sched_journey_atleast2_vp",
     "rt_sched_journey_ratio",
     "speed_mph",
-    "portfolio_organization_name",
+    "analysis_name",
     "headway_in_minutes",
     "sched_rt_category", # added this
     'avg_stop_miles'
@@ -55,7 +55,7 @@ readable_col_names = {
     "pct_sched_journey_atleast2_vp": "% Scheduled Trip w/ 2+ VP/Minute",
     "rt_sched_journey_ratio": "Realtime versus Scheduled Service Ratio",
     "speed_mph": "Speed (MPH)",
-    "portfolio_organization_name": "Portfolio Organization Name",
+    "analysis_name": "Analysis Name",
     "headway_in_minutes": "Headway (Minutes)",
     'avg_stop_miles':"Average Stop Distance (Miles)",
     "sched_rt_category":"GTFS Availability",

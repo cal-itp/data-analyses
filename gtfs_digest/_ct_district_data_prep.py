@@ -13,7 +13,7 @@ fs = gcsfs.GCSFileSystem()
 operator_route_gdf_readable_columns = {"portfolio_organization_name": "Portfolio Organization Name"}
 
 transit_shn_map_columns = {
-    "portfolio_organization_name": "Portfolio Organization Name",
+    "analysis_name": "Analysis Name",
     "recent_combined_name": "Route",
     "shn_route": "State Highway Network Route",
     "pct_route_on_hwy_across_districts": "Percentage of Transit Route on SHN Across All Districts",
@@ -23,7 +23,7 @@ shn_map_readable_columns = {"shn_route": "State Highway Network Route",
                            "district":"District"}
 
 gtfs_table_readable_columns = {
-    "portfolio_organization_name": "Portfolio Organization Name",
+    "analysis_name": "Analysis Name",
     "operator_n_trips": "# Trips",
     "operator_n_stops": "# Stops",
     "operator_n_arrivals": "# Arrivals",
@@ -46,7 +46,7 @@ def data_wrangling_operator_profile(district:str)->pd.DataFrame:
     
     operator_df2 = operator_df.loc[operator_df.caltrans_district == district]
     
-    operator_df2 = operator_df2.sort_values(by = ["service_date"], ascending = False).drop_duplicates(subset = ["portfolio_organization_name"])
+    operator_df2 = operator_df2.sort_values(by = ["service_date"], ascending = False).drop_duplicates(subset = ["analysis_name"])
     return operator_df2
         
 def data_wrangling_operator_map(portfolio_organization_names:list)->gpd.GeoDataFrame:
@@ -56,27 +56,27 @@ def data_wrangling_operator_map(portfolio_organization_names:list)->gpd.GeoDataF
     operator_route_gdf = gpd.read_parquet(
     f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet",
     storage_options={"token": credentials.token},
-)[["portfolio_organization_name", "service_date", "recent_combined_name", "geometry"]]
-        
+)[["analysis_name", "service_date", "recent_combined_name", "geometry"]]
+    
+    # Temp
+    operator_route_gdf = operator_route_gdf.rename(columns = {"portfolio_organization_name":"analysis_name"})
     operator_route_gdf = operator_route_gdf.loc[
-    operator_route_gdf.portfolio_organization_name.isin(portfolio_organization_names)]
+    operator_route_gdf.analysis_name.isin(portfolio_organization_names)]
     
     operator_route_gdf = (
     operator_route_gdf.sort_values(
-        ["service_date", "portfolio_organization_name", "recent_combined_name"],
+        ["service_date", "analysis_name", "recent_combined_name"],
         ascending=[False, True, True],
     )
-    .drop_duplicates(subset=["portfolio_organization_name", "recent_combined_name"])
+    .drop_duplicates(subset=["analysis_name", "recent_combined_name"])
     .drop(
         columns=["service_date", "recent_combined_name"]
-        # drop route because after the dissolve, all operator routes are combined
-        # so route would hold only the first row's value
     )
-    .dissolve(by="portfolio_organization_name").reset_index()
+    .dissolve(by="analysis_name").reset_index()
 )
     
-    operator_route_gdf["portfolio_organization_name"] = operator_route_gdf[
-    "portfolio_organization_name"
+    operator_route_gdf["analysis_name"] = operator_route_gdf[
+    "analysis_name"
 ].str.replace(" Schedule", "")
     
     operator_route_gdf = operator_route_gdf.rename(columns = operator_route_gdf_readable_columns)
@@ -121,15 +121,18 @@ def final_transit_route_shs_outputs(
         intersecting_gdf.district == district
     ]
 
+    # TEMP
+    intersecting_gdf = intersecting_gdf.rename(columns = {"portfolio_organization_name":"analysis_name"})
+    open_data_df = open_data_df.rename(columns = {"portfolio_organization_name":"analysis_name"})
     # Join back to get the long gdf with the transit route geometries and the names of the
     # state highways these routes intersect with. This gdf will be used to
     # display a map.
     map_gdf = pd.merge(
         intersecting_gdf[
-            ["portfolio_organization_name", "recent_combined_name", "geometry"]
+            ["analysis_name", "recent_combined_name", "geometry"]
         ].drop_duplicates(),
         open_data_df,
-        on=["portfolio_organization_name", "recent_combined_name"],
+        on=["analysis_name", "recent_combined_name"],
     )
     
     # Buffer so we can see stuff and change the CRS
@@ -142,7 +145,7 @@ def final_transit_route_shs_outputs(
     text_table_df = pd.merge(
         intersecting_gdf[
             [
-                "portfolio_organization_name",
+                "analysis_name",
                 "recent_combined_name",
                 "shn_route",
                "district",
@@ -150,12 +153,12 @@ def final_transit_route_shs_outputs(
         ],
         open_data_df[
             [
-                "portfolio_organization_name",
+                "analysis_name",
                 "recent_combined_name",
                 "pct_route_on_hwy_across_districts",
             ]
         ],
-        on=["portfolio_organization_name", "recent_combined_name"],
+        on=["analysis_name", "recent_combined_name"],
     )
 
     # Now we have to aggregate again so each route will only have one row with the
@@ -176,7 +179,7 @@ def final_transit_route_shs_outputs(
     return map_gdf, text_table
 
 def create_gtfs_stats(df:pd.DataFrame)->pd.DataFrame:
-    shared_cols = ["portfolio_organization_name"]
+    shared_cols = ["analysis_name"]
     exclude_cols = [
     "schedule_gtfs_dataset_key",
     "caltrans_district",
@@ -208,10 +211,13 @@ def load_ct_district(district:int)->gpd.GeoDataFrame:
     district_geojson = ca_geojson.loc[ca_geojson.DISTRICT == district][["geometry"]]
     
     # Add color column
-    district_geojson["color"] = [(235, 240, 235)]
+    district_geojson["color"] = [(58, 25, 79)]
+    boundary = district_geojson.geometry.iloc[0].boundary 
+    district_geojson.geometry = [boundary]
+    district_geojson.geometry = district_geojson.geometry.buffer(100)
     return district_geojson
 
-def load_buffered_shn_map(buffer_amount:int, district:int) -> gpd.GeoDataFrame:
+def load_buffered_shn_map(district:int) -> gpd.GeoDataFrame:
     """
     Load buffered and dissolved version of the SHN that we can
     use with the webmaps.
@@ -230,8 +236,7 @@ def load_buffered_shn_map(buffer_amount:int, district:int) -> gpd.GeoDataFrame:
     gdf2 = gdf2.dissolve(by = ["Route","County","District", "RouteType"]).reset_index().drop(columns = ["Direction"])
     
     # Buffer - make it a bit bigger so we can actually see stuff
-    buffer_amount = buffer_amount + 50
-    gdf2.geometry = gdf2.geometry.buffer(buffer_amount)
+    gdf2.geometry = gdf2.geometry.buffer(100)
     
     # Rename the columns
     gdf2 = gdf2.rename(columns = shn_map_readable_columns)

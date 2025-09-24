@@ -18,9 +18,9 @@ def generate_operator_grain_yaml(filename: str) -> pd.DataFrame:
     df = (pd.read_parquet(
         FILEPATH_URL, 
         filters=[[("sched_rt_category", "in", ["schedule_and_vp", "schedule_only"])]],
-        columns = ["caltrans_district", "portfolio_organization_name"]
+        columns = ["caltrans_district", "analysis_name"]
     ).dropna(subset=["caltrans_district"])
-    .sort_values(["caltrans_district", "portfolio_organization_name"]).reset_index(drop=True)
+    .sort_values(["caltrans_district", "analysis_name"]).reset_index(drop=True)
          )
                      
     return df
@@ -41,7 +41,7 @@ if __name__ == "__main__":
             "caption_suffix": "",
         },
         section_info = {
-            "column": "portfolio_organization_name",
-            "name": "portfolio_organization_name",
+            "column": "analysis_name",
+            "name": "analysis_name",
         },
     )

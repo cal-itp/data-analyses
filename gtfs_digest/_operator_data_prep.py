@@ -38,13 +38,13 @@ routes_subset = [
     "is_rail",
     "is_ferry",
     "service_date",
-    "portfolio_organization_name",
+    "analysis_name",
     "recent_combined_name",
     "route_length_miles_percentile",
     "percentile_group",
 ]
 
-operator_date_cols = ["portfolio_organization_name", "service_date"]
+operator_date_cols = ["analysis_name", "service_date"]
 
 
 def aggregate_operator_stats(
@@ -161,9 +161,9 @@ if __name__ == "__main__":
         storage_options={"token": credentials.token},
     ).pipe(
         publish_utils.filter_to_recent_date,
-        ["portfolio_organization_name"]
+        ["analysis_name"]
     ).drop_duplicates(
-        subset = ["portfolio_organization_name", "route_id"]
+        subset = ["analysis_name", "route_id"]
     ).rename(
         columns = routes_readable_col_names
     ).reset_index(drop=True)
@@ -197,7 +197,7 @@ if __name__ == "__main__":
         how = "left" # used to be inner
     ).pipe(
         publish_utils.filter_to_recent_date, 
-        ["portfolio_organization_name"]
+        ["analysis_name"]
     ).rename(
         columns = routes_readable_col_names
     )

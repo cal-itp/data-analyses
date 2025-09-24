@@ -210,8 +210,7 @@ def concatenate_crosswalk_organization(
             portfolio_utils.CALTRANS_DISTRICT_DICT
         )
     ).pipe(
-        portfolio_utils.standardize_portfolio_organization_names, 
-        PORTFOLIO_ORGANIZATIONS_DICT
+        portfolio_utils.standardize_portfolio_organization_names
     )
     
     # to aggregate up to organization, 
