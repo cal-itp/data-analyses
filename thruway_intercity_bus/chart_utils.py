@@ -24,22 +24,31 @@ def transform_gtfs_info(one_direction_st_df: pd.DataFrame, shape_geom: shapely.G
     Create mi_range column for all stops except the final stop.
     '''
     df = one_direction_st_df.assign(stop_meters = one_direction_st_df.geometry.map(lambda x: shape_geom.project(x)))
-    df = df.assign(stop_miles = np.round((df.stop_meters / rt_utils.METERS_PER_MILE), 0).astype(int))
-    df = df.assign(next_miles = df.stop_miles.shift(-1))
+    df = df.assign(stop_miles = np.round((df.stop_meters / rt_utils.METERS_PER_MILE), 0).astype(int),
+                  departure_sec = df.departure_sec.fillna(df.arrival_sec))
+    df = df.assign(relative_departure_min = (df.departure_sec - df.departure_sec.min()) / 60)
+    df = df.assign(next_miles = df.stop_miles.shift(-1), next_min = df.relative_departure_min.shift(-1))
     
     mi_range = lambda row: np.arange(row.stop_miles, row.next_miles) if not np.isnan(row.stop_miles) and not np.isnan(row.next_miles) else None
-    df = df.assign(mile_range = df.apply(mi_range, axis=1))
+    minute_range = lambda row: np.arange(row.relative_departure_min, row.next_min) if not np.isnan(row.relative_departure_min) and not np.isnan(row.next_min) else None
+    df = df.assign(mile_range = df.apply(mi_range, axis=1),
+                  minute_range = df.apply(minute_range, axis=1))
 
     return df
 
-def explode_gtfs_info(gtfs_info_df: pd.DataFrame) -> pd.DataFrame:
+def explode_gtfs_info(gtfs_info_df: pd.DataFrame, how='miles') -> pd.DataFrame:
     '''
-    Use mi_range column from transform_gtfs_info to explode df to have one row for each mile travelled
+    Use mi_range column from transform_gtfs_info to explode df to have one row for each mile traveled
     alongside stop_times info.
+    
+    how: 'miles' or 'time'
     '''
-    gtfs_info_df = gtfs_info_df[['amtrak_stop', 'stop_sequence','route_id',
-                     'route_short_name', 'shape_id', 'direction_id',
-                        'mile_range']].explode(column='mile_range').rename(columns={'mile_range': 'route_mileage'})
+    subset_cols = ['amtrak_stop', 'stop_sequence','route_id',
+                     'route_short_name', 'shape_id', 'direction_id']
+    if how == 'miles':
+        gtfs_info_df = gtfs_info_df[subset_cols + ['mile_range']].explode(column='mile_range').rename(columns={'mile_range': 'miles_traveled'})
+    elif how == 'time':
+        gtfs_info_df = gtfs_info_df[subset_cols + ['minute_range']].explode(column='minute_range').rename(columns={'minute_range': 'minutes_traveled'})
     return gtfs_info_df
 
 def stop_sequence_dict_and_direction_id(gtfs_info_df: pd.DataFrame) -> tuple:
@@ -110,7 +119,8 @@ def create_cmap_mapping(cmap_list: list, unique_values_to_map: list) -> dict:
     origin_cmaps = dict(zip(unique_values_to_map, cmap_per_origin))
     return origin_cmaps
 
-def scale_transform_cmaps(cmap_list: list, cmap_origin_dict: dict, with_distance_df: pd.DataFrame) -> list:
+def scale_transform_cmaps(cmap_list: list, cmap_origin_dict: dict, with_distance_df: pd.DataFrame,
+                         col: str) -> list:
     '''
     Scale each colormap to the max and minimum o/d distances of each origin sharing the cmap,
     since there may be multiple.
@@ -122,8 +132,8 @@ def scale_transform_cmaps(cmap_list: list, cmap_origin_dict: dict, with_distance
         max_dist = 0
         #  only consider origins sharing this cmap
         for origin in [key for key in cmap_origin_dict.keys() if cmap_origin_dict[key] == cmap]:
-            origin_min = with_distance_df.query('orig == @origin').od_miles.min()
-            origin_max = with_distance_df.query('orig == @origin').od_miles.max()
+            origin_min = with_distance_df.query('orig == @origin')[col].min()
+            origin_max = with_distance_df.query('orig == @origin')[col].max()
             min_dist = min(origin_min, min_dist)
             max_dist = max(origin_max, max_dist)
         if min_dist == max_dist:
@@ -136,45 +146,56 @@ def scale_transform_cmaps(cmap_list: list, cmap_origin_dict: dict, with_distance
         
     return scaled_cmaps
 
-def color_from_od_row(row: pd.Series, scaled_cmaps_dict: dict, index_df: pd.DataFrame):
+def color_from_od_row(row: pd.Series, scaled_cmaps_dict: dict, index_df: pd.DataFrame, col:str):
     '''
     Use a df row with origin and od_miles (o/d distance) to get a rgb hex value
     from the relevant colormap.
     '''
     cmap = scaled_cmaps_dict[row.orig]
-    color = cmap.rgb_hex_str(row.od_miles)
+    color = cmap.rgb_hex_str(row[col])
     return color
 
-def color_by_origin_and_distance(with_distance_df: pd.DataFrame, cmaps: list) -> alt.Scale:
+def color_by_origin_and_distance(with_distance_df: pd.DataFrame, cmaps: list, col: str) -> alt.Scale:
     '''
     Create an Altair Scale (colorscale) with 
     '''
     unique_origins = with_distance_df.orig.unique()
     origin_cmaps = create_cmap_mapping(cmaps, unique_origins)
-    scaled_cmaps = scale_transform_cmaps(cmap_list=cmaps, cmap_origin_dict=origin_cmaps, with_distance_df=with_distance_df)
+    scaled_cmaps = scale_transform_cmaps(cmap_list=cmaps, cmap_origin_dict=origin_cmaps, with_distance_df=with_distance_df,
+                                        col=col)
     origin_cmaps_scaled = create_cmap_mapping(cmap_list=scaled_cmaps, unique_values_to_map=unique_origins)
     
-    df = with_distance_df[['od', 'orig', 'od_miles']].drop_duplicates()
-    color_index_df = df.assign(color = df.apply(color_from_od_row, axis = 1, scaled_cmaps_dict = origin_cmaps_scaled, index_df = df))
+    df = with_distance_df[['od', 'orig'] + [col]].drop_duplicates()
+    color_index_df = df.assign(color = df.apply(color_from_od_row, axis = 1, scaled_cmaps_dict = origin_cmaps_scaled, index_df = df,
+                                               col=col))
     color_dict = dict(zip(color_index_df.od, color_index_df.color))
     colorscale = alt.Scale(domain = color_dict.keys(), range = color_dict.values())
     
     return colorscale
 
-def chart_rider_flow(with_distance_df, color_args={}):
+def chart_rider_flow(with_distance_df, col:str, color_args={}):
 
+    x = alt.X(col+':Q').title(col.replace('_', ' ').title())
     flow = alt.Chart(with_distance_df).mark_area().encode(
-    alt.X('route_mileage:Q').title('Route Mileage'),
-    alt.Y('sum(ridership):Q').axis().title('Passenger Load (total monthly)'),
+    x = x,
+    y = alt.Y('sum(ridership):Q').axis().title('Passenger Load (total monthly)'),
     # color=alt.Color('od', scale=scale),
     color=alt.Color('od', legend=alt.Legend(symbolLimit=0, labelFontSize=12, titleFontSize=14), **color_args),
     tooltip = ['departing_station', 'od', 'ridership'],
-        ).properties(width = with_distance_df.route_mileage.max() * 3, height = 600)
+        ).properties(width = with_distance_df[col].max() * 3, height = 600)
     flow = flow.configure_axis(labelFontSize=14, titleFontSize=16)
     return flow
 
 def flow_chart_from_shape_trip_row(row: pd.Series, stop_times: pd.DataFrame, ridership: pd.DataFrame,
-                                  ridership_data_route: str = None):
+                                  ridership_data_route: str = None, how = 'miles'):
+    '''
+    
+    how: 'miles' or 'time'
+    '''
+    
+    key_column_dict = {'miles': 'miles_traveled', 'time': 'minutes_traveled'}
+    key_column = key_column_dict[how]
+    od_group_col = 'od_' + key_column
     trip_st = stop_times.query('trip_id == @row.trip_id')
     # print(trip_st.columns)
     # print(trip_st.route_id.iloc[0])
@@ -182,17 +203,18 @@ def flow_chart_from_shape_trip_row(row: pd.Series, stop_times: pd.DataFrame, rid
         print('correcting LAX to SMN for Route 1c') #  is this a GTFS error?
         trip_st = trip_st.assign(amtrak_stop = trip_st.amtrak_stop.str.replace('LAX', 'SMN'))
     gtfs_info_df = transform_gtfs_info(trip_st, row.geometry)
-    gtfs_info_df = explode_gtfs_info(gtfs_info_df)
+    # return gtfs_info_df
+    gtfs_info_df = explode_gtfs_info(gtfs_info_df, how=how)
     rider_one_rt_dir = filter_ridership(source_ridership_df = ridership, rider_bus_route=ridership_data_route, gtfs_info_df=gtfs_info_df)
     rider_one_rt_dir = running_ridership(filtered_ridership_df = rider_one_rt_dir, gtfs_info_df=gtfs_info_df)
     with_distance = rider_one_rt_dir.merge(
-        gtfs_info_df[['amtrak_stop', 'route_mileage']], left_on = 'departing_station', right_on = 'amtrak_stop')
-    with_distance = with_distance.assign(od_miles = with_distance.od.map(with_distance.groupby('od')[['route_mileage']].size()))
-    try:
-        colorscale = color_by_origin_and_distance(with_distance_df=with_distance, cmaps=all_cmaps)
-        chart = chart_rider_flow(with_distance, color_args={'scale': colorscale})
-    except Exception as e:
-        print('custom coloring failed, trying default colors')
-        print(e)
-        chart = chart_rider_flow(with_distance)
+        gtfs_info_df[['amtrak_stop', key_column]], left_on = 'departing_station', right_on = 'amtrak_stop')
+    with_distance[od_group_col] = with_distance.od.map(with_distance.groupby('od')[[key_column]].size())
+    # try:
+    colorscale = color_by_origin_and_distance(with_distance_df=with_distance, cmaps=all_cmaps, col=od_group_col)
+    chart = chart_rider_flow(with_distance, col=key_column, color_args={'scale': colorscale})
+    # except Exception as e:
+    #     print('custom coloring failed, trying default colors')
+    #     print(e)
+    #     chart = chart_rider_flow(with_distance)
     return chart
