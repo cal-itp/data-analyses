@@ -49,46 +49,47 @@ def data_wrangling_operator_profile(district:str)->pd.DataFrame:
     operator_df2 = operator_df2.sort_values(by = ["service_date"], ascending = False).drop_duplicates(subset = ["analysis_name"])
     return operator_df2
         
-def data_wrangling_operator_map(portfolio_organization_names:list)->gpd.GeoDataFrame:
-     
-    OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map   
-    
+def data_wrangling_operator_map(portfolio_organization_names: list) -> gpd.GeoDataFrame:
+
+    OPERATOR_ROUTE = GTFS_DATA_DICT.digest_tables.operator_routes_map
+
     operator_route_gdf = gpd.read_parquet(
-    f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet",
-    storage_options={"token": credentials.token},
-)[["analysis_name", "service_date", "recent_combined_name", "geometry"]]
-    
+        f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet",
+        storage_options={"token": credentials.token},
+    )[["analysis_name", "service_date", "recent_combined_name", "geometry"]].to_crs(
+        geography_utils.CA_NAD83Albers_m
+    )
+
     # Temp
-    operator_route_gdf = operator_route_gdf.rename(columns = {"portfolio_organization_name":"analysis_name"})
+    # operator_route_gdf = operator_route_gdf.rename(columns = {"portfolio_organization_name":"analysis_name"})
     operator_route_gdf = operator_route_gdf.loc[
-    operator_route_gdf.analysis_name.isin(portfolio_organization_names)]
-    
+        operator_route_gdf.analysis_name.isin(portfolio_organization_names)
+    ]
+
     operator_route_gdf = (
-    operator_route_gdf.sort_values(
-        ["service_date", "analysis_name", "recent_combined_name"],
-        ascending=[False, True, True],
+        operator_route_gdf.sort_values(
+            ["service_date", "analysis_name", "recent_combined_name"],
+            ascending=[False, True, True],
+        )
+        .drop_duplicates(subset=["analysis_name", "recent_combined_name"])
+        .drop(columns=["service_date", "recent_combined_name"])
     )
-    .drop_duplicates(subset=["analysis_name", "recent_combined_name"])
-    .drop(
-        columns=["service_date", "recent_combined_name"]
-    )
-    .dissolve(by="analysis_name").reset_index()
-)
-    
+
     operator_route_gdf["analysis_name"] = operator_route_gdf[
-    "analysis_name"
-].str.replace(" Schedule", "")
-    
-    operator_route_gdf = operator_route_gdf.rename(columns = operator_route_gdf_readable_columns)
-    
-    operator_route_gdf = operator_route_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
-    
+        "analysis_name"
+    ].str.replace(" Schedule", "")
+
+    operator_route_gdf = operator_route_gdf.rename(
+        columns=operator_route_gdf_readable_columns
+    )
+
+    # Buffer
+    operator_route_gdf.geometry = operator_route_gdf.geometry.buffer(100)
+    operator_route_gdf = operator_route_gdf.dissolve(by="analysis_name").reset_index()
+
     # Need to create a number column in order for webmaps to work
     operator_route_gdf = operator_route_gdf.reset_index(drop=False)
     operator_route_gdf = operator_route_gdf.rename(columns={"index": "number"})
-    
-    # Buffer
-    # operator_route_gdf.geometry = operator_route_gdf.geometry.buffer(100)
     return operator_route_gdf
 
 def final_transit_route_shs_outputs(
@@ -212,6 +213,7 @@ def load_ct_district(district:int)->gpd.GeoDataFrame:
     
     # Add color column
     district_geojson["color"] = [(58, 25, 79)]
+    district_geojson["description"] = f"geometry for district {district}"
     boundary = district_geojson.geometry.iloc[0].boundary 
     district_geojson.geometry = [boundary]
     district_geojson.geometry = district_geojson.geometry.buffer(100)

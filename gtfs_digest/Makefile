@@ -5,12 +5,12 @@ assemble_data:
     
 assemble_route_direction_data:
 	python merge_data.py
-	python quarterly_rollup.py # for now, quarterly only affects route-direction, since operator filters to recent date
-	python _route_dir_data_prep.py  
+	python _operator_grain_quarterly_rollup.py # for now, quarterly only affects route-direction, since operator filters to recent date
+	python _operator_grain_route_dir_data_prep.py  
 
 assemble_operator_data:
 	python merge_operator_data.py
-	python _operator_data_prep.py # filters only to recent date for each operator
+	python _operator_grain_data_prep.py # filters only to recent date for each operator
 	python merge_operator_service.py   
     
 portfolio_deploy:
