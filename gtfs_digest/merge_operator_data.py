@@ -77,8 +77,7 @@ def concatenate_operator_routes(
         date_list,
         data_type = "gdf",
     ).sort_values(sort_cols).reset_index(drop=True).pipe(
-        portfolio_utils.standardize_portfolio_organization_names, 
-        PORTFOLIO_ORGANIZATIONS_DICT
+        portfolio_utils.standardize_portfolio_organization_names
     )
     
     return df
@@ -159,8 +158,7 @@ def concatenate_crosswalks(
             portfolio_utils.CALTRANS_DISTRICT_DICT
         )
     ).pipe(
-        portfolio_utils.standardize_portfolio_organization_names, 
-        PORTFOLIO_ORGANIZATIONS_DICT
+        portfolio_utils.standardize_portfolio_organization_names
     )
     
     return df
@@ -295,14 +293,14 @@ def add_sched_rt_category(filename: str) -> pd.DataFrame:
     """  
     sched_rt_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{filename}.parquet",
-        columns = ["portfolio_organization_name", "service_date", 
+        columns = ["analysis_name", "service_date", 
                    "route_id", "sched_rt_category"]
     )
     
     # Find the mode
     # https://stackoverflow.com/questions/15222754/groupby-pandas-dataframe-and-select-most-common-value
     sched_rt_df2 = (sched_rt_df
-                    .groupby(["portfolio_organization_name", "service_date"])
+                    .groupby(["analysis_name", "service_date"])
                     .agg({"sched_rt_category": lambda x: pd.Series.mode(x)[0]})
                     .reset_index()
                     )
@@ -361,7 +359,7 @@ if __name__ == "__main__":
         merge_in_standardized_route_names
     ).pipe(
         categorize_route_percentiles, 
-        ["portfolio_organization_name", "service_date"]
+        ["analysis_name", "service_date"]
     ).pipe(
         publish_utils.exclude_private_datasets, 
         col = "schedule_gtfs_dataset_key", 
@@ -402,7 +400,7 @@ if __name__ == "__main__":
         how = "inner"
     ).merge(
         sched_rt_df,
-        on = ["portfolio_organization_name", "service_date"],
+        on = ["analysis_name", "service_date"],
         how = "left"  
     ).pipe(
         publish_utils.exclude_private_datasets, 

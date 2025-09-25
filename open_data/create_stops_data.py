@@ -14,7 +14,8 @@ from shared_utils import publish_utils
 from update_vars import (analysis_date, 
                          GTFS_DATA_DICT,
                          TRAFFIC_OPS_GCS, 
-                         RT_SCHED_GCS, SCHED_GCS
+                         RT_SCHED_GCS, SCHED_GCS,
+                         AH_TEST
                         )
 
 import google.auth
@@ -123,7 +124,7 @@ def patch_previous_dates(
             date = one_date, 
             crosswalk_col = "schedule_gtfs_dataset_key",
             data_type = "gdf"
-        ).pipe(open_data_utils.standardize_operator_info_for_exports, one_date)
+        )
         
         partial_dfs.append(df_to_add)
 
@@ -144,7 +145,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     # Change column order
     route_cols = [
-        'organization_source_record_id', 'organization_name',
+        'source_record_id', 'analysis_name',
     ]       
     stop_cols = [
         'stop_id', 'stop_name', 
@@ -172,22 +173,33 @@ if __name__ == "__main__":
     time0 = datetime.datetime.now()
 
     stops = create_stops_file_for_export(analysis_date)  
-
+    """
     published_stops = patch_previous_dates(
         stops, 
         analysis_date,
-    ).pipe(finalize_export_df)    
+    ).pipe(finalize_export_df)
 
     
+    AH: work for later
+    """
+    published_stops = (
+    patch_previous_dates(
+        stops,
+        analysis_date,
+    )
+    
+    .pipe(open_data_utils.standardize_operator_info_for_exports, analysis_date)
+    .pipe(finalize_export_df)
+    )
     utils.geoparquet_gcs_export(
         published_stops,
-        TRAFFIC_OPS_GCS,
+        AH_TEST,
         f"export/ca_transit_stops_{analysis_date}"
     )
     
     utils.geoparquet_gcs_export(
         published_stops, 
-        TRAFFIC_OPS_GCS, 
+        AH_TEST, 
         "ca_transit_stops"
     )
     

@@ -1,38 +1,26 @@
 lost_rt:
-  - name: Bay Area 511 Petaluma Schedule
-    portfolio_organization_name: City of Petaluma
+  - analysis_name: City of Petaluma
+    name: Bay Area 511 Petaluma Schedule
     schedule_and_vp: 2025-06-11
     schedule_only: 2025-07-16
-  - name: Desert Roadrunner GMV Schedule
-    portfolio_organization_name: Palo Verde Valley Transit Agency
-    schedule_and_vp: 2024-05-22
-    schedule_only: 2025-06-11
-  - name: LAX FlyAway Schedule
-    portfolio_organization_name: Los Angeles World Airports
-    schedule_and_vp: 2024-11-13
-    schedule_only: 2025-03-12
-  - name: Nevada County Schedule
-    portfolio_organization_name: Nevada County
+  - analysis_name: Nevada County
+    name: Nevada County Schedule
     schedule_and_vp: 2025-06-11
     schedule_only: 2025-07-16
-  - name: OmniTrans Schedule
-    portfolio_organization_name: OmniTrans
+  - analysis_name: OmniTrans
+    name: OmniTrans Schedule
     schedule_and_vp: 2025-04-16
     schedule_only: 2025-07-16
-  - name: Santa Ynez Mecatran Schedule
-    portfolio_organization_name: City of Solvang
+  - analysis_name: City of Solvang
+    name: Santa Ynez Mecatran Schedule
     schedule_and_vp: 2025-02-12
     schedule_only: 2025-07-16
-  - name: TCRTA TripShot Schedule
-    portfolio_organization_name: Tulare County Regional Transit Agency
-    schedule_and_vp: 2025-06-11
-    schedule_only: 2025-07-16
-  - name: Tahoe Transportation District Schedule
-    portfolio_organization_name: Tahoe Transportation District
+  - analysis_name: Tahoe Transportation District
+    name: Tahoe Transportation District Schedule
     schedule_and_vp: 2023-11-15
     schedule_only: 2025-07-16
-  - name: WeHo Schedule
-    portfolio_organization_name: City of West Hollywood
+  - analysis_name: City of West Hollywood
+    name: WeHo Schedule
     schedule_and_vp: 2025-05-14
     schedule_only: 2025-07-16
 operators_last6_months:
@@ -49,29 +37,29 @@ operators_last6_months:
   - name: 185
     service_date: 2025-02-12
 operators_map_last6_months:
-  - name: 162
+  - name: 160
     service_date: 2025-07-16
-  - name: 177
+  - name: 172
     service_date: 2025-06-11
-  - name: 180
-    service_date: 2025-05-14
-  - name: 181
-    service_date: 2025-04-16
-  - name: 177
-    service_date: 2025-03-12
   - name: 175
+    service_date: 2025-05-14
+  - name: 176
+    service_date: 2025-04-16
+  - name: 172
+    service_date: 2025-03-12
+  - name: 170
     service_date: 2025-02-12
 portfolio_groupings_last6_months:
-  - portfolio_organization_name: 154
+  - analysis_name: 154
     service_date: 2025-07-16
-  - portfolio_organization_name: 168
+  - analysis_name: 166
     service_date: 2025-06-11
-  - portfolio_organization_name: 169
+  - analysis_name: 167
     service_date: 2025-05-14
-  - portfolio_organization_name: 170
+  - analysis_name: 168
     service_date: 2025-04-16
-  - portfolio_organization_name: 168
+  - analysis_name: 166
     service_date: 2025-03-12
-  - portfolio_organization_name: 166
+  - analysis_name: 164
     service_date: 2025-02-12
 stale_operators: []

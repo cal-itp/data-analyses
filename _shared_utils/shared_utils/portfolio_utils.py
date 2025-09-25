@@ -254,6 +254,7 @@ def load_portfolio_names() -> pd.DataFrame:
             SELECT
             name,
             analysis_name,
+            source_record_id,
             FROM
             cal-itp-data-infra.mart_transit_database.dim_gtfs_datasets
             WHERE _is_current = TRUE

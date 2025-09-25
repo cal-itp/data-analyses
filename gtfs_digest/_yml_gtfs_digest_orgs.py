@@ -38,7 +38,7 @@ def case2_lost_rt(df: pd.DataFrame) -> pd.DataFrame:
     Find operators that had RT data before, but their most recent data
     was schedule_only.
     """
-    group_cols = ["name", "portfolio_organization_name"]
+    group_cols = ["name", "analysis_name"]
     
     df2 = (
         df
@@ -69,7 +69,7 @@ def case3_stale_data(df: pd.DataFrame) -> pd.DataFrame:
     Find where we haven't found operators for at least 3 months.
     https://stackoverflow.com/questions/42822768/pandas-number-of-months-between-two-dates/42822819
     """
-    group_cols = ["name", "portfolio_organization_name"]
+    group_cols = ["name", "analysis_name"]
     
     MAX_DATE = df.service_date.max()
         
@@ -109,20 +109,20 @@ if __name__ == "__main__":
     
     route_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{DIGEST_RT_SCHED}.parquet",
-        columns = ["name", "portfolio_organization_name", "service_date"]
+        columns = ["name", "analysis_name", "service_date"]
     ).drop_duplicates().reset_index(drop=True).astype(str) 
     
     operator_df = pd.read_parquet(
         f"{RT_SCHED_GCS}{OPERATOR_PROFILE}.parquet",
         columns = [
-            "name", "portfolio_organization_name", "service_date",
+            "name", "analysis_name", "service_date",
             "sched_rt_category"
         ]
     ).drop_duplicates().reset_index(drop=True)   
 
     operator_gdf = pd.read_parquet(
         f"{RT_SCHED_GCS}{OPERATOR_ROUTE}.parquet",
-        columns = ["name", "portfolio_organization_name", "service_date"]
+        columns = ["name", "analysis_name", "service_date"]
     ).drop_duplicates().reset_index(drop=True).astype(str)
     
     # Count operators from the route-direction grain
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     ).pipe(df_to_dict)
     
     n_portfolio_operators = case1_operator_counts_by_data(
-        route_df, "portfolio_organization_name"
+        route_df, "analysis_name"
     ).pipe(df_to_dict)
     
     n_operators_in_map = case1_operator_counts_by_data(

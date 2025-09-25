@@ -64,11 +64,11 @@ def district_stats(
     df2 = (df.groupby(group_cols, 
                       observed=True, group_keys=False)
            .agg({
-               "portfolio_organization_name": "nunique",
+               "analysis_name": "nunique",
                **{c:"sum" for c in sum_me},
            })
            .reset_index()
-           .rename(columns = {"portfolio_organization_name": "n_operators"})
+           .rename(columns = {"analysis_name": "n_operators"})
           )
     
     # These need to be calculated again separately
