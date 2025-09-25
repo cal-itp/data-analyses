@@ -448,7 +448,7 @@ def produce_annual_ntd_ridership_data_by_rtpa(min_year: str, split_scag: bool) -
 
 def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame:
     """
-    This function works with the warehouse `dim_monthly_ntd_ridership_with_adjustments` long data format.
+    This function works with the warehouse `mart_ntd_ridership.fct_complete_monthly_ridership_with_adjustments_and_estimates` long data format.
     Import NTD data from warehouse, filter to CA,
     merge in crosswalk, checks for unmerged rows, then creates new columns for full Mode and TOS name.
 
@@ -464,10 +464,10 @@ def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame
       mode,
       tos,
       mode_type_of_service_status AS Status,
-      primary_uza_name as uza_name,
+      uza_name,
       upt
     FROM
-      `cal-itp-data-infra.mart_ntd.dim_monthly_ridership_with_adjustments`
+      `cal-itp-data-infra.mart_ntd_ridership.fct_complete_monthly_ridership_with_adjustments_and_estimates`
     WHERE
       period_year IN ("2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025")
       AND agency IS NOT NULL
