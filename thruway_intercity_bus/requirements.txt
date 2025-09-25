@@ -1,0 +1,2 @@
+vegafusion[embed]>=1.5.0
+vl-convert-python>=1.6.0

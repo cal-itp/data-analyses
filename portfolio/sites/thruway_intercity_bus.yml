@@ -1,0 +1,8 @@
+title: Thruway Bus Analysis
+directory: ./thruway_intercity_bus/
+readme: ./thruway_intercity_bus/README.md
+parts:
+- caption: Thruway Bus Analysis
+- chapters:
+  - notebook: ./thruway_intercity_bus/04_gtfs_link_charts.ipynb
+  - notebook: ./thruway_intercity_bus/05_ridership_time_series.ipynb
