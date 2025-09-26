@@ -30,9 +30,9 @@ Per the [NTD Complete Monthly Ridership Report](https://www.transit.dot.gov/ntd/
 Transit operators/agencies that are **Urban full reporters, that submit monthly ridership data to NTD from 2018 to present**, are included in this report.
 
 Operators/agencies that do not appear in the report may be due to:
-- Previousl Urban full reporters, but are currently not 
+- Were previously Urban full reporters, but are currently not 
 - Non-monthly reporters (small system/rural/reduced reporters) 
-- Has not reported data since 2018
+- Has not reported data (empty or NULL values) since 2018
 - Has reported "0" data since 2018
 
 Examples: 
