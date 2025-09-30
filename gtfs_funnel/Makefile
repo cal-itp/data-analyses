@@ -27,7 +27,7 @@ preprocess_schedule_only:
 	python track_publish_dates.py
     
 route_typologies_data:
-	python stop_arrivals_in_roads.py # quarterly cadence (Jan/Apr/Jul/Oct)
+#	python stop_arrivals_in_roads.py # quarterly cadence (Jan/Apr/Jul/Oct)
 	python route_typologies.py
 
 # Start compiling scripts needed when we start concatenating several days
@@ -53,7 +53,7 @@ all:
     # update open_data/update_vars.py        
 	cd ../open_data/ && make create_gtfs_schedule_geospatial_open_data -f Makefile
     # update high_quality_transit_areas/update_vars.py    
-#	cd ../high_quality_transit_areas/ && make hqta_data -f Makefile    
+	cd ../high_quality_transit_areas/ && make hqta_data -f Makefile    
     # update rt_segment_speeds/segment_speed_utils/project_vars.py
 	cd ../rt_segment_speeds/scripts/ && make all_speeds_pipeline -f Makefile && cd ../../
     # update rt_scheduled_v_ran/scripts/update_vars.py
