@@ -173,9 +173,9 @@ if __name__ == "__main__":
                         .drop_duplicates()
                        )
         
-        #crosswalk_df.to_parquet(
-        #    f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
-        #)
+        crosswalk_df.to_parquet(
+           f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
+        )
         t1 = datetime.datetime.now()
         print(f"finished {analysis_date}: {t1-t0}")
     
