@@ -110,7 +110,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
         
     intersecting_pairs = catalog.pairwise_intersections.read()
-    corridors = catalog.subset_corridors(geopandas_kwargs={"storage_options": {"token": credentials}}).read()
+    corridors = catalog.subset_corridors().read()
     
     pairs_table = attach_geometry_to_pairs(corridors, intersecting_pairs)
         

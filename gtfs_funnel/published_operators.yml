@@ -1,8 +1,6 @@
 2025-01-15:
   - Auburn Schedule
   - Golden Gate Park Shuttle Schedule
-2025-03-12:
-  - Bay Area 511 Rio Vista Delta Breeze Schedule
 2025-04-16:
   - Glenn Schedule
 2025-05-14:
@@ -11,34 +9,26 @@
   - Arvin Schedule
   - Bellflower Bus Schedule
 2025-06-11:
-  - SLO Peak Transit Schedule
-  - Glendora Schedule
-  - Get Around Town Express Schedule
-  - Culver City Schedule
   - North County Schedule
-  - Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
-  - Bay Area 511 SolTrans Schedule
-  - Bay Area 511 Vacaville City Coach Schedule
-  - Bay Area 511 Vine Transit Schedule
-  - Mountain Transit Schedule
-  - Madera Metro Schedule
-  - Eastern Sierra Schedule
-  - DowneyLink Avail Schedule
   - Havasu Landing Ferry Schedule
-  - Redding Schedule
-  - LA DOT Schedule
   - Rosemead Passio Schedule
-  - Beach Cities GMV Schedule
-  - Desert Roadrunner GMV Schedule
-  - Santa Maria Schedule
 2025-07-16:
+  - TCRTA TripShot Schedule
+  - Bear Schedule
+  - Victor Valley Schedule
+  - eTrans Schedule
+  - Guadalupe Flyer Schedule
+  - Foothill Schedule
+  - Roseville Transit GMV Schedule
+  - StanRTA Schedule
+2025-09-24:
   - Santa Ynez Mecatran Schedule
+  - SLO Peak Transit Schedule
   - GET Schedule
   - Flixbus Schedule
   - Tracy Schedule
   - San Joaquin Schedule
   - San Juan Capistrano Trolley Schedule
-  - TCRTA TripShot Schedule
   - Tahoe Transportation District GMV Schedule
   - Merced GMV Schedule
   - Torrance Schedule
@@ -47,14 +37,16 @@
   - BruinBus Schedule
   - Unitrans Schedule
   - Visalia Schedule
-  - Bear Schedule
   - Cerritos on Wheels Website Schedule
   - Calabasas Schedule
   - Cudahy Schedule
-  - Alhambra Schedule
   - La Campana Schedule
+  - Glendora Schedule
   - Inglewood Schedule
   - Lompoc Schedule
+  - Get Around Town Express Schedule
+  - Culver City Schedule
+  - Alhambra Schedule
   - Antelope Valley Transit Authority Schedule
   - Big Blue Bus Schedule
   - Huntington Park Schedule
@@ -96,6 +88,8 @@
   - Bay Area 511 MVGO Schedule
   - Bay Area 511 Petaluma Schedule
   - Bay Area 511 PresidiGo Schedule
+  - Bay Area 511 Rio Vista Delta Breeze Schedule
+  - Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
   - Bay Area 511 San Francisco Bay Ferry Schedule
   - Bay Area 511 Santa Clara Transit Schedule
   - Bay Area 511 Muni Schedule
@@ -104,19 +98,24 @@
   - Bay Area 511 Sonoma County Transit Schedule
   - Bay Area 511 Santa Rosa CityBus Schedule
   - Bay Area 511 South San Francisco Shuttle Schedule
+  - Bay Area 511 SolTrans Schedule
   - Bay Area 511 Treasure Island Ferry Schedule
   - Bay Area 511 Union City Transit Schedule
+  - Bay Area 511 Vacaville City Coach Schedule
+  - Bay Area 511 Vine Transit Schedule
   - Bay Area 511 WestCAT Schedule
   - Bay Area 511 Tri-Valley Wheels Schedule
-  - Victor Valley Schedule
   - SLO Schedule
   - Santa Clarita Schedule
   - Anaheim Resort Schedule
   - Baldwin Park Schedule
   - CatTracks Schedule
   - Commerce Schedule
+  - Roseville Transit TripShot Schedule
   - Amtrak Schedule
   - Clean Air Express Schedule
+  - Amtrak San Joaquins Schedule
+  - TCRTA Schedule
   - Tahoe Transportation District Schedule
   - Tehama Schedule
   - Turlock Schedule
@@ -126,18 +125,19 @@
   - Amador Schedule
   - Banning Pass Schedule
   - Beaumont Transit Schedule
+  - Mountain Transit Schedule
   - Calaveras Schedule
   - Lawndale Schedule
+  - Madera Metro Schedule
   - Corona Schedule
   - Clovis Schedule
   - Delano Schedule
   - Redwood Coast Schedule
   - LADPW Schedule
+  - Eastern Sierra Schedule
   - El Monte Schedule
   - El Dorado Schedule
-  - eTrans Schedule
   - Nevada County Schedule
-  - Guadalupe Flyer Schedule
   - Humboldt Schedule
   - Kern Schedule
   - Laguna Beach Schedule
@@ -157,9 +157,9 @@
   - Sage Stage Schedule
   - Siskiyou Schedule
   - Santa Cruz Schedule
+  - DowneyLink Avail Schedule
   - Dana Point Trolley Schedule
   - Long Beach Schedule
-  - Foothill Schedule
   - Fresno Schedule
   - LA Metro Bus Schedule
   - LA Metro Rail Schedule
@@ -167,14 +167,15 @@
   - Glendale Schedule
   - Artesia Schedule
   - Maywood Schedule
-  - Yurok Schedule
   - Tuolumne Remix Schedule
+  - eTrans Schedule Remix
   - SunLine Avail Schedule
   - Roseville Schedule
   - South County Transit Link Schedule
   - Elk Grove Schedule
   - Sacramento Schedule
   - Kings Schedule
+  - LA DOT Schedule
   - LAX Shuttles Schedule
   - LAX Flyaway Bus Schedule
   - Montebello Schedule
@@ -191,19 +192,22 @@
   - Spirit Bus Passio Schedule
   - UCSC Schedule
   - B-Line Schedule
+  - Redding Schedule
   - Carson Circuit Schedule
   - Fresno County Schedule
+  - Beach Cities GMV Schedule
   - Basin Transit GMV Schedule
   - Burbank Schedule
   - G Trans Schedule
   - Lawndale Beat GMV Schedule
-  - Roseville Transit GMV Schedule
+  - Desert Roadrunner GMV Schedule
   - Pasadena Schedule
   - Manteca Schedule
   - Imperial Valley Transit Schedule
   - SBMTD Schedule
   - SLORTA Schedule
-  - StanRTA Schedule
+  - Santa Maria Schedule
+  - Yurok Schedule
   - Metrolink Schedule
 2024-02-14:
   - Rosemead Schedule
