@@ -39,3 +39,5 @@
 2025-06-30 19:43:04.128 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:142 - nearest neighbor for speedmap_segments 2025-06-11: 0:11:41.269737
 2025-07-17 13:51:07.081 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:142 - nearest neighbor for rt_stop_times 2025-07-16: 0:36:11.741538
 2025-07-17 14:17:57.893 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:142 - nearest neighbor for speedmap_segments 2025-07-16: 0:08:08.711024
+2025-10-02 12:03:24.220 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:142 - nearest neighbor for rt_stop_times 2025-09-24: 0:38:18.993070
+2025-10-02 12:29:44.730 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:142 - nearest neighbor for speedmap_segments 2025-09-24: 0:09:07.977195
