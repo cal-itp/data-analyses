@@ -44,7 +44,7 @@ def clip_to_ca(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Clip to CA boundaries. 
     """    
-    ca = catalog.ca_boundary(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(gdf.crs)
+    ca = catalog.ca_boundary().read().to_crs(gdf.crs)
 
     gdf2 = gdf.clip(ca, keep_geom_type = False).reset_index(drop=True)
 

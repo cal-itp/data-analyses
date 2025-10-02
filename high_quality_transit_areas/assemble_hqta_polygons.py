@@ -79,7 +79,7 @@ def buffer_major_transit_stops(
     Buffer major transit stops. 
     Start with hqta points and filter out the hq_corridor_bus types.
     """
-    hqta_points = catalog.hqta_points(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(PROJECT_CRS)
+    hqta_points = catalog.hqta_points().read().to_crs(PROJECT_CRS)
 
     stops = hqta_points[hqta_points.hqta_type != "hq_corridor_bus"]
     

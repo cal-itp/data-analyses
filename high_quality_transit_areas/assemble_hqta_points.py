@@ -39,11 +39,11 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     the maximum arrivals for each stop (keep if it shows up in hqta_points) 
     with left merge.
     """  
-    rail_ferry_brt = catalog.rail_brt_ferry_stops(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(
+    rail_ferry_brt = catalog.rail_brt_ferry_stops().read().to_crs(
         crs)
-    major_stop_bus = catalog.major_stop_bus(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
-    major_stop_bus_branching = catalog.major_stop_bus_branching(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
-    stops_in_corridor = catalog.stops_in_hq_corr(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(crs)
+    major_stop_bus = catalog.major_stop_bus().read().to_crs(crs)
+    major_stop_bus_branching = catalog.major_stop_bus_branching().read().to_crs(crs)
+    stops_in_corridor = catalog.stops_in_hq_corr().read().to_crs(crs)
     
     trip_count_cols = ["am_max_trips_hr", "pm_max_trips_hr"]
 
@@ -130,7 +130,7 @@ def add_route_agency_info(
     Add agency names by merging it in with our crosswalk
     and populate primary and secondary operator information.
     """
-    stop_with_route_crosswalk = catalog.stops_info_crosswalk(geopandas_kwargs={"storage_options": {"token": credentials}}).read()
+    stop_with_route_crosswalk = catalog.stops_info_crosswalk().read()
     
     #  TODO lookback and concat
     agency_info = get_agency_crosswalk(analysis_date)
