@@ -307,3 +307,5 @@
 2025-10-02 09:55:35.015 | INFO     | __main__:<module>:185 - C1_prep_pairwise_intersections 2025-09-24 execution time: 0:00:24.395301
 2025-10-02 09:57:47.066 | INFO     | __main__:<module>:127 - C2_find_intersections 2025-09-24 execution time: 0:00:14.069232
 2025-10-02 10:00:33.134 | INFO     | __main__:<module>:195 - C3_create_bus_hqta_types 2025-09-24 execution time: 0:00:17.860469
+2025-10-02 10:19:24.851 | INFO     | __main__:<module>:270 - D1_assemble_hqta_points 2025-09-24 execution time: 0:00:21.067102
+2025-10-02 10:20:10.014 | INFO     | __main__:<module>:171 - D2_assemble_hqta_polygons 2025-09-24 execution time: 0:00:14.807217

@@ -210,7 +210,7 @@ def read_standardize_mpo_input(mpo_data_path = MPO_DATA_PATH, gcsgp = gcsgp, fs 
     """
     Read in mpo-provided planned major transit stops and enforce schema.
     """
-    mpo_names = [x.split('/')[-1].split('.')[0] for x in fs.ls(MPO_DATA_PATH) if x.split('/')[-1]]
+    mpo_names = [x.split('/')[-1].split('.')[0] for x in fs.ls(MPO_DATA_PATH) if x.split('/')[-1] != 'mpo_input']
     
     mpo_gdfs = []
     for mpo_name in mpo_names:
