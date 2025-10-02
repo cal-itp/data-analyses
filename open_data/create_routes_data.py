@@ -399,7 +399,6 @@ if __name__ == "__main__":
     )
     
     # Patch previous dates and add SHN + Route Typology
-    """
     # Amanda: commenting this out for now.
     published_routes = (
     patch_previous_dates(
@@ -411,11 +410,10 @@ if __name__ == "__main__":
     .pipe(open_data_utils.standardize_operator_info_for_exports, analysis_date)
     .pipe(finalize_export_df)
 ) 
-    """
-    published_routes = patch_previous_dates(
-        routes, 
-        analysis_date,
-    ).pipe(finalize_export_df)
+#     published_routes = patch_previous_dates(
+#         routes, 
+#         analysis_date,
+#     ).pipe(finalize_export_df)
     
     utils.geoparquet_gcs_export(
         published_routes, 
