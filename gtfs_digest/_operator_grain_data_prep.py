@@ -168,6 +168,9 @@ if __name__ == "__main__":
         columns = routes_readable_col_names
     ).reset_index(drop=True)
     
+    # Buffer
+    most_recent_routes.geometry = most_recent_routes.geometry.buffer(100)
+    
     utils.geoparquet_gcs_export(
         most_recent_routes,
         RT_SCHED_GCS,

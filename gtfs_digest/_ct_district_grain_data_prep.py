@@ -84,12 +84,12 @@ def data_wrangling_operator_map(portfolio_organization_names: list) -> gpd.GeoDa
     )
 
     # Buffer
-    operator_route_gdf.geometry = operator_route_gdf.geometry.buffer(100)
+    operator_route_gdf.geometry = operator_route_gdf.geometry.buffer(35)
     operator_route_gdf = operator_route_gdf.dissolve(by="analysis_name").reset_index()
 
     # Need to create a number column in order for webmaps to work
     operator_route_gdf = operator_route_gdf.reset_index(drop=False)
-    operator_route_gdf = operator_route_gdf.rename(columns={"index": "number"})
+    operator_route_gdf = operator_route_gdf.rename(columns={"index": "Number"})
     return operator_route_gdf
 
 def final_transit_route_shs_outputs(
@@ -138,7 +138,7 @@ def final_transit_route_shs_outputs(
     
     # Buffer so we can see stuff and change the CRS
     map_gdf = map_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
-    map_gdf.geometry = map_gdf.geometry.buffer(75)
+    map_gdf.geometry = map_gdf.geometry.buffer(35)
     
     # We want a text table to display.
     # Have to rejoin and to find only the SHN routes that are in the district
@@ -176,7 +176,9 @@ def final_transit_route_shs_outputs(
     text_table = text_table.rename(columns = transit_shn_map_columns)
     map_gdf = map_gdf.rename(columns = transit_shn_map_columns).drop(columns = ["on_shs"])
     map_gdf = map_gdf.reset_index(drop=False)
-    map_gdf = map_gdf.rename(columns={"index": "number"})
+    map_gdf = map_gdf.rename(columns={"index": "Number"})
+    map_gdf = map_gdf[['Analysis Name', 'Route', 'geometry',
+       'State Highway Network Route', "Number"]]
     return map_gdf, text_table
 
 def create_gtfs_stats(df:pd.DataFrame)->pd.DataFrame:
