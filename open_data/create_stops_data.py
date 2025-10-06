@@ -193,13 +193,13 @@ if __name__ == "__main__":
     )
     utils.geoparquet_gcs_export(
         published_stops,
-        AH_TEST,
+        TRAFFIC_OPS_GCS,
         f"export/ca_transit_stops_{analysis_date}"
     )
     
     utils.geoparquet_gcs_export(
         published_stops, 
-        AH_TEST, 
+        TRAFFIC_OPS_GCS, 
         "ca_transit_stops"
     )
     
