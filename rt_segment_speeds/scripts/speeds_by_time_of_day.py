@@ -14,7 +14,7 @@ from loguru import logger
 from typing import Literal, Optional
 
 from segment_speed_utils import gtfs_schedule_wrangling, helpers, segment_calcs
-from shared_utils import time_helpers, open_data_utils
+from shared_utils import time_helpers
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 from segment_speed_utils.project_vars import SEGMENT_TYPES
 
@@ -118,7 +118,7 @@ def aggregate_by_time_of_day(
             gtfs_schedule_wrangling.merge_operator_identifiers, 
             [analysis_date],
             columns = CROSSWALK_COLS
-        ).pipe(open_data_utils.standardize_operator_info_for_exports, analysis_date)
+        )
         
         # segment_id should capture the 1,000m segments, where it's suffixed -1, -2, -3
         SEGMENT_COLS = [
