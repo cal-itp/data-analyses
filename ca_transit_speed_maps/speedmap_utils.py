@@ -11,8 +11,8 @@ from IPython.display import display, Markdown, IFrame
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 from update_vars_index import SPEED_SEGS_PATH, ANALYSIS_DATE_LIST, GEOJSON_SUBFOLDER
 
-import google.auth
-credentials, project = google.auth.default()
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 
 def read_segments_shn(analysis_name: str, force_analysis_date: str = None) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
     '''
@@ -24,15 +24,18 @@ def read_segments_shn(analysis_name: str, force_analysis_date: str = None) -> (g
         ix_df = pd.read_parquet(f'./_rt_progress_{ANALYSIS_DATE_LIST[0]}.parquet')
         this_org_ix = ix_df.query('analysis_name == @analysis_name')
         analysis_date = this_org_ix.analysis_date.iloc[0] #  with lookback, this may be a previous date
-    path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
-    speedmap_segs = gpd.read_parquet(path,
-                                     filters=[['analysis_name', '==', analysis_name]],
-                                     storage_options = {"token": credentials.token}) #  aggregated
-    assert (speedmap_segs
-    >> select(-_.route_short_name, -_.direction_id)).isna().any().any() == False, 'no cols besides route_short_name, direction_id should be nan'
+    path = './speedmaps_analysis_name_test.parquet'
+    print(f'testing with {path}')
+    speedmap_segs = gpd.read_parquet(path, filters=[['analysis_name', '==', analysis_name]])
+    # path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
+    # speedmap_segs = gcsgp.read_parquet(path,
+    #                                  filters=[['analysis_name', '==', analysis_name]]) #  aggregated
+    msg = 'no cols besides route_short_name, direction_id should be nan'
+    assert speedmap_segs.drop(columns=['route_short_name', 'direction_id']).isna().any().any() == False, msg
     speedmap_segs = prepare_segment_gdf(speedmap_segs).assign(analysis_date = analysis_date)
-    shn = gpd.read_parquet(rt_utils.SHN_PATH, storage_options = {"token": credentials.token})
-    this_shn = shn >> filter(_.District.isin([int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]))
+    shn = gcsgp.read_parquet(rt_utils.SHN_PATH)
+    this_district = [int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]
+    this_shn = shn.query('District.isin(@this_district)')
     
     return (speedmap_segs, this_shn)
 
@@ -60,7 +63,7 @@ def prepare_segment_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     gdf.geometry = gdf.geometry.apply(rt_utils.try_parallel)
     gdf = gdf.apply(rt_utils.arrowize_by_frequency, axis=1, frequency_col='trips_hr_sch')
 
-    gdf = gdf >> arrange(_.trips_hr_sch)
+    gdf = gdf.sort_values(by='trips_hr_sch', ascending=False)
 
     return gdf
 
@@ -80,7 +83,7 @@ def map_excluded_shapes(existing_state: dict, speedmap_segs: gpd.GeoDataFrame, s
     
     '''
     display_date = dt.date.fromisoformat(analysis_date).strftime('%B %d %Y (%A)')
-    filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_excluded_shapes_{time_of_day}"
+    filename = f"{analysis_date}_{speedmap_segs.base64_url.iloc[0]}_excluded_shapes_{time_of_day}"
     title = f"{speedmap_segs.analysis_name.iloc[0]} {display_date} Excluded Shapes {time_of_day}"
 
     shapes_gdf = shapes_gdf[['shape_id', 'route_id', 'route_short_name', 'geometry']]
@@ -105,7 +108,7 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
     Always add State Highway Network first.
     '''
     time_of_day_lower = time_of_day.lower().replace(' ', '_')
-    speedmap_segs = speedmap_segs >> filter(_.time_of_day == time_of_day)
+    speedmap_segs = speedmap_segs.query('time_of_day == @time_of_day')
     if speedmap_segs.empty:
         return None
     color_col = {'new_speedmap': 'p20_mph', 'new_speed_variation': 'fast_slow_ratio'}[map_type]
@@ -114,7 +117,7 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
                                                 time_of_day, analysis_date)
     
     display_date = dt.date.fromisoformat(analysis_date).strftime('%B %d %Y (%A)')
-    filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_{map_type}_{time_of_day}"
+    filename = f"{analysis_date}_{speedmap_segs.base64_url.iloc[0]}_{map_type}_{time_of_day}"
     title = f"{speedmap_segs.analysis_name.iloc[0]} {display_date} {time_of_day}"
     
     if map_type == 'new_speedmap':
