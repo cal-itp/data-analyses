@@ -2,12 +2,13 @@ import pandas as pd
 import geopandas as gpd
 from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers_m
 from shared_utils.rt_utils import arrowize_by_frequency, try_parallel
+from typing import Hashable
 
 
 def sjoin_signals(
     signals_gdf: gpd.GeoDataFrame,
-    segments_gdf: gpd.GeoDataFrame,
     segments_lines_gdf: gpd.GeoDataFrame,
+    unique_identifier_signals: Hashable,
     signals_buffer_distance: int = 150,
 ):
     """
@@ -18,35 +19,31 @@ def sjoin_signals(
     segments_lines_gdf: geometry is linestrings (need for later approaching calc)
     """
 
-    signals = signals_gdf.loc[
-        signals_gdf["tms_unit_type"] != "Freeway Ramp Meters",
-        ["imms_id", "objectid", "location", signals_gdf.geometry.name],
+    # Get buffered signals with just join fields and geometry
+    signals = signals_gdf[
+        [unique_identifier_signals, signals_gdf.geometry.name]
     ].copy()
-
     signals_points = signals.to_crs(CA_NAD83Albers_m)
     signals_buffered = signals_points.copy()
-    signals_buffered.geometry = signals_buffered.buffer(150)
+    signals_buffered.geometry = signals_buffered.buffer(signals_buffer_distance)
 
-    joined = gpd.sjoin(segments_gdf, signals_buffered).drop("index_right", axis=1)
+    # Join segments to signals, keeping only join fields from both
+    # Rename the merged geometry to "line_geom"
+    joined = (
+        segments_lines_gdf.to_crs(CA_NAD83Albers_m)
+        .sjoin(signals_buffered, how="left")
+        .drop("index_right", axis=1)
+    ).rename_geometry("line_geom")
 
-    points_for_join = signals_points.rename_geometry("signal_pt_geom")[
-        ["signal_pt_geom", "imms_id", "objectid"]
-    ]
+    # Merge signal point geometry back into the joined gdf
+    points_for_join = signals_points.rename_geometry("signal_pt_geom")
     joined_signal_points = joined.merge(
-        points_for_join, on="objectid", how="inner", validate="many_to_one"
-    )
-
-    # add line geometries from stop_segment_speed_view
-    seg_lines = segments_lines_gdf.rename_geometry("line_geom")[
-        ["line_geom", "shape_id", "segment_id", "organization_source_record_id"]
-    ].drop_duplicates(keep="first")
-    # ideally a more robust join in the future
-    joined_seg_lines = joined_signal_points.merge(
-        seg_lines,
+        points_for_join,
+        on=unique_identifier_signals,
         how="inner",
-        on=["shape_id", "segment_id"],
+        validate="many_to_one",
     )
-    return joined_seg_lines
+    return joined_signal_points
 
 
 def filter_points_along_corridor(
@@ -58,41 +55,11 @@ def filter_points_along_corridor(
     )
 
 
-def clean_sjoin_signals_segments(
-    signals_gdf, speedmap_segments_gdf, buffer_distance
-) -> gpd.GeoDataFrame:
-    """
-    This just calls sjoin_signals_segments but handles the weirdness with buffering, it should be integrated into that function instead
-    """
-    buffer_distance_segments = 5
-    buffer_distance_signals = buffer_distance - buffer_distance_segments
-
-    # Get one GDF with signals and their nearest segment
-    buffered_speedmap_segments = gpd.GeoDataFrame(
-        data=speedmap_segments_gdf.drop(speedmap_segments_gdf.geometry.name, axis=1),
-        geometry=speedmap_segments_gdf.to_crs(CA_NAD83Albers_m).buffer(
-            buffer_distance_segments
-        ),
-    )
-
-    # Join segments to signals
-    sjoined_signals_segments = (
-        sjoin_signals(
-            signals_gdf=signals_gdf.reset_index(),
-            segments_gdf=buffered_speedmap_segments,
-            segments_lines_gdf=speedmap_segments_gdf,
-            signals_buffer_distance=buffer_distance_signals,
-        )
-        .drop("geometry", axis=1)
-        .set_geometry("line_geom")
-    )
-    return sjoined_signals_segments
-
-
-def add_transit_metrics_to_signals(signals_gdf, sjoined_signals_segments):
-    # Get distances which points and segments should be buffered by
-    # TODO: I still don't understand the point of this, would be good to rewrite sjoin_signals to avoid
-
+def add_transit_metrics_to_signals(
+    signals_gdf: gpd.GeoDataFrame,
+    sjoined_signals_segments: gpd.GeoDataFrame,
+    unique_identifier_signals: Hashable,
+):
     # Get a gdf of segments with one entry per signal and shape_id
     # Get the distance from the segment to the associated signal
     sjoined_signals_segments["distance_to_signal"] = (
@@ -103,12 +70,12 @@ def add_transit_metrics_to_signals(signals_gdf, sjoined_signals_segments):
     # Make sure we only count the one shape per signal
     signals_segments_removed_duplicates = sjoined_signals_segments.sort_values(
         ["distance_to_signal"], ascending=True
-    ).drop_duplicates(subset=["shape_id", "objectid"], keep="first")
+    ).drop_duplicates(subset=["shape_id", unique_identifier_signals], keep="first")
 
     # Get metrics for each signal
-    signals_gdf_with_metrics = signals_gdf.copy()
+    signals_gdf_with_metrics = signals_gdf.set_index(unique_identifier_signals)
     speedmaps_grouped_by_signal = signals_segments_removed_duplicates.groupby(
-        "objectid"
+        unique_identifier_signals
     )
     # Get frequencies through a stop
     signals_gdf_with_metrics["trips_hr_sch"] = speedmaps_grouped_by_signal[
@@ -145,9 +112,10 @@ def ready_speedmap_segments_for_display(sjoined_segments_gdf):
     return arrowized_gdf
 
 
-def ready_signals_for_display(signals_gdf, buffer_distance):
+def ready_signals_for_display(signals_gdf, buffer_distance, ownership_map):
     buffered_signals = gpd.GeoDataFrame(
         data=signals_gdf.rename(columns={"trips_hr_sch": "Trips/Hour"}),
         geometry=signals_gdf.to_crs(CA_NAD83Albers_m).buffer(buffer_distance),
     ).reset_index()
+    buffered_signals["color_key"] = buffered_signals["signal_owner"].map(ownership_map)
     return buffered_signals
