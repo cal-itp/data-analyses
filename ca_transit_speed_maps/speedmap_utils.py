@@ -14,7 +14,7 @@ from update_vars_index import SPEED_SEGS_PATH, ANALYSIS_DATE_LIST, GEOJSON_SUBFO
 import google.auth
 credentials, project = google.auth.default()
 
-def read_segments_shn(organization_name: str, force_analysis_date: str = None) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
+def read_segments_shn(analysis_name: str, force_analysis_date: str = None) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
     '''
     Get filtered detailed speedmap segments for an organization, and relevant district SHN.
     '''
@@ -22,11 +22,11 @@ def read_segments_shn(organization_name: str, force_analysis_date: str = None) -
         analysis_date = force_analysis_date
     else:
         ix_df = pd.read_parquet(f'./_rt_progress_{ANALYSIS_DATE_LIST[0]}.parquet')
-        this_org_ix = ix_df.query('organization_name == @organization_name')
+        this_org_ix = ix_df.query('analysis_name == @analysis_name')
         analysis_date = this_org_ix.analysis_date.iloc[0] #  with lookback, this may be a previous date
     path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
     speedmap_segs = gpd.read_parquet(path,
-                                     filters=[['organization_name', '==', organization_name]],
+                                     filters=[['analysis_name', '==', analysis_name]],
                                      storage_options = {"token": credentials.token}) #  aggregated
     assert (speedmap_segs
     >> select(-_.route_short_name, -_.direction_id)).isna().any().any() == False, 'no cols besides route_short_name, direction_id should be nan'
@@ -81,7 +81,7 @@ def map_excluded_shapes(existing_state: dict, speedmap_segs: gpd.GeoDataFrame, s
     '''
     display_date = dt.date.fromisoformat(analysis_date).strftime('%B %d %Y (%A)')
     filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_excluded_shapes_{time_of_day}"
-    title = f"{speedmap_segs.organization_name.iloc[0]} {display_date} Excluded Shapes {time_of_day}"
+    title = f"{speedmap_segs.analysis_name.iloc[0]} {display_date} Excluded Shapes {time_of_day}"
 
     shapes_gdf = shapes_gdf[['shape_id', 'route_id', 'route_short_name', 'geometry']]
     speedmap_segs = speedmap_segs.dissolve()
@@ -115,7 +115,7 @@ def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFr
     
     display_date = dt.date.fromisoformat(analysis_date).strftime('%B %d %Y (%A)')
     filename = f"{analysis_date}_{speedmap_segs.organization_source_record_id.iloc[0]}_{map_type}_{time_of_day}"
-    title = f"{speedmap_segs.organization_name.iloc[0]} {display_date} {time_of_day}"
+    title = f"{speedmap_segs.analysis_name.iloc[0]} {display_date} {time_of_day}"
     
     if map_type == 'new_speedmap':
         cmap = rt_utils.ACCESS_ZERO_THIRTY_COLORSCALE

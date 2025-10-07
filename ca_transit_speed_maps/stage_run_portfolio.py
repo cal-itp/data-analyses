@@ -30,19 +30,19 @@ def make_rt_site_yml(speedmaps_index_joined,
     
     chapters_list = []
     speedmaps_index_joined = speedmaps_index_joined >> arrange(_.caltrans_district)
-    speedmaps_index_joined = speedmaps_index_joined >> distinct(_.caltrans_district, _.organization_name, _.organization_source_record_id)
+    speedmaps_index_joined = speedmaps_index_joined >> distinct(_.caltrans_district, _.analysis_name, _.organization_source_record_id)
     for district in speedmaps_index_joined.caltrans_district.unique():
         if type(district) == type(None):
             continue
         chapter_dict = {}
         filtered = (speedmaps_index_joined
                     >> filter(_.caltrans_district == district)
-                    >> arrange(_.organization_name)
+                    >> arrange(_.analysis_name)
                    )
         chapter_dict['caption'] = f'District {district}'
         chapter_dict['params'] = {'district': district}
         chapter_dict['sections'] = \
-            [{'organization_name': organization_name} for organization_name in filtered.organization_name.to_list()]
+            [{'analysis_name': analysis_name} for analysis_name in filtered.analysis_name.to_list()]
         chapters_list += [chapter_dict]   
         
     parts_list = [{'chapters': chapters_list}]
