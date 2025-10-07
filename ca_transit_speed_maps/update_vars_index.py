@@ -39,7 +39,7 @@ def read_segs(analysis_date: str) -> gpd.GeoDataFrame:
     path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
     # path = './speedmaps_analysis_name_test.parquet'
     # print(f'testing with {path}')
-    org_cols = ['analysis_name', 'name', 'base64_url']
+    org_cols = ['analysis_name', 'name', 'base64_url', 'caltrans_district']
     # speedmap_segs = gpd.read_parquet(path)
     speedmap_segs = gcsgp.read_parquet(path)
     speedmap_segs = speedmap_segs[org_cols].drop_duplicates().reset_index(drop=True)
