@@ -81,74 +81,74 @@ if __name__ == "__main__":
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
                level="INFO")
     
-    delayed_dfs = [
-        delayed(nearest_neighbor_for_stop)(
-            analysis_date = analysis_date,
-            segment_type = segment_type,
-            config_path = GTFS_DATA_DICT
-        ) for analysis_date in analysis_date_list
-    ]
+#     delayed_dfs = [
+#         delayed(nearest_neighbor_for_stop)(
+#             analysis_date = analysis_date,
+#             segment_type = segment_type,
+#             config_path = GTFS_DATA_DICT
+#         ) for analysis_date in analysis_date_list
+#     ]
 
-    [compute(i)[0] for i in delayed_dfs]
+#     [compute(i)[0] for i in delayed_dfs]
 
-    logger.remove()
+#     logger.remove()
 
     
-    LOG_FILE = "../logs/interpolate_stop_arrival.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
+#     LOG_FILE = "../logs/interpolate_stop_arrival.log"
+#     logger.add(LOG_FILE, retention="3 months")
+#     logger.add(sys.stderr, 
+#                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+#                level="INFO")
 
-    delayed_dfs = [
-        delayed(interpolate_stop_arrivals)(
-            analysis_date = analysis_date, 
-            segment_type = segment_type, 
-            config_path = GTFS_DATA_DICT
-        ) for analysis_date in analysis_date_list
-    ]
+#     delayed_dfs = [
+#         delayed(interpolate_stop_arrivals)(
+#             analysis_date = analysis_date, 
+#             segment_type = segment_type, 
+#             config_path = GTFS_DATA_DICT
+#         ) for analysis_date in analysis_date_list
+#     ]
     
-    [compute(i)[0] for i in delayed_dfs]
+#     [compute(i)[0] for i in delayed_dfs]
 
-    logger.remove()
+#     logger.remove()
     
     
-    t0 = datetime.datetime.now()
-    delayed_dfs = [
-        delayed(concatenate_speedmap_proxy_arrivals_with_remaining)(
-            analysis_date,
-            config_path = GTFS_DATA_DICT
-        ) for analysis_date in analysis_date_list
-    ]
+#     t0 = datetime.datetime.now()
+#     delayed_dfs = [
+#         delayed(concatenate_speedmap_proxy_arrivals_with_remaining)(
+#             analysis_date,
+#             config_path = GTFS_DATA_DICT
+#         ) for analysis_date in analysis_date_list
+#     ]
     
-    [compute(i)[0] for i in delayed_dfs]
+#     [compute(i)[0] for i in delayed_dfs]
 
-    t1 = datetime.datetime.now()
-    print(f"concatenate proxy arrivals with rt_stop_times: {t1 - t0}")
+#     t1 = datetime.datetime.now()
+#     print(f"concatenate proxy arrivals with rt_stop_times: {t1 - t0}")
         
-    LOG_FILE = "../logs/speeds_by_segment_trip.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
+#     LOG_FILE = "../logs/speeds_by_segment_trip.log"
+#     logger.add(LOG_FILE, retention="3 months")
+#     logger.add(sys.stderr, 
+#                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+#                level="INFO")
 
-    delayed_dfs = [
-        delayed(calculate_speed_from_stop_arrivals)(
-            analysis_date = analysis_date, 
-            segment_type = segment_type,
-            config_path = GTFS_DATA_DICT
-        ) for analysis_date in analysis_date_list
-    ]
+#     delayed_dfs = [
+#         delayed(calculate_speed_from_stop_arrivals)(
+#             analysis_date = analysis_date, 
+#             segment_type = segment_type,
+#             config_path = GTFS_DATA_DICT
+#         ) for analysis_date in analysis_date_list
+#     ]
 
-    [compute(i)[0] for i in delayed_dfs]
+#     [compute(i)[0] for i in delayed_dfs]
     
-    logger.remove()
+#     logger.remove()
     
-    LOG_FILE = "../logs/speeds_timeofday.log"
-    logger.add(LOG_FILE, retention="3 months")
-    logger.add(sys.stderr, 
-               format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
-               level="INFO")
+#     LOG_FILE = "../logs/speeds_timeofday.log"
+#     logger.add(LOG_FILE, retention="3 months")
+#     logger.add(sys.stderr, 
+#                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
+#                level="INFO")
 
     delayed_dfs = [
         delayed(aggregate_by_time_of_day)(

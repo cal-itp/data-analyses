@@ -14,7 +14,7 @@ from loguru import logger
 from typing import Literal, Optional
 
 from segment_speed_utils import gtfs_schedule_wrangling, helpers, segment_calcs
-from shared_utils import time_helpers
+from shared_utils import time_helpers, portfolio_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 from segment_speed_utils.project_vars import SEGMENT_TYPES
 
@@ -135,6 +135,9 @@ def aggregate_by_time_of_day(
     )
     
     avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]
+    avg_speeds_with_geom = portfolio_utils.standardize_operator_info_for_exports(speedmap_segs, analysis_date)
+    drop_cols = [col for col in avg_speeds_with_geom.columns if 'original' in col or 'organization' in col]
+    avg_speeds_with_geom = avg_speeds_with_geom.drop(columns=drop_cols).drop_duplicates()
     
     utils.geoparquet_gcs_export(
         avg_speeds_with_geom,
