@@ -24,12 +24,12 @@ def read_segments_shn(analysis_name: str, force_analysis_date: str = None) -> (g
         ix_df = pd.read_parquet(f'./_rt_progress_{ANALYSIS_DATE_LIST[0]}.parquet')
         this_org_ix = ix_df.query('analysis_name == @analysis_name')
         analysis_date = this_org_ix.analysis_date.iloc[0] #  with lookback, this may be a previous date
-    path = './speedmaps_analysis_name_test.parquet'
-    print(f'testing with {path}')
-    speedmap_segs = gpd.read_parquet(path, filters=[['analysis_name', '==', analysis_name]])
-    # path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
-    # speedmap_segs = gcsgp.read_parquet(path,
-    #                                  filters=[['analysis_name', '==', analysis_name]]) #  aggregated
+    # path = './speedmaps_analysis_name_test.parquet'
+    # print(f'testing with {path}')
+    # speedmap_segs = gpd.read_parquet(path, filters=[['analysis_name', '==', analysis_name]])
+    path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
+    speedmap_segs = gcsgp.read_parquet(path,
+                                     filters=[['analysis_name', '==', analysis_name]]) #  aggregated
     msg = 'no cols besides route_short_name, direction_id should be nan'
     assert speedmap_segs.drop(columns=['route_short_name', 'direction_id']).isna().any().any() == False, msg
     speedmap_segs = prepare_segment_gdf(speedmap_segs).assign(analysis_date = analysis_date)

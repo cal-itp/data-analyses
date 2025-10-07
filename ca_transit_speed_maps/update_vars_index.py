@@ -36,13 +36,12 @@ def read_segs(analysis_date: str) -> gpd.GeoDataFrame:
     '''
     read speedmap segments from gcs and keep one row per organization x feed
     '''
-    # path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
-    path = './speedmaps_analysis_name_test.parquet'
-    print(f'testing with {path}')
-    # org_cols = ['organization_name', 'organization_source_record_id', 'name', 'base64_url']
+    path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
+    # path = './speedmaps_analysis_name_test.parquet'
+    # print(f'testing with {path}')
     org_cols = ['analysis_name', 'name', 'base64_url']
-    speedmap_segs = gpd.read_parquet(path)
-    # speedmap_segs = gcsgp.read_parquet(path)
+    # speedmap_segs = gpd.read_parquet(path)
+    speedmap_segs = gcsgp.read_parquet(path)
     speedmap_segs = speedmap_segs[org_cols].drop_duplicates().reset_index(drop=True)
     return speedmap_segs
 
@@ -65,9 +64,6 @@ def build_speedmaps_index(analysis_date_list: dt.date, operators: dict) -> pd.Da
     speedmap_segs = pd.DataFrame()
     for i in range(len(analysis_date_list)):
         speedmap_segs = append_previous(speedmap_segs, analysis_date_list[i], operators)
-    #  CT districts now added upstream
-    # districts = schedule_rt_utils.filter_dim_county_geography(analysis_date_list[0])
-    # new_ix = speedmap_segs.merge(districts, on = 'organization_name')
     speedmap_segs['status'] = 'speedmap_segs_available'
     return speedmap_segs
 
