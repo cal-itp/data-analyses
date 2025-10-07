@@ -135,7 +135,7 @@ def aggregate_by_time_of_day(
     )
     
     avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]
-    avg_speeds_with_geom = portfolio_utils.standardize_operator_info_for_exports(speedmap_segs, analysis_date)
+    avg_speeds_with_geom = portfolio_utils.standardize_operator_info_for_exports(avg_speeds_with_geom, analysis_date)
     drop_cols = [col for col in avg_speeds_with_geom.columns if 'original' in col or 'organization' in col]
     avg_speeds_with_geom = avg_speeds_with_geom.drop(columns=drop_cols).drop_duplicates()
     

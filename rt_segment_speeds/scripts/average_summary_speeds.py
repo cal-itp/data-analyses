@@ -15,7 +15,7 @@ from calitp_data_analysis import utils
 from segment_speed_utils import (gtfs_schedule_wrangling, 
                                  metrics,
                                  )
-from shared_utils import time_helpers
+from shared_utils import time_helpers, portfolio_utils
 from segment_speed_utils.project_vars import SEGMENT_TYPES
 from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 
@@ -146,6 +146,9 @@ def summary_speeds_by_peak_offpeak(
     )
         
     avg_speeds_with_geom = compute(avg_speeds_with_geom)[0]
+    avg_speeds_with_geom = portfolio_utils.standardize_operator_info_for_exports(avg_speeds_with_geom, analysis_date)
+    drop_cols = [col for col in avg_speeds_with_geom.columns if 'original' in col or 'organization' in col]
+    avg_speeds_with_geom = avg_speeds_with_geom.drop(columns=drop_cols).drop_duplicates()
     
     utils.geoparquet_gcs_export(
         avg_speeds_with_geom,
