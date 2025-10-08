@@ -8,7 +8,6 @@ from tqdm import tqdm
 import time
 
 import pandas as pd
-from siuba import *
 
 import datetime as dt
 from shared_utils import rt_utils
@@ -29,15 +28,14 @@ def make_rt_site_yml(speedmaps_index_joined,
         rt_site_data = yaml.load(rt_site, yaml.Loader)
     
     chapters_list = []
-    speedmaps_index_joined = speedmaps_index_joined >> arrange(_.caltrans_district)
-    speedmaps_index_joined = speedmaps_index_joined >> distinct(_.caltrans_district, _.analysis_name)
+    speedmaps_index_joined = speedmaps_index_joined.sort_values('caltrans_district', ascending=True)
+    speedmaps_index_joined = speedmaps_index_joined[['caltrans_district', 'analysis_name']].drop_duplicates()
     for district in speedmaps_index_joined.caltrans_district.unique():
         if type(district) == type(None):
             continue
         chapter_dict = {}
-        filtered = (speedmaps_index_joined
-                    >> filter(_.caltrans_district == district)
-                    >> arrange(_.analysis_name)
+        filtered = (speedmaps_index_joined.query('caltrans_district == @district')
+                        .sort_values('analysis_name', ascending=True)
                    )
         chapter_dict['caption'] = f'District {district}'
         chapter_dict['params'] = {'district': district}

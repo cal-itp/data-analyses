@@ -1,5 +1,4 @@
 import pandas as pd
-from siuba import *
 import numpy as np
 import geopandas as gpd
 from shared_utils import rt_utils, catalog_utils, webmap_utils
@@ -146,9 +145,7 @@ def chart_speeds_by_time_period(speedmap_segs: gpd.GeoDataFrame) -> None:
     domain = cmap.index
     range_ = [cmap.rgb_hex_str(i) for i in cmap.index]
     df = speedmap_segs[['time_of_day', 'p50_mph', 'p20_mph', 'p80_mph']]
-    df = df >> group_by(_.time_of_day) >> summarize(p50_mph = _.p50_mph.quantile(.5),
-                                                   p20_mph = _.p20_mph.quantile(.5),
-                                                   p80_mph = _.p80_mph.quantile(.5),)
+    df = df.groupby('time_of_day').median().reset_index()
     df['p50 - p20'] = -(df['p50_mph'] - df['p20_mph'])
     df['p80 - p50'] = df['p80_mph'] - df['p50_mph']
     error_bars = alt.Chart(df).mark_errorbar(thickness=5, color='gray', opacity=.6).encode(
