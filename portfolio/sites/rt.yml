@@ -1,7 +1,10 @@
 directory: ./ca_transit_speed_maps/
+
 notebook: ./ca_transit_speed_maps/01_new_speedmaps.ipynb
+
 parts:
   - chapters:
+
       - caption: District 01 - Eureka
         params:
           district: 01 - Eureka
@@ -10,12 +13,14 @@ parts:
           - analysis_name: Lake Transit Authority
           - analysis_name: Mendocino Transit Authority
           - analysis_name: Redwood Coast Transit Authority
+
       - caption: District 02 - Redding
         params:
           district: 02 - Redding
         sections:
           - analysis_name: Redding Area Bus Authority
           - analysis_name: Tehama County
+
       - caption: District 03 - Marysville / Sacramento
         params:
           district: 03 - Marysville / Sacramento
@@ -23,7 +28,8 @@ parts:
           - analysis_name: Butte County Association of Governments
           - analysis_name: City of Elk Grove
           - analysis_name: Sacramento Regional Transit District
-          - analysis_name: 'University of California, Davis'
+          - analysis_name: University of California, Davis
+
       - caption: District 04 - Bay Area / Oakland
         params:
           district: 04 - Bay Area / Oakland
@@ -38,21 +44,21 @@ parts:
           - analysis_name: City of Vacaville
           - analysis_name: Eastern Contra Costa Transit Authority
           - analysis_name: Emeryville Transportation Management Agency
-          - analysis_name: 'Golden Gate Bridge, Highway and Transportation District'
+          - analysis_name: Golden Gate Bridge, Highway and Transportation District
           - analysis_name: Livermore-Amador Valley Transit Authority
           - analysis_name: Marin County Transit District
           - analysis_name: Mountain View Transportation Management Association
           - analysis_name: Napa Valley Transportation Authority
           - analysis_name: Peninsula Corridor Joint Powers Board
           - analysis_name: Presidio Trust
-          - analysis_name: San Francisco Bay Ferry and Oakland Alameda Water Shuttle
-              Schedule
+          - analysis_name: San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule
           - analysis_name: San Mateo County Transit District
           - analysis_name: Santa Clara Valley Transportation Authority
           - analysis_name: Solano Transportation Authority
           - analysis_name: Sonoma County Transit Schedule
           - analysis_name: Sonoma-Marin Area Rail Transit District
           - analysis_name: Western Contra Costa Transit Authority
+
       - caption: District 05 - San Luis Obispo / Santa Barbara
         params:
           district: 05 - San Luis Obispo / Santa Barbara
@@ -62,6 +68,7 @@ parts:
           - analysis_name: San Luis Obispo Regional Transit Authority
           - analysis_name: Santa Barbara Metropolitan Transit District
           - analysis_name: UCSC and City of Santa Cruz Beach Shuttle
+
       - caption: District 06 - Fresno / Bakersfield
         params:
           district: 06 - Fresno / Bakersfield
@@ -72,6 +79,7 @@ parts:
           - analysis_name: Kern County
           - analysis_name: Kings County Area Public Transit Agency
           - analysis_name: Madera County
+
       - caption: District 07 - Los Angeles / Ventura
         params:
           district: 07 - Los Angeles / Ventura
@@ -94,9 +102,10 @@ parts:
           - analysis_name: City of Torrance
           - analysis_name: Long Beach Transit
           - analysis_name: Los Angeles County Metropolitan Transportation Authority
-          - analysis_name: 'University of California, Los Angeles'
-          - analysis_name: 'Ventura County (VCTC, Gold Coast, Cities of Camarillo,
-              Moorpark, Ojai, Simi Valley, Thousand Oaks)'
+          - analysis_name: University of California, Los Angeles
+          - analysis_name: Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai, Simi
+              Valley, Thousand Oaks)
+
       - caption: District 08 - San Bernardino / Riverside
         params:
           district: 08 - San Bernardino / Riverside
@@ -106,11 +115,13 @@ parts:
           - analysis_name: OmniTrans
           - analysis_name: Riverside Transit Agency
           - analysis_name: SunLine Transit Agency
+
       - caption: District 09 - Bishop
         params:
           district: 09 - Bishop
         sections:
           - analysis_name: Eastern Sierra Transit Authority
+
       - caption: District 10 - Stockton
         params:
           district: 10 - Stockton
@@ -121,12 +132,13 @@ parts:
           - analysis_name: San Joaquin Regional Rail Commission
           - analysis_name: San Joaquin Regional Transit District
           - analysis_name: Tuolumne County Transit Agency
+
       - caption: District 11 - San Diego
         params:
           district: 11 - San Diego
         sections:
-          - analysis_name: 'San Diego Metropolitan Transit System, Airport, Flagship
-              Cruises'
+          - analysis_name: San Diego Metropolitan Transit System, Airport, Flagship Cruises
+
       - caption: District 12 - Santa Ana
         params:
           district: 12 - Santa Ana
@@ -134,5 +146,7 @@ parts:
           - analysis_name: Anaheim Transportation Network
           - analysis_name: City of Irvine
           - analysis_name: Orange County Transportation Authority
+
 readme: ./ca_transit_speed_maps/README.md
+
 title: California Transit Speed Maps

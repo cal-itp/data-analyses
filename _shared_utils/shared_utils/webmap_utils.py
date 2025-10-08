@@ -26,6 +26,7 @@ def spa_map_export_link(
     site: str = SPA_MAP_SITE,
     cache_seconds: int = 3600,
     verbose: bool = False,
+    overwrite: bool = False,
 ) -> str:
     """
     Called via set_state_export. Handles stream writing of gzipped geojson to GCS bucket,
@@ -36,9 +37,12 @@ def spa_map_export_link(
     geojson_bytes = geojson_str.encode("utf-8")
     if verbose:
         print(f"writing to {path}")
-    with fs.open(path, "wb") as writer:  # write out to public-facing GCS?
-        with gzip.GzipFile(fileobj=writer, mode="w") as gz:
-            gz.write(geojson_bytes)
+    if fs.exists(path) and not overwrite:
+        print(f"file already exists at {path}, not overwriting, use overwrite = True to overwrite")
+    else:
+        with fs.open(path, "wb") as writer:  # write out to public-facing GCS?
+            with gzip.GzipFile(fileobj=writer, mode="w") as gz:
+                gz.write(geojson_bytes)
     if cache_seconds != 3600:
         fs.setxattrs(path, fixed_key_metadata={"cache_control": f"public, max-age={cache_seconds}"})
     base64state = base64.urlsafe_b64encode(json.dumps(state).encode()).decode()
