@@ -47,7 +47,7 @@ def read_shapes(speedmap_segs: gpd.GeoDataFrame):
     shapes = shapes.merge(trips, on='shape_array_key')
     org_shapes = shapes.merge(speedmap_segs[['schedule_gtfs_dataset_key']].drop_duplicates(),
                               on='schedule_gtfs_dataset_key')
-    return org_shapes
+    return org_shapes.dropna()
 
 def prepare_segment_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
