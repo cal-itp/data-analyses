@@ -60,10 +60,6 @@
 				<attrdef>Full name of the transit agency</attrdef>
 			</attr>
 			<attr>
-				<attrlabl>org_id</attrlabl>
-				<attrdef>Organization identifier for the agency</attrdef>
-			</attr>
-			<attr>
 				<attrlabl>stop_id</attrlabl>
 				<attrdef>Identifies a stop, station, or station entrance</attrdef>
 				<attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>

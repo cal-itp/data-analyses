@@ -347,7 +347,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "route_id",
         "route_type",
         "route_name_used",
-        "route_length_feet",
+        # "route_length_feet",
     ]
     shape_cols = ["shape_id", "n_trips"]
     agency_ids = ["base64_url"]
@@ -358,19 +358,21 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "pct_route_on_hwy_across_districts",
     ]
 
-    route_typology = [
-        "is_express",
-        "is_ferry",
-        "is_rail",
-        "is_coverage",
-        "is_local",
-        "is_downtown_local",
-        "is_rapid",
-    ]
+    # route_typology = [
+    #     "is_express",
+    #     "is_ferry",
+    #     "is_rail",
+    #     "is_coverage",
+    #     "is_local",
+    #     "is_downtown_local",
+    #     "is_rapid",
+    # ]
+    # col_order = (
+    #     route_cols + shape_cols + agency_ids + shn_cols + route_typology + ["geometry"]
+    # )
     col_order = (
-        route_cols + shape_cols + agency_ids + shn_cols + route_typology + ["geometry"]
+        route_cols + shape_cols + agency_ids + shn_cols + ["geometry"]
     )
-    # col_order = route_cols + shape_cols + agency_ids + ['geometry']
     df2 = (
         df[col_order].reindex(columns=col_order)
         .rename(columns=open_data_utils.STANDARDIZED_COLUMNS_DICT)
@@ -406,8 +408,8 @@ if __name__ == "__main__":
         analysis_date,
     )
     .pipe(add_shn_information, SHN_HWY_BUFFER_FEET)
-    .pipe(add_route_typologies)
-    .pipe(open_data_utils.standardize_operator_info_for_exports, analysis_date)
+    # .pipe(add_route_typologies)
+    .pipe(portfolio_utils.standardize_operator_info_for_exports, analysis_date)
     .pipe(finalize_export_df)
 ) 
 #     published_routes = patch_previous_dates(
