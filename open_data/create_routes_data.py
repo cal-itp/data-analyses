@@ -347,7 +347,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "route_id",
         "route_type",
         "route_name_used",
-        "route_length_feet",
+        # "route_length_feet",
     ]
     shape_cols = ["shape_id", "n_trips"]
     agency_ids = ["base64_url"]

@@ -145,7 +145,7 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     # Change column order
     route_cols = [
-        'source_record_id', 'analysis_name',
+        'analysis_name',
     ]       
     stop_cols = [
         'stop_id', 'stop_name', 
