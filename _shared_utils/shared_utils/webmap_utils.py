@@ -101,6 +101,8 @@ def set_state_export(
     gdf = gdf.to_crs(geography_utils.WGS84)
     if cmap and color_col:
         gdf["color"] = gdf[color_col].apply(lambda x: cmap.rgb_bytes_tuple(x))
+    elif "color" not in gdf.columns:
+        gdf = gdf.assign(color=[(155, 155, 155)] * gdf.shape[0])
     gdf = gdf.round(2)  # round for map display
     this_layer = [
         {
