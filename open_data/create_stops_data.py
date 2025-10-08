@@ -10,7 +10,7 @@ import yaml
 
 import open_data_utils
 from calitp_data_analysis import geography_utils, utils
-from shared_utils import publish_utils
+from shared_utils import publish_utils, portfolio_utils
 from update_vars import (analysis_date, 
                          GTFS_DATA_DICT,
                          TRAFFIC_OPS_GCS, 
@@ -40,7 +40,7 @@ def create_stops_file_for_export(
         storage_options={"token": credentials.token}
     )
     
-    stops2 = open_data_utils.standardize_operator_info_for_exports(stops, date)
+    stops2 = portfolio_utils.standardize_operator_info_for_exports(stops, date)
 
     time1 = datetime.datetime.now()
     print(f"get stops for date: {time1 - time0}")
@@ -188,7 +188,7 @@ if __name__ == "__main__":
         analysis_date,
     )
     
-    .pipe(open_data_utils.standardize_operator_info_for_exports, analysis_date)
+    .pipe(portfolio_utils.standardize_operator_info_for_exports, analysis_date)
     .pipe(finalize_export_df)
     )
     utils.geoparquet_gcs_export(

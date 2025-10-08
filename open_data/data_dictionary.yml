@@ -1,8 +1,8 @@
 metadata:
   version: 1
 common-fields:
-  - &org_id
-    definition: Organization identifier for the agency
+  # - &org_id
+  #   definition: Organization identifier for the agency
   - &agency
     definition: Full name of the transit agency
   - &route_id
@@ -85,7 +85,7 @@ tables:
     base64_url_secondary: 
       definition: |- 
         The base64 encoded url for the feed associated with the secondary agency
-    org_id_primary: *org_id
+    # org_id_primary: *org_id
     org_id_secondary: 
       definition: Organization identifier for the secondary agency
     mpo:
@@ -112,7 +112,7 @@ tables:
     base64_url_secondary: 
       definition: |- 
         The base64 encoded url for the feed associated with the secondary agency
-    org_id_primary: *org_id
+    # org_id_primary: *org_id
     org_id_secondary: 
       definition: Organization identifier for the secondary agency
     avg_trips_per_peak_hr:
@@ -127,7 +127,7 @@ tables:
         
   - dataset_name: ca_transit_routes
     agency: *agency
-    org_id: *org_id    
+    # org_id: *org_id    
     route_id: *route_id
     route_type: *route_type
     route_name: *route_name
@@ -146,7 +146,7 @@ tables:
 
   - dataset_name: ca_transit_stops
     agency: *agency
-    org_id: *org_id    
+    # org_id: *org_id    
     stop_id: *stop_id
     stop_name: *stop_name
     base64_url: *base64_url
@@ -188,7 +188,7 @@ tables:
 
   - dataset_name: speeds_by_stop_segments
     agency: *agency
-    org_id: *org_id    
+    # org_id: *org_id    
     route_id: *route_id
     direction_id: *direction_id
     stop_pair: *stop_pair
@@ -211,7 +211,7 @@ tables:
     
   - dataset_name: speeds_by_route_time_of_day
     agency: *agency
-    org_id: *org_id    
+    # org_id: *org_id    
     route_id: *route_id
     route_name: *route_name
     direction_id: *direction_id
