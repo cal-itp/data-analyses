@@ -135,6 +135,14 @@ tables:
     n_trips: 
       definition: Daily trips associated with this shape_id and route_id.      
     base64_url: *base64_url
+    shn_route:
+      definition: Route number or numbers of California State Highway System routes that this shape_id and route_id travels on.
+    on_shs:
+      definition: "0 or 1 indicating if this shape_id or route_id overlaps with the California State Highway System"
+    shn_districts:
+      definition: Caltrans District numbers containing each California State Highway System route that this shape_id and route_id travels on.
+    pct_route_on_hwy_across_districts:
+      definition: Percentage of shape_id and route_id distance traveling on any California State Highway System route.
 
   - dataset_name: ca_transit_stops
     agency: *agency
