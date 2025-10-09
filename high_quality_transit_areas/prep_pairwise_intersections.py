@@ -125,7 +125,7 @@ def pairwise_intersections(
     azimuth-based comparison.
     """
     # Intersect each route with all others
-    corridors_gdf = corridors_gdf[corridors_gdf['segment_direction'] != 'inconclusive']
+    corridors_gdf = corridors_gdf[~corridors_gdf['circuitous_segment']]
     results = [
         sjoin_against_other_operators(corridors.query('route_key == @route_key'),
                                       corridors.query('route_key != @route_key'))

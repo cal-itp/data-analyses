@@ -227,29 +227,31 @@ def find_primary_direction_across_hqta_segments(
     #  TODO speed up, try dask?
     with_azimuth = with_direction.apply(add_azimuth, axis=1, **kwargs)
     
-    # Get predominant direction based on segments
-    predominant_direction_by_route = (
-        with_azimuth.groupby(["route_key", "route_direction"])
-        .agg({"route_primary_direction": "count"})
-        .reset_index()
-        .sort_values(["route_key", "route_primary_direction"], 
-        # descending order, the one with most counts at the top
-        ascending=[True, False])
-        .drop_duplicates(subset="route_key")
-        .reset_index(drop=True)
-        [["route_key", "route_direction"]]
-     )
+    # # Get predominant direction based on segments
+    # predominant_direction_by_route = (
+    #     with_azimuth.groupby(["route_key", "route_direction"])
+    #     .agg({"route_primary_direction": "count"})
+    #     .reset_index()
+    #     .sort_values(["route_key", "route_primary_direction"], 
+    #     # descending order, the one with most counts at the top
+    #     ascending=[True, False])
+    #     .drop_duplicates(subset="route_key")
+    #     .reset_index(drop=True)
+    #     [["route_key", "route_direction"]]
+    #  )
     
     drop_cols = ["origin", "destination", "route_primary_direction"]
     
-    routes_with_primary_direction = pd.merge(
-        with_azimuth.rename(
-            columns = {"route_direction": "segment_direction"}), 
-        predominant_direction_by_route,
-        on = "route_key",
-        how = "left",
-        validate = "m:1"
-    ).drop(columns = drop_cols)
+    # routes_with_primary_direction = pd.merge(
+    #     with_azimuth.rename(
+    #         columns = {"route_direction": "segment_direction"}), 
+    #     predominant_direction_by_route,
+    #     on = "route_key",
+    #     how = "left",
+    #     validate = "m:1"
+    # ).drop(columns = drop_cols)
+    
+    routes_with_primary_direction = with_azimuth.drop(columns = drop_cols)
     
     return routes_with_primary_direction
     
@@ -267,11 +269,7 @@ if __name__=="__main__":
     hqta_segments = select_shapes_and_segment(
         analysis_date, HQTA_SEGMENT_LENGTH)
     
-    # Since route_direction at the route-level could yield both 
-    # north-south and east-west 
-    # for a given route, use the segments to determine the primary direction
-    
-    # test adding azimuth
+    # Use segment azimuth (degrees) to determine direction, accomodate non-grid streets
     geodesic = pyproj.Geod(ellps="WGS84")
     hqta_segments_with_dir = find_primary_direction_across_hqta_segments(
         hqta_segments, geodesic=geodesic)

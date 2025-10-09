@@ -126,8 +126,7 @@ def hqta_segment_keep_one_stop(
     
     return segment_to_stop_gdf
 
-#  use this for azimuth, too?
-def find_inconclusive_directions(hqta_segments: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+def find_circuitous_segments(hqta_segments: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
     Where individual segments loop tightly, segment_direction becomes arbitrary.
     Find these cases and mark segment_direction as "inconclusive"
@@ -142,8 +141,9 @@ def find_inconclusive_directions(hqta_segments: gpd.GeoDataFrame) -> gpd.GeoData
     hqta_segments['circuitousness_ratio'] = ((hqta_segments.length / hqta_segments.st_end_dist)
                                              .replace(np.inf, 10)
                                              .clip(upper=5))
-    hqta_segments.segment_direction = hqta_segments.apply(
-        lambda x: x.segment_direction if x.circuitousness_ratio < circuitousness_ratio_threshold else 'inconclusive', axis=1)
+    hqta_segments = hqta_segments.assign(circuitous_segment = hqta_segments.apply(
+        lambda x: x.circuitousness_ratio > circuitousness_ratio_threshold, axis=1)
+                                        )
     calculation_cols = ['length', 'start', 'end',
                        'st_end_dist', 'circuitousness_ratio']
     hqta_segments = hqta_segments.drop(columns=calculation_cols)
@@ -173,7 +173,7 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     hqta_segments = (hqta_segments.merge(st_copy[['schedule_gtfs_dataset_key', 'route_id']], on=['schedule_gtfs_dataset_key', 'route_id']))
     stop_times = stop_times.drop(columns=['route_id']).drop_duplicates() # prefer route_id from segments in future steps
     # Identify ambiguous direction segments to exclude from intersection steps
-    hqta_segments = find_inconclusive_directions(hqta_segments)
+    hqta_segments = find_circuitous_segments(hqta_segments)
     # Draw buffer to capture stops around hqta segments
     hqta_segments2 = hqta_segments.assign(
         geometry = hqta_segments.geometry.buffer(buffer_size)
