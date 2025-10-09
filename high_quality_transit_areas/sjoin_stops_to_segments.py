@@ -129,7 +129,6 @@ def hqta_segment_keep_one_stop(
 def find_circuitous_segments(hqta_segments: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     '''
     Where individual segments loop tightly, segment_direction becomes arbitrary.
-    Find these cases and mark segment_direction as "inconclusive"
     OK to keep in possible HQ corridors, but shouldn't be used for bus intersection major stops
     '''
     circuitousness_ratio_threshold = 3

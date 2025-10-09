@@ -87,7 +87,7 @@ def sjoin_against_other_operators(
     computationally expensive,
     so we want to do it on fewer rows. 
     """
-    route_cols = ["hqta_segment_id", "segment_direction", "route_key",
+    route_cols = ["hqta_segment_id", "route_key",
                   "fwd_azimuth_360"]
     
     s1 = gpd.sjoin(
