@@ -17,10 +17,8 @@ from loguru import logger
 from calitp_data_analysis import utils
 from update_vars import GCS_FILE_PATH, analysis_date
 
-import gcsfs
-import google.auth
-credentials, _ = google.auth.default()
-fs = gcsfs.GCSFileSystem(token=credentials)
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 
 def prep_bus_corridors(is_ms_precursor: bool = False, is_hq_corr: bool = False) -> gpd.GeoDataFrame:
     """
@@ -30,16 +28,14 @@ def prep_bus_corridors(is_ms_precursor: bool = False, is_hq_corr: bool = False) 
     """
     assert is_ms_precursor or is_hq_corr, 'must select exactly one category of segment'
     if is_ms_precursor:
-        hqtc_or_ms_pre = gpd.read_parquet(
+        hqtc_or_ms_pre = gcsgp.read_parquet(
             f"{GCS_FILE_PATH}all_bus.parquet",
-            filters = [[("ms_precursor", "==", is_ms_precursor)]],
-            storage_options={"token": credentials.token}
+            filters = [[("ms_precursor", "==", is_ms_precursor)]]
         ).reset_index(drop=True)
     elif is_hq_corr:
-        hqtc_or_ms_pre = gpd.read_parquet(
+        hqtc_or_ms_pre = gcsgp.read_parquet(
             f"{GCS_FILE_PATH}all_bus.parquet",
-            filters = [[("hq_transit_corr", "==", is_hq_corr)]],
-            storage_options={"token": credentials.token}
+            filters = [[("hq_transit_corr", "==", is_hq_corr)]]
         ).reset_index(drop=True)
         
     hqtc_or_ms_pre = hqtc_or_ms_pre.assign(
@@ -154,9 +150,9 @@ def pairwise_intersections(
         .reset_index(drop=True)
     )
     
-    pairs.to_parquet(
+    gcsgp.geo_data_frame_to_parquet(
+        pairs,
         f"{GCS_FILE_PATH}pairwise.parquet",
-        filesystem=fs
     )
     
     utils.geoparquet_gcs_export(

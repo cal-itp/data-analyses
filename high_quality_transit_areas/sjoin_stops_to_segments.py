@@ -15,9 +15,11 @@ import sys
 from loguru import logger
 
 from calitp_data_analysis import utils, get_fs
-from segment_speed_utils import helpers, gtfs_schedule_wrangling
+from segment_speed_utils import helpers
 from update_vars import GCS_FILE_PATH, analysis_date, PROJECT_CRS, SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD
 import lookback_wrappers
+from _utils import append_analysis_name
+
 
 am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
 pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
@@ -218,16 +220,26 @@ if __name__ == "__main__":
     stops = helpers.import_scheduled_stops(
         analysis_date,
         get_pandas = True,
-        crs = PROJECT_CRS
+        crs = PROJECT_CRS,
+        columns = stops_cols
     )
     published_operators_dict = lookback_wrappers.read_published_operators(analysis_date)
     print(published_operators_dict)
     trips_cols = ['name', 'feed_key', 'gtfs_dataset_key']
+    trips = helpers.import_scheduled_trips(
+        analysis_date,
+        columns = trips_cols,
+        get_pandas = True
+    )
     lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
     lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
     lookback_stops = lookback_wrappers.get_lookback_stops(published_operators_dict, lookback_trips_ix, stops_cols,
                                                          crs=PROJECT_CRS)
-    stops = pd.concat([stops, lookback_stops])
+    stops = (pd.concat([stops, lookback_stops])
+             .merge(pd.concat([trips, lookback_trips])[['feed_key', 'schedule_gtfs_dataset_key']].drop_duplicates(),
+                           on = 'feed_key')
+             .pipe(append_analysis_name, analysis_date=analysis_date)
+            )
     
     max_arrivals_by_stop = pd.read_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet"

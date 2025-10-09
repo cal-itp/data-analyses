@@ -7,6 +7,7 @@ from loguru import logger
 import sys
 import datetime
 import lookback_wrappers
+from _utils import append_analysis_name
 
 from update_vars import (analysis_date, AM_PEAK, PM_PEAK, EXPORT_PATH, GCS_FILE_PATH, PROJECT_CRS,
 SEGMENT_BUFFER_METERS, AM_PEAK, PM_PEAK, HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD, SHARED_STOP_THRESHOLD,
@@ -30,8 +31,7 @@ def get_st_trips(analysis_date: str) -> (pd.DataFrame, pd.DataFrame):
     print(published_operators_dict)
     lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
     lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
-    
-    trips = pd.concat([trips, lookback_trips])
+    trips = pd.concat([trips, lookback_trips]).pipe(append_analysis_name, analysis_date=analysis_date)
     
     st_cols = ["feed_key", "trip_id", "stop_id",
               "arrival_hour"]
@@ -41,7 +41,11 @@ def get_st_trips(analysis_date: str) -> (pd.DataFrame, pd.DataFrame):
         get_pandas = True,
     )
     lookback_stop_times = lookback_wrappers.get_lookback_st(published_operators_dict, lookback_trips_ix, st_cols)
-    stop_times = pd.concat([stop_times, lookback_stop_times])
+    stop_times = (pd.concat([stop_times, lookback_stop_times])
+                 .merge(trips[['feed_key', 'schedule_gtfs_dataset_key']].drop_duplicates(), on='feed_key')
+                 .pipe(append_analysis_name, analysis_date=analysis_date)
+                 )
+
     
     return stop_times, trips
 
@@ -58,7 +62,7 @@ def add_route_dir(
     
     stop_times = stop_times.merge(
         trips,
-        on = ["feed_key", "trip_id"]
+        on = ["feed_key", "trip_id", "schedule_gtfs_dataset_key"]
     )
 
     stop_times.direction_id = stop_times.direction_id.fillna(0).astype(int).astype(str)
@@ -309,7 +313,7 @@ def stop_times_aggregation_max_by_stop(
                    max_trips_by_stop.pm_max_trips.fillna(0)),
         route_dir_count = max_trips_by_stop.route_dir.map(lambda x: x.size)
     )
-        
+    
     return max_trips_by_stop
 
 if __name__ == "__main__":

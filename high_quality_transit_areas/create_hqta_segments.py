@@ -15,11 +15,12 @@ import zlib
 from loguru import logger
 
 from calitp_data_analysis import geography_utils, utils
-from shared_utils import rt_utils
+from shared_utils import rt_utils, portfolio_utils
 from segment_speed_utils import gtfs_schedule_wrangling
 from update_vars import GCS_FILE_PATH, analysis_date, HQTA_SEGMENT_LENGTH, PROJECT_CRS
 import pyproj
 import lookback_wrappers
+from _utils import append_analysis_name
                         
 
 def difference_overlay_by_route(
@@ -125,7 +126,8 @@ def select_shapes_and_segment(
     lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
     lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
     gdf_lookback = lookback_wrappers.get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix)
-    gdf = pd.concat([gdf, gdf_lookback])
+    gdf = pd.concat([gdf, gdf_lookback]).pipe(append_analysis_name, analysis_date=analysis_date)
+    # return gdf
     
     routes_both_dir = (gdf.route_key
                        .value_counts()

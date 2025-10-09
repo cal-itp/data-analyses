@@ -7,10 +7,11 @@ SEGMENT_BUFFER_METERS, MS_TRANSIT_THRESHOLD, SHARED_STOP_THRESHOLD,
 TARGET_AREA_DIFFERENCE, BRANCHING_OVERLAY_BUFFER)
 import create_aggregate_stop_frequencies
 import lookback_wrappers
+from _utils import append_analysis_name
+
 
 from tqdm import tqdm
 tqdm.pandas()
-# !pip install calitp-data-analysis==2025.6.24
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 gcsgp = GCSGeoPandas()
 
@@ -42,7 +43,7 @@ def get_trips_with_route_dir(analysis_date: str, published_operators_dict: dict)
     )
     lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
     lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
-    trips = pd.concat([trips, lookback_trips])
+    trips = pd.concat([trips, lookback_trips]).pipe(append_analysis_name, analysis_date=analysis_date)
     trips = trips[trips['route_type'].isin(['3', '11'])] #  bus only
     trips.direction_id = trips.direction_id.fillna(0).astype(int).astype(str)
     trips['route_dir'] = trips[['route_id', 'direction_id']].agg('_'.join, axis=1)
@@ -61,7 +62,7 @@ def get_shapes_with_lookback(analysis_date: str, published_operators_dict: dict,
         'shape_array_key not in @outside_amtrak_shapes'
     ).fillna({"direction_id": 0}).astype({"direction_id": "int"})
     lookback_hqta_shapes = lookback_wrappers.get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix, no_drop=True)
-    shapes = pd.concat([shapes, lookback_hqta_shapes])
+    shapes = pd.concat([shapes, lookback_hqta_shapes]).pipe(append_analysis_name, analysis_date=analysis_date)
     shapes = shapes.assign(route_dir = shapes.apply(lambda x: str(x.route_id) + '_' + str(x.direction_id), axis=1))
     shapes.geometry = shapes.buffer(BRANCHING_OVERLAY_BUFFER)
     shapes = shapes.assign(area = shapes.geometry.map(lambda x: x.area))
