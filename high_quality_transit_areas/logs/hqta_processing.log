@@ -311,3 +311,7 @@
 2025-10-02 10:20:10.014 | INFO     | __main__:<module>:171 - D2_assemble_hqta_polygons 2025-09-24 execution time: 0:00:14.807217
 2025-10-02 10:50:17.519 | INFO     | __main__:<module>:270 - D1_assemble_hqta_points 2025-09-24 execution time: 0:00:17.933284
 2025-10-02 10:51:14.852 | INFO     | __main__:<module>:171 - D2_assemble_hqta_polygons 2025-09-24 execution time: 0:00:15.599413
+2025-10-09 09:22:28.283 | INFO     | __main__:<module>:266 - A1_rail_ferry_brt_stops 2025-09-24 
+2025-10-09 09:24:07.066 | INFO     | __main__:<module>:267 - A1_rail_ferry_brt_stops 2025-09-24 
+2025-10-09 09:25:44.906 | INFO     | __main__:<module>:268 - A1_rail_ferry_brt_stops 2025-09-24 
+2025-10-09 09:26:14.009 | INFO     | __main__:<module>:294 - A1_rail_ferry_brt_stops 2025-09-24 execution time: 0:00:29.103159
