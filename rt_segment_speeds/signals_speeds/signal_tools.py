@@ -65,8 +65,8 @@ def add_transit_metrics_to_signals(
     """
     Return the signals_gdf with the following additional metrics:
     - trips_hr_sch: the total trips per hour associated with the signal
-    - route_names_aggregated: the comma-separated short names of each route associated with the signal. Maps 1:1 with organization_names_aggregated
-    - organization_names_aggregated: the comma-separated organization names of each route associated with the signal. Maps 1:1 with route_names_aggregated
+    - route_names_aggregated: the comma-separated short names of each route associated with the signal. Maps 1:1 with analysis_names_aggregated
+    - analysis_names_aggregated: the comma-separated analysis names of each route associated with the signal. Maps 1:1 with route_names_aggregated
     
     Parameters:
     - signals_gdf - a points gdf of traffic signals
@@ -98,14 +98,14 @@ def add_transit_metrics_to_signals(
         "trips_hr_sch"
     ].sum()
 
-    # Get all the routes and organizations that serve a stop
+    # Get all the routes and organizations (by analysis_name) that serve a stop
     def aggregate_names(names):
         return ", ".join(names.drop_duplicates().dropna())
     signals_gdf_with_metrics["route_names_aggregated"] = (
         speedmaps_grouped_by_signal["route_short_name"]
     ).agg(aggregate_names)
-    signals_gdf_with_metrics["organization_names_aggregated"] = (
-        speedmaps_grouped_by_signal["organization_name"]
+    signals_gdf_with_metrics["analysis_names_aggregated"] = (
+        speedmaps_grouped_by_signal["analysis_name"]
     ).agg(aggregate_names)
 
     return signals_gdf_with_metrics
@@ -123,7 +123,7 @@ def ready_speedmap_segments_for_display(sjoined_segments_gdf):
         arrowize_by_frequency, axis=1, frequency_col="trips_hr_sch"
     )
     arrowized_gdf["route_short_name"] = (
-        arrowized_gdf["organization_name"] + " - " + arrowized_gdf["route_short_name"]
+        arrowized_gdf["analysis_name"] + " - " + arrowized_gdf["route_short_name"]
     )
     return arrowized_gdf
 

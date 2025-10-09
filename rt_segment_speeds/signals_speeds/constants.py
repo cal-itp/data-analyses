@@ -1,7 +1,7 @@
 from shared_utils import rt_dates
 
 # constants
-TARGET_DATE = rt_dates.DATES["jul2025"]
+TARGET_DATE = rt_dates.DATES["sep2025"]
 TARGET_TIME_OF_DAY = "AM Peak"
 ANALYSIS_DISTRICT_NUMBER = 7
 TARGET_TIME_OF_DAY_LENGTH_HOURS = (
