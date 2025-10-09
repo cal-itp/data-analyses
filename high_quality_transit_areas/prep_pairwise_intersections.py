@@ -132,7 +132,7 @@ def pairwise_intersections(
         for route_key in corridors_gdf.route_key.unique()
     ]
     
-    pairs = pd.concat(results, axis=0, ignore_index=True)
+    pairs = pd.concat(results, axis=0, ignore_index=True).query('intersect == 1')
     
     segments_p1 = pairs.hqta_segment_id.unique()
     segments_p2 = pairs.intersect_hqta_segment_id.unique()
