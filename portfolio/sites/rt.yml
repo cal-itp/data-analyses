@@ -2,52 +2,52 @@ directory: ./ca_transit_speed_maps/
 notebook: ./ca_transit_speed_maps/01_new_speedmaps.ipynb
 parts:
 - chapters:
-#  - caption: District 01 - Eureka
-#    params:
-#      district: 01 - Eureka
-#    sections:
-#    - analysis_name: Humboldt Transit Authority
-#    - analysis_name: Lake Transit Authority
-#    - analysis_name: Mendocino Transit Authority
-#    - analysis_name: Redwood Coast Transit Authority
-#  - caption: District 02 - Redding
-#    params:
-#      district: 02 - Redding
-#    sections:
-#    - analysis_name: Redding Area Bus Authority
-#    - analysis_name: Tehama County
-#  - caption: District 03 - Marysville / Sacramento
-#    params:
-#      district: 03 - Marysville / Sacramento
-#    sections:
-#    - analysis_name: Butte County Association of Governments
-#    - analysis_name: City of Elk Grove
-#    - analysis_name: Sacramento Regional Transit District
-#    - analysis_name: University of California, Davis
+  - caption: District 01 - Eureka
+    params:
+      district: 01 - Eureka
+    sections:
+    - analysis_name: Humboldt Transit Authority
+    - analysis_name: Lake Transit Authority
+    - analysis_name: Mendocino Transit Authority
+    - analysis_name: Redwood Coast Transit Authority
+  - caption: District 02 - Redding
+    params:
+      district: 02 - Redding
+    sections:
+    - analysis_name: Redding Area Bus Authority
+    - analysis_name: Tehama County
+  - caption: District 03 - Marysville / Sacramento
+    params:
+      district: 03 - Marysville / Sacramento
+    sections:
+    - analysis_name: Butte County Association of Governments
+    - analysis_name: City of Elk Grove
+    - analysis_name: Sacramento Regional Transit District
+    - analysis_name: University of California, Davis
   - caption: District 04 - Bay Area / Oakland
     params:
       district: 04 - Bay Area / Oakland
     sections:
-#    - analysis_name: Alameda-Contra Costa Transit District
-#    - analysis_name: Capitol Corridor Joint Powers Authority
-#    - analysis_name: Central Contra Costa Transit Authority
-#    - analysis_name: City and County of San Francisco
-#    - analysis_name: City of Fairfield
-#    - analysis_name: City of Santa Rosa
-#    - analysis_name: City of Union City
-#    - analysis_name: City of Vacaville
-#    - analysis_name: Eastern Contra Costa Transit Authority
-#    - analysis_name: Emeryville Transportation Management Agency
-#    - analysis_name: Golden Gate Bridge, Highway and Transportation District
-#    - analysis_name: Livermore-Amador Valley Transit Authority
-#    - analysis_name: Marin County Transit District
-#    - analysis_name: Mountain View Transportation Management Association
-#    - analysis_name: Napa Valley Transportation Authority
-#    - analysis_name: Peninsula Corridor Joint Powers Board
-#    - analysis_name: Presidio Trust
-#    - analysis_name: San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule
-#    - analysis_name: San Mateo County Transit District
-#    - analysis_name: Santa Clara Valley Transportation Authority
+    - analysis_name: Alameda-Contra Costa Transit District
+    - analysis_name: Capitol Corridor Joint Powers Authority
+    - analysis_name: Central Contra Costa Transit Authority
+    - analysis_name: City and County of San Francisco
+    - analysis_name: City of Fairfield
+    - analysis_name: City of Santa Rosa
+    - analysis_name: City of Union City
+    - analysis_name: City of Vacaville
+    - analysis_name: Eastern Contra Costa Transit Authority
+    - analysis_name: Emeryville Transportation Management Agency
+    - analysis_name: Golden Gate Bridge, Highway and Transportation District
+    - analysis_name: Livermore-Amador Valley Transit Authority
+    - analysis_name: Marin County Transit District
+    - analysis_name: Mountain View Transportation Management Association
+    - analysis_name: Napa Valley Transportation Authority
+    - analysis_name: Peninsula Corridor Joint Powers Board
+    - analysis_name: Presidio Trust
+    - analysis_name: San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule
+    - analysis_name: San Mateo County Transit District
+    - analysis_name: Santa Clara Valley Transportation Authority
     - analysis_name: Solano Transportation Authority
     - analysis_name: Sonoma County Transit Schedule
     - analysis_name: Sonoma-Marin Area Rail Transit District
