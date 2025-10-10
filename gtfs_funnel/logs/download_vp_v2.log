@@ -220,3 +220,12 @@
 2025-09-30 14:44:25.551 | INFO     | __main__:<module>:99 - Analysis date: 2025-09-24
 2025-09-30 14:44:33.535 | INFO     | __main__:<module>:107 - concat and filter batched data: 0:00:07.971440
 2025-09-30 14:48:33.363 | INFO     | __main__:<module>:114 - export concatenated vp: 0:03:59.828519
+2025-10-10 11:14:05.882 | INFO     | __main__:<module>:172 - Analysis date: 2025-08-20
+2025-10-10 11:15:57.759 | INFO     | __main__:loop_through_batches_and_download_vp:135 - exported batch 0 to GCS: 0:01:51.855513
+2025-10-10 11:17:09.304 | INFO     | __main__:loop_through_batches_and_download_vp:135 - exported batch 1 to GCS: 0:01:11.544190
+2025-10-10 11:21:10.789 | INFO     | __main__:loop_through_batches_and_download_vp:135 - exported batch 2 to GCS: 0:04:01.484475
+2025-10-10 11:23:07.083 | INFO     | __main__:loop_through_batches_and_download_vp:135 - exported batch 3 to GCS: 0:01:56.284903
+2025-10-10 11:23:07.083 | INFO     | __main__:<module>:179 - execution time: 0:09:01.180300
+2025-10-10 11:23:51.390 | INFO     | __main__:<module>:99 - Analysis date: 2025-08-20
+2025-10-10 11:23:59.344 | INFO     | __main__:<module>:107 - concat and filter batched data: 0:00:07.952765
+2025-10-10 11:27:48.972 | INFO     | __main__:<module>:114 - export concatenated vp: 0:03:49.628196
