@@ -1,7 +1,8 @@
 """
 Draw bus corridors (routes -> segments) across all operators.
 
-Takes ~3 min to run 
+Takes 10 min to run 
+- up from 3 min previously, but azimuth improves accuracy. could explore speeding it up.
 - down from 6 min in v3
 - down from 1 hr in v2 
 - down from several hours v1
@@ -15,11 +16,12 @@ import zlib
 from loguru import logger
 
 from calitp_data_analysis import geography_utils, utils
-from shared_utils import rt_utils
+from shared_utils import rt_utils, portfolio_utils
 from segment_speed_utils import gtfs_schedule_wrangling
 from update_vars import GCS_FILE_PATH, analysis_date, HQTA_SEGMENT_LENGTH, PROJECT_CRS
 import pyproj
 import lookback_wrappers
+from _utils import append_analysis_name
                         
 
 def difference_overlay_by_route(
@@ -125,7 +127,7 @@ def select_shapes_and_segment(
     lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
     lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
     gdf_lookback = lookback_wrappers.get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix)
-    gdf = pd.concat([gdf, gdf_lookback])
+    gdf = pd.concat([gdf, gdf_lookback]).pipe(append_analysis_name, analysis_date=analysis_date)
     
     routes_both_dir = (gdf.route_key
                        .value_counts()
@@ -209,12 +211,7 @@ def find_primary_direction_across_hqta_segments(
 ) -> gpd.GeoDataFrame:
     """
     For each hqta_segment_id, grab the origin / destination of 
-    each segment. For a route, find the route_direction that appears
-    the most, and that's the route_direction to be associated with the route.
-    
-    Since routes, depending on where you pick origin / destination,
-    could have shown both north-south and east-west, doing it this way
-    will be more accurate.
+    each segment. Calculate azimuth (degrees) for each segment.
     """
     
     with_od = rt_utils.add_origin_destination(hqta_segments_gdf)
@@ -225,29 +222,9 @@ def find_primary_direction_across_hqta_segments(
     #  TODO speed up, try dask?
     with_azimuth = with_direction.apply(add_azimuth, axis=1, **kwargs)
     
-    # Get predominant direction based on segments
-    predominant_direction_by_route = (
-        with_azimuth.groupby(["route_key", "route_direction"])
-        .agg({"route_primary_direction": "count"})
-        .reset_index()
-        .sort_values(["route_key", "route_primary_direction"], 
-        # descending order, the one with most counts at the top
-        ascending=[True, False])
-        .drop_duplicates(subset="route_key")
-        .reset_index(drop=True)
-        [["route_key", "route_direction"]]
-     )
-    
     drop_cols = ["origin", "destination", "route_primary_direction"]
     
-    routes_with_primary_direction = pd.merge(
-        with_azimuth.rename(
-            columns = {"route_direction": "segment_direction"}), 
-        predominant_direction_by_route,
-        on = "route_key",
-        how = "left",
-        validate = "m:1"
-    ).drop(columns = drop_cols)
+    routes_with_primary_direction = with_azimuth.drop(columns = drop_cols)
     
     return routes_with_primary_direction
     
@@ -265,11 +242,7 @@ if __name__=="__main__":
     hqta_segments = select_shapes_and_segment(
         analysis_date, HQTA_SEGMENT_LENGTH)
     
-    # Since route_direction at the route-level could yield both 
-    # north-south and east-west 
-    # for a given route, use the segments to determine the primary direction
-    
-    # test adding azimuth
+    # Use segment azimuth (degrees) to determine direction, accomodate non-grid streets
     geodesic = pyproj.Geod(ellps="WGS84")
     hqta_segments_with_dir = find_primary_direction_across_hqta_segments(
         hqta_segments, geodesic=geodesic)

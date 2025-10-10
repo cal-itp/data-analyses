@@ -144,7 +144,7 @@ def merge_ntd_mobility()->pd.DataFrame:
 
 if __name__ == "__main__":
 
-    from update_vars import analysis_date_list, ntd_latest_year
+    from update_vars import analysis_date_list
     
     EXPORT = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     start = datetime.datetime.now()
@@ -173,9 +173,9 @@ if __name__ == "__main__":
                         .drop_duplicates()
                        )
         
-        #crosswalk_df.to_parquet(
-        #    f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
-        #)
+        crosswalk_df.to_parquet(
+           f"{SCHED_GCS}{EXPORT}_{analysis_date}.parquet"
+        )
         t1 = datetime.datetime.now()
         print(f"finished {analysis_date}: {t1-t0}")
     

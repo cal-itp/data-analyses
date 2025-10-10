@@ -8,52 +8,15 @@ from tqdm import tqdm
 import time
 
 import pandas as pd
-from siuba import *
 
 import datetime as dt
-from shared_utils import rt_utils
+from shared_utils import rt_utils, portfolio_utils
 
 import os
 
 import pyaml
 import yaml
 from update_vars_index import PROGRESS_PATH
-
-def make_rt_site_yml(speedmaps_index_joined,
-                       rt_site_path = '../portfolio/sites/rt.yml'):
-        
-    # make sure index is generated
-    assert speedmaps_index_joined.status.isin(['speedmap_segs_available']).all(), 'must run prior scripts first, see Makefile'
-    
-    with open(rt_site_path) as rt_site:
-        rt_site_data = yaml.load(rt_site, yaml.Loader)
-    
-    chapters_list = []
-    speedmaps_index_joined = speedmaps_index_joined >> arrange(_.caltrans_district)
-    speedmaps_index_joined = speedmaps_index_joined >> distinct(_.caltrans_district, _.organization_name, _.organization_source_record_id)
-    for district in speedmaps_index_joined.caltrans_district.unique():
-        if type(district) == type(None):
-            continue
-        chapter_dict = {}
-        filtered = (speedmaps_index_joined
-                    >> filter(_.caltrans_district == district)
-                    >> arrange(_.organization_name)
-                   )
-        chapter_dict['caption'] = f'District {district}'
-        chapter_dict['params'] = {'district': district}
-        chapter_dict['sections'] = \
-            [{'organization_name': organization_name} for organization_name in filtered.organization_name.to_list()]
-        chapters_list += [chapter_dict]   
-        
-    parts_list = [{'chapters': chapters_list}]
-    rt_site_data['parts'] = parts_list
-    
-    output = pyaml.dump(rt_site_data)
-    with open(rt_site_path, 'w') as rt_site:
-        rt_site.write(output)
-    
-    print(f'portfolio yml staged to {rt_site_path}')
-    return
 
 def stage_portfolio():
     
@@ -68,7 +31,10 @@ def deploy_portfolio():
 
 if __name__ == "__main__":
 
-    speedmaps_index_joined = pd.read_parquet(PROGRESS_PATH)
-    make_rt_site_yml(speedmaps_index_joined)
+    speedmaps_index_joined = pd.read_parquet(PROGRESS_PATH).sort_values(['caltrans_district', 'analysis_name'])
+    portfolio_utils.create_portfolio_yaml_chapters_with_sections(portfolio_site_yaml='../portfolio/sites/rt.yml',
+                                                 df=speedmaps_index_joined,
+                                                 section_info={'column':'analysis_name', 'name':'analysis_name'}
+                                                )
     stage_portfolio()
     deploy_portfolio()

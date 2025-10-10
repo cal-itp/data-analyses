@@ -20,8 +20,6 @@ from loguru import logger
 from calitp_data_analysis import utils
 from update_vars import GCS_FILE_PATH, analysis_date
 
-import google.auth
-
 catalog = intake.open_catalog("*.yml")
 
 def attach_geometry_to_pairs(
@@ -98,10 +96,7 @@ def find_intersections(pairs_table: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
     
 if __name__ == "__main__":
-    # Connect to dask distributed client, put here so it only runs for this script
-    #from dask.distributed import Client
-    #client = Client("dask-scheduler.dask.svc.cluster.local:8786")
-    credentials, _=google.auth.default()
+
     logger.add("./logs/hqta_processing.log", retention = "3 months")
     logger.add(sys.stderr, 
                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", 
@@ -110,7 +105,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
         
     intersecting_pairs = catalog.pairwise_intersections.read()
-    corridors = catalog.subset_corridors(geopandas_kwargs={"storage_options": {"token": credentials}}).read()
+    corridors = catalog.subset_corridors().read()
     
     pairs_table = attach_geometry_to_pairs(corridors, intersecting_pairs)
         
@@ -128,4 +123,3 @@ if __name__ == "__main__":
         f"execution time: {end - start}"
     )
     
-    #client.close()

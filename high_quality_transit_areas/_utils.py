@@ -4,9 +4,7 @@ Shared utility functions for HQTA
 import geopandas as gpd
 import intake
 import pandas as pd
-import google.auth
-
-credentials, _ = google.auth.default()
+from shared_utils import portfolio_utils
 
 catalog = intake.open_catalog("catalog.yml")
 
@@ -44,8 +42,18 @@ def clip_to_ca(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Clip to CA boundaries. 
     """    
-    ca = catalog.ca_boundary(geopandas_kwargs={"storage_options": {"token": credentials}}).read().to_crs(gdf.crs)
+    ca = catalog.ca_boundary().read().to_crs(gdf.crs)
 
     gdf2 = gdf.clip(ca, keep_geom_type = False).reset_index(drop=True)
 
     return gdf2
+
+def append_analysis_name(df: pd.DataFrame, analysis_date: str) -> pd.DataFrame:
+    '''
+    Drop duplicates based on analysis_name, add it to columns
+    '''
+    cols = df.columns
+    df = portfolio_utils.standardize_operator_info_for_exports(df, analysis_date)
+    df = df[list(cols) + ['analysis_name']]
+    
+    return df

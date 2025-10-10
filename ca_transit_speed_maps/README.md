@@ -16,7 +16,7 @@ Select source code can be found at:
 
 [https://github.com/cal-itp/data-analyses/tree/main/ca_transit_speed_maps](https://github.com/cal-itp/data-analyses/tree/main/ca_transit_speed_maps)
 
-[https://github.com/cal-itp/data-analyses/tree/main/rt_delay/rt_analysis](https://github.com/cal-itp/data-analyses/tree/main/rt_delay/rt_analysis)
+[https://github.com/cal-itp/data-analyses/tree/main/rt_segment_speeds](https://github.com/cal-itp/data-analyses/tree/main/rt_segment_speeds)
 
 [https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py](https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/rt_utils.py)
 

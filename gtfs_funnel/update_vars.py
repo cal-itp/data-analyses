@@ -14,8 +14,8 @@ all_dates = (
 
 # analysis_date_list = [rt_dates.DATES['jul2025']]
 # analysis_date_list = apr2025_week
-# analysis_date_list = [rt_dates.DATES['jun2025']]
-analysis_date_list = ["2025-04-18"]
+analysis_date_list = [rt_dates.DATES['sep2025']]
+
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 

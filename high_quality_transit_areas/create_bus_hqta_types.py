@@ -27,6 +27,8 @@ from update_vars import (GCS_FILE_PATH, analysis_date,
 import lookback_wrappers
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 gcsgp = GCSGeoPandas()
+from _utils import append_analysis_name
+
 
 def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame: 
     """
@@ -160,7 +162,7 @@ if __name__ == "__main__":
     all_stops = all_stops.merge(
         gtfs_keys,
         on = "feed_key",
-    ).drop(columns = "feed_key")
+    ).drop(columns = "feed_key").pipe(append_analysis_name, analysis_date=analysis_date)
     print(all_stops.columns)
     print(all_stops.head(3))
     

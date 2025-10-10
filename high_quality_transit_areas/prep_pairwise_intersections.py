@@ -17,10 +17,8 @@ from loguru import logger
 from calitp_data_analysis import utils
 from update_vars import GCS_FILE_PATH, analysis_date
 
-import gcsfs
-import google.auth
-credentials, _ = google.auth.default()
-fs = gcsfs.GCSFileSystem(token=credentials)
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 
 def prep_bus_corridors(is_ms_precursor: bool = False, is_hq_corr: bool = False) -> gpd.GeoDataFrame:
     """
@@ -30,16 +28,14 @@ def prep_bus_corridors(is_ms_precursor: bool = False, is_hq_corr: bool = False) 
     """
     assert is_ms_precursor or is_hq_corr, 'must select exactly one category of segment'
     if is_ms_precursor:
-        hqtc_or_ms_pre = gpd.read_parquet(
+        hqtc_or_ms_pre = gcsgp.read_parquet(
             f"{GCS_FILE_PATH}all_bus.parquet",
-            filters = [[("ms_precursor", "==", is_ms_precursor)]],
-            storage_options={"token": credentials.token}
+            filters = [[("ms_precursor", "==", is_ms_precursor)]]
         ).reset_index(drop=True)
     elif is_hq_corr:
-        hqtc_or_ms_pre = gpd.read_parquet(
+        hqtc_or_ms_pre = gcsgp.read_parquet(
             f"{GCS_FILE_PATH}all_bus.parquet",
-            filters = [[("hq_transit_corr", "==", is_hq_corr)]],
-            storage_options={"token": credentials.token}
+            filters = [[("hq_transit_corr", "==", is_hq_corr)]]
         ).reset_index(drop=True)
         
     hqtc_or_ms_pre = hqtc_or_ms_pre.assign(
@@ -91,7 +87,7 @@ def sjoin_against_other_operators(
     computationally expensive,
     so we want to do it on fewer rows. 
     """
-    route_cols = ["hqta_segment_id", "segment_direction", "route_key",
+    route_cols = ["hqta_segment_id", "route_key",
                   "fwd_azimuth_360"]
     
     s1 = gpd.sjoin(
@@ -129,14 +125,14 @@ def pairwise_intersections(
     azimuth-based comparison.
     """
     # Intersect each route with all others
-    corridors_gdf = corridors_gdf[corridors_gdf['segment_direction'] != 'inconclusive']
+    corridors_gdf = corridors_gdf[~corridors_gdf['circuitous_segment']]
     results = [
         sjoin_against_other_operators(corridors.query('route_key == @route_key'),
                                       corridors.query('route_key != @route_key'))
         for route_key in corridors_gdf.route_key.unique()
     ]
     
-    pairs = pd.concat(results, axis=0, ignore_index=True)
+    pairs = pd.concat(results, axis=0, ignore_index=True).query('intersect == 1')
     
     segments_p1 = pairs.hqta_segment_id.unique()
     segments_p2 = pairs.intersect_hqta_segment_id.unique()
@@ -154,9 +150,9 @@ def pairwise_intersections(
         .reset_index(drop=True)
     )
     
-    pairs.to_parquet(
+    gcsgp.geo_data_frame_to_parquet(
+        pairs,
         f"{GCS_FILE_PATH}pairwise.parquet",
-        filesystem=fs
     )
     
     utils.geoparquet_gcs_export(

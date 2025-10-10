@@ -2,7 +2,7 @@ from shared_utils import rt_dates
 import datetime as dt
 from calitp_data_analysis import geography_utils
 
-analysis_date = rt_dates.DATES["jul2025"]
+analysis_date = rt_dates.DATES["sep2025"]
 
 GCS_FILE_PATH = ("gs://calitp-analytics-data/data-analyses/"
                  "high_quality_transit_areas/")
