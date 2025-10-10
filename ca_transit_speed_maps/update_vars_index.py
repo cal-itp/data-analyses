@@ -11,8 +11,8 @@ from segment_speed_utils.project_vars import (
     SEGMENT_GCS,
 )
 
-import google.auth
-credentials, project = google.auth.default()
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+gcsgp = GCSGeoPandas()
 
 catalog = catalog_utils.get_catalog('gtfs_analytics_data')
 
@@ -25,8 +25,9 @@ def datetime_to_rt_date_key(datetime: dt.datetime, day_offset: int = 0) -> str:
     return datetime.strftime('%b%Y').lower()
 
 #  default is current month if available in rt_dates then 3 months of lookback
-ANALYSIS_DATE_LIST = [datetime_to_rt_date_key(dt.datetime.now(), x) for x in range(0, -91, -30)]
-ANALYSIS_DATE_LIST = [rt_dates.DATES[key] for key in ANALYSIS_DATE_LIST if key in rt_dates.DATES.keys()]
+# ANALYSIS_DATE_LIST = [datetime_to_rt_date_key(dt.datetime.now(), x) for x in range(0, -91, -30)]
+# ANALYSIS_DATE_LIST = [rt_dates.DATES[key] for key in ANALYSIS_DATE_LIST if key in rt_dates.DATES.keys()]
+ANALYSIS_DATE_LIST = [rt_dates.DATES['sep2025']]
 PROGRESS_PATH = f'./_rt_progress_{ANALYSIS_DATE_LIST[0]}.parquet'
 SPEED_SEGS_PATH = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.segment_timeofday}'
 GEOJSON_SUBFOLDER = f'segment_speeds_{ANALYSIS_DATE_LIST[0]}/'
@@ -36,8 +37,11 @@ def read_segs(analysis_date: str) -> gpd.GeoDataFrame:
     read speedmap segments from gcs and keep one row per organization x feed
     '''
     path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
-    org_cols = ['organization_name', 'organization_source_record_id', 'name', 'base64_url']
-    speedmap_segs = gpd.read_parquet(path, storage_options = {"token": credentials.token})
+    # path = './speedmaps_analysis_name_test.parquet'
+    # print(f'testing with {path}')
+    org_cols = ['analysis_name', 'name', 'base64_url', 'caltrans_district']
+    # speedmap_segs = gpd.read_parquet(path)
+    speedmap_segs = gcsgp.read_parquet(path)
     speedmap_segs = speedmap_segs[org_cols].drop_duplicates().reset_index(drop=True)
     return speedmap_segs
 
@@ -60,10 +64,8 @@ def build_speedmaps_index(analysis_date_list: dt.date, operators: dict) -> pd.Da
     speedmap_segs = pd.DataFrame()
     for i in range(len(analysis_date_list)):
         speedmap_segs = append_previous(speedmap_segs, analysis_date_list[i], operators)
-    districts = schedule_rt_utils.filter_dim_county_geography(analysis_date_list[0])
-    new_ix = speedmap_segs.merge(districts, on = 'organization_name')
-    new_ix['status'] = 'speedmap_segs_available'
-    return new_ix
+    speedmap_segs['status'] = 'speedmap_segs_available'
+    return speedmap_segs
 
 if __name__ == "__main__":
     

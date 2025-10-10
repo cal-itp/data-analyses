@@ -62,7 +62,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
    * Set your "ArcGIS Pro" license versio to "Advanced"
    * Re-open your project in ArcGIS Pro
 1. Delete any existing databases that you intend to overwrite on the HQRail Enterprise Geodatabase (the .sde file).
-1. Run the remainder of the [notebook](./arcgis_pro_notebook_sample.ipynb) after importing the updated XML metadata for each feature class.
+1. Run the remainder of the ArcGIS [notebook](./arcgis_pro_notebook_sample.ipynb) after importing the updated XML metadata for each feature class.
    * Note that since you re-started ArcGIS, the notebook's kernel will restart and you will need to re-run the first few cells.
    * Once this completes, the new data will be added to the HQRail enterprise geodatabase, and you should be able to add datasets from there to the map.
    * There are steps to create FGDC templates for each datasets to store field information, but this only needs to be done once when a new dataset is created. 
@@ -84,4 +84,4 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
        * The CRS should be EPSG:4326, and all columns should have a description
    * Check that the geographic extent of each layer seems plausible
    * Check that the number of records is comparable to the number of records for the prior month.
-* Open a [ticket](https://sv03tmcpo.ct.dot.ca.gov/portal/apps/sites/#/geep/pages/open-data-request) on the Intranet to update or add new services and provide [justification](./intake_justification.md)
+* Open a [ticket](https://d3giscoreage.dot.ca.gov/portal/apps/sites/#/geep-geohighway/pages/dp-open-data) on the Intranet to update or add new services and provide [justification](./intake_justification.md)

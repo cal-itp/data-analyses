@@ -19,6 +19,7 @@ from segment_speed_utils import helpers
 from segment_speed_utils.project_vars import COMPILED_CACHED_VIEWS
 from update_vars import GCS_FILE_PATH, analysis_date
 import lookback_wrappers
+from shared_utils import portfolio_utils
 
 catalog = intake.open_catalog("*.yml")
 
@@ -134,12 +135,16 @@ def assemble_stops(analysis_date: str) -> gpd.GeoDataFrame:
     )
     lookback_stops = lookback_wrappers.get_lookback_stops(published_operators_dict, lookback_trips_ix, stops_cols)
     stops = pd.concat([stops, lookback_stops])
+
     stops_with_geom = pd.merge(
         stops, 
         stops_with_route,
         on = ["feed_key", "stop_id"],
         how = "inner"
     )
+    stops_with_geom = portfolio_utils.standardize_operator_info_for_exports(stops_with_geom, analysis_date)
+    drop_cols = ['name_original', 'base64_url', 'caltrans_district', 'source_record_id']
+    stops_with_geom = stops_with_geom.drop(columns=drop_cols)
     
     return stops_with_geom
 

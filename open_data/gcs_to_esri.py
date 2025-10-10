@@ -67,8 +67,7 @@ if __name__=="__main__":
                level="INFO")
         
     for d in RUN_ME :
-        #  clunky way to add SSO credentials with bracket/key syntax
-        gdf = catalog[d](geopandas_kwargs={"storage_options": {"token": credentials.token}}).read().pipe(project_and_standardize_cols)
+        gdf = catalog[d].read().pipe(project_and_standardize_cols)
         
         logger.info(f"********* {d} *************")
         print_info(gdf)

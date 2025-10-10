@@ -68,10 +68,6 @@
 				<attrdef>Full name of the transit agency</attrdef>
 			</attr>
 			<attr>
-				<attrlabl>org_id</attrlabl>
-				<attrdef>Organization identifier for the agency</attrdef>
-			</attr>
-			<attr>
 				<attrlabl>route_id</attrlabl>
 				<attrdef>Identifies a route</attrdef>
 				<attrdefs>https://gtfs.org/schedule/reference/#routestxt</attrdefs>
@@ -108,6 +104,22 @@
 			<attr>
 				<attrlabl>base64_url</attrlabl>
 				<attrdef>The base64 encoded url for the feed associated with the agency</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>shn_route</attrlabl>
+				<attrdef>Route number or numbers of California State Highway System routes that this shape_id and route_id travels on.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>on_shs</attrlabl>
+				<attrdef>0 or 1 indicating if this shape_id or route_id overlaps with the California State Highway System</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>shn_districts</attrlabl>
+				<attrdef>Caltrans District numbers containing each California State Highway System route that this shape_id and route_id travels on.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>pct_route_on_hwy_across_districts</attrlabl>
+				<attrdef>Percentage of shape_id and route_id distance traveling on any California State Highway System route.</attrdef>
 			</attr>
 		</detailed>
 	</eainfo>

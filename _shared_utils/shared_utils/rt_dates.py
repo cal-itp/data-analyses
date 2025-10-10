@@ -70,7 +70,8 @@ DATES = {
     "apr2025f": "2025-04-20",
     "may2025": "2025-05-14",
     "jun2025": "2025-06-11",
-    "jul2025": "2025-07-16",
+    "jul2025": "2025-07-16",  # need to backfill aug at some point
+    "sep2025": "2025-09-24",  # later date to capture A Line to Pomona
 }
 
 years_available = list(range(2023, datetime.datetime.now().year + 1))

@@ -10,8 +10,10 @@ from typing import Literal
 import pandas as pd
 import yaml
 from calitp_data_analysis.sql import get_engine
+from shared_utils import catalog_utils, gtfs_utils_v2
 
 db_engine = get_engine()
+GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
 
 def decode_base64_url(row):
@@ -283,11 +285,56 @@ def standardize_portfolio_organization_names(df: pd.DataFrame) -> pd.DataFrame:
     return m1
 
 
-"""
-def standardize_portfolio_organization_names(df: pd.DataFrame, preferred_organization_name_dict: dict) -> pd.DataFrame:
-    # Map the preferred organization name using schedule_gtfs_dataset_name.
-    df = df.assign(portfolio_organization_name=df.name.map(preferred_organization_name_dict))
-    # drop the ones that were removed with duplicated feed info (create_portfolio_display_yaml.py)
-    df = df.dropna(subset="portfolio_organization_name")
-    return df
-"""
+def standardize_operator_info_for_exports(df: pd.DataFrame, date: str) -> pd.DataFrame:
+    """
+    Use our crosswalk file created in gtfs_funnel
+    and add in the organization columns we want to
+    publish on.
+    """
+
+    CROSSWALK_FILE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
+    SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
+
+    public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
+
+    # Get the crosswalk file
+    crosswalk = pd.read_parquet(
+        f"{SCHED_GCS}{CROSSWALK_FILE}_{date}.parquet",
+        columns=[
+            "schedule_gtfs_dataset_key",
+            "name",
+            "base64_url",
+            "caltrans_district",
+        ],
+        filters=[[("schedule_gtfs_dataset_key", "in", public_feeds)]],
+    )
+
+    # Add portfolio_organization_name
+    crosswalk = (
+        crosswalk.assign(caltrans_district=crosswalk.caltrans_district.map(CALTRANS_DISTRICT_DICT))
+        .pipe(
+            standardize_portfolio_organization_names,
+        )
+        .drop_duplicates(subset=["schedule_gtfs_dataset_key", "name", "analysis_name"])
+    )
+
+    # Checked whether we need a left merge to keep stops outside of CA
+    # that may not have caltrans_district
+    # and inner merge is fine. All operators are assigned a caltrans_district
+    # so Amtrak / FlixBus stops have values populated
+
+    # Merge the crosswalk and the input DF
+    crosswalk_input_merged = pd.merge(
+        df,
+        crosswalk,
+        on=["schedule_gtfs_dataset_key"],
+        suffixes=[
+            "_original",
+            None,
+        ],  # Keep the source record id from the crosswalk as the "definitive" version
+        how="inner",
+    )
+
+    # Drop dups
+    crosswalk_input_merged = crosswalk_input_merged.drop_duplicates()
+    return crosswalk_input_merged

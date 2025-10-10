@@ -28,7 +28,7 @@ def truncate_from_catalog(catalog_entry: str) -> dict:
     ESRI shapefile truncated columns to full names.
     '''
     #  clunky way to add SSO credentials with bracket/key syntax
-    one_row_gdf = catalog[catalog_entry](geopandas_kwargs={"storage_options": {"token": credentials.token}}).read().iloc[:1].pipe(project_and_standardize_cols)
+    one_row_gdf = catalog[catalog_entry].read().iloc[:1].pipe(project_and_standardize_cols)
     return esri_truncate_columns(one_row_gdf.columns)
 
 #--------------------------------------------------------#
