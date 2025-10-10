@@ -256,7 +256,7 @@ def routes_shn_intersection(
 
     gdf2 = gdf2.rename(
         columns={
-            "pct_route_on_hwy": "pct_route_on_hwy_across_districts",
+            "pct_route_on_hwy": "pct_route_on_hwy_all_districts",
             "district": "shn_districts",
         }
     )
@@ -282,20 +282,20 @@ def group_route_district(df: pd.DataFrame) -> pd.DataFrame:
         df.groupby(
             ["name", "route_id", "shape_id"],  # maybe comment out later
             as_index=False,
-        )[["shn_route", "shn_districts", "pct_route_on_hwy_across_districts"]]
+        )[["shn_route", "shn_districts", "pct_route_on_hwy_all_districts"]]
         .agg(
             {
                 "shn_route": lambda x: ", ".join(set(x.astype(str))),
                 "shn_districts": lambda x: ", ".join(set(x.astype(str))),
-                "pct_route_on_hwy_across_districts": "sum",
+                "pct_route_on_hwy_all_districts": "sum",
             }
         )
         .reset_index(drop=True)
     )
 
     # Clean up
-    agg1.pct_route_on_hwy_across_districts = (
-        agg1.pct_route_on_hwy_across_districts.astype(float).round(2)
+    agg1.pct_route_on_hwy_all_districts = (
+        agg1.pct_route_on_hwy_all_districts.astype(float).round(2)
     )
 
     return agg1
@@ -326,12 +326,12 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
     m1.pct_route_on_hwy_across_districts = m1.pct_route_on_hwy_across_districts.fillna(
         0
     )
-    m1["on_shs"] = np.where(m1["pct_route_on_hwy_across_districts"] == 0, 0, 1)
+    m1["on_shn"] = np.where(m1["pct_route_on_hwy_all_districts"] == 0, 0, 1)
 
     # Clean up rows that are tagged as "on_shs==N" but still have values
     # that appear.
     m1.loc[
-        (m1["on_shs"] == "N") & (m1["shn_districts"] != "0"),
+        (m1["on_shn"] == "N") & (m1["shn_districts"] != "0"),
         ["shn_districts", "shn_route"],
     ] = np.nan
 
@@ -347,15 +347,14 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "route_id",
         "route_type",
         "route_name_used",
-        # "route_length_feet",
     ]
     shape_cols = ["shape_id", "n_trips"]
     agency_ids = ["base64_url"]
     shn_cols = [
         "shn_route",
-        "on_shs",
+        "on_shn",
         "shn_districts",
-        "pct_route_on_hwy_across_districts",
+        "pct_route_on_hwy_all_districts",
     ]
 
     # route_typology = [
@@ -412,11 +411,6 @@ if __name__ == "__main__":
     .pipe(portfolio_utils.standardize_operator_info_for_exports, analysis_date)
     .pipe(finalize_export_df)
 ) 
-#     published_routes = patch_previous_dates(
-#         routes, 
-#         analysis_date,
-#     ).pipe(finalize_export_df)
-    
     utils.geoparquet_gcs_export(
         published_routes, 
         TRAFFIC_OPS_GCS, 

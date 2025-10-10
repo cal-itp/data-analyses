@@ -177,8 +177,8 @@ def final_transit_route_shs_outputs(
     map_gdf = map_gdf.rename(columns = transit_shn_map_columns).drop(columns = ["on_shs"])
     map_gdf = map_gdf.reset_index(drop=False)
     map_gdf = map_gdf.rename(columns={"index": "Number"})
-    map_gdf = map_gdf[['Analysis Name', 'Route', 'geometry',
-       'State Highway Network Route', "Number"]]
+    #map_gdf = map_gdf[['Analysis Name', 'Route', 'geometry',
+    #   'State Highway Network Route', "Number"]]
     return map_gdf, text_table
 
 def create_gtfs_stats(df:pd.DataFrame)->pd.DataFrame:
