@@ -1,278 +1,209 @@
 """
-(1a) daily time-series stop df
-* % completeness, % accuracy - 2D histogram?
-scatterplot is similar, but this groups them
-* avg_prediction_error_minutes
-layered histogram or several histograms by day_of_week
-* avg_prediction_spread_minutes
-layered histogram or several histograms by day_of_week
-* n_predictions in the 30 min interval
-
-(1b) aggregated day_type stop df
-* % completeness, % accuracy by day_type - 2D histogram?
-* avg_prediction_error_minutes
-* avg_prediction_spread_minutes
-* daily_predictions_per_stop
-* can we put the above all in a table, pivoted wide so it's weekday/sat/sun?
-
-would be nice to merge in trip grain, and trip grain has a column
-for an array of stop_ids, so when we aggregate to route-direction,
-we can unpack the stops for that and grab it from the stop grain
-
-(2a)
-(2b)
+Chart and map functions for report.
 """
 import altair as alt
-import folium
 import geopandas as gpd
 import pandas as pd
 
-def make_layered_histogram(
-    df: pd.DataFrame, 
-    plot_col:str,
-    step_size: float
-):
-    """
-    Might be useful for distributions of the metrics by day_type
-    https://altair-viz.github.io/gallery/layered_histogram.html
-    
-    Make a symmetrical distribution, centered on 0.
-    Find the larger of min and max and use that as bounds.
-    """
-    vertical_line = alt.Chart(
-        pd.DataFrame({'line_x': [0]})).mark_rule(
-        color='red'
-    ).encode(
-        x=alt.X('line_x:Q', title="")
-    )
-    
-    chart = (
-        alt.Chart(df)
-        .mark_bar(
-            opacity=0.3,
-            binSpacing=0
-    ).encode(
-        alt.X(f'{plot_col}:Q', bin=alt.Bin(step=step_size), 
-             #scale=alt.Scale(domain=[bounds * -1, bounds])
-             ),
-        alt.Y('count()', stack=None),
-        alt.Color(
-            'weekday_weekend:N',
-            scale=alt.Scale(
-                range=["#ccbb44","#5b8efd","#dd217d"]) # tri_color color_palette
-            )
-        )
-    )
-    
-    return chart + vertical_line
+TRI_COLORS = ["#ccbb44","#5b8efd","#dd217d"]
+FOUR_COLORS = ["#dd217d","#fcb40e","#ccbb44","#5b8efd"]
+FOUR_COLORS2 = ["#ee6677","#66ccee","#ccbb44","#4477aa",]
+FULL_CATEGORICAL_COLORS = ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44"]
 
 
-def counts_for_2d_histogram(
-    df: pd.DataFrame
-) -> pd.DataFrame:
-    """
-    Group by the combinations of the 2 percent columns.
-    Otherwise, each stop is overlaying the other, and we can't actually see.
-    """
-    df2 = (
-        df
-        .groupby(["pct_complete_minutes", "pct_accurate_minutes", "weekday_weekend"])
-        .agg({"stop_id": "count"})
-        .reset_index()
-        .rename(columns = {"stop_id": "n_stops"})
-    )
-    
-    return df2
-    
-def make_2d_histogram(
-    df: pd.DataFrame,
-    title: str = "",
-):
-    """
-    https://altair-viz.github.io/gallery/histogram_scatterplot.html
-    prefer this one: https://altair-viz.github.io/gallery/histogram_heatmap.html
-    """
-    aggregated_df = counts_for_2d_histogram(df)
-    
-    chart = (
-        alt.Chart(aggregated_df)
-        .mark_rect()
-        .encode(
-            x = alt.X(
-                "pct_complete_minutes:Q", 
-                bin=alt.Bin(maxbins=20), 
-                title = "% complete"
-            ),
-            y = alt.Y(
-                "pct_accurate_minutes:Q", 
-                bin=alt.Bin(maxbins=20), 
-                title = "% accurate"
-            ),
-            color=alt.Color(
-                'sum(n_stops):Q', 
-                scale=alt.Scale(scheme="greenblue")
-                #range=["#ccbb44","#5b8efd","#dd217d"] # color_palette
-            ), 
-            #size='sum(n_stops)',
-            tooltip=["weekday_weekend", "n_stops",
-                     "pct_complete_minutes", "pct_accurate_minutes"]
-        ).properties(title=title).interactive()
-    )
-    
-    return chart
-        
-def make_boxplot_by_day_type(
+def histogram_line_chart_by_date(
     df: pd.DataFrame, 
-    plot_col: str,
-    title: str
+    metric_column: str,
+    legend_color_column: str
 ) -> alt.Chart:
     """
+    Distill the results from a histogram (deciles binned) for each day 
+    into 1 chart.
+    Line chart works better; can't get bar chart to unstack and still select 
+    a date for a legend.
+    
+    Purpose of chart is to show daily differences in distribution, so that we are
+    comfortable with moving towards a day_type aggregation (weekday/Sat/Sun summary).
     """
-    boxplot = (
-        alt.Chart(
-            df[["weekday_weekend", "service_date", "stop_id", "stop_name", plot_col]]
-        ).mark_boxplot(size=4, opacity=0.7)
-        .encode(
-            x="service_date:T",
-            y=f"{plot_col}:Q",
-            color=alt.Color(
-                'weekday_weekend:N', 
-                scale = alt.Scale(range=["#ccbb44","#5b8efd","#dd217d"])
-            ),
-            tooltip=["stop_id", "stop_name", plot_col]
-        ).interactive().properties(title = title)
-    )
-
-    return boxplot
-   
+    selection = alt.selection_point(fields=[legend_color_column], bind='legend')
+      
+    subset_df = df[df.metric==metric_column]
     
-def test_jitter(plot_col):
-    plot_col = "avg_prediction_error_minutes"
-
-    subset_gdf = gdf1[["weekday_weekend", "service_date", "stop_id", "stop_name", plot_col]]
-
-    jitter = alt.Chart(subset_gdf).mark_circle(size=8).encode(
-        x="service_date:T",
-        y=f"{plot_col}:Q",
-        xOffset="jitter:Q",
-        yOffset="jitter:Q",
-        color=alt.Color('weekday_weekend:N', legend=None)
-    ).transform_calculate(
-        # Generate Gaussian jitter with a Box-Muller transform
-        #jitter="sqrt(-2*log(random()))*cos(2*PI*random())"
-        jitter='random()'
-    )
-
-    return jitter
-
-def stop_map_of_metric(
-    gdf: gpd.GeoDataFrame,
-    plot_col: str
-):
-    subset_gdf = gdf[["stop_id", "stop_name", "weekday_weekend", plot_col, "geometry"]]
-    
-    weekday_df = subset_gdf[subset_gdf.weekday_weekend=="Weekday"] 
-    sat_df = subset_gdf[subset_gdf.weekday_weekend=="Saturday"] 
-    sun_df = subset_gdf[subset_gdf.weekday_weekend=="Sunday"]
-    
-    m = weekday_df.explore(
-        plot_col,
-        tiles = "CartoDB Positron",
-        name="Weekday"
-    )
-    
-    if len(sat_df) > 0:
-        m = sat_df.explore(plot_col, m=m, name="Saturday", legend=False)
-    
-    if len(sun_df) > 0:
-        m = sun_df.explore(plot_col, m=m, name="Sunday", legend=False)
-    
-    folium.LayerControl().add_to(m)
-    
-    return m
-
-def manual_quartiles(
-    df: pd.DataFrame
-) -> pd.DataFrame:
-    """
-    For percents, start with 0.25, 0.5, 0.75.
-    For other metrics, divide into 4 groups?
-    """
-    pct_scale_cols = ["pct_accurate_minutes", "pct_complete_minutes"]
-    other_metric_cols = ["avg_prediction_error_sec", "avg_prediction_spread_minutes", "avg_predictions_per_trip"]
-
-    for c in pct_scale_cols:
-        df[f"{c}_categorized"] = pd.qcut(df[c], q=[0, 0.25, 0.5, 0.75, 1], labels=['< 25%', '25-50%', '50-75%', '> 75%'])
-    
-    for c in other_metric_cols:
-        df[f"{c}_categorized"] = pd.qcut(df[c], q=4)
-
-    return df
+    if "Weekday" in subset_df[legend_color_column].unique():
+        sort_order = ["Weekday", "Saturday", "Sunday"]
+    else:
+        sort_order = sorted(subset_df[legend_color_column].unique().tolist())
         
-    
-def make_bar_chart(df: pd.DataFrame, plot_col: str): 
-    """
-    Put a daily chart, x=service_date, y=metric,
-    see if we can merge in the avg for the day_type
-    """
-    chart = (
-        alt.Chart(df)
-        .mark_bar()
+    chart= (
+        alt.Chart(subset_df)
+        .mark_line(point={"size": 15, "filled": True})
         .encode(
-            x=alt.X(
-                "yearmonthdate(service_date):O", 
-                title="Date", 
-                axis=alt.Axis(labelAngle=-45)
+            alt.X('decile_bin'),
+            alt.Y('counts:Q'),
+            alt.Color(
+                f'{legend_color_column}:N', 
+                sort = sort_order,
+                scale=alt.Scale(range=FULL_CATEGORICAL_COLORS + TRI_COLORS + FOUR_COLORS + FOUR_COLORS2),
+                
             ),
-            y=alt.Y(plot_col),
-            column=alt.Column("day_type:N")
-        )
-    )
-
-    return chart
-
-#make_layered_histogram(df, "avg_prediction_spread_minutes")
-#make_layered_histogram(df, "avg_prediction_error_sec")
-#make_layered_histogram(df, "pct_accurate_minutes")
-#make_layered_histogram(df, "n_predictions") # this covers the period that's 30 minutes before arrival
-
-
-def base_facet_line_chart(
-    df: pd.DataFrame,
-    y_col: str,
-    facet_col: str,
-    ruler_col: str
-) -> alt.Chart:
-
-    # Create the ruler chart
-    ruler = (
-            alt.Chart(df)
-            .mark_rule(color="red", strokeDash=[10, 7])
-            .encode(y=f"{ruler_col}:Q")
-        )
-
-    chart = (
-            alt.Chart(df)
-            .mark_line()
-            .encode(
-                x=alt.X(
-                    "stop_name:O",
-                    title="Stop",
-                    order = "stop_sequence",
-                    axis=alt.Axis(labelAngle=-45),
-                ),
-            )
-        )
-    # Add ruler plus main chart
-    chart = (chart + ruler).properties(width=200, height=250)
-    chart = chart.facet(
-            column=alt.Column("{facet_col}:N"),
+            opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.2)),
+            strokeWidth=alt.when(selection).then(alt.value(2)).otherwise(alt.value(1)),
+            tooltip = ["decile_bin", "counts", "metric"]
+        ).add_params(
+            selection
         ).properties(
-            #title={
-            #    "text": [title],
-            #    "subtitle": [subtitle],
-            #}
-        )
+            title = f"{metric_column.replace('pct_tu', '%').replace('_', ' ')}",
+            width = 220, height = 170
+        ).interactive()
+    )
     
     return chart
 
+
+def boxplot_by_date(
+    df: pd.DataFrame, 
+    y_col: str
+) -> alt.Chart:
+    """
+    Get a boxplot for each day to look at distribution avg_prediction_error_minutes
+    and avg_prediction_spread_minutes.
+    These are more suited to see how "early" or "late" an operator's predictions are.
+    If it's centered at 0, that's very on-time/accurate!
+    
+    Couldn't get alt.datum to work from this:
+    https://altair-viz.github.io/user_guide/encodings/index.html#datum-and-value
+    """
+    df = df.assign(horiz_line = 0)
+    
+    chart = (
+        alt.Chart(df)
+        .mark_boxplot()
+        .encode(
+            x=alt.X('service_date:T', axis=alt.Axis(format="%b %e")),
+            y=f'{y_col}:Q',
+            color=alt.Color(
+                "day_type:N", 
+                scale=alt.Scale(
+                    domain=["Weekday", "Saturday", "Sunday"], 
+                    range=FULL_CATEGORICAL_COLORS)
+            ),
+        )
+    )
+
+    #rule = alt.Chart(df).mark_rule(strokeDash=[2, 2]).encode(
+    #    y=alt.datum(0)
+    #)
+    rule = alt.Chart(df).mark_rule(
+        color='black', strokeWidth=1, strokeDash=[2, 2]
+    ).encode(
+        y='horiz_line'
+    )
+
+    combined = (chart + rule).properties(
+        title=f"{y_col.replace('_', ' ').title()}"
+    )   
+    
+    return combined
+ 
+    
+def bar_chart_by_date(
+    df: pd.DataFrame, 
+    legend_color_column: str,
+    is_stacked: bool
+) -> alt.Chart:
+    selection = alt.selection_point(fields=[legend_color_column], bind='legend')
+
+    chart = (
+        alt.Chart(df)
+        .mark_bar(size=20)
+        .encode(
+            x=alt.X("service_date:T", axis=alt.Axis(format='%b %e')),
+            y=alt.Y("count()"),
+            color=alt.Color(
+                f"{legend_color_column}:N", 
+                sort = ["5+ min early", "3-5 min early", "1-3 min early",
+                       "1 min early to 1 min late", 
+                        "1-3 min late", "5+ min late",
+                       "unknown"],
+                scale = alt.Scale(range = FULL_CATEGORICAL_COLORS),   
+            ),
+            opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.2)),
+            tooltip = ["service_date", legend_color_column, "count()"],
+            ).add_params(
+                selection
+        ).properties(
+            title = f"{legend_color_column.replace('_', ' ').replace('label', '').title()}",
+            width = 350, height = 300
+        ).interactive()
+    )
+
+    if is_stacked:
+        chart = chart.encode(
+            y=alt.Y("count()", stack="normalize")
+        )
+
+    
+    return chart
+    
+    
+def make_map(gdf: gpd.GeoDataFrame, plot_col: str):
+    """
+    Make map for metric, drop columns that are either datetime (not allowed for maps) or
+    add confusion. Keep the schedule and other RT metric columns in 
+    because future dbt models will be a schedule_rt_stop_metrics file.
+    If map doesn't load quickly for portfolio, then switch to small set of 
+    columns for tooltip. 
+    """    
+    drop_cols = ["month_first_day", "n_days", "n_feeds"] + [c for c in gdf.columns if "bin" in c]
+    
+    categorical_cols = ["prediction_error_label"]
+    
+    if plot_col in categorical_cols:
+        colorscale = FULL_CATEGORICAL_COLORS
+    else:
+        colorscale = "viridis"
+    
+    subset_gdf = gdf[
+        gdf.day_type == "Weekday"
+    ].drop(
+        columns = drop_cols
+    ).dropna(subset="geometry").reset_index(drop=True)
+    
+    if len(subset_gdf) > 0:
+        m = subset_gdf.explore(
+            plot_col,
+            tiles = "CartoDB Positron", 
+            cmap = colorscale, legend=True
+        )
+
+        return m
+    
+    else:
+        subset_gdf = gdf[
+            gdf.day_type != "Weekday"
+        ].drop(
+            columns = drop_cols
+        ).dropna(subset="geometry").reset_index(drop=True)
+        
+        if len(subset_gdf) > 0:
+            
+            m = subset_gdf.explore(
+                plot_col,
+                tiles = "CartoDB Positron", 
+                cmap = colorscale, legend=True
+            )
+            print(f"Weekday map could not be plotted. Plot weekend map.")
+        else:
+            print(f"No map could be plotted. Debug error related to schedule + RT data.")
+
+
+'''
+Double check that we have different values for each date
+
+daily_df2[daily_df2.metric=="pct_tu_accurate_minutes"].groupby(
+    ["decile_bin"]
+).agg({
+    "service_date": lambda x: list(x),
+    "counts": lambda x: list(x)}
+).reset_index()
+'''
