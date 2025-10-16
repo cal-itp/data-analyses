@@ -9,7 +9,7 @@ import geopandas as gpd
 import pandas as pd
 import siuba  # for type hints
 from calitp_data_analysis.tables import tbls
-from calitp_data_analysis.sql import get_engine
+from calitp_data_analysis.sql import get_engine, query_sql
 from calitp_data_analysis.tables import AutoTable
 from shared_utils import gtfs_utils_v2
 from siuba import *
@@ -61,18 +61,11 @@ def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True, **kwargs) -> U
     """
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_gtfs")
-    tables = get_tables(project=project)
 
-    schedule_feed_to_rt_key = (
-        getattr(tables, dataset).fct_daily_feed_scheduled_service_summary()
-        >> filter(_.service_date == date)
-        >> select(_.gtfs_dataset_key, _.feed_key)
-    )
-
-    if get_df:
-        schedule_feed_to_rt_key = schedule_feed_to_rt_key >> collect()
-
-    return schedule_feed_to_rt_key
+    return query_sql(f"""
+        SELECT gtfs_dataset_key, feed_key FROM {project}.{dataset}.fct_daily_feed_scheduled_service_summary
+        WHERE service_date = '{date}'
+    """, as_df=get_df)
 
 
 def filter_dim_gtfs_datasets(
