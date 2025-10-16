@@ -1,0 +1,59 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
+      "datasetId": "test_shared_utils"}, "queryParameters": [], "useLegacySql": false,
+      "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2", "query":
+      "SELECT `dim_organizations`.`source_record_id` AS `organization_source_record_id`
+      \nFROM `dim_organizations` \nWHERE `dim_organizations`.`_is_current` = true",
+      "maxResults": 5000, "requestId": "fdea5969-f3fd-4e48-a6c2-efc4ae7141a3"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '491'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_source_record_id","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_RI7jjD6r5zHgRoMbU9az15QDP9Aw","location":"us-west2"},"totalRows":"3","rows":[{"f":[{"v":"reckGS8egMZryjbX7"}]},{"f":[{"v":"recyqZ1zbZMkeA7Vf"}]},{"f":[{"v":"recOT4QO6t6mRhUEu"}]}],"totalBytesProcessed":"60","jobComplete":true,"cacheHit":false,"queryId":"job_RI7jjD6r5zHgRoMbU9az15QDP9Aw","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"19","location":"us-west2","creationTime":"1762221451925","startTime":"1762221451976","endTime":"1762221452093"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 04 Nov 2025 01:57:32 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,62 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
+      "datasetId": "test_shared_utils"}, "queryParameters": [], "useLegacySql": false,
+      "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2", "query":
+      "SELECT `dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`, `dim_gtfs_datasets`.`name`
+      AS `gtfs_dataset_name` \nFROM `dim_gtfs_datasets` \nWHERE `dim_gtfs_datasets`.`data_quality_pipeline`
+      = true", "maxResults": 5000, "requestId": "47029e4f-7838-41c6-86df-93740b07550e"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '526'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_AUVWd6Fm-JQ-Frp2tcUuXjtan3wI","location":"us-west2"},"totalRows":"3","rows":[{"f":[{"v":"c51dbfdd47838f86074c4ef3179cc9ed"},{"v":"Santa
+        Ynez Mecatran Schedule"}]},{"f":[{"v":"372a06b593e1716d1c911b1d1d35bedd"},{"v":"Santa
+        Ynez Mecatran Schedule"}]},{"f":[{"v":"8aed0709366badf9342e03d0a2d72b8d"},{"v":"SLO
+        Trip Updates"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_AUVWd6Fm-JQ-Frp2tcUuXjtan3wI","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1762208244536","startTime":"1762208244592","endTime":"1762208244659"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 03 Nov 2025 22:17:24 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1
