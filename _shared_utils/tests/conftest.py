@@ -1,0 +1,22 @@
+import pytest
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    return {
+        "filter_headers": [
+            ("cookie", "FILTERED"),
+            ("Authorization", "FILTERED"),
+            ("apikey", "FILTERED"),
+            ("X-CKAN-API-Key", "FILTERED"),
+        ],
+        "allow_playback_repeats": True,
+        "ignore_hosts": [
+            "run-actions-1-azure-eastus.actions.githubusercontent.com",
+            "run-actions-2-azure-eastus.actions.githubusercontent.com",
+            "run-actions-3-azure-eastus.actions.githubusercontent.com",
+            "sts.googleapis.com",
+            "iamcredentials.googleapis.com",
+            "oauth2.googleapis.com",
+        ],
+    }
