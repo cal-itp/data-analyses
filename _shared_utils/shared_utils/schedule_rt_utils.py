@@ -9,11 +9,23 @@ import geopandas as gpd
 import pandas as pd
 import siuba  # for type hints
 from calitp_data_analysis.tables import tbls
+from calitp_data_analysis.sql import get_engine
+from calitp_data_analysis.tables import AutoTable
 from shared_utils import gtfs_utils_v2
 from siuba import *
+from sqlalchemy.engine import Engine
 
 PACIFIC_TIMEZONE = "US/Pacific"
 
+def get_tables(project):
+    tables = AutoTable(
+        get_engine(project=project),
+        lambda s: s,  # s.replace(".", "_"),
+    )
+
+    tables._init()
+
+    return tables
 
 def localize_timestamp_col(df: dd.DataFrame, timestamp_col: Union[str, list]) -> dd.DataFrame:
     """
@@ -42,13 +54,17 @@ def localize_timestamp_col(df: dd.DataFrame, timestamp_col: Union[str, list]) ->
     return df
 
 
-def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True, **kwargs) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
     """
     Use fct_daily_feed_scheduled_service to find
     the gtfs_dataset_key that corresponds to the feed_key.
     """
+    project = kwargs.get("project", "cal-itp-data-infra")
+    dataset = kwargs.get("dataset", "mart_gtfs")
+    tables = get_tables(project=project)
+
     schedule_feed_to_rt_key = (
-        tbls.mart_gtfs.fct_daily_feed_scheduled_service_summary()
+        getattr(tables, dataset).fct_daily_feed_scheduled_service_summary()
         >> filter(_.service_date == date)
         >> select(_.gtfs_dataset_key, _.feed_key)
     )
