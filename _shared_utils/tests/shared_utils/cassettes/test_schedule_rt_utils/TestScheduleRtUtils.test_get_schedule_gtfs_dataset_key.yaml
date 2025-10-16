@@ -1,0 +1,102 @@
+interactions:
+- request:
+    body: grant_type=refresh_token&refresh_token=1%2F%2FARFdg7r3pVHX4ZZW7S0lWIpzxh-EwAMIH7DIKx-JBaSHiBXiqfuoa7rG9k5agi81GpHYWoD5XgvKwiGSsRN1rjj3TMYp8BrShLVpZ91EJOBd_D52HdnF6ObHvr6kpADdVznNUvL2Bx6lOe7T80xxCZ1t6aU40ZUNWCotW3yYkDRxPg4cd2XSenl7P4iyqgXPUNR5i2a6qBXBadXfD23mErHg0JKoGyn5OB-b03LCLVq0DV7ZPXHkiwQmGiVHkX8tZROJ-LrAgDoZg63H6I_zCh9f1KN0VxxWYgx-31ny6BetGx5aY4Uw6vcXKKDNWKyUdm4ShUXECmeNetN0GxqAXNZf8m7ZVY3LjjKYTBsP4bnHqKxmcOxJ2KgtVq-oMpZvf_b86Y81X2HMZL4c36E9PQqtygspWs5e1-ZYxWAIhstg309AivAFRijU6I0S8lln2aBT-8zsoW-opdnkFaOUvBWsha-7mT0S23ZbM0yXp17e5BL01q6afbKfKtUC3Yv7mqhymqSzUuo8i-SujlgSJ5ZoarqDm-wI2ydXAq9js2UAA9gUVsslzrG6wXwdnunm3PxK0rm4W88pHkhSASEXnILrADoqQVutjgB7BIECUWNzR9QeRHvpb3lvkrEBQklQIgLL9UlQppZ6BY40IoE9Y-Z7bF3byA0wPxpps4_2yJzJZfVBCUNXZNLlX3Nt4vJagmPXhb4LcPeAVFzn9tNjYDD6SBz3Gh8U5XZQ9lPhmNuORvWFLkMbGIx8rsjqq0KJ8BG638JJMuaNirePiqaZDViay8ek8RvRosvk7V4ONfRVXxEb-IZq_Hr52g_UQKV7hMurt44q_syt-X9PsI1xeKBq76z_Yg7Q_u93SFfvOdO3Xctsw5vAuqivjqn2K1_MAAtH-ZCQpkmHwXk4kkAF1ybptsGfpVwS6WgZk35ZBD3McSBn8j03J2jsV6L4M0cqmyHu9iZO-VolPaKeCya7yGsyRKq6aQxHbEkLwAhjAhuQgouwfkxV_5NJlokAVdcOXbnOt1X-ZvBX0MlQhjc7wrLo9XIUQ3rMxp1DsX8sWoXTryUYMjmTKesEJAnFw9hU84iAH57-W6RlwmaVmFHmag5mwtB3u8nVy4jPTvwPduYikd6p0w94OKioO80AV0GYCF_EpXFxnBko9Mmr5FvwVOjz4ntGzIcaZDt2w3YbpCo1bMayQ-87LK37cmchILtP9xYGLXU9chIdD81VV_hB5i85VBDY8QfetPQ53DudoCAj5F6JqYgcGbEqFFdcqDfZVbqd78RhPFDXu46mw2K6CpgosmS1ATxtHkyffEWEIZCMkvNDwKrzjtSREjBQQkHmAHLYC2U
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Authorization:
+      - Basic MzI1NTU5NDA1NTkuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb206Wm1zc0xOakp5Mjk5OGhENENUZzJlanIy
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1397'
+      Content-Type:
+      - application/x-www-form-urlencoded
+      User-Agent:
+      - python-requests/2.32.5
+    method: POST
+    uri: https://sts.googleapis.com/v1/oauthtoken
+  response:
+    body:
+      string: "{\n  \"access_token\": \"ya29.d.s0AXyl4arfyY-dNLncnsLxGM5SI3sgSUu2YxDxbnrEIvgSaCVw36Qo1bo1T7yvdpgQuHLWodVJfoQZTA0dVvZ1Zx3Uxg1id18oGPGnmMwh2r2L6FsM94v0w5Mvwpyt3YTyQgzbVf-Zbc8E8tGw-PIzFXzLsQHYbD71nWgEDRGS6rsiWmwWlaSztJOBiQiVYCqSM17cgJPHmvgrL0fdkZfPukZr77M8so_-68SQH41IeaTDeOPLwul3PaOna0TsM2vo_MMmoU-meBxmGDbiKHUKWSFZ25mwXiW7jgcTm9YtM3Bct05UAju5lt1tuGma2pcP0MYTrbWe\",\n
+        \ \"expires_in\": 3599,\n  \"token_type\": \"Bearer\"\n}\n"
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Length:
+      - '410'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 16 Oct 2025 22:33:34 GMT
+      Server:
+      - scaffolding on HTTPServer2
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql":
+      false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
+      "query": "\n        SELECT gtfs_dataset_key, feed_key FROM cal-itp-data-infra-staging.test_mart_gtfs.fct_daily_feed_scheduled_service_summary\n        WHERE
+      service_date = ''2025-09-01''\n    ", "maxResults": 5000, "requestId": "897ebea1-361a-4a4a-a6f0-c921c89d0762"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '418'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.75.1 gax/2.25.2 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.75.1 gax/2.25.2 gapic/3.38.0 gccl/3.38.0
+      authorization:
+      - Bearer ya29.d.s0AXyl4arfyY-dNLncnsLxGM5SI3sgSUu2YxDxbnrEIvgSaCVw36Qo1bo1T7yvdpgQuHLWodVJfoQZTA0dVvZ1Zx3Uxg1id18oGPGnmMwh2r2L6FsM94v0w5Mvwpyt3YTyQgzbVf-Zbc8E8tGw-PIzFXzLsQHYbD71nWgEDRGS6rsiWmwWlaSztJOBiQiVYCqSM17cgJPHmvgrL0fdkZfPukZr77M8so_-68SQH41IeaTDeOPLwul3PaOna0TsM2vo_MMmoU-meBxmGDbiKHUKWSFZ25mwXiW7jgcTm9YtM3Bct05UAju5lt1tuGma2pcP0MYTrbWe
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_F3jwNSEE_RIiFvhqD6rsmvhIhMWJ","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"0089bd1b0a2b78a8590d8749737d7146"},{"v":"10f6bb537140b7e52c8f313f3d611f71"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_F3jwNSEE_RIiFvhqD6rsmvhIhMWJ","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1760654014440","startTime":"1760654014513","endTime":"1760654014585"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 16 Oct 2025 22:33:34 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

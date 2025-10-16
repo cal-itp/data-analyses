@@ -10,9 +10,10 @@ class TestScheduleRtUtils:
     def dataset(self):
         return "test_mart_gtfs"
 
+    @pytest.mark.vcr
     def test_get_schedule_gtfs_dataset_key(self, project: str, dataset: str):
-        # this test depends on a table available at cal-itp-data-infra-staging.test_mart_gtfs that you can create with
-        # this query and then adjust the test date filter below to match the data you created.
+        # Without the vcr cassette, this test depends on a table available at cal-itp-data-infra-staging.test_mart_gtfs
+        # that you can create with this query and then adjust the test date filter below to match the data you created.
         # CREATE TABLE test_mart_gtfs.fct_daily_feed_scheduled_service_summary AS(
         #     SELECT * FROM mart_gtfs.fct_daily_feed_scheduled_service_summary LIMIT 3
         # );

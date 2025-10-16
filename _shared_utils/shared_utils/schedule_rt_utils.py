@@ -13,7 +13,6 @@ from calitp_data_analysis.sql import get_engine, query_sql
 from calitp_data_analysis.tables import AutoTable
 from shared_utils import gtfs_utils_v2
 from siuba import *
-from sqlalchemy.engine import Engine
 
 PACIFIC_TIMEZONE = "US/Pacific"
 
