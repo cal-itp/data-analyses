@@ -145,17 +145,38 @@ def bar_chart_by_date(
     
     return chart
     
-    
+
+def plot_basic_map(gdf: gpd.GeoDataFrame, plot_col: str, colorscale: str):
+    """
+    Function for map arguments.
+    """
+    m = gdf.explore(
+        plot_col,
+        tiles = "CartoDB Positron", 
+        cmap = colorscale, 
+        legend=True,
+        legend_kwds = {
+            "caption": f"{plot_col.replace('pct_tu', '%').replace('_', ' ').title()}"
+        }
+    )
+
+    return m
+
+
 def make_map(gdf: gpd.GeoDataFrame, plot_col: str):
     """
-    Make map for metric, drop columns that are either datetime (not allowed for maps) or
-    add confusion. Keep the schedule and other RT metric columns in 
-    because future dbt models will be a schedule_rt_stop_metrics file.
-    If map doesn't load quickly for portfolio, then switch to small set of 
-    columns for tooltip. 
+    Make map for metric.
+    The map gets cluttered with the tooltip, 
+    so keep only a small set of columns.
     """    
-    drop_cols = ["month_first_day", "n_days", "n_feeds"] + [c for c in gdf.columns if "bin" in c]
-    
+    keep_cols = [
+        "month", "year", "day_type", 
+        "stop_id", "stop_name",
+        "pct_tu_predictions_early", "pct_tu_predictions_ontime", "pct_tu_predictions_late",
+        "avg_prediction_error_minutes", "avg_prediction_spread_minutes",
+        "prediction_error_label", "n_predictions",
+        "geometry"
+    ]
     categorical_cols = ["prediction_error_label"]
     
     if plot_col in categorical_cols:
@@ -163,38 +184,31 @@ def make_map(gdf: gpd.GeoDataFrame, plot_col: str):
     else:
         colorscale = "viridis"
     
-    subset_gdf = gdf[
-        gdf.day_type == "Weekday"
-    ].drop(
-        columns = drop_cols
-    ).dropna(subset="geometry").reset_index(drop=True)
     
-    if len(subset_gdf) > 0:
-        m = subset_gdf.explore(
-            plot_col,
-            tiles = "CartoDB Positron", 
-            cmap = colorscale, legend=True
-        )
-
+    # try to plot weekday where we can
+    if len(gdf[gdf.day_type == "Weekday"]) > 0:
+        
+        subset_gdf = gdf[
+            gdf.day_type == "Weekday"
+        ][keep_cols].dropna(subset="geometry").reset_index(drop=True)
+        
+        m = plot_basic_map(subset_gdf, plot_col, colorscale)
+        
+        return m
+    
+    # if there are no weekday rows, then let's plot weekend 
+    elif len(gdf[gdf.day_type == "Weekday"]) == 0:
+        subset_gdf = gdf[
+            gdf.day_type != "Weekday"
+        ][keep_cols].dropna(subset="geometry").reset_index(drop=True)
+        
+        print(f"Weekday map could not be plotted. Plot weekend map.")
+        m = plot_basic_map(subset_gdf, plot_col, colorscale)
+        
         return m
     
     else:
-        subset_gdf = gdf[
-            gdf.day_type != "Weekday"
-        ].drop(
-            columns = drop_cols
-        ).dropna(subset="geometry").reset_index(drop=True)
-        
-        if len(subset_gdf) > 0:
-            
-            m = subset_gdf.explore(
-                plot_col,
-                tiles = "CartoDB Positron", 
-                cmap = colorscale, legend=True
-            )
-            print(f"Weekday map could not be plotted. Plot weekend map.")
-        else:
-            print(f"No map could be plotted. Debug error related to schedule + RT data.")
+        print(f"No map could be plotted. Debug error related to schedule + RT data.")
 
 
 '''

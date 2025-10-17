@@ -3,6 +3,8 @@ altair-transform==0.2.0
 great_tables==0.16.1
 omegaconf==2.3.0 # better yaml configuration
 polars==1.22.0
+pytest (>=8.4.1, <9.0.0)
 quarto-cli==1.6.40
 quarto==0.1.0
-pytest (>=8.4.1, <9.0.0)
+vegafusion==2.0.2
+vl-convert-python>=1.6.0
