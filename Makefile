@@ -6,8 +6,9 @@ build_portfolio_site:
 	#need git rm because otherwise, just local removal, but git change is untracked
 	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
+	python portfolio/portfolio.py build $(site) 
 	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra
-	python portfolio/portfolio.py build $(site) --deploy 
+	python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy
 	git add portfolio/sites/$(site).yml     
 	#make production_portfolio
 
