@@ -1,7 +1,4 @@
 portfolio/**/*.ipynb filter=lfs diff=lfs merge=lfs -text
-portfolio/ntd_monthly_ridership/**/*.ipynb filter=lfs diff=lfs merge=lfs -text
-portfolio/dla/district_*/*.ipynb filter=lfs diff=lfs merge=lfs -text
-portfolio/parallel_corridors/district_*/*.ipynb filter=lfs diff=lfs merge=lfs -text
-portfolio/district_digest/district_*/*.ipynb filter=lfs diff=lfs merge=lfs -text
+portfolio/**/**/*.ipynb filter=lfs diff=lfs merge=lfs -text
 “portfolio/**/**/*.ipynb” filter=lfs diff=lfs merge=lfs -text
 “portfolio/**/*.ipynb” filter=lfs diff=lfs merge=lfs -text

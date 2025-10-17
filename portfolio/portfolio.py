@@ -65,7 +65,7 @@ def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
 
 
 class Chapter(BaseModel):
-    caption: Optional[Any]
+    caption: Optional[Any] = None
     notebook: Optional[Path] = None
     params: Dict = {}
     sections: List[Dict] = []
@@ -215,7 +215,7 @@ class Site(BaseModel):
     output_dir: Path
     name: str
     title: str
-    directory: Path
+    directory: Path 
     readme: Optional[Path] = "README.md"
     notebook: Optional[Path] = None
     parts: List[Part]
@@ -226,14 +226,14 @@ class Site(BaseModel):
 
         for part in self.parts:
             part.site = self
-
-    @validator('readme', pre=True, always=True)
+    
+    @validator('readme', pre=True, always=True, check_fields=False)
     def default_readme(cls, v, *, values, **kwargs):
         if "./" in v: 
             return Path(v)
         else:
             return (values['directory'] / Path("README.md")) or (values['directory'] / Path(v))
-
+    
     @property
     def slug(self) -> str:
         return slugify(self.title)

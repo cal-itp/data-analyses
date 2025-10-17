@@ -52,8 +52,6 @@ parts:
   - params:
       name: Beach Cities GMV Schedule
   - params:
-      name: Beaumont Pass Schedule
-  - params:
       name: Beaumont Transit Schedule
   - params:
       name: Big Blue Bus Swiftly Schedule
@@ -73,8 +71,6 @@ parts:
       name: Fairfield Schedule
   - params:
       name: Fresno Schedule
-  - params:
-      name: Historic Tuolumne Schedule
   - params:
       name: Humboldt Schedule
   - params:
@@ -98,8 +94,6 @@ parts:
   - params:
       name: Marin Optibus Schedule
   - params:
-      name: Marin Schedule
-  - params:
       name: Mendocino Schedule
   - params:
       name: Merced GMV Schedule
@@ -114,8 +108,6 @@ parts:
   - params:
       name: OCTA Schedule
   - params:
-      name: Ojai Schedule
-  - params:
       name: Petaluma GMV Schedule
   - params:
       name: PresidiGo Schedule
@@ -123,8 +115,6 @@ parts:
       name: Redding Schedule
   - params:
       name: Redwood Coast Schedule
-  - params:
-      name: Redwood Coast Schedulel
   - params:
       name: Roseville Transit GMV Schedule
   - params:
@@ -149,8 +139,6 @@ parts:
       name: Tri-Valley Wheels Schedule
   - params:
       name: Tuolumne Remix Schedule
-  - params:
-      name: Tuolumne Schedule
   - params:
       name: Turlock Schedule
   - params:
