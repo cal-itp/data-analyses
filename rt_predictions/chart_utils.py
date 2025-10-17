@@ -184,31 +184,29 @@ def make_map(gdf: gpd.GeoDataFrame, plot_col: str):
     else:
         colorscale = "viridis"
     
+    subset_weekday_gdf = gdf[
+        gdf.day_type == "Weekday"
+    ][keep_cols].dropna(subset="geometry")
+    
+    subset_weekend_gdf = gdf[
+        gdf.day_type != "Weekday"
+    ][keep_cols].dropna(subset="geometry")
     
     # try to plot weekday where we can
-    if len(gdf[gdf.day_type == "Weekday"]) > 0:
+    if len(subset_weekday_gdf) > 0:
         
-        subset_gdf = gdf[
-            gdf.day_type == "Weekday"
-        ][keep_cols].dropna(subset="geometry").reset_index(drop=True)
-        
-        m = plot_basic_map(subset_gdf, plot_col, colorscale)
-        
-        return m
+        m = plot_basic_map(subset_weekday_gdf, plot_col, colorscale)
     
     # if there are no weekday rows, then let's plot weekend 
-    elif len(gdf[gdf.day_type == "Weekday"]) == 0:
-        subset_gdf = gdf[
-            gdf.day_type != "Weekday"
-        ][keep_cols].dropna(subset="geometry").reset_index(drop=True)
+    elif len(subset_weekday_gdf) == 0 and len(subset_weekend_gdf) > 0:
         
         print(f"Weekday map could not be plotted. Plot weekend map.")
-        m = plot_basic_map(subset_gdf, plot_col, colorscale)
-        
-        return m
+        m = plot_basic_map(subset_weekend_gdf, plot_col, colorscale)
     
-    else:
-        print(f"No map could be plotted. Debug error related to schedule + RT data.")
+    else: 
+        m = "No map could be plotted. Debug error related to schedule + RT data."
+    
+    return m 
 
 
 '''

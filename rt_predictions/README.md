@@ -6,6 +6,7 @@ That widely desired piece of information is powered by GTFS Real-Time Trip Updat
 
 GTFS Real Time trip updates performance metrics, specifically the stop time update messages. 
 Accurate and reliable information should be provided to transit users for journey planning. These performance metrics provide insights into:
+
 * availability and completeness of RT - is there information available for users?
 * prediction inconsistency - how much are predictions changing from minute to minute as the bus approaches time of arrival?
 * prediction reliability and accuracy - are these predictions accurate (when compared to our estimated actual time of arrival)?
@@ -35,6 +36,21 @@ As the bus approaches each stop, the software is making predictions for when the
    * follow the prediction, you will **miss** the bus...this is very bad!
    * we want fewer of these kinds of predictions, and would much rather wait for the bus than to miss it
 
+## Availability and Completeness of Predictions
+
+* This metric is the easiest to achieve. For starters, having information is better than no information.
+* For each instance of scheduled stop arrival, there is complete information if there are at least 2 predictions each minute.
+* For the 30 minute period before the bus arrives at each stop, each minute is an observation that goes into this calculation (up to 30 observations).
+* This ensures that we have fairly equal number of observations for each stop and can compare across stops.
+   * We want to avoid having 30 minutes of predictions for the 1st stop and 60 minutes of predictions for the last stop and comparing metrics that have different denominators.
+   
+## Prediction Inconsistency
+
+* This metric (also called jitter or wobble) captures another aspect of transit user experience. Any change in prediction is counted, so this metric **only has positive values**, but smaller positive values are better.
+   * If the prediction is changing from minute to minute, a large spread would show up.
+   * If the prediction is fairly consistent, we would see small spread.
+* There is [research](https://www.sciencedirect.com/science/article/abs/pii/S0965856416303494) around how transit users perceive wait time, and that users perceive longer wait times than what is actually experienced. Decreasing the perceived wait time by providing real-time information has positive benefits for user experience. 
+
 ## Master Services Agreement
 Exhibit H definitions (pg 53 on pdf)
 
@@ -54,8 +70,23 @@ Exhibit H definitions (pg 53 on pdf)
 ## References
 * Caltrans GTFS RT Master Service Agreement Contract
    * Swiftly provides a prediction accuracy exponential equation
-* Professor Gregory Newmark's paper: [Assessing GTFS Accuracy ](https://transweb.sjsu.edu/sites/default/files/2017-Newmark-Public-Transit-Statistical-Analysis.pdf)
+* Professor Gregory Newmark's paper: [Assessing GTFS Accuracy](https://transweb.sjsu.edu/sites/default/files/2017-Newmark-Public-Transit-Statistical-Analysis.pdf)
     * This project is a work in progress for productionizing and implementing all the ideas presented in this paper.
     * This paper provides the basis of policy and planning interpretations around the various metrics.
     * We replicate as many of the visualizations and tables as possible.
-    
+* Yingling Fan, Andrew Guthrie, David Levinson's paper on [Waiting time perceptions at transit stops and stations](https://www.sciencedirect.com/science/article/abs/pii/S0965856416303494)
+
+### Data Models and Data Processing Scripts
+1. Big Query SQL models (upstream to downstream SQL)
+   * 2 week [sample](https://dbt-docs.dds.dot.ca.gov/index.html#!/model/model.calitp_warehouse.fct_stop_time_updates_sample)
+   * [actual arrivals](https://dbt-docs.dds.dot.ca.gov/index.html#!/model/model.calitp_warehouse.int_gtfs_rt__trip_updates_trip_stop_day_map_grouping)
+   * [daily stop time metrics](https://dbt-docs.dds.dot.ca.gov/index.html#!/model/model.calitp_warehouse.fct_stop_time_metrics) 
+   * [daily stop metrics](https://dbt-docs.dds.dot.ca.gov/index.html#!/model/model.calitp_warehouse.fct_trip_updates_stop_metrics) --> desired future aggregation: move to this stop on a June 2025 weekday instead of this stop on June 1, 2025
+   * [GitHub issue](https://github.com/cal-itp/data-infra/issues/4101)
+
+
+2. Python scripts
+   * [report notebook](https://github.com/cal-itp/data-analyses/blob/main/rt_predictions/rt_trip_updates_report.ipynb)
+   * [Makefile](https://github.com/cal-itp/data-analyses/blob/main/rt_predictions/Makefile)
+   * [download warehouse tables](https://github.com/cal-itp/data-analyses/blob/main/rt_predictions/download_warehouse_tables.py)
+   * [prep data](https://github.com/cal-itp/data-analyses/blob/main/rt_predictions/prep_data.py)
