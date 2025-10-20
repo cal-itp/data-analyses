@@ -18,18 +18,19 @@
   - Foothill Schedule
 2025-08-20:
   - Bear Schedule
-  - Victor Valley Schedule
   - eTrans Schedule
   - Roseville Transit GMV Schedule
-  - StanRTA Schedule
 2025-09-24:
+  - San Juan Capistrano Trolley Schedule
+  - Culver City Schedule
+2025-10-15:
+  - Yolobus Schedule
   - Santa Ynez Mecatran Schedule
   - SLO Peak Transit Schedule
   - GET Schedule
   - Flixbus Schedule
   - Tracy Schedule
   - San Joaquin Schedule
-  - San Juan Capistrano Trolley Schedule
   - Tahoe Transportation District GMV Schedule
   - Merced GMV Schedule
   - Torrance Schedule
@@ -46,7 +47,6 @@
   - Inglewood Schedule
   - Lompoc Schedule
   - Get Around Town Express Schedule
-  - Culver City Schedule
   - Alhambra Schedule
   - Antelope Valley Transit Authority Schedule
   - Big Blue Bus Schedule
@@ -64,7 +64,6 @@
   - Riverside Schedule
   - WeHo Schedule
   - Go West Schedule
-  - Yolobus Schedule
   - Yuma Schedule
   - San Diego International Airport Shuttles Schedule
   - Bay Area 511 Tri Delta Schedule
@@ -106,6 +105,7 @@
   - Bay Area 511 Vine Transit Schedule
   - Bay Area 511 WestCAT Schedule
   - Bay Area 511 Tri-Valley Wheels Schedule
+  - Victor Valley Schedule
   - SLO Schedule
   - Santa Clarita Schedule
   - Anaheim Resort Schedule
@@ -155,7 +155,6 @@
   - Plumas Schedule
   - Palos Verdes PTA Schedule
   - County Express Schedule
-  - Sage Stage Schedule
   - Siskiyou Schedule
   - Santa Cruz Schedule
   - DowneyLink Avail Schedule
@@ -163,12 +162,15 @@
   - Long Beach Schedule
   - Fresno Schedule
   - LA Metro Bus Schedule
+  - Sage Stage Schedule
   - LA Metro Rail Schedule
   - VCTC GMV Schedule
   - Glendale Schedule
   - Artesia Schedule
   - Maywood Schedule
+  - Yurok Schedule
   - Tuolumne Remix Schedule
+  - Bellflower Remix Schedule
   - eTrans Schedule Remix
   - SunLine Avail Schedule
   - Roseville Schedule
@@ -195,6 +197,7 @@
   - B-Line Schedule
   - Redding Schedule
   - Carson Circuit Schedule
+  - El Monte RTAP Schedule
   - Fresno County Schedule
   - Beach Cities GMV Schedule
   - Basin Transit GMV Schedule
@@ -208,7 +211,7 @@
   - SBMTD Schedule
   - SLORTA Schedule
   - Santa Maria Schedule
-  - Yurok Schedule
+  - StanRTA Schedule
   - Metrolink Schedule
 2024-02-14:
   - Rosemead Schedule
