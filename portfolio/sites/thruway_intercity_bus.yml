@@ -6,3 +6,4 @@ parts:
 - chapters:
   - notebook: ./thruway_intercity_bus/04_gtfs_link_charts.ipynb
   - notebook: ./thruway_intercity_bus/05_ridership_time_series.ipynb
+  - notebook: ./thruway_intercity_bus/06_cost_time_series.ipynb
