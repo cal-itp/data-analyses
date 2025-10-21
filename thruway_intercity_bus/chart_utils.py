@@ -196,7 +196,7 @@ def flow_chart_from_shape_trip_row(row: pd.Series, stop_times: pd.DataFrame, rid
     key_column_dict = {'miles': 'miles_traveled', 'time': 'minutes_traveled'}
     key_column = key_column_dict[how]
     od_group_col = 'od_' + key_column
-    trip_st = stop_times.query('trip_id == @row.trip_id')
+    trip_st = stop_times.query('trip_id == @row.trip_id').sort_values('stop_sequence', ascending=True)
     # print(trip_st.columns)
     # print(trip_st.route_id.iloc[0])
     if trip_st.route_id.iloc[0] == '1c':
@@ -210,6 +210,8 @@ def flow_chart_from_shape_trip_row(row: pd.Series, stop_times: pd.DataFrame, rid
     with_distance = rider_one_rt_dir.merge(
         gtfs_info_df[['amtrak_stop', key_column]], left_on = 'departing_station', right_on = 'amtrak_stop')
     with_distance[od_group_col] = with_distance.od.map(with_distance.groupby('od')[[key_column]].size())
+    with_distance = with_distance.drop_duplicates(subset=['od', key_column])
+    # return with_distance
     # try:
     colorscale = color_by_origin_and_distance(with_distance_df=with_distance, cmaps=all_cmaps, col=od_group_col)
     chart = chart_rider_flow(with_distance, col=key_column, color_args={'scale': colorscale})
