@@ -19,12 +19,15 @@ def read_format_ridership() -> pd.DataFrame:
     source_ridership = source_ridership.assign(route_short_name = source_ridership.ca_bus_route.str.replace('Rt', 'Route'))
 
     rider_to_gtfs_dict = {'Route 1A': 'Route 1', 'Route 1B': 'Route 1', 'Route 1C': 'Route 1c',
-                         'Route 20 - B': 'Route 20', 'Route 3R': 'Route 3'}
+                         'Route 20 - B': 'Route 20', 'Route 3R': 'Route 3',
+                          'Route 56': 'Route 6'}
+    
     strip_zero = lambda route_str: ' '.join([x.lstrip('0') for x in route_str.split(' ')])
     rider_to_gtfs = lambda route_str: rider_to_gtfs_dict[route_str] if route_str in rider_to_gtfs_dict.keys() else route_str
 
+    drop_routes = ['Route 68', 'Route 35']
     source_ridership = source_ridership.assign(route_short_name = source_ridership.route_short_name.map(strip_zero).map(rider_to_gtfs))
-    
+    source_ridership = source_ridership[~source_ridership['route_short_name'].isin(drop_routes)]
     return source_ridership
 
 def longest_by_route_dir(shape_trip_df):
