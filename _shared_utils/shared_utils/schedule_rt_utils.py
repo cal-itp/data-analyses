@@ -79,28 +79,42 @@ def filter_dim_gtfs_datasets(
     """
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_transit_database")
-    tables = _get_tables(project=project)
 
     if "key" not in keep_cols:
         raise KeyError("Include key in keep_cols list")
 
-    dim_gtfs_datasets = (
-        getattr(tables, dataset).dim_gtfs_datasets()
-        >> filter(_.data_quality_pipeline == True)  # if True, we can use
-        >> gtfs_utils_v2.filter_custom_col(custom_filtering)
-        >> gtfs_utils_v2.subset_cols(keep_cols)
-    )
+    columns = []
 
-    # rename columns to match our convention
-    if "key" in keep_cols:
-        dim_gtfs_datasets = dim_gtfs_datasets >> rename(gtfs_dataset_key="key")
-    if "name" in keep_cols:
-        dim_gtfs_datasets = dim_gtfs_datasets >> rename(gtfs_dataset_name="name")
+    for column in keep_cols:
+        new_column = column
 
-    if get_df:
-        dim_gtfs_datasets = dim_gtfs_datasets >> collect()
+        if column in ["key", "name"]:
+            new_column = f"{column} AS gtfs_dataset_{column}"
 
-    return dim_gtfs_datasets
+        columns.append(new_column)
+
+    search_conditions = "data_quality_pipeline = true"
+    search_params = {}
+
+    for k, v in (custom_filtering or {}).items():
+        search_conditions = search_conditions + f" AND {k} IN UNNEST(%({k}_values)s)"
+        search_params[f"{k}_values"] = v
+
+    query = f"""
+        SELECT {','.join(columns)} FROM {project}.{dataset}.dim_gtfs_datasets
+        WHERE {search_conditions}
+    """
+
+    # TODO: update query_sql to accept parameterized queries and use that instead
+    db_engine = get_engine()
+
+    with db_engine.connect() as connection:
+        if get_df:
+            result = pd.read_sql(query, connection, params=search_params)
+        else:
+            result = connection.execute(query, params=search_params)
+
+    return result
 
 
 def get_organization_id(

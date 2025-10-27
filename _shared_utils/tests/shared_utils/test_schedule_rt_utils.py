@@ -67,3 +67,7 @@ class TestScheduleRtUtils:
                                                                'regional_feed_type': None,
                                                                'uri': 'http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb',
                                                                'base64_url': 'aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI='}])
+
+    def test_filter_dim_gtfs_dataset_keep_cols_key_missing(self, project: str, dataset: str):
+        with pytest.raises(KeyError, match="Include key in keep_cols list"):
+            filter_dim_gtfs_datasets(keep_cols=["name", "type", "regional_feed_type", "uri", "base64_url"], project=project, dataset=dataset)
