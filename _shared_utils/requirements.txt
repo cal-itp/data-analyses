@@ -10,6 +10,7 @@ polars==1.22.0
 pytest (>=8.4.1, <9.0.0)
 pytest-mock (>=3.15.1, <4.0.0)
 pytest-recording (>=0.13.4,<0.14.0)
+pytest-unordered (>=0.7.0,<0.8.0)
 quarto==0.1.0
 quarto-cli==1.6.40
 vegafusion==2.0.2

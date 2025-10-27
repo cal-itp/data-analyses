@@ -16,7 +16,7 @@ from siuba import *
 
 PACIFIC_TIMEZONE = "US/Pacific"
 
-def get_tables(project):
+def _get_tables(project):
     tables = AutoTable(
         get_engine(project=project),
         lambda s: s,  # s.replace(".", "_"),
@@ -71,16 +71,21 @@ def filter_dim_gtfs_datasets(
     keep_cols: list[str] = ["key", "name", "type", "regional_feed_type", "uri", "base64_url"],
     custom_filtering: dict = None,
     get_df: bool = True,
+    **kwargs
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
     """
     Filter mart_transit_database.dim_gtfs_dataset table
     and keep only the valid rows that passed data quality checks.
     """
+    project = kwargs.get("project", "cal-itp-data-infra")
+    dataset = kwargs.get("dataset", "mart_transit_database")
+    tables = _get_tables(project=project)
+
     if "key" not in keep_cols:
         raise KeyError("Include key in keep_cols list")
 
     dim_gtfs_datasets = (
-        tbls.mart_transit_database.dim_gtfs_datasets()
+        getattr(tables, dataset).dim_gtfs_datasets()
         >> filter(_.data_quality_pipeline == True)  # if True, we can use
         >> gtfs_utils_v2.filter_custom_col(custom_filtering)
         >> gtfs_utils_v2.subset_cols(keep_cols)
