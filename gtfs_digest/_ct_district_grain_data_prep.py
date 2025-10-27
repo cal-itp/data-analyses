@@ -46,7 +46,7 @@ def data_wrangling_operator_profile(district:str)->pd.DataFrame:
     
     operator_df2 = operator_df.loc[operator_df.caltrans_district == district]
     
-    operator_df2 = operator_df2.sort_values(by = ["service_date"], ascending = False).drop_duplicates(subset = ["analysis_name"])
+    operator_df2 = operator_df2.sort_values(by = ["service_date"], ascending = False).drop_duplicates(subset = ["analysis_name", "name"])
     return operator_df2
         
 def data_wrangling_operator_map(portfolio_organization_names: list) -> gpd.GeoDataFrame:
@@ -182,24 +182,16 @@ def final_transit_route_shs_outputs(
     return map_gdf, text_table
 
 def create_gtfs_stats(df:pd.DataFrame)->pd.DataFrame:
-    shared_cols = ["analysis_name"]
-    exclude_cols = [
-    "schedule_gtfs_dataset_key",
-    "caltrans_district",
-    "organization_source_record_id",
-    # "service_date",
-    "primary_uza",]
-
+    
     gtfs_service_cols = [c for c in df.columns if "operator_" in c]
     
-    gtfs_table_df = df[shared_cols + gtfs_service_cols + ["service_date"]].reset_index(drop=True)
+    gtfs_table_df = df[gtfs_service_cols + ["analysis_name"]].reset_index(drop=True)
+    
+    gtfs_table_df = gtfs_table_df.groupby(['analysis_name']).agg("sum").reset_index()
     
     gtfs_table_df = gtfs_table_df.rename(columns=gtfs_table_readable_columns)
     
     gtfs_table_df["Avg Arrivals per Stop"] = gtfs_table_df["# Arrivals"]/gtfs_table_df["# Stops"]
-    
-    # gtfs_table_df = gtfs_table_df.drop_duplicates()
-    
     return gtfs_table_df
     
 """
