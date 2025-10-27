@@ -1,0 +1,26 @@
+name: Pytest
+
+on: [push]
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install share_utils dependencies
+        working-directory: _shared_utils/
+        run: pip install -r requirements.txt
+
+      - name: Run shared_utils tests
+        working-directory: _shared_utils/
+        run: pytest tests

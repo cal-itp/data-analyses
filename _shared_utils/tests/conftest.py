@@ -1,5 +1,12 @@
 import pytest
+import sys
 
+
+def pytest_configure(config):
+    sys._called_from_test = True
+
+def pytest_unconfigure(config):
+    del sys._called_from_test
 
 @pytest.fixture(scope="module")
 def vcr_config():
@@ -20,3 +27,4 @@ def vcr_config():
             "oauth2.googleapis.com",
         ],
     }
+
