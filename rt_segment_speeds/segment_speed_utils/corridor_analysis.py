@@ -25,7 +25,7 @@ def get_max_frequencies(segment_speeds: gpd.GeoDataFrame) -> pd.DataFrame:
     '''
     get max directional frequency by route from segment speeds
     '''
-    group_cols = ['schedule_gtfs_dataset_key', 'route_id']
+    group_cols = ['schedule_gtfs_dataset_key', 'name', 'route_id']
     frequencies = segment_speeds[group_cols + ['direction_id', 'time_of_day', 'shape_array_key', 'trips_hr_sch']]
     #  max for each shape across all times of day, then sum all shapes per direction, then max direction
     frequencies = (frequencies.groupby(
@@ -119,6 +119,7 @@ def find_corridor_data(
     half of the corridor length or the CORRIDOR_RELEVANCE threshold
     '''
     speed_segments_gdf = speed_segments_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
+    corridor_gdf = corridor_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
     corridor_segments = speed_segments_gdf.clip(corridor_gdf)
     attach_geom = (corridor_segments.groupby(
         ['shape_array_key', 'segment_id','geometry']).agg(
@@ -133,12 +134,11 @@ def find_corridor_data(
         ).reset_index()
                     )
     trip_speeds_df = trip_speeds_df.drop(columns=['shape_length']).merge(shape_lengths, on=['shape_id', 'schedule_gtfs_dataset_key'])
-    half_corr = corridor_gdf.corridor_distance_meters.iloc[0] / 2
     if custom_relevance_meters:
         corridor_relevance_threshold = custom_relevance_meters
     else:
+        half_corr = corridor_gdf.corridor_distance_meters.iloc[0] / 2
         corridor_relevance_threshold = min(half_corr, CORRIDOR_RELEVANCE)
-    # display(trip_speeds_df.drop_duplicates(subset = 'route_id'))
     trip_speeds_df = trip_speeds_df.query('shape_length >= @corridor_relevance_threshold')
     if start_datetime and end_datetime:
         trip_speeds_df = trip_speeds_df.query('arrival_time >= @start_datetime & arrival_time <= @end_datetime')
