@@ -219,20 +219,37 @@ def filter_dim_organizations(
     """
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_transit_database")
-    tables = _get_tables(project=project)
+    search_conditions = "_is_current = true"
+    search_params = {}
 
-    dim_orgs = (
-        getattr(tables, dataset).dim_organizations()
-        >> gtfs_utils_v2.filter_custom_col(custom_filtering)
-        >> filter(_._is_current == True)
-        >> gtfs_utils_v2.subset_cols(keep_cols)
-        >> rename(organization_source_record_id="source_record_id")
-    )
+    for k, v in (custom_filtering or {}).items():
+        search_conditions = search_conditions + f" AND {k} IN UNNEST(%({k}_values)s)"
+        search_params[f"{k}_values"] = v
 
-    if get_df:
-        dim_orgs = dim_orgs >> collect()
+    columns = []
 
-    return dim_orgs
+    for column in keep_cols:
+        if column == "source_record_id":
+            columns.append("source_record_id AS organization_source_record_id")
+        else:
+            columns.append(column)
+
+    query = f"""
+        SELECT {','.join(columns)}
+        FROM {project}.{dataset}.dim_organizations
+        WHERE {search_conditions}
+    """
+
+    # TODO: update query_sql to accept parameterized queries and use that instead
+    db_engine = get_engine()
+
+    with db_engine.connect() as connection:
+        if get_df:
+            result = pd.read_sql(query, connection, params=search_params)
+        else:
+            result = connection.execute(query, params=search_params)
+
+    return result
 
 
 def sample_gtfs_dataset_key_to_organization_crosswalk(
