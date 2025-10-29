@@ -26,6 +26,26 @@ def _get_tables(project):
 
     return tables
 
+def _query_sql_with_params(query_template: str, search_criteria: dict, as_df: bool) -> pd.DataFrame:
+    # TODO: update query_sql to accept parameterized queries and use that instead
+    search_conditions = ""
+    search_params = {}
+
+    for k, v in (search_criteria or {}).items():
+        search_conditions = f" AND {k} IN UNNEST(%({k}_values)s)"
+        search_params[f"{k}_values"] = v
+
+    query = query_template.format(search_conditions=search_conditions)
+    db_engine = get_engine()
+
+    with db_engine.connect() as connection:
+        if as_df:
+            result = pd.read_sql(query, connection, params=search_params)
+        else:
+            result = connection.execute(query, params=search_params)
+
+    return result
+
 def localize_timestamp_col(df: dd.DataFrame, timestamp_col: Union[str, list]) -> dd.DataFrame:
     """
     RT vehicle timestamps are given in UTC.
@@ -93,28 +113,15 @@ def filter_dim_gtfs_datasets(
 
         columns.append(new_column)
 
-    search_conditions = "data_quality_pipeline = true"
-    search_params = {}
-
-    for k, v in (custom_filtering or {}).items():
-        search_conditions = search_conditions + f" AND {k} IN UNNEST(%({k}_values)s)"
-        search_params[f"{k}_values"] = v
-
-    query = f"""
-        SELECT {','.join(columns)} FROM {project}.{dataset}.dim_gtfs_datasets
-        WHERE {search_conditions}
+    query_base = f"""
+        SELECT {','.join(columns)}
+        FROM {project}.{dataset}.dim_gtfs_datasets
+        WHERE data_quality_pipeline = true
     """
 
-    # TODO: update query_sql to accept parameterized queries and use that instead
-    db_engine = get_engine()
+    query_template = query_base + "{search_conditions}"
 
-    with db_engine.connect() as connection:
-        if get_df:
-            result = pd.read_sql(query, connection, params=search_params)
-        else:
-            result = connection.execute(query, params=search_params)
-
-    return result
+    return _query_sql_with_params(query_template=query_template, search_criteria=custom_filtering, as_df=get_df)
 
 
 def _get_organization_id(
@@ -219,13 +226,6 @@ def filter_dim_organizations(
     """
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_transit_database")
-    search_conditions = "_is_current = true"
-    search_params = {}
-
-    for k, v in (custom_filtering or {}).items():
-        search_conditions = search_conditions + f" AND {k} IN UNNEST(%({k}_values)s)"
-        search_params[f"{k}_values"] = v
-
     columns = []
 
     for column in keep_cols:
@@ -234,22 +234,10 @@ def filter_dim_organizations(
         else:
             columns.append(column)
 
-    query = f"""
-        SELECT {','.join(columns)}
-        FROM {project}.{dataset}.dim_organizations
-        WHERE {search_conditions}
-    """
+    query_base = f"SELECT {','.join(columns)} FROM {project}.{dataset}.dim_organizations WHERE _is_current = true"
+    query_template = query_base + "{search_conditions}"
 
-    # TODO: update query_sql to accept parameterized queries and use that instead
-    db_engine = get_engine()
-
-    with db_engine.connect() as connection:
-        if get_df:
-            result = pd.read_sql(query, connection, params=search_params)
-        else:
-            result = connection.execute(query, params=search_params)
-
-    return result
+    return _query_sql_with_params(query_template=query_template, search_criteria=custom_filtering, as_df=get_df)
 
 
 def sample_gtfs_dataset_key_to_organization_crosswalk(
