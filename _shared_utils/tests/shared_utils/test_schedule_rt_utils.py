@@ -88,3 +88,27 @@ class TestScheduleRtUtils:
         result = filter_dim_county_geography(project=project, dataset=dataset, date='2024-01-17')
 
         assert len(result) == 0
+
+    @pytest.mark.vcr
+    def test_filter_dim_county_geography_additional_keep_cols(self, project: str, dataset: str):
+        result = filter_dim_county_geography(
+            project=project,
+            dataset=dataset,
+            date='2025-06-17',
+            keep_cols=['caltrans_district', 'county_geography_name', 'msa', 'fips']
+        )
+
+        assert len(result) == 2
+        assert result.to_dict(orient='records') == unordered(
+            [{'organization_name': 'City of Rosemead',
+              'caltrans_district': '07 - Los Angeles / Ventura',
+              'county_geography_name': 'Los Angeles',
+              'msa': 'Los Angeles-Long Beach-Anaheim',
+              'fips': 6037,
+              },
+             {'organization_name': 'Via / Remix Inc.',
+              'caltrans_district': '07 - Los Angeles / Ventura',
+              'county_geography_name': 'Los Angeles',
+              'msa': 'Los Angeles-Long Beach-Anaheim',
+              'fips': 6037,
+              }])

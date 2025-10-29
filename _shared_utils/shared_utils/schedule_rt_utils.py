@@ -176,7 +176,7 @@ def _get_organization_id(
 
 def filter_dim_county_geography(
     date: str,
-    keep_cols: list[str] = ["caltrans_district"],
+    keep_cols: list[str] = [],
     **kwargs,
 ) -> pd.DataFrame:
     """
@@ -192,43 +192,19 @@ def filter_dim_county_geography(
     """
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_transit_database")
-    tables = _get_tables(project=project)
 
-    bridge_orgs_county_geog = (
-        getattr(tables, dataset).bridge_organizations_x_headquarters_county_geography()
-        >> gtfs_utils_v2.subset_cols([_.organization_name, _.county_geography_key, _._valid_from, _._valid_to])
-        >> collect()
-    )
+    df = query_sql(f"""
+        SELECT 
+            bohcg.organization_name,
+            CONCAT(LPAD(CAST(dmg.caltrans_district AS STRING), 2, '0'), ' - ', dmg.caltrans_district_name) AS caltrans_district,
+            {','.join(keep_cols)}
+        FROM {project}.{dataset}.bridge_organizations_x_headquarters_county_geography AS bohcg
+        INNER JOIN {project}.{dataset}.dim_county_geography AS dmg ON dmg.key = bohcg.county_geography_key
+        WHERE DATETIME(bohcg._valid_from, '{PACIFIC_TIMEZONE}') <= DATETIME('{date}')
+            AND DATETIME(bohcg._valid_to, '{PACIFIC_TIMEZONE}') >= DATETIME('{date}')
+    """, as_df=True)
 
-    keep_cols2 = list(set(keep_cols + ["county_geography_key", "caltrans_district_name"]))
-
-    dim_county_geography = (
-        getattr(tables, dataset).dim_county_geography()
-        >> rename(county_geography_key=_.key)
-        >> gtfs_utils_v2.subset_cols(keep_cols2)
-        >> collect()
-    )
-
-    bridge_orgs_county_geog = localize_timestamp_col(bridge_orgs_county_geog, ["_valid_from", "_valid_to"])
-
-    bridge_orgs_county_geog2 = bridge_orgs_county_geog >> filter(
-        _._valid_from_local <= pd.to_datetime(date), _._valid_to_local >= pd.to_datetime(date)
-    )
-
-    # Merge organization-county with caltrans_district info
-    # it appears to be a 1:1 merge. checked whether organization can belong to multiple districts,
-    # and that doesn't appear to happen
-    df = pd.merge(bridge_orgs_county_geog2, dim_county_geography, on="county_geography_key", how="inner")
-
-    df2 = (
-        df.assign(caltrans_district=df.caltrans_district.astype(str).str.zfill(2) + " - " + df.caltrans_district_name)[
-            ["organization_name"] + keep_cols
-        ]
-        .drop_duplicates()
-        .reset_index(drop=True)
-    )
-
-    return df2
+    return df[["organization_name", "caltrans_district"] + keep_cols].drop_duplicates().reset_index(drop=True)
 
 
 def filter_dim_organizations(

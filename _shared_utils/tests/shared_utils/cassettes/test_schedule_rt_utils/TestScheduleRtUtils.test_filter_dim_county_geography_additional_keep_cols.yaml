@@ -2,14 +2,14 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
-      "query": "\n        SELECT \n            \n            bohcg.organization_name,\n            CONCAT(LPAD(CAST(dmg.caltrans_district
-      AS STRING), 2, ''0''), '' - '', dmg.caltrans_district_name) AS caltrans_district\n        FROM
+      "query": "\n        SELECT \n            bohcg.organization_name,\n            CONCAT(LPAD(CAST(dmg.caltrans_district
+      AS STRING), 2, ''0''), '' - '', dmg.caltrans_district_name) AS caltrans_district,\n            caltrans_district,county_geography_name,msa,fips\n        FROM
       cal-itp-data-infra-staging.test_shared_utils.bridge_organizations_x_headquarters_county_geography
       AS bohcg\n        INNER JOIN cal-itp-data-infra-staging.test_shared_utils.dim_county_geography
       AS dmg ON dmg.key = bohcg.county_geography_key\n        WHERE DATETIME(bohcg._valid_from,
       ''US/Pacific'') <= DATETIME(''2025-06-17'')\n            AND DATETIME(bohcg._valid_to,
       ''US/Pacific'') >= DATETIME(''2025-06-17'')\n    ", "maxResults": 5000, "requestId":
-      "96cd4d92-8387-4baa-87ac-206c602bc358"}'
+      "7f608e5f-2429-4da2-b640-ab82e91aa81d"}'
     headers:
       Accept:
       - '*/*'
@@ -20,7 +20,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '862'
+      - '911'
       Content-Type:
       - application/json
       User-Agent:
@@ -33,9 +33,11 @@ interactions:
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_AuxKbFYiR0vWffvH6GHVu2SIKoor","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"City
-        of Rosemead"},{"v":"07 - Los Angeles / Ventura"}]},{"f":[{"v":"Via / Remix
-        Inc."},{"v":"07 - Los Angeles / Ventura"}]}],"totalBytesProcessed":"285","jobComplete":true,"cacheHit":false,"queryId":"job_AuxKbFYiR0vWffvH6GHVu2SIKoor","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"20971520","totalSlotMs":"17","location":"us-west2","creationTime":"1761764432067","startTime":"1761764432186","endTime":"1761764432342"}'
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district_1","type":"INTEGER","mode":"NULLABLE"},{"name":"county_geography_name","type":"STRING","mode":"NULLABLE"},{"name":"msa","type":"STRING","mode":"NULLABLE"},{"name":"fips","type":"INTEGER","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_gRfrnVo0NpxZgLjautHhxl-3VYe5","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"City
+        of Rosemead"},{"v":"07 - Los Angeles / Ventura"},{"v":"7"},{"v":"Los Angeles"},{"v":"Los
+        Angeles-Long Beach-Anaheim"},{"v":"6037"}]},{"f":[{"v":"Via / Remix Inc."},{"v":"07
+        - Los Angeles / Ventura"},{"v":"7"},{"v":"Los Angeles"},{"v":"Los Angeles-Long
+        Beach-Anaheim"},{"v":"6037"}]}],"totalBytesProcessed":"359","jobComplete":true,"cacheHit":false,"queryId":"job_gRfrnVo0NpxZgLjautHhxl-3VYe5","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"20971520","totalSlotMs":"24","location":"us-west2","creationTime":"1761764610038","startTime":"1761764610130","endTime":"1761764610282"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -44,7 +46,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Wed, 29 Oct 2025 19:00:32 GMT
+      - Wed, 29 Oct 2025 19:03:30 GMT
       Server:
       - ESF
       Transfer-Encoding:
