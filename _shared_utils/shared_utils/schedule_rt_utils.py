@@ -117,7 +117,7 @@ def filter_dim_gtfs_datasets(
     return result
 
 
-def get_organization_id(
+def _get_organization_id(
     df: pd.DataFrame,
     date: str,
     merge_cols: list = [],
@@ -177,6 +177,7 @@ def get_organization_id(
 def filter_dim_county_geography(
     date: str,
     keep_cols: list[str] = ["caltrans_district"],
+    **kwargs,
 ) -> pd.DataFrame:
     """
     Merge mart_transit_database.dim_county_geography with
@@ -189,8 +190,12 @@ def filter_dim_county_geography(
     Use this merge to get caltrans_district.
     Organizations belong to county, and counties are assigned to districts.
     """
+    project = kwargs.get("project", "cal-itp-data-infra")
+    dataset = kwargs.get("dataset", "mart_transit_database")
+    tables = _get_tables(project=project)
+
     bridge_orgs_county_geog = (
-        tbls.mart_transit_database.bridge_organizations_x_headquarters_county_geography()
+        getattr(tables, dataset).bridge_organizations_x_headquarters_county_geography()
         >> gtfs_utils_v2.subset_cols([_.organization_name, _.county_geography_key, _._valid_from, _._valid_to])
         >> collect()
     )
@@ -198,7 +203,7 @@ def filter_dim_county_geography(
     keep_cols2 = list(set(keep_cols + ["county_geography_key", "caltrans_district_name"]))
 
     dim_county_geography = (
-        tbls.mart_transit_database.dim_county_geography()
+        getattr(tables, dataset).dim_county_geography()
         >> rename(county_geography_key=_.key)
         >> gtfs_utils_v2.subset_cols(keep_cols2)
         >> collect()
@@ -304,7 +309,7 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
     # (3) From quartet, get to organization name
     merge_cols = [i for i in feeds_with_quartet_info.columns if quartet_data in i]
 
-    feeds_with_org_id = get_organization_id(feeds_with_quartet_info, date, merge_cols=merge_cols)
+    feeds_with_org_id = _get_organization_id(feeds_with_quartet_info, date, merge_cols=merge_cols)
 
     # (4) Merge in dim_orgs to get organization info - everything except caltrans_district is found here
     ORG_RENAME_DICT = {"source_record_id": "organization_source_record_id", "name": "organization_name"}

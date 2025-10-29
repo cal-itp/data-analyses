@@ -1,6 +1,6 @@
 import pytest
 from pytest_unordered import unordered
-from shared_utils.schedule_rt_utils import get_schedule_gtfs_dataset_key, filter_dim_gtfs_datasets
+from shared_utils.schedule_rt_utils import get_schedule_gtfs_dataset_key, filter_dim_gtfs_datasets, filter_dim_county_geography, sample_gtfs_dataset_key_to_organization_crosswalk
 
 class TestScheduleRtUtils:
     @pytest.fixture
@@ -71,3 +71,20 @@ class TestScheduleRtUtils:
     def test_filter_dim_gtfs_dataset_keep_cols_key_missing(self, project: str, dataset: str):
         with pytest.raises(KeyError, match="Include key in keep_cols list"):
             filter_dim_gtfs_datasets(keep_cols=["name", "type", "regional_feed_type", "uri", "base64_url"], project=project, dataset=dataset)
+
+    @pytest.mark.vcr
+    def test_filter_dim_county_geography(self, project: str, dataset: str):
+        result = filter_dim_county_geography(project=project, dataset=dataset, date='2025-06-17')
+
+        assert len(result) == 2
+        assert result.to_dict(orient='records') == unordered(
+            [{'organization_name': 'City of Rosemead',
+              'caltrans_district': '07 - Los Angeles / Ventura', },
+             {'organization_name': 'Via / Remix Inc.',
+              'caltrans_district': '07 - Los Angeles / Ventura'}])
+
+    @pytest.mark.vcr
+    def test_filter_dim_county_geography_date_unavailable(self, project: str, dataset: str):
+        result = filter_dim_county_geography(project=project, dataset=dataset, date='2024-01-17')
+
+        assert len(result) == 0
