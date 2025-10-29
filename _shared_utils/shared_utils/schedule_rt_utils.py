@@ -208,17 +208,21 @@ def filter_dim_county_geography(
 
 
 def filter_dim_organizations(
-    date: str,
     keep_cols: list[str] = ["source_record_id"],
     custom_filtering: dict = None,
     get_df: bool = True,
+    **kwargs,
 ) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
     """
     Filter dim_organizations down to current record for organization.
     Caltrans district is associated with organization_source_record_id.
     """
+    project = kwargs.get("project", "cal-itp-data-infra")
+    dataset = kwargs.get("dataset", "mart_transit_database")
+    tables = _get_tables(project=project)
+
     dim_orgs = (
-        tbls.mart_transit_database.dim_organizations()
+        getattr(tables, dataset).dim_organizations()
         >> gtfs_utils_v2.filter_custom_col(custom_filtering)
         >> filter(_._is_current == True)
         >> gtfs_utils_v2.subset_cols(keep_cols)

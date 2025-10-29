@@ -1,6 +1,7 @@
 import pytest
 from pytest_unordered import unordered
-from shared_utils.schedule_rt_utils import get_schedule_gtfs_dataset_key, filter_dim_gtfs_datasets, filter_dim_county_geography, sample_gtfs_dataset_key_to_organization_crosswalk
+from shared_utils.schedule_rt_utils import get_schedule_gtfs_dataset_key, filter_dim_gtfs_datasets, \
+    filter_dim_county_geography, filter_dim_organizations
 
 class TestScheduleRtUtils:
     @pytest.fixture
@@ -24,24 +25,25 @@ class TestScheduleRtUtils:
         result = filter_dim_gtfs_datasets(project=project, dataset=dataset)
 
         assert len(result) == 3
-        assert result.to_dict(orient='records') == unordered([{'gtfs_dataset_key': 'c51dbfdd47838f86074c4ef3179cc9ed',
-                                                               'gtfs_dataset_name': 'Santa Ynez Mecatran Schedule',
-                                                               'type': 'schedule',
-                                                               'regional_feed_type': None,
-                                                               'uri': 'http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0',
-                                                               'base64_url': 'aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=='},
-                                                              {'gtfs_dataset_key': '372a06b593e1716d1c911b1d1d35bedd',
-                                                               'gtfs_dataset_name': 'Santa Ynez Mecatran Schedule',
-                                                               'type': 'schedule',
-                                                               'regional_feed_type': None,
-                                                               'uri': 'http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0',
-                                                               'base64_url': 'aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=='},
-                                                              {'gtfs_dataset_key': '8aed0709366badf9342e03d0a2d72b8d',
-                                                               'gtfs_dataset_name': 'SLO Trip Updates',
-                                                               'type': 'trip_updates',
-                                                               'regional_feed_type': None,
-                                                               'uri': 'http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb',
-                                                               'base64_url': 'aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI='}])
+        assert result.to_dict(orient='records') == unordered(
+            [{'gtfs_dataset_key': 'c51dbfdd47838f86074c4ef3179cc9ed',
+              'gtfs_dataset_name': 'Santa Ynez Mecatran Schedule',
+              'type': 'schedule',
+              'regional_feed_type': None,
+              'uri': 'http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0',
+              'base64_url': 'aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=='},
+             {'gtfs_dataset_key': '372a06b593e1716d1c911b1d1d35bedd',
+              'gtfs_dataset_name': 'Santa Ynez Mecatran Schedule',
+              'type': 'schedule',
+              'regional_feed_type': None,
+              'uri': 'http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0',
+              'base64_url': 'aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=='},
+             {'gtfs_dataset_key': '8aed0709366badf9342e03d0a2d72b8d',
+              'gtfs_dataset_name': 'SLO Trip Updates',
+              'type': 'trip_updates',
+              'regional_feed_type': None,
+              'uri': 'http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb',
+              'base64_url': 'aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI='}])
 
     @pytest.mark.vcr
     def test_filter_dim_gtfs_dataset_keep_cols_subset(self, project: str, dataset: str):
@@ -61,12 +63,13 @@ class TestScheduleRtUtils:
         result = filter_dim_gtfs_datasets(custom_filtering={"type": ["trip_updates"]}, project=project, dataset=dataset)
 
         assert len(result) == 1
-        assert result.to_dict(orient='records') == unordered([{'gtfs_dataset_key': '8aed0709366badf9342e03d0a2d72b8d',
-                                                               'gtfs_dataset_name': 'SLO Trip Updates',
-                                                               'type': 'trip_updates',
-                                                               'regional_feed_type': None,
-                                                               'uri': 'http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb',
-                                                               'base64_url': 'aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI='}])
+        assert result.to_dict(orient='records') == unordered(
+            [{'gtfs_dataset_key': '8aed0709366badf9342e03d0a2d72b8d',
+              'gtfs_dataset_name': 'SLO Trip Updates',
+              'type': 'trip_updates',
+              'regional_feed_type': None,
+              'uri': 'http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb',
+              'base64_url': 'aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI='}])
 
     def test_filter_dim_gtfs_dataset_keep_cols_key_missing(self, project: str, dataset: str):
         with pytest.raises(KeyError, match="Include key in keep_cols list"):
@@ -112,3 +115,51 @@ class TestScheduleRtUtils:
               'msa': 'Los Angeles-Long Beach-Anaheim',
               'fips': 6037,
               }])
+
+    @pytest.mark.vcr
+    def test_filter_dim_organizations(self, project: str, dataset: str):
+        result = filter_dim_organizations(project=project, dataset=dataset)
+
+        assert len(result) == 3
+        assert result.to_dict(orient='records') == unordered(
+            [{'organization_source_record_id': 'reckGS8egMZryjbX7'},
+             {'organization_source_record_id': 'recyqZ1zbZMkeA7Vf'},
+             {'organization_source_record_id': 'recOT4QO6t6mRhUEu'}]
+        )
+        assert 'coolplace33333bX7' not in result.organization_source_record_id.values
+
+    @pytest.mark.vcr
+    def test_filter_dim_organizations_additional_keep_cols(self, project: str, dataset: str):
+        result = filter_dim_organizations(
+            project=project,
+            dataset=dataset,
+            keep_cols=['key', 'name', 'organization_type'])
+
+        assert len(result) == 3
+        assert result.to_dict(orient='records') == unordered(
+            [{'key': '35448956533b3ff4f8c9cf4e7886c974',
+              'name': 'City of Mission Viejo',
+              'organization_type': 'City/Town'},
+             {'key': '02a0e06b1ddb80e5695fc82fcc0c3ccc',
+              'name': 'City of Patterson',
+              'organization_type': 'City/Town'},
+             {'key': '4cb90bb76f9cd9472a2df6dd9014b4fa',
+              'name': 'City of Chula Vista',
+              'organization_type': 'City/Town'}]
+        )
+
+    @pytest.mark.vcr
+    def test_filter_dim_organizations_custom_filtering(self, project: str, dataset: str):
+        result = filter_dim_organizations(
+            custom_filtering={"name": ["City of Mission Viejo", "City of Patterson"]},
+            project=project,
+            keep_cols=['name', 'source_record_id'],
+            dataset=dataset)
+
+        assert len(result) == 2
+        assert result.to_dict(orient='records') == unordered(
+            [{'name': 'City of Mission Viejo',
+              'organization_source_record_id': 'reckGS8egMZryjbX7'},
+             {'name': 'City of Patterson',
+              'organization_source_record_id': 'recyqZ1zbZMkeA7Vf'}]
+        )
