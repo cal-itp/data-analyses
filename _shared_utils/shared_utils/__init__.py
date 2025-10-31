@@ -1,6 +1,6 @@
 import sys
 
-if hasattr(sys, '_called_from_test'):
+if hasattr(sys, "_called_from_test"):
     pass
 else:
     from . import (

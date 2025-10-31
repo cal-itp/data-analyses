@@ -11,6 +11,7 @@ from calitp_data_analysis.sql import get_engine, query_sql
 
 PACIFIC_TIMEZONE = "US/Pacific"
 
+
 def _query_sql_with_params(query_template: str, search_criteria: dict, as_df: bool) -> pd.DataFrame:
     # TODO: update query_sql to accept parameterized queries and use that instead
     search_conditions = ""
@@ -30,6 +31,7 @@ def _query_sql_with_params(query_template: str, search_criteria: dict, as_df: bo
             result = connection.execute(query, params=search_params)
 
     return result
+
 
 def localize_timestamp_col(df: dd.DataFrame, timestamp_col: Union[str, list]) -> dd.DataFrame:
     """
@@ -66,17 +68,20 @@ def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True, **kwargs) -> p
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_gtfs")
 
-    return query_sql(f"""
+    return query_sql(
+        f"""
         SELECT gtfs_dataset_key, feed_key FROM {project}.{dataset}.fct_daily_feed_scheduled_service_summary
         WHERE service_date = '{date}'
-    """, as_df=get_df)
+    """,
+        as_df=get_df,
+    )
 
 
 def filter_dim_gtfs_datasets(
     keep_cols: list[str] = ["key", "name", "type", "regional_feed_type", "uri", "base64_url"],
     custom_filtering: dict = None,
     get_df: bool = True,
-    **kwargs
+    **kwargs,
 ) -> pd.DataFrame:
     """
     Filter mart_transit_database.dim_gtfs_dataset table
@@ -146,12 +151,15 @@ def get_organization_id(
         project = kwargs.get("project", "cal-itp-data-infra")
         dataset = kwargs.get("dataset", "mart_transit_database")
 
-        dim_provider_gtfs_data = query_sql(f"""
+        dim_provider_gtfs_data = query_sql(
+            f"""
             SELECT DISTINCT *
             FROM {project}.{dataset}.dim_provider_gtfs_data
             WHERE DATETIME(_valid_from, '{PACIFIC_TIMEZONE}') <= DATETIME('{date}')
                 AND DATETIME(_valid_to, '{PACIFIC_TIMEZONE}') >= DATETIME('{date}')
-        """, as_df=True)
+        """,
+            as_df=True,
+        )
 
         sorting = [True for c in merge_cols]
         keep_cols = ["organization_source_record_id"]
@@ -188,8 +196,9 @@ def filter_dim_county_geography(
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_transit_database")
 
-    df = query_sql(f"""
-        SELECT 
+    df = query_sql(
+        f"""
+        SELECT
             bohcg.organization_name,
             CONCAT(LPAD(CAST(dmg.caltrans_district AS STRING), 2, '0'), ' - ', dmg.caltrans_district_name) AS caltrans_district,
             {','.join(keep_cols)}
@@ -197,7 +206,9 @@ def filter_dim_county_geography(
         INNER JOIN {project}.{dataset}.dim_county_geography AS dmg ON dmg.key = bohcg.county_geography_key
         WHERE DATETIME(bohcg._valid_from, '{PACIFIC_TIMEZONE}') <= DATETIME('{date}')
             AND DATETIME(bohcg._valid_to, '{PACIFIC_TIMEZONE}') >= DATETIME('{date}')
-    """, as_df=True)
+    """,
+        as_df=True,
+    )
 
     return df[["organization_name", "caltrans_district"] + keep_cols].drop_duplicates().reset_index(drop=True)
 
@@ -316,4 +327,3 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
     feeds_with_district = pd.merge(feeds_with_org_info, district, on="organization_name")
 
     return feeds_with_district
-

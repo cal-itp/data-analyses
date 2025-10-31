@@ -1,10 +1,15 @@
-import pytest
 import pandas as pd
+import pytest
 from pytest_unordered import unordered
-from shared_utils.schedule_rt_utils import (filter_dim_gtfs_datasets, filter_dim_county_geography,
-                                            filter_dim_organizations,
-                                            get_schedule_gtfs_dataset_key, get_organization_id,
-                                            sample_gtfs_dataset_key_to_organization_crosswalk)
+from shared_utils.schedule_rt_utils import (
+    filter_dim_county_geography,
+    filter_dim_gtfs_datasets,
+    filter_dim_organizations,
+    get_organization_id,
+    get_schedule_gtfs_dataset_key,
+    sample_gtfs_dataset_key_to_organization_crosswalk,
+)
+
 
 class TestScheduleRtUtils:
     @pytest.fixture
@@ -28,95 +33,122 @@ class TestScheduleRtUtils:
         result = filter_dim_gtfs_datasets(project=project, dataset=dataset)
 
         assert len(result) == 3
-        assert result.to_dict(orient='records') == unordered(
-            [{'gtfs_dataset_key': 'c51dbfdd47838f86074c4ef3179cc9ed',
-              'gtfs_dataset_name': 'Santa Ynez Mecatran Schedule',
-              'type': 'schedule',
-              'regional_feed_type': None,
-              'uri': 'http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0',
-              'base64_url': 'aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=='},
-             {'gtfs_dataset_key': '372a06b593e1716d1c911b1d1d35bedd',
-              'gtfs_dataset_name': 'Santa Ynez Mecatran Schedule',
-              'type': 'schedule',
-              'regional_feed_type': None,
-              'uri': 'http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0',
-              'base64_url': 'aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=='},
-             {'gtfs_dataset_key': '8aed0709366badf9342e03d0a2d72b8d',
-              'gtfs_dataset_name': 'SLO Trip Updates',
-              'type': 'trip_updates',
-              'regional_feed_type': None,
-              'uri': 'http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb',
-              'base64_url': 'aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI='}])
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "gtfs_dataset_key": "c51dbfdd47838f86074c4ef3179cc9ed",
+                    "gtfs_dataset_name": "Santa Ynez Mecatran Schedule",
+                    "type": "schedule",
+                    "regional_feed_type": None,
+                    "uri": "http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0",
+                    "base64_url": "aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA==",
+                },
+                {
+                    "gtfs_dataset_key": "372a06b593e1716d1c911b1d1d35bedd",
+                    "gtfs_dataset_name": "Santa Ynez Mecatran Schedule",
+                    "type": "schedule",
+                    "regional_feed_type": None,
+                    "uri": "http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0",
+                    "base64_url": "aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA==",
+                },
+                {
+                    "gtfs_dataset_key": "8aed0709366badf9342e03d0a2d72b8d",
+                    "gtfs_dataset_name": "SLO Trip Updates",
+                    "type": "trip_updates",
+                    "regional_feed_type": None,
+                    "uri": "http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb",
+                    "base64_url": "aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI=",
+                },
+            ]
+        )
 
     @pytest.mark.vcr
     def test_filter_dim_gtfs_datasets_keep_cols_subset(self, project: str, dataset: str):
         result = filter_dim_gtfs_datasets(keep_cols=["key", "name"], project=project, dataset=dataset)
 
         assert len(result) == 3
-        assert result.to_dict(orient='records') == unordered(
-            [{'gtfs_dataset_key': 'c51dbfdd47838f86074c4ef3179cc9ed',
-              'gtfs_dataset_name': 'Santa Ynez Mecatran Schedule'},
-             {'gtfs_dataset_key': '372a06b593e1716d1c911b1d1d35bedd',
-              'gtfs_dataset_name': 'Santa Ynez Mecatran Schedule'},
-             {'gtfs_dataset_key': '8aed0709366badf9342e03d0a2d72b8d',
-              'gtfs_dataset_name': 'SLO Trip Updates'}])
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "gtfs_dataset_key": "c51dbfdd47838f86074c4ef3179cc9ed",
+                    "gtfs_dataset_name": "Santa Ynez Mecatran Schedule",
+                },
+                {
+                    "gtfs_dataset_key": "372a06b593e1716d1c911b1d1d35bedd",
+                    "gtfs_dataset_name": "Santa Ynez Mecatran Schedule",
+                },
+                {"gtfs_dataset_key": "8aed0709366badf9342e03d0a2d72b8d", "gtfs_dataset_name": "SLO Trip Updates"},
+            ]
+        )
 
     @pytest.mark.vcr
     def test_filter_dim_gtfs_datasets_custom_filtering(self, project: str, dataset: str):
         result = filter_dim_gtfs_datasets(custom_filtering={"type": ["trip_updates"]}, project=project, dataset=dataset)
 
         assert len(result) == 1
-        assert result.to_dict(orient='records') == unordered(
-            [{'gtfs_dataset_key': '8aed0709366badf9342e03d0a2d72b8d',
-              'gtfs_dataset_name': 'SLO Trip Updates',
-              'type': 'trip_updates',
-              'regional_feed_type': None,
-              'uri': 'http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb',
-              'base64_url': 'aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI='}])
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "gtfs_dataset_key": "8aed0709366badf9342e03d0a2d72b8d",
+                    "gtfs_dataset_name": "SLO Trip Updates",
+                    "type": "trip_updates",
+                    "regional_feed_type": None,
+                    "uri": "http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb",
+                    "base64_url": "aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI=",
+                }
+            ]
+        )
 
     def test_filter_dim_gtfs_datasets_keep_cols_key_missing(self, project: str, dataset: str):
         with pytest.raises(KeyError, match="Include key in keep_cols list"):
-            filter_dim_gtfs_datasets(keep_cols=["name", "type", "regional_feed_type", "uri", "base64_url"], project=project, dataset=dataset)
+            filter_dim_gtfs_datasets(
+                keep_cols=["name", "type", "regional_feed_type", "uri", "base64_url"], project=project, dataset=dataset
+            )
 
     @pytest.mark.vcr
     def test_get_organization_id_no_merge_cols(self, project: str, dataset: str):
-        dataframe = pd.DataFrame(data=[{
-            'feed_key': 'bc76f45fb4d8a3c1be8349ad3d085c3c',
-            'schedule_gtfs_dataset_key': '372a06b593e1716d1c911b1d1d35bedd',
-            'schedule_gtfs_dataset_name': 'Santa Ynez Mecatran Schedule',
-            'type': 'schedule',
-            'schedule_source_record_id': 'recuWhPXfxMatv6rL',
-            'regional_feed_type': None,
-            'base64_url': 'anything',
-            'uri': 'http://www.example.com'
-        }])
+        dataframe = pd.DataFrame(
+            data=[
+                {
+                    "feed_key": "bc76f45fb4d8a3c1be8349ad3d085c3c",
+                    "schedule_gtfs_dataset_key": "372a06b593e1716d1c911b1d1d35bedd",
+                    "schedule_gtfs_dataset_name": "Santa Ynez Mecatran Schedule",
+                    "type": "schedule",
+                    "schedule_source_record_id": "recuWhPXfxMatv6rL",
+                    "regional_feed_type": None,
+                    "base64_url": "anything",
+                    "uri": "http://www.example.com",
+                }
+            ]
+        )
 
         with pytest.raises(IndexError, match="list index out of range"):
-            get_organization_id(df=dataframe, date='2025-10-12', project=project, dataset=dataset)
+            get_organization_id(df=dataframe, date="2025-10-12", project=project, dataset=dataset)
 
     def test_get_organization_id_invalid_merge_cols(self, project: str, dataset: str):
         with pytest.raises(KeyError, match="Unable to detect which GTFS quartet"):
             get_organization_id(
-                df=pd.DataFrame(),
-                date="2025-10-12",
-                merge_cols=["notreal"],
-                project=project,
-                dataset=dataset)
+                df=pd.DataFrame(), date="2025-10-12", merge_cols=["notreal"], project=project, dataset=dataset
+            )
 
     @pytest.mark.vcr
     def test_filter_dim_county_geography(self, project: str, dataset: str):
-        result = filter_dim_county_geography(project=project, dataset=dataset, date='2025-06-17')
+        result = filter_dim_county_geography(project=project, dataset=dataset, date="2025-06-17")
 
         assert len(result) == 2
-        assert result.to_dict(orient='records') == unordered(
-            [{'organization_name': 'City of Rosemead',
-              'caltrans_district': '07 - Los Angeles / Ventura', },
-             {'organization_name': 'Via / Remix Inc.',
-              'caltrans_district': '07 - Los Angeles / Ventura'}])
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "organization_name": "City of Rosemead",
+                    "caltrans_district": "07 - Los Angeles / Ventura",
+                },
+                {"organization_name": "Via / Remix Inc.", "caltrans_district": "07 - Los Angeles / Ventura"},
+            ]
+        )
 
     @pytest.mark.vcr
     def test_filter_dim_county_geography_date_unavailable(self, project: str, dataset: str):
-        result = filter_dim_county_geography(project=project, dataset=dataset, date='2024-01-17')
+        result = filter_dim_county_geography(project=project, dataset=dataset, date="2024-01-17")
 
         assert len(result) == 0
 
@@ -125,55 +157,69 @@ class TestScheduleRtUtils:
         result = filter_dim_county_geography(
             project=project,
             dataset=dataset,
-            date='2025-06-17',
-            keep_cols=['caltrans_district', 'county_geography_name', 'msa', 'fips']
+            date="2025-06-17",
+            keep_cols=["caltrans_district", "county_geography_name", "msa", "fips"],
         )
 
         assert len(result) == 2
-        assert result.to_dict(orient='records') == unordered(
-            [{'organization_name': 'City of Rosemead',
-              'caltrans_district': '07 - Los Angeles / Ventura',
-              'county_geography_name': 'Los Angeles',
-              'msa': 'Los Angeles-Long Beach-Anaheim',
-              'fips': 6037,
-              },
-             {'organization_name': 'Via / Remix Inc.',
-              'caltrans_district': '07 - Los Angeles / Ventura',
-              'county_geography_name': 'Los Angeles',
-              'msa': 'Los Angeles-Long Beach-Anaheim',
-              'fips': 6037,
-              }])
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "organization_name": "City of Rosemead",
+                    "caltrans_district": "07 - Los Angeles / Ventura",
+                    "county_geography_name": "Los Angeles",
+                    "msa": "Los Angeles-Long Beach-Anaheim",
+                    "fips": 6037,
+                },
+                {
+                    "organization_name": "Via / Remix Inc.",
+                    "caltrans_district": "07 - Los Angeles / Ventura",
+                    "county_geography_name": "Los Angeles",
+                    "msa": "Los Angeles-Long Beach-Anaheim",
+                    "fips": 6037,
+                },
+            ]
+        )
 
     @pytest.mark.vcr
     def test_filter_dim_organizations(self, project: str, dataset: str):
         result = filter_dim_organizations(project=project, dataset=dataset)
 
         assert len(result) == 3
-        assert result.to_dict(orient='records') == unordered(
-            [{'organization_source_record_id': 'reckGS8egMZryjbX7'},
-             {'organization_source_record_id': 'recyqZ1zbZMkeA7Vf'},
-             {'organization_source_record_id': 'recOT4QO6t6mRhUEu'}]
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {"organization_source_record_id": "reckGS8egMZryjbX7"},
+                {"organization_source_record_id": "recyqZ1zbZMkeA7Vf"},
+                {"organization_source_record_id": "recOT4QO6t6mRhUEu"},
+            ]
         )
-        assert 'coolplace33333bX7' not in result.organization_source_record_id.values
+        assert "coolplace33333bX7" not in result.organization_source_record_id.values
 
     @pytest.mark.vcr
     def test_filter_dim_organizations_additional_keep_cols(self, project: str, dataset: str):
         result = filter_dim_organizations(
-            project=project,
-            dataset=dataset,
-            keep_cols=['key', 'name', 'organization_type'])
+            project=project, dataset=dataset, keep_cols=["key", "name", "organization_type"]
+        )
 
         assert len(result) == 3
-        assert result.to_dict(orient='records') == unordered(
-            [{'key': '35448956533b3ff4f8c9cf4e7886c974',
-              'name': 'City of Mission Viejo',
-              'organization_type': 'City/Town'},
-             {'key': '02a0e06b1ddb80e5695fc82fcc0c3ccc',
-              'name': 'City of Patterson',
-              'organization_type': 'City/Town'},
-             {'key': '4cb90bb76f9cd9472a2df6dd9014b4fa',
-              'name': 'City of Chula Vista',
-              'organization_type': 'City/Town'}]
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "key": "35448956533b3ff4f8c9cf4e7886c974",
+                    "name": "City of Mission Viejo",
+                    "organization_type": "City/Town",
+                },
+                {
+                    "key": "02a0e06b1ddb80e5695fc82fcc0c3ccc",
+                    "name": "City of Patterson",
+                    "organization_type": "City/Town",
+                },
+                {
+                    "key": "4cb90bb76f9cd9472a2df6dd9014b4fa",
+                    "name": "City of Chula Vista",
+                    "organization_type": "City/Town",
+                },
+            ]
         )
 
     @pytest.mark.vcr
@@ -181,70 +227,91 @@ class TestScheduleRtUtils:
         result = filter_dim_organizations(
             custom_filtering={"name": ["City of Mission Viejo", "City of Patterson"]},
             project=project,
-            keep_cols=['name', 'source_record_id'],
-            dataset=dataset)
+            keep_cols=["name", "source_record_id"],
+            dataset=dataset,
+        )
 
         assert len(result) == 2
-        assert result.to_dict(orient='records') == unordered(
-            [{'name': 'City of Mission Viejo',
-              'organization_source_record_id': 'reckGS8egMZryjbX7'},
-             {'name': 'City of Patterson',
-              'organization_source_record_id': 'recyqZ1zbZMkeA7Vf'}]
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {"name": "City of Mission Viejo", "organization_source_record_id": "reckGS8egMZryjbX7"},
+                {"name": "City of Patterson", "organization_source_record_id": "recyqZ1zbZMkeA7Vf"},
+            ]
         )
 
     @pytest.mark.vcr
     def test_sample_gtfs_dataset_key_to_organization_crosswalk(self, project: str, dataset: str):
-        dataframe = pd.DataFrame(data=[
-            {'gtfs_dataset_key': '372a06b593e1716d1c911b1d1d35bedd',
-             'feed_key': 'bc76f45fb4d8a3c1be8349ad3d085c3c',
-             'name': 'Santa Ynez Mecatran Schedule'}])
+        dataframe = pd.DataFrame(
+            data=[
+                {
+                    "gtfs_dataset_key": "372a06b593e1716d1c911b1d1d35bedd",
+                    "feed_key": "bc76f45fb4d8a3c1be8349ad3d085c3c",
+                    "name": "Santa Ynez Mecatran Schedule",
+                }
+            ]
+        )
 
         result = sample_gtfs_dataset_key_to_organization_crosswalk(
-            df=dataframe,
-            date='2025-10-16',
-            quartet_data="schedule",
-            project=project,
-            dataset=dataset)
+            df=dataframe, date="2025-10-16", quartet_data="schedule", project=project, dataset=dataset
+        )
 
         assert len(result) == 1
-        assert result.to_dict(orient='records') == unordered(
-            [{'feed_key': 'bc76f45fb4d8a3c1be8349ad3d085c3c',
-              'schedule_gtfs_dataset_key': '372a06b593e1716d1c911b1d1d35bedd',
-              'schedule_gtfs_dataset_name': 'Santa Ynez Mecatran Schedule',
-              'type': 'schedule',
-              'schedule_source_record_id': 'recuWhPXfxMatv6rL',
-              'regional_feed_type': None,
-              'base64_url': 'aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA==',
-              'uri': 'http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0',
-              'organization_source_record_id': 'reckp33bhAuZlmO1M',
-              'organization_name': 'Santa Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California',
-              'caltrans_district': '05 - San Luis Obispo / Santa Barbara'}])
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "feed_key": "bc76f45fb4d8a3c1be8349ad3d085c3c",
+                    "schedule_gtfs_dataset_key": "372a06b593e1716d1c911b1d1d35bedd",
+                    "schedule_gtfs_dataset_name": "Santa Ynez Mecatran Schedule",
+                    "type": "schedule",
+                    "schedule_source_record_id": "recuWhPXfxMatv6rL",
+                    "regional_feed_type": None,
+                    "base64_url": "aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA==",
+                    "uri": "http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0",
+                    "organization_source_record_id": "reckp33bhAuZlmO1M",
+                    "organization_name": "Santa Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California",
+                    "caltrans_district": "05 - San Luis Obispo / Santa Barbara",
+                }
+            ]
+        )
 
     @pytest.mark.vcr
-    def test_sample_gtfs_dataset_key_to_organization_crosswalk_subset_gtfs_dataset_cols(self, project: str, dataset: str):
-        dataframe = pd.DataFrame(data=[
-            {'gtfs_dataset_key': '372a06b593e1716d1c911b1d1d35bedd',
-             'feed_key': 'bc76f45fb4d8a3c1be8349ad3d085c3c',
-             'name': 'Santa Ynez Mecatran Schedule'}])
+    def test_sample_gtfs_dataset_key_to_organization_crosswalk_subset_gtfs_dataset_cols(
+        self, project: str, dataset: str
+    ):
+        dataframe = pd.DataFrame(
+            data=[
+                {
+                    "gtfs_dataset_key": "372a06b593e1716d1c911b1d1d35bedd",
+                    "feed_key": "bc76f45fb4d8a3c1be8349ad3d085c3c",
+                    "name": "Santa Ynez Mecatran Schedule",
+                }
+            ]
+        )
 
         result = sample_gtfs_dataset_key_to_organization_crosswalk(
             df=dataframe,
-            date='2025-10-16',
+            date="2025-10-16",
             quartet_data="schedule",
-            dim_gtfs_dataset_cols = [
+            dim_gtfs_dataset_cols=[
                 "key",
                 "name",
                 "source_record_id",
             ],
             project=project,
-            dataset=dataset)
+            dataset=dataset,
+        )
 
         assert len(result) == 1
-        assert result.to_dict(orient='records') == unordered(
-            [{'feed_key': 'bc76f45fb4d8a3c1be8349ad3d085c3c',
-              'schedule_gtfs_dataset_key': '372a06b593e1716d1c911b1d1d35bedd',
-              'schedule_gtfs_dataset_name': 'Santa Ynez Mecatran Schedule',
-              'schedule_source_record_id': 'recuWhPXfxMatv6rL',
-              'organization_source_record_id': 'reckp33bhAuZlmO1M',
-              'organization_name': 'Santa Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California',
-              'caltrans_district': '05 - San Luis Obispo / Santa Barbara'}])
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "feed_key": "bc76f45fb4d8a3c1be8349ad3d085c3c",
+                    "schedule_gtfs_dataset_key": "372a06b593e1716d1c911b1d1d35bedd",
+                    "schedule_gtfs_dataset_name": "Santa Ynez Mecatran Schedule",
+                    "schedule_source_record_id": "recuWhPXfxMatv6rL",
+                    "organization_source_record_id": "reckp33bhAuZlmO1M",
+                    "organization_name": "Santa Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California",
+                    "caltrans_district": "05 - San Luis Obispo / Santa Barbara",
+                }
+            ]
+        )
