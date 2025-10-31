@@ -7,24 +7,9 @@ import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
-import siuba  # for type hints
-from calitp_data_analysis.tables import tbls
 from calitp_data_analysis.sql import get_engine, query_sql
-from calitp_data_analysis.tables import AutoTable
-from shared_utils import gtfs_utils_v2
-from siuba import *
 
 PACIFIC_TIMEZONE = "US/Pacific"
-
-def _get_tables(project):
-    tables = AutoTable(
-        get_engine(project=project),
-        lambda s: s,  # s.replace(".", "_"),
-    )
-
-    tables._init()
-
-    return tables
 
 def _query_sql_with_params(query_template: str, search_criteria: dict, as_df: bool) -> pd.DataFrame:
     # TODO: update query_sql to accept parameterized queries and use that instead
@@ -73,7 +58,7 @@ def localize_timestamp_col(df: dd.DataFrame, timestamp_col: Union[str, list]) ->
     return df
 
 
-def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True, **kwargs) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True, **kwargs) -> pd.DataFrame:
     """
     Use fct_daily_feed_scheduled_service to find
     the gtfs_dataset_key that corresponds to the feed_key.
@@ -92,7 +77,7 @@ def filter_dim_gtfs_datasets(
     custom_filtering: dict = None,
     get_df: bool = True,
     **kwargs
-) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+) -> pd.DataFrame:
     """
     Filter mart_transit_database.dim_gtfs_dataset table
     and keep only the valid rows that passed data quality checks.
@@ -222,7 +207,7 @@ def filter_dim_organizations(
     custom_filtering: dict = None,
     get_df: bool = True,
     **kwargs,
-) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+) -> pd.DataFrame:
     """
     Filter dim_organizations down to current record for organization.
     Caltrans district is associated with organization_source_record_id.
