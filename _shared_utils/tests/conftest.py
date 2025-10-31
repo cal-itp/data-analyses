@@ -17,7 +17,6 @@ def vcr_config():
             ("apikey", "FILTERED"),
             ("X-CKAN-API-Key", "FILTERED"),
         ],
-        "allow_playback_repeats": True,
         "ignore_hosts": [
             "run-actions-1-azure-eastus.actions.githubusercontent.com",
             "run-actions-2-azure-eastus.actions.githubusercontent.com",

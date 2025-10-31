@@ -124,10 +124,11 @@ def filter_dim_gtfs_datasets(
     return _query_sql_with_params(query_template=query_template, search_criteria=custom_filtering, as_df=get_df)
 
 
-def _get_organization_id(
+def get_organization_id(
     df: pd.DataFrame,
     date: str,
     merge_cols: list = [],
+    **kwargs,
 ) -> pd.DataFrame:
     """
     Instead of using the GTFS dataset name (of the quartet), usually
@@ -157,7 +158,11 @@ def _get_organization_id(
             "trip_updates, or service_alerts."
         )
     else:
-        dim_provider_gtfs_data = tbls.mart_transit_database.dim_provider_gtfs_data() >> distinct() >> collect()
+        project = kwargs.get("project", "cal-itp-data-infra")
+        dataset = kwargs.get("dataset", "mart_transit_database")
+        tables = _get_tables(project)
+
+        dim_provider_gtfs_data = getattr(tables, dataset).dim_provider_gtfs_data() >> distinct() >> collect()
 
         dim_provider_gtfs_data = localize_timestamp_col(dim_provider_gtfs_data, ["_valid_from", "_valid_to"])
 
@@ -255,12 +260,16 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
     ],
     dim_organization_cols: list[str] = ["source_record_id", "name"],
     dim_county_geography_cols: list[str] = ["caltrans_district"],
+    **kwargs,
 ) -> pd.DataFrame:
     """
     Get crosswalk from gtfs_dataset_key to certain quartet data identifiers
     like base64_url, uri, and organization identifiers
     like organization_source_record_id and caltrans_district.
     """
+    project = kwargs.get("project", "cal-itp-data-infra")
+    dataset = kwargs.get("dataset", "mart_transit_database")
+
     id_cols = ["gtfs_dataset_key"]
 
     # If schedule feed_key is present, include it our crosswalk output
@@ -272,7 +281,11 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
     # (1) Filter dim_gtfs_datasets by quartet and merge with the
     # gtfs_dataset_keys in df.
     dim_gtfs_datasets = filter_dim_gtfs_datasets(
-        keep_cols=dim_gtfs_dataset_cols, custom_filtering={"type": [quartet_data]}, get_df=True
+        keep_cols=dim_gtfs_dataset_cols,
+        custom_filtering={"type": [quartet_data]},
+        get_df=True,
+        project=project,
+        dataset=dataset,
     )
 
     feeds_with_quartet_info = pd.merge(
@@ -294,17 +307,28 @@ def sample_gtfs_dataset_key_to_organization_crosswalk(
     # (3) From quartet, get to organization name
     merge_cols = [i for i in feeds_with_quartet_info.columns if quartet_data in i]
 
-    feeds_with_org_id = _get_organization_id(feeds_with_quartet_info, date, merge_cols=merge_cols)
+    feeds_with_org_id = get_organization_id(
+        feeds_with_quartet_info,
+        date,
+        merge_cols=merge_cols,
+        project=project,
+        dataset=dataset,
+    )
 
     # (4) Merge in dim_orgs to get organization info - everything except caltrans_district is found here
     ORG_RENAME_DICT = {"source_record_id": "organization_source_record_id", "name": "organization_name"}
-    orgs = filter_dim_organizations(date, keep_cols=dim_organization_cols, get_df=True).rename(columns=ORG_RENAME_DICT)
+    orgs = filter_dim_organizations(
+        keep_cols=dim_organization_cols,
+        get_df=True,
+        project=project,
+        dataset=dataset,
+    ).rename(columns=ORG_RENAME_DICT)
 
     feeds_with_org_info = pd.merge(feeds_with_org_id, orgs, on="organization_source_record_id")
 
     # (5) Merge in dim_county_geography to get caltrans_district
     # https://github.com/cal-itp/data-analyses/issues/1282
-    district = filter_dim_county_geography(date, dim_county_geography_cols)
+    district = filter_dim_county_geography(date, dim_county_geography_cols, project=project, dataset=dataset)
 
     feeds_with_district = pd.merge(feeds_with_org_info, district, on="organization_name")
 
