@@ -17,22 +17,21 @@ interactions:
       x-goog-user-project:
       - cal-itp-data-infra-staging
     method: GET
-    uri: https://bigquery.googleapis.com/bigquery/v2/projects/%0A%20%20%20%20%20%20%20%20SELECT%20key,name,organization_type%0A%20%20%20%20%20%20%20%20FROM%20cal-itp-data-infra-staging/datasets/test_shared_utils/tables/dim_organizations%0A%20%20%20%20%20%20%20%20WHERE%20_is_current%20=%20true%0A%20%20%20%20?prettyPrint=false
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/SELECT%20key,name,organization_type%20FROM%20cal-itp-data-infra-staging/datasets/test_shared_utils/tables/dim_organizations%20WHERE%20_is_current%20=%20true?prettyPrint=false
   response:
     body:
-      string: '{"error":{"code":400,"message":"Invalid resource name projects/\n        SELECT
-        key,name,organization_type\n        FROM cal-itp-data-infra-staging; Project
-        id: \n        SELECT key,name,organization_type\n        FROM cal-itp-data-infra-staging","errors":[{"message":"Invalid
-        resource name projects/\n        SELECT key,name,organization_type\n        FROM
-        cal-itp-data-infra-staging; Project id: \n        SELECT key,name,organization_type\n        FROM
-        cal-itp-data-infra-staging","domain":"global","reason":"badRequest"}],"status":"INVALID_ARGUMENT"}}'
+      string: '{"error":{"code":400,"message":"Invalid resource name projects/SELECT
+        key,name,organization_type FROM cal-itp-data-infra-staging; Project id: SELECT
+        key,name,organization_type FROM cal-itp-data-infra-staging","errors":[{"message":"Invalid
+        resource name projects/SELECT key,name,organization_type FROM cal-itp-data-infra-staging;
+        Project id: SELECT key,name,organization_type FROM cal-itp-data-infra-staging","domain":"global","reason":"badRequest"}],"status":"INVALID_ARGUMENT"}}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Wed, 29 Oct 2025 22:45:34 GMT
+      - Fri, 31 Oct 2025 20:39:32 GMT
       Transfer-Encoding:
       - chunked
     status:
@@ -41,8 +40,8 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
-      "query": "\n        SELECT key,name,organization_type\n        FROM cal-itp-data-infra-staging.test_shared_utils.dim_organizations\n        WHERE
-      _is_current = true\n    ", "maxResults": 5000, "requestId": "0bed0f92-9143-4406-a755-e90f47869a7f"}'
+      "query": "SELECT key,name,organization_type FROM cal-itp-data-infra-staging.test_shared_utils.dim_organizations
+      WHERE _is_current = true", "maxResults": 5000, "requestId": "88df987d-003b-48f3-ac6c-5c6cf621aa6c"}'
     headers:
       Accept:
       - '*/*'
@@ -53,7 +52,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '398'
+      - '364'
       Content-Type:
       - application/json
       User-Agent:
@@ -78,7 +77,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Wed, 29 Oct 2025 22:45:35 GMT
+      - Fri, 31 Oct 2025 20:39:33 GMT
       Server:
       - ESF
       Transfer-Encoding:

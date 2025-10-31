@@ -69,10 +69,10 @@ def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True, **kwargs) -> p
     dataset = kwargs.get("dataset", "mart_gtfs")
 
     return query_sql(
-        f"""
-        SELECT gtfs_dataset_key, feed_key FROM {project}.{dataset}.fct_daily_feed_scheduled_service_summary
-        WHERE service_date = '{date}'
-    """,
+        (
+            f"SELECT gtfs_dataset_key, feed_key FROM {project}.{dataset}.fct_daily_feed_scheduled_service_summary "
+            f"WHERE service_date = '{date}'"
+        ),
         as_df=get_df,
     )
 
@@ -103,11 +103,11 @@ def filter_dim_gtfs_datasets(
 
         columns.append(new_column)
 
-    query_base = f"""
-        SELECT {','.join(columns)}
-        FROM {project}.{dataset}.dim_gtfs_datasets
-        WHERE data_quality_pipeline = true
-    """
+    query_base = (
+        f"SELECT {','.join(columns)} "
+        f"FROM {project}.{dataset}.dim_gtfs_datasets "
+        "WHERE data_quality_pipeline = true"
+    )
 
     query_template = query_base + "{search_conditions}"
 
@@ -152,12 +152,12 @@ def get_organization_id(
         dataset = kwargs.get("dataset", "mart_transit_database")
 
         dim_provider_gtfs_data = query_sql(
-            f"""
-            SELECT DISTINCT *
-            FROM {project}.{dataset}.dim_provider_gtfs_data
-            WHERE DATETIME(_valid_from, '{PACIFIC_TIMEZONE}') <= DATETIME('{date}')
-                AND DATETIME(_valid_to, '{PACIFIC_TIMEZONE}') >= DATETIME('{date}')
-        """,
+            (
+                "SELECT DISTINCT * "
+                f"FROM {project}.{dataset}.dim_provider_gtfs_data "
+                f"WHERE DATETIME(_valid_from, '{PACIFIC_TIMEZONE}') <= DATETIME('{date}') "
+                f"AND DATETIME(_valid_to, '{PACIFIC_TIMEZONE}') >= DATETIME('{date}')"
+            ),
             as_df=True,
         )
 
@@ -197,16 +197,15 @@ def filter_dim_county_geography(
     dataset = kwargs.get("dataset", "mart_transit_database")
 
     df = query_sql(
-        f"""
-        SELECT
-            bohcg.organization_name,
-            CONCAT(LPAD(CAST(dmg.caltrans_district AS STRING), 2, '0'), ' - ', dmg.caltrans_district_name) AS caltrans_district,
-            {','.join(keep_cols)}
-        FROM {project}.{dataset}.bridge_organizations_x_headquarters_county_geography AS bohcg
-        INNER JOIN {project}.{dataset}.dim_county_geography AS dmg ON dmg.key = bohcg.county_geography_key
-        WHERE DATETIME(bohcg._valid_from, '{PACIFIC_TIMEZONE}') <= DATETIME('{date}')
-            AND DATETIME(bohcg._valid_to, '{PACIFIC_TIMEZONE}') >= DATETIME('{date}')
-    """,
+        (
+            "SELECT bohcg.organization_name, "
+            "CONCAT(LPAD(CAST(dmg.caltrans_district AS STRING), 2, '0'), ' - ', dmg.caltrans_district_name) AS caltrans_district, "
+            f"{','.join(keep_cols)} "
+            f"FROM {project}.{dataset}.bridge_organizations_x_headquarters_county_geography AS bohcg "
+            f"INNER JOIN {project}.{dataset}.dim_county_geography AS dmg ON dmg.key = bohcg.county_geography_key "
+            f"WHERE DATETIME(bohcg._valid_from, '{PACIFIC_TIMEZONE}') <= DATETIME('{date}') "
+            f"AND DATETIME(bohcg._valid_to, '{PACIFIC_TIMEZONE}') >= DATETIME('{date}')"
+        ),
         as_df=True,
     )
 

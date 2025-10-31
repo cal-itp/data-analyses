@@ -2,14 +2,13 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
-      "query": "\n        SELECT \n            bohcg.organization_name,\n            CONCAT(LPAD(CAST(dmg.caltrans_district
-      AS STRING), 2, ''0''), '' - '', dmg.caltrans_district_name) AS caltrans_district,\n            caltrans_district,county_geography_name,msa,fips\n        FROM
-      cal-itp-data-infra-staging.test_shared_utils.bridge_organizations_x_headquarters_county_geography
-      AS bohcg\n        INNER JOIN cal-itp-data-infra-staging.test_shared_utils.dim_county_geography
-      AS dmg ON dmg.key = bohcg.county_geography_key\n        WHERE DATETIME(bohcg._valid_from,
-      ''US/Pacific'') <= DATETIME(''2025-06-17'')\n            AND DATETIME(bohcg._valid_to,
-      ''US/Pacific'') >= DATETIME(''2025-06-17'')\n    ", "maxResults": 5000, "requestId":
-      "7f608e5f-2429-4da2-b640-ab82e91aa81d"}'
+      "query": "SELECT bohcg.organization_name, CONCAT(LPAD(CAST(dmg.caltrans_district
+      AS STRING), 2, ''0''), '' - '', dmg.caltrans_district_name) AS caltrans_district,
+      caltrans_district,county_geography_name,msa,fips FROM cal-itp-data-infra-staging.test_shared_utils.bridge_organizations_x_headquarters_county_geography
+      AS bohcg INNER JOIN cal-itp-data-infra-staging.test_shared_utils.dim_county_geography
+      AS dmg ON dmg.key = bohcg.county_geography_key WHERE DATETIME(bohcg._valid_from,
+      ''US/Pacific'') <= DATETIME(''2025-06-17'') AND DATETIME(bohcg._valid_to, ''US/Pacific'')
+      >= DATETIME(''2025-06-17'')", "maxResults": 5000, "requestId": "f1653db5-072b-417d-8dfe-0ce48fc509b7"}'
     headers:
       Accept:
       - '*/*'
@@ -20,7 +19,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '911'
+      - '815'
       Content-Type:
       - application/json
       User-Agent:
@@ -46,7 +45,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Wed, 29 Oct 2025 19:03:30 GMT
+      - Fri, 31 Oct 2025 20:39:31 GMT
       Server:
       - ESF
       Transfer-Encoding:

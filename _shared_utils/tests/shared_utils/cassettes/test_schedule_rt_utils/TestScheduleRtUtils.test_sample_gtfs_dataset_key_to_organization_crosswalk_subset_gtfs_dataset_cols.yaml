@@ -17,23 +17,23 @@ interactions:
       x-goog-user-project:
       - cal-itp-data-infra-staging
     method: GET
-    uri: https://bigquery.googleapis.com/bigquery/v2/projects/%0A%20%20%20%20%20%20%20%20SELECT%20key%20AS%20gtfs_dataset_key,name%20AS%20gtfs_dataset_name,source_record_id%0A%20%20%20%20%20%20%20%20FROM%20cal-itp-data-infra-staging/datasets/test_shared_utils/tables/dim_gtfs_datasets%0A%20%20%20%20%20%20%20%20WHERE%20data_quality_pipeline%20=%20true%0A%20%20%20%20%20AND%20type%20IN%20UNNEST(%25(type_values)s)?prettyPrint=false
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/SELECT%20key%20AS%20gtfs_dataset_key,name%20AS%20gtfs_dataset_name,source_record_id%20FROM%20cal-itp-data-infra-staging/datasets/test_shared_utils/tables/dim_gtfs_datasets%20WHERE%20data_quality_pipeline%20=%20true%20AND%20type%20IN%20UNNEST(%25(type_values)s)?prettyPrint=false
   response:
     body:
-      string: '{"error":{"code":400,"message":"Invalid resource name projects/\n        SELECT
-        key AS gtfs_dataset_key,name AS gtfs_dataset_name,source_record_id\n        FROM
-        cal-itp-data-infra-staging; Project id: \n        SELECT key AS gtfs_dataset_key,name
-        AS gtfs_dataset_name,source_record_id\n        FROM cal-itp-data-infra-staging","errors":[{"message":"Invalid
-        resource name projects/\n        SELECT key AS gtfs_dataset_key,name AS gtfs_dataset_name,source_record_id\n        FROM
-        cal-itp-data-infra-staging; Project id: \n        SELECT key AS gtfs_dataset_key,name
-        AS gtfs_dataset_name,source_record_id\n        FROM cal-itp-data-infra-staging","domain":"global","reason":"badRequest"}],"status":"INVALID_ARGUMENT"}}'
+      string: '{"error":{"code":400,"message":"Invalid resource name projects/SELECT
+        key AS gtfs_dataset_key,name AS gtfs_dataset_name,source_record_id FROM cal-itp-data-infra-staging;
+        Project id: SELECT key AS gtfs_dataset_key,name AS gtfs_dataset_name,source_record_id
+        FROM cal-itp-data-infra-staging","errors":[{"message":"Invalid resource name
+        projects/SELECT key AS gtfs_dataset_key,name AS gtfs_dataset_name,source_record_id
+        FROM cal-itp-data-infra-staging; Project id: SELECT key AS gtfs_dataset_key,name
+        AS gtfs_dataset_name,source_record_id FROM cal-itp-data-infra-staging","domain":"global","reason":"badRequest"}],"status":"INVALID_ARGUMENT"}}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Fri, 31 Oct 2025 00:57:04 GMT
+      - Fri, 31 Oct 2025 20:35:37 GMT
       Transfer-Encoding:
       - chunked
     status:
@@ -44,10 +44,10 @@ interactions:
       {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
       [{"value": "schedule"}]}, "name": "type_values"}], "parameterMode": "NAMED",
       "useLegacySql": false, "formatOptions": {"useInt64Timestamp": true}, "location":
-      "us-west2", "query": "\n        SELECT key AS gtfs_dataset_key,name AS gtfs_dataset_name,source_record_id\n        FROM
-      cal-itp-data-infra-staging.test_shared_utils.dim_gtfs_datasets\n        WHERE
-      data_quality_pipeline = true\n     AND type IN UNNEST(@`type_values`)", "maxResults":
-      5000, "requestId": "bcbb2639-c84b-4c8f-8087-2814536db893"}'
+      "us-west2", "query": "SELECT key AS gtfs_dataset_key,name AS gtfs_dataset_name,source_record_id
+      FROM cal-itp-data-infra-staging.test_shared_utils.dim_gtfs_datasets WHERE data_quality_pipeline
+      = true AND type IN UNNEST(@`type_values`)", "maxResults": 5000, "requestId":
+      "140b0fc4-3594-4090-b83e-2fee39a1beaf"}'
     headers:
       Accept:
       - '*/*'
@@ -58,7 +58,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '661'
+      - '627'
       Content-Type:
       - application/json
       User-Agent:
@@ -71,9 +71,9 @@ interactions:
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"source_record_id","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_YS2MmB47grNn8n2f1-yvKZSR-dEO","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"c51dbfdd47838f86074c4ef3179cc9ed"},{"v":"Santa
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"source_record_id","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_6_aOk_1pZqtWLCVQL0AUJspx0Qq4","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"c51dbfdd47838f86074c4ef3179cc9ed"},{"v":"Santa
         Ynez Mecatran Schedule"},{"v":"recuWhPXfxMatv6rL"}]},{"f":[{"v":"372a06b593e1716d1c911b1d1d35bedd"},{"v":"Santa
-        Ynez Mecatran Schedule"},{"v":"recuWhPXfxMatv6rL"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_YS2MmB47grNn8n2f1-yvKZSR-dEO","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1761872225126","startTime":"1761872225215","endTime":"1761872225292"}'
+        Ynez Mecatran Schedule"},{"v":"recuWhPXfxMatv6rL"}]}],"totalBytesProcessed":"274","jobComplete":true,"cacheHit":false,"queryId":"job_6_aOk_1pZqtWLCVQL0AUJspx0Qq4","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"20","location":"us-west2","creationTime":"1761942937302","startTime":"1761942937369","endTime":"1761942937498"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -82,7 +82,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Fri, 31 Oct 2025 00:57:05 GMT
+      - Fri, 31 Oct 2025 20:35:37 GMT
       Server:
       - ESF
       Transfer-Encoding:
@@ -103,10 +103,10 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
-      "query": "\n            SELECT DISTINCT * \n            FROM cal-itp-data-infra-staging.test_shared_utils.dim_provider_gtfs_data\n            WHERE
-      DATETIME(_valid_from, ''US/Pacific'') <= DATETIME(''2025-10-16'')\n                AND
-      DATETIME(_valid_to, ''US/Pacific'') >= DATETIME(''2025-10-16'')\n        ",
-      "maxResults": 5000, "requestId": "56687b87-f830-4b10-b038-376f7e5c4ab0"}'
+      "query": "SELECT DISTINCT * FROM cal-itp-data-infra-staging.test_shared_utils.dim_provider_gtfs_data
+      WHERE DATETIME(_valid_from, ''US/Pacific'') <= DATETIME(''2025-10-16'') AND
+      DATETIME(_valid_to, ''US/Pacific'') >= DATETIME(''2025-10-16'')", "maxResults":
+      5000, "requestId": "c30de7ca-d67c-4d15-b42b-87022935f536"}'
     headers:
       Accept:
       - '*/*'
@@ -117,7 +117,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '528'
+      - '460'
       Content-Type:
       - application/json
       User-Agent:
@@ -130,17 +130,17 @@ interactions:
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"key","type":"STRING","mode":"NULLABLE"},{"name":"public_customer_facing_fixed_route","type":"BOOLEAN","mode":"NULLABLE"},{"name":"public_customer_facing_or_regional_subfeed_fixed_route","type":"BOOLEAN","mode":"NULLABLE"},{"name":"organization_key","type":"STRING","mode":"NULLABLE"},{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"organization_itp_id","type":"INTEGER","mode":"NULLABLE"},{"name":"organization_hubspot_company_record_id","type":"STRING","mode":"NULLABLE"},{"name":"organization_ntd_id","type":"STRING","mode":"NULLABLE"},{"name":"organization_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"service_key","type":"STRING","mode":"NULLABLE"},{"name":"service_name","type":"STRING","mode":"NULLABLE"},{"name":"service_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_service_data_customer_facing","type":"BOOLEAN","mode":"NULLABLE"},{"name":"regional_feed_type","type":"STRING","mode":"NULLABLE"},{"name":"associated_schedule_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"schedule_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"schedule_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"service_alerts_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"service_alerts_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"vehicle_positions_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"vehicle_positions_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"trip_updates_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"trip_updates_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"schedule_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"service_alerts_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"vehicle_positions_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"trip_updates_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"_valid_from","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"_valid_to","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"_is_current","type":"BOOLEAN","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_meNnhk079l8Kjq0r0imGd_kqXAhK","location":"us-west2"},"totalRows":"4","rows":[{"f":[{"v":"5beb8a6bf200cfdf00da66ac1521d526"},{"v":"false"},{"v":"false"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"1ba3e20e8edb9c64866206d138aaca83"},{"v":"Ridgecrest
-        Schedule"},{"v":"recb7v2QiflfKM77w"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"1ba3e20e8edb9c64866206d138aaca83"},{"v":null},{"v":null},{"v":null},{"v":"1749859200000000"},{"v":"4070908799999999"},{"v":"true"}]},{"f":[{"v":"90ebcb3f9a649985be20bc10aa3ae3d4"},{"v":"false"},{"v":"false"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"794534a42bc6cbb1f4f7bc4d4bb1be16"},{"v":"Avalon
-        Schedule Historic"},{"v":"recdcpS2s3wuT3QAG"},{"v":"Avalon Alerts Historic"},{"v":"recgHXDRuyrKbOD47"},{"v":"Avalon
-        Vehicle Positions"},{"v":"recvwGOdqwtvPzKhZ"},{"v":"Avalon Trip Updates"},{"v":"recaDdOPYGgkoCOoT"},{"v":"794534a42bc6cbb1f4f7bc4d4bb1be16"},{"v":"688fc08edb6dbba6ce92a11b36929993"},{"v":"66f7f7dfc9290a80d99b5b2e645d8659"},{"v":"b070831f700176fc88e2464cb353c24e"},{"v":"1749859200000000"},{"v":"4070908799999999"},{"v":"true"}]},{"f":[{"v":"57321774eb04c7c650ef4709fb25a2c8"},{"v":"true"},{"v":"true"},{"v":"624c361fd9a2a9ad100cbf4b729c2df9"},{"v":"City
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"key","type":"STRING","mode":"NULLABLE"},{"name":"public_customer_facing_fixed_route","type":"BOOLEAN","mode":"NULLABLE"},{"name":"public_customer_facing_or_regional_subfeed_fixed_route","type":"BOOLEAN","mode":"NULLABLE"},{"name":"organization_key","type":"STRING","mode":"NULLABLE"},{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"organization_itp_id","type":"INTEGER","mode":"NULLABLE"},{"name":"organization_hubspot_company_record_id","type":"STRING","mode":"NULLABLE"},{"name":"organization_ntd_id","type":"STRING","mode":"NULLABLE"},{"name":"organization_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"service_key","type":"STRING","mode":"NULLABLE"},{"name":"service_name","type":"STRING","mode":"NULLABLE"},{"name":"service_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_service_data_customer_facing","type":"BOOLEAN","mode":"NULLABLE"},{"name":"regional_feed_type","type":"STRING","mode":"NULLABLE"},{"name":"associated_schedule_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"schedule_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"schedule_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"service_alerts_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"service_alerts_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"vehicle_positions_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"vehicle_positions_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"trip_updates_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"trip_updates_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"schedule_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"service_alerts_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"vehicle_positions_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"trip_updates_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"_valid_from","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"_valid_to","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"_is_current","type":"BOOLEAN","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job__fM1GYFvSPjBxgj7Ej7ceBn8v6Bx","location":"us-west2"},"totalRows":"4","rows":[{"f":[{"v":"57321774eb04c7c650ef4709fb25a2c8"},{"v":"true"},{"v":"true"},{"v":"624c361fd9a2a9ad100cbf4b729c2df9"},{"v":"City
         of Solvang"},{"v":"312"},{"v":"8719942682"},{"v":"9R02-91028"},{"v":"reckp33bhAuZlmO1M"},{"v":"55e1099a8610904b4479be54b36875d9"},{"v":"Santa
         Ynez Valley Transit"},{"v":"recTlfGUkpnZ8cICb"},{"v":"true"},{"v":null},{"v":"bb227dec4b51d9d438125e38d0214784"},{"v":"Santa
         Ynez Mecatran Schedule"},{"v":"recuWhPXfxMatv6rL"},{"v":null},{"v":null},{"v":"Santa
         Ynez Vehicle Positions"},{"v":"reccgBgsKC5J7BD8K"},{"v":null},{"v":null},{"v":"372a06b593e1716d1c911b1d1d35bedd"},{"v":null},{"v":"40e0488e732e680cc9d7002fad71adad"},{"v":null},{"v":"1760572800000000"},{"v":"1761264000000000"},{"v":"true"}]},{"f":[{"v":"145279bf2bb891a6f43abd24403a46d7"},{"v":"false"},{"v":"false"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"b6280b24ea50c714c38f0c02bd8d3a2e"},{"v":"Rosemead
         Passio Schedule"},{"v":"reccLvZxTMz1FuNii"},{"v":"Rosemead Passio Alerts"},{"v":"recm7XryAyH4sP0ZF"},{"v":"Rosemead
         Passio Vehicle Positions"},{"v":"rec1RocbLnc4A9eE4"},{"v":"Rosemead Passio
-        Trip Updates"},{"v":"recQtNJAv4UyQjMh4"},{"v":"b6280b24ea50c714c38f0c02bd8d3a2e"},{"v":"c766db2bb5dd244b0e2176f4dfc35999"},{"v":"ad67eda06e383bbd5c174eab700915fb"},{"v":"70b85693df485b227c4a1a87ac46d065"},{"v":"1753401600000000"},{"v":"4070908799999999"},{"v":"true"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_meNnhk079l8Kjq0r0imGd_kqXAhK","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1761872225974","startTime":"1761872226039","endTime":"1761872226112"}'
+        Trip Updates"},{"v":"recQtNJAv4UyQjMh4"},{"v":"b6280b24ea50c714c38f0c02bd8d3a2e"},{"v":"c766db2bb5dd244b0e2176f4dfc35999"},{"v":"ad67eda06e383bbd5c174eab700915fb"},{"v":"70b85693df485b227c4a1a87ac46d065"},{"v":"1753401600000000"},{"v":"4070908799999999"},{"v":"true"}]},{"f":[{"v":"5beb8a6bf200cfdf00da66ac1521d526"},{"v":"false"},{"v":"false"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"1ba3e20e8edb9c64866206d138aaca83"},{"v":"Ridgecrest
+        Schedule"},{"v":"recb7v2QiflfKM77w"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"1ba3e20e8edb9c64866206d138aaca83"},{"v":null},{"v":null},{"v":null},{"v":"1749859200000000"},{"v":"4070908799999999"},{"v":"true"}]},{"f":[{"v":"90ebcb3f9a649985be20bc10aa3ae3d4"},{"v":"false"},{"v":"false"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"794534a42bc6cbb1f4f7bc4d4bb1be16"},{"v":"Avalon
+        Schedule Historic"},{"v":"recdcpS2s3wuT3QAG"},{"v":"Avalon Alerts Historic"},{"v":"recgHXDRuyrKbOD47"},{"v":"Avalon
+        Vehicle Positions"},{"v":"recvwGOdqwtvPzKhZ"},{"v":"Avalon Trip Updates"},{"v":"recaDdOPYGgkoCOoT"},{"v":"794534a42bc6cbb1f4f7bc4d4bb1be16"},{"v":"688fc08edb6dbba6ce92a11b36929993"},{"v":"66f7f7dfc9290a80d99b5b2e645d8659"},{"v":"b070831f700176fc88e2464cb353c24e"},{"v":"1749859200000000"},{"v":"4070908799999999"},{"v":"true"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job__fM1GYFvSPjBxgj7Ej7ceBn8v6Bx","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1761942938161","startTime":"1761942938250","endTime":"1761942938320"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -149,7 +149,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Fri, 31 Oct 2025 00:57:06 GMT
+      - Fri, 31 Oct 2025 20:35:38 GMT
       Server:
       - ESF
       Transfer-Encoding:
@@ -201,7 +201,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Fri, 31 Oct 2025 00:57:06 GMT
+      - Fri, 31 Oct 2025 20:35:38 GMT
       Transfer-Encoding:
       - chunked
     status:
@@ -212,7 +212,7 @@ interactions:
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
       "query": "SELECT source_record_id AS organization_source_record_id,name FROM
       cal-itp-data-infra-staging.test_shared_utils.dim_organizations WHERE _is_current
-      = true", "maxResults": 5000, "requestId": "e8a33ecb-e763-4674-864f-45e75579fbd7"}'
+      = true", "maxResults": 5000, "requestId": "eb0be1c2-e06f-47e9-9a5f-dd428817c809"}'
     headers:
       Accept:
       - '*/*'
@@ -236,10 +236,10 @@ interactions:
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"name","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_9r1QZqG4pBNytgwzveAkn2QBtfuW","location":"us-west2"},"totalRows":"4","rows":[{"f":[{"v":"reckGS8egMZryjbX7"},{"v":"City
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"name","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_UcgccTzh0qC9Zu1Wqc_muRi3x9aF","location":"us-west2"},"totalRows":"4","rows":[{"f":[{"v":"reckGS8egMZryjbX7"},{"v":"City
         of Mission Viejo"}]},{"f":[{"v":"recyqZ1zbZMkeA7Vf"},{"v":"City of Patterson"}]},{"f":[{"v":"recOT4QO6t6mRhUEu"},{"v":"City
         of Chula Vista"}]},{"f":[{"v":"reckp33bhAuZlmO1M"},{"v":"Santa Ynez Band of
-        Chumash Mission Indians of the Santa Ynez Reservation, California"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_9r1QZqG4pBNytgwzveAkn2QBtfuW","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1761872226973","startTime":"1761872227037","endTime":"1761872227110"}'
+        Chumash Mission Indians of the Santa Ynez Reservation, California"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_UcgccTzh0qC9Zu1Wqc_muRi3x9aF","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1761942939044","startTime":"1761942939123","endTime":"1761942939183"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -248,7 +248,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Fri, 31 Oct 2025 00:57:07 GMT
+      - Fri, 31 Oct 2025 20:35:39 GMT
       Server:
       - ESF
       Transfer-Encoding:
@@ -269,14 +269,13 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
-      "query": "\n        SELECT \n            bohcg.organization_name,\n            CONCAT(LPAD(CAST(dmg.caltrans_district
-      AS STRING), 2, ''0''), '' - '', dmg.caltrans_district_name) AS caltrans_district,\n            caltrans_district\n        FROM
-      cal-itp-data-infra-staging.test_shared_utils.bridge_organizations_x_headquarters_county_geography
-      AS bohcg\n        INNER JOIN cal-itp-data-infra-staging.test_shared_utils.dim_county_geography
-      AS dmg ON dmg.key = bohcg.county_geography_key\n        WHERE DATETIME(bohcg._valid_from,
-      ''US/Pacific'') <= DATETIME(''2025-10-16'')\n            AND DATETIME(bohcg._valid_to,
-      ''US/Pacific'') >= DATETIME(''2025-10-16'')\n    ", "maxResults": 5000, "requestId":
-      "e1590b14-a27a-4a1c-a38f-3c3c5d86a11f"}'
+      "query": "SELECT bohcg.organization_name, CONCAT(LPAD(CAST(dmg.caltrans_district
+      AS STRING), 2, ''0''), '' - '', dmg.caltrans_district_name) AS caltrans_district,
+      caltrans_district FROM cal-itp-data-infra-staging.test_shared_utils.bridge_organizations_x_headquarters_county_geography
+      AS bohcg INNER JOIN cal-itp-data-infra-staging.test_shared_utils.dim_county_geography
+      AS dmg ON dmg.key = bohcg.county_geography_key WHERE DATETIME(bohcg._valid_from,
+      ''US/Pacific'') <= DATETIME(''2025-10-16'') AND DATETIME(bohcg._valid_to, ''US/Pacific'')
+      >= DATETIME(''2025-10-16'')", "maxResults": 5000, "requestId": "11b85fee-2eeb-4e07-b68d-c59b43c082cf"}'
     headers:
       Accept:
       - '*/*'
@@ -287,7 +286,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '880'
+      - '784'
       Content-Type:
       - application/json
       User-Agent:
@@ -300,9 +299,9 @@ interactions:
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district_1","type":"INTEGER","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_DtMAT7XpkrxGTczGRSfQCz46c6KG","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"Santa
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district_1","type":"INTEGER","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_3dg6LAqCMIH_GyuDU8YscqvBvbYX","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"Santa
         Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California"},{"v":"05
-        - San Luis Obispo / Santa Barbara"},{"v":"5"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_DtMAT7XpkrxGTczGRSfQCz46c6KG","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1761872227807","startTime":"1761872227878","endTime":"1761872227951"}'
+        - San Luis Obispo / Santa Barbara"},{"v":"5"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_3dg6LAqCMIH_GyuDU8YscqvBvbYX","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1761942939920","startTime":"1761942939992","endTime":"1761942940062"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -311,7 +310,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Fri, 31 Oct 2025 00:57:08 GMT
+      - Fri, 31 Oct 2025 20:35:40 GMT
       Server:
       - ESF
       Transfer-Encoding:

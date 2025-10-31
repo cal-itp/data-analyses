@@ -17,23 +17,23 @@ interactions:
       x-goog-user-project:
       - cal-itp-data-infra-staging
     method: GET
-    uri: https://bigquery.googleapis.com/bigquery/v2/projects/%0A%20%20%20%20%20%20%20%20SELECT%20name,source_record_id%20AS%20organization_source_record_id%0A%20%20%20%20%20%20%20%20FROM%20cal-itp-data-infra-staging/datasets/test_shared_utils/tables/dim_organizations%0A%20%20%20%20%20%20%20%20WHERE%20_is_current%20=%20true%20AND%20name%20IN%20UNNEST(%25(name_values)s)%0A%20%20%20%20?prettyPrint=false
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/SELECT%20name,source_record_id%20AS%20organization_source_record_id%20FROM%20cal-itp-data-infra-staging/datasets/test_shared_utils/tables/dim_organizations%20WHERE%20_is_current%20=%20true%20AND%20name%20IN%20UNNEST(%25(name_values)s)?prettyPrint=false
   response:
     body:
-      string: '{"error":{"code":400,"message":"Invalid resource name projects/\n        SELECT
-        name,source_record_id AS organization_source_record_id\n        FROM cal-itp-data-infra-staging;
-        Project id: \n        SELECT name,source_record_id AS organization_source_record_id\n        FROM
-        cal-itp-data-infra-staging","errors":[{"message":"Invalid resource name projects/\n        SELECT
-        name,source_record_id AS organization_source_record_id\n        FROM cal-itp-data-infra-staging;
-        Project id: \n        SELECT name,source_record_id AS organization_source_record_id\n        FROM
-        cal-itp-data-infra-staging","domain":"global","reason":"badRequest"}],"status":"INVALID_ARGUMENT"}}'
+      string: '{"error":{"code":400,"message":"Invalid resource name projects/SELECT
+        name,source_record_id AS organization_source_record_id FROM cal-itp-data-infra-staging;
+        Project id: SELECT name,source_record_id AS organization_source_record_id
+        FROM cal-itp-data-infra-staging","errors":[{"message":"Invalid resource name
+        projects/SELECT name,source_record_id AS organization_source_record_id FROM
+        cal-itp-data-infra-staging; Project id: SELECT name,source_record_id AS organization_source_record_id
+        FROM cal-itp-data-infra-staging","domain":"global","reason":"badRequest"}],"status":"INVALID_ARGUMENT"}}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Wed, 29 Oct 2025 22:45:36 GMT
+      - Fri, 31 Oct 2025 20:39:33 GMT
       Transfer-Encoding:
       - chunked
     status:
@@ -44,10 +44,10 @@ interactions:
       {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
       [{"value": "City of Mission Viejo"}, {"value": "City of Patterson"}]}, "name":
       "name_values"}], "parameterMode": "NAMED", "useLegacySql": false, "formatOptions":
-      {"useInt64Timestamp": true}, "location": "us-west2", "query": "\n        SELECT
-      name,source_record_id AS organization_source_record_id\n        FROM cal-itp-data-infra-staging.test_shared_utils.dim_organizations\n        WHERE
-      _is_current = true AND name IN UNNEST(@`name_values`)\n    ", "maxResults":
-      5000, "requestId": "2387e633-d7cc-447a-b142-f2bed88f4b2d"}'
+      {"useInt64Timestamp": true}, "location": "us-west2", "query": "SELECT name,source_record_id
+      AS organization_source_record_id FROM cal-itp-data-infra-staging.test_shared_utils.dim_organizations
+      WHERE _is_current = true AND name IN UNNEST(@`name_values`)", "maxResults":
+      5000, "requestId": "2ea4e75b-6a24-4322-81b5-fe03fb28eebb"}'
     headers:
       Accept:
       - '*/*'
@@ -58,7 +58,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '684'
+      - '650'
       Content-Type:
       - application/json
       User-Agent:
@@ -71,8 +71,8 @@ interactions:
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"name","type":"STRING","mode":"NULLABLE"},{"name":"organization_source_record_id","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_uPuH-XMLPJ4uS6_lpSghRHkRFqcp","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"City
-        of Mission Viejo"},{"v":"reckGS8egMZryjbX7"}]},{"f":[{"v":"City of Patterson"},{"v":"recyqZ1zbZMkeA7Vf"}]}],"totalBytesProcessed":"166","jobComplete":true,"cacheHit":false,"queryId":"job_uPuH-XMLPJ4uS6_lpSghRHkRFqcp","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"21","location":"us-west2","creationTime":"1761777936153","startTime":"1761777936212","endTime":"1761777936357"}'
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"name","type":"STRING","mode":"NULLABLE"},{"name":"organization_source_record_id","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_2FL6ibo5j2Ld344ERR6QPSqn42p4","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"City
+        of Mission Viejo"},{"v":"reckGS8egMZryjbX7"}]},{"f":[{"v":"City of Patterson"},{"v":"recyqZ1zbZMkeA7Vf"}]}],"totalBytesProcessed":"272","jobComplete":true,"cacheHit":false,"queryId":"job_2FL6ibo5j2Ld344ERR6QPSqn42p4","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"22","location":"us-west2","creationTime":"1761943174065","startTime":"1761943174129","endTime":"1761943174265"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -81,7 +81,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Wed, 29 Oct 2025 22:45:36 GMT
+      - Fri, 31 Oct 2025 20:39:34 GMT
       Server:
       - ESF
       Transfer-Encoding:

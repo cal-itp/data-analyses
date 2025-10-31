@@ -17,15 +17,15 @@ interactions:
       x-goog-user-project:
       - cal-itp-data-infra-staging
     method: GET
-    uri: https://bigquery.googleapis.com/bigquery/v2/projects/%0A%20%20%20%20%20%20%20%20SELECT%20key%20AS%20gtfs_dataset_key,name%20AS%20gtfs_dataset_name,type,regional_feed_type,uri,base64_url%20FROM%20cal-itp-data-infra-staging/datasets/test_shared_utils/tables/dim_gtfs_datasets%0A%20%20%20%20%20%20%20%20WHERE%20data_quality_pipeline%20=%20true%0A%20%20%20%20?prettyPrint=false
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/SELECT%20key%20AS%20gtfs_dataset_key,name%20AS%20gtfs_dataset_name,type,regional_feed_type,uri,base64_url%20FROM%20cal-itp-data-infra-staging/datasets/test_shared_utils/tables/dim_gtfs_datasets%20WHERE%20data_quality_pipeline%20=%20true?prettyPrint=false
   response:
     body:
-      string: '{"error":{"code":400,"message":"Invalid resource name projects/\n        SELECT
+      string: '{"error":{"code":400,"message":"Invalid resource name projects/SELECT
         key AS gtfs_dataset_key,name AS gtfs_dataset_name,type,regional_feed_type,uri,base64_url
-        FROM cal-itp-data-infra-staging; Project id: \n        SELECT key AS gtfs_dataset_key,name
+        FROM cal-itp-data-infra-staging; Project id: SELECT key AS gtfs_dataset_key,name
         AS gtfs_dataset_name,type,regional_feed_type,uri,base64_url FROM cal-itp-data-infra-staging","errors":[{"message":"Invalid
-        resource name projects/\n        SELECT key AS gtfs_dataset_key,name AS gtfs_dataset_name,type,regional_feed_type,uri,base64_url
-        FROM cal-itp-data-infra-staging; Project id: \n        SELECT key AS gtfs_dataset_key,name
+        resource name projects/SELECT key AS gtfs_dataset_key,name AS gtfs_dataset_name,type,regional_feed_type,uri,base64_url
+        FROM cal-itp-data-infra-staging; Project id: SELECT key AS gtfs_dataset_key,name
         AS gtfs_dataset_name,type,regional_feed_type,uri,base64_url FROM cal-itp-data-infra-staging","domain":"global","reason":"badRequest"}],"status":"INVALID_ARGUMENT"}}'
     headers:
       Alt-Svc:
@@ -33,7 +33,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Tue, 28 Oct 2025 22:51:35 GMT
+      - Fri, 31 Oct 2025 20:39:25 GMT
       Transfer-Encoding:
       - chunked
     status:
@@ -42,9 +42,9 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
-      "query": "\n        SELECT key AS gtfs_dataset_key,name AS gtfs_dataset_name,type,regional_feed_type,uri,base64_url
-      FROM cal-itp-data-infra-staging.test_shared_utils.dim_gtfs_datasets\n        WHERE
-      data_quality_pipeline = true\n    ", "maxResults": 5000, "requestId": "d1af4eea-ac0b-45af-9ecb-cc6ba1acea3a"}'
+      "query": "SELECT key AS gtfs_dataset_key,name AS gtfs_dataset_name,type,regional_feed_type,uri,base64_url
+      FROM cal-itp-data-infra-staging.test_shared_utils.dim_gtfs_datasets WHERE data_quality_pipeline
+      = true", "maxResults": 5000, "requestId": "3bc4a402-9a2e-462f-ad93-64f90bf90b8a"}'
     headers:
       Accept:
       - '*/*'
@@ -55,7 +55,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '461'
+      - '436'
       Content-Type:
       - application/json
       User-Agent:
@@ -68,10 +68,10 @@ interactions:
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"type","type":"STRING","mode":"NULLABLE"},{"name":"regional_feed_type","type":"STRING","mode":"NULLABLE"},{"name":"uri","type":"STRING","mode":"NULLABLE"},{"name":"base64_url","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_P9k02okrFAGWBdKBL4UtBq5ScSF6","location":"us-west2"},"totalRows":"3","rows":[{"f":[{"v":"c51dbfdd47838f86074c4ef3179cc9ed"},{"v":"Santa
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"type","type":"STRING","mode":"NULLABLE"},{"name":"regional_feed_type","type":"STRING","mode":"NULLABLE"},{"name":"uri","type":"STRING","mode":"NULLABLE"},{"name":"base64_url","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_T4FIMEzTq-4OEZu5ZPtyBu90H_QS","location":"us-west2"},"totalRows":"3","rows":[{"f":[{"v":"c51dbfdd47838f86074c4ef3179cc9ed"},{"v":"Santa
         Ynez Mecatran Schedule"},{"v":"schedule"},{"v":null},{"v":"http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0"},{"v":"aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=="}]},{"f":[{"v":"372a06b593e1716d1c911b1d1d35bedd"},{"v":"Santa
         Ynez Mecatran Schedule"},{"v":"schedule"},{"v":null},{"v":"http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0"},{"v":"aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=="}]},{"f":[{"v":"8aed0709366badf9342e03d0a2d72b8d"},{"v":"SLO
-        Trip Updates"},{"v":"trip_updates"},{"v":null},{"v":"http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb"},{"v":"aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI="}]}],"totalBytesProcessed":"1043","jobComplete":true,"cacheHit":false,"queryId":"job_P9k02okrFAGWBdKBL4UtBq5ScSF6","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"19","location":"us-west2","creationTime":"1761691895709","startTime":"1761691895865","endTime":"1761691895995"}'
+        Trip Updates"},{"v":"trip_updates"},{"v":null},{"v":"http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb"},{"v":"aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI="}]}],"totalBytesProcessed":"1043","jobComplete":true,"cacheHit":false,"queryId":"job_T4FIMEzTq-4OEZu5ZPtyBu90H_QS","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"8","location":"us-west2","creationTime":"1761943165663","startTime":"1761943165760","endTime":"1761943165888"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -80,7 +80,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Tue, 28 Oct 2025 22:51:36 GMT
+      - Fri, 31 Oct 2025 20:39:26 GMT
       Server:
       - ESF
       Transfer-Encoding:

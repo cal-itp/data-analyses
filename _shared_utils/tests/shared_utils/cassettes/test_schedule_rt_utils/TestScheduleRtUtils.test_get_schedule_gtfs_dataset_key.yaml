@@ -2,8 +2,8 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
-      "query": "\n        SELECT gtfs_dataset_key, feed_key FROM cal-itp-data-infra-staging.test_shared_utils.fct_daily_feed_scheduled_service_summary\n        WHERE
-      service_date = ''2025-09-01''\n    ", "maxResults": 5000, "requestId": "b4de31be-e244-4c56-9ce6-502c4c29c82d"}'
+      "query": "SELECT gtfs_dataset_key, feed_key FROM cal-itp-data-infra-staging.test_shared_utils.fct_daily_feed_scheduled_service_summary
+      WHERE service_date = ''2025-09-01''", "maxResults": 5000, "requestId": "82d8a956-b5a1-456b-9e3a-38b332ecd91c"}'
     headers:
       Accept:
       - '*/*'
@@ -14,7 +14,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '421'
+      - '396'
       Content-Type:
       - application/json
       User-Agent:
@@ -27,7 +27,7 @@ interactions:
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_4a7P1Y2msl8HzByKXhvGeHSYQI-Q","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"0089bd1b0a2b78a8590d8749737d7146"},{"v":"10f6bb537140b7e52c8f313f3d611f71"}]}],"totalBytesProcessed":"228","jobComplete":true,"cacheHit":false,"queryId":"job_4a7P1Y2msl8HzByKXhvGeHSYQI-Q","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"9","location":"us-west2","creationTime":"1761695424681","startTime":"1761695424859","endTime":"1761695425005"}'
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_6l08_NbzcdbDyLP3oIueh6CiQUGw","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"0089bd1b0a2b78a8590d8749737d7146"},{"v":"10f6bb537140b7e52c8f313f3d611f71"}]}],"totalBytesProcessed":"228","jobComplete":true,"cacheHit":false,"queryId":"job_6l08_NbzcdbDyLP3oIueh6CiQUGw","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"31","location":"us-west2","creationTime":"1761943164443","startTime":"1761943164544","endTime":"1761943164686"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -36,7 +36,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Tue, 28 Oct 2025 23:50:25 GMT
+      - Fri, 31 Oct 2025 20:39:24 GMT
       Server:
       - ESF
       Transfer-Encoding:
