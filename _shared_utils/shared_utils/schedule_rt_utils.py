@@ -160,15 +160,13 @@ def get_organization_id(
     else:
         project = kwargs.get("project", "cal-itp-data-infra")
         dataset = kwargs.get("dataset", "mart_transit_database")
-        tables = _get_tables(project)
 
-        dim_provider_gtfs_data = getattr(tables, dataset).dim_provider_gtfs_data() >> distinct() >> collect()
-
-        dim_provider_gtfs_data = localize_timestamp_col(dim_provider_gtfs_data, ["_valid_from", "_valid_to"])
-
-        dim_provider_gtfs_data2 = dim_provider_gtfs_data >> filter(
-            _._valid_from_local <= pd.to_datetime(date), _._valid_to_local >= pd.to_datetime(date)
-        )
+        dim_provider_gtfs_data = query_sql(f"""
+            SELECT DISTINCT *
+            FROM {project}.{dataset}.dim_provider_gtfs_data
+            WHERE DATETIME(_valid_from, '{PACIFIC_TIMEZONE}') <= DATETIME('{date}')
+                AND DATETIME(_valid_to, '{PACIFIC_TIMEZONE}') >= DATETIME('{date}')
+        """, as_df=True)
 
         sorting = [True for c in merge_cols]
         keep_cols = ["organization_source_record_id"]
@@ -177,11 +175,11 @@ def get_organization_id(
         # but we should handle it by selectig a preferred
         # rather than alphabetical.
         # (organization names Foothill Transit and City of Duarte)
-        dim_provider_gtfs_data2 = dim_provider_gtfs_data2.sort_values(
+        dim_provider_gtfs_data = dim_provider_gtfs_data.sort_values(
             merge_cols + ["_valid_to", "_valid_from"], ascending=sorting + [False, False]
         ).reset_index(drop=True)[merge_cols + keep_cols]
 
-        df2 = pd.merge(df, dim_provider_gtfs_data2, on=merge_cols, how="inner")
+        df2 = pd.merge(df, dim_provider_gtfs_data, on=merge_cols, how="inner")
 
         return df2
 
