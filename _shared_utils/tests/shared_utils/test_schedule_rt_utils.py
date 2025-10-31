@@ -24,7 +24,7 @@ class TestScheduleRtUtils:
         assert result.feed_key.values[0] == "10f6bb537140b7e52c8f313f3d611f71"
 
     @pytest.mark.vcr
-    def test_filter_dim_gtfs_dataset(self, project: str, dataset: str):
+    def test_filter_dim_gtfs_datasets(self, project: str, dataset: str):
         result = filter_dim_gtfs_datasets(project=project, dataset=dataset)
 
         assert len(result) == 3
@@ -49,7 +49,7 @@ class TestScheduleRtUtils:
               'base64_url': 'aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI='}])
 
     @pytest.mark.vcr
-    def test_filter_dim_gtfs_dataset_keep_cols_subset(self, project: str, dataset: str):
+    def test_filter_dim_gtfs_datasets_keep_cols_subset(self, project: str, dataset: str):
         result = filter_dim_gtfs_datasets(keep_cols=["key", "name"], project=project, dataset=dataset)
 
         assert len(result) == 3
@@ -62,7 +62,7 @@ class TestScheduleRtUtils:
               'gtfs_dataset_name': 'SLO Trip Updates'}])
 
     @pytest.mark.vcr
-    def test_filter_dim_gtfs_dataset_custom_filtering(self, project: str, dataset: str):
+    def test_filter_dim_gtfs_datasets_custom_filtering(self, project: str, dataset: str):
         result = filter_dim_gtfs_datasets(custom_filtering={"type": ["trip_updates"]}, project=project, dataset=dataset)
 
         assert len(result) == 1
@@ -74,7 +74,7 @@ class TestScheduleRtUtils:
               'uri': 'http://data.peaktransit.com/gtfsrt/1/TripUpdate.pb',
               'base64_url': 'aHR0cDovL2RhdGEucGVha3RyYW5zaXQuY29tL2d0ZnNydC8xL1RyaXBVcGRhdGUucGI='}])
 
-    def test_filter_dim_gtfs_dataset_keep_cols_key_missing(self, project: str, dataset: str):
+    def test_filter_dim_gtfs_datasets_keep_cols_key_missing(self, project: str, dataset: str):
         with pytest.raises(KeyError, match="Include key in keep_cols list"):
             filter_dim_gtfs_datasets(keep_cols=["name", "type", "regional_feed_type", "uri", "base64_url"], project=project, dataset=dataset)
 
