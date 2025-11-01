@@ -1,0 +1,67 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
+      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+      "STRING"}, "parameterValue": {"value": "2025-09-01"}, "name": "service_date_1"}],
+      "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
+      true}, "location": "us-west2", "query": "SELECT `fct_daily_feed_scheduled_service_summary`.`service_date`,
+      `fct_daily_feed_scheduled_service_summary`.`feed_key`, `fct_daily_feed_scheduled_service_summary`.`gtfs_dataset_key`,
+      `fct_daily_feed_scheduled_service_summary`.`ttl_service_hours`, `fct_daily_feed_scheduled_service_summary`.`n_trips`,
+      `fct_daily_feed_scheduled_service_summary`.`first_departure_sec`, `fct_daily_feed_scheduled_service_summary`.`last_arrival_sec`,
+      `fct_daily_feed_scheduled_service_summary`.`num_stop_times`, `fct_daily_feed_scheduled_service_summary`.`n_routes`,
+      `fct_daily_feed_scheduled_service_summary`.`contains_warning_duplicate_stop_times_primary_key`,
+      `fct_daily_feed_scheduled_service_summary`.`contains_warning_duplicate_trip_primary_key`,
+      `fct_daily_feed_scheduled_service_summary`.`contains_warning_missing_foreign_key_stop_id`
+      \nFROM `fct_daily_feed_scheduled_service_summary` \nWHERE `fct_daily_feed_scheduled_service_summary`.`service_date`
+      = @`service_date_1`", "maxResults": 5000, "requestId": "9953e7d0-1be5-4c33-85c3-905c2b766bba"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1425'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"service_date","type":"DATETIME","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"ttl_service_hours","type":"FLOAT","mode":"NULLABLE"},{"name":"n_trips","type":"INTEGER","mode":"NULLABLE"},{"name":"first_departure_sec","type":"INTEGER","mode":"NULLABLE"},{"name":"last_arrival_sec","type":"INTEGER","mode":"NULLABLE"},{"name":"num_stop_times","type":"INTEGER","mode":"NULLABLE"},{"name":"n_routes","type":"INTEGER","mode":"NULLABLE"},{"name":"contains_warning_duplicate_stop_times_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"contains_warning_duplicate_trip_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"contains_warning_missing_foreign_key_stop_id","type":"BOOLEAN","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_mN8R7pcY7vH1oyXjRt2lNWDsuTI-","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"2025-09-01T00:00:00"},{"v":"10f6bb537140b7e52c8f313f3d611f71"},{"v":"0089bd1b0a2b78a8590d8749737d7146"},{"v":"0.0"},{"v":"0"},{"v":null},{"v":null},{"v":"0"},{"v":"0"},{"v":null},{"v":null},{"v":null}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_mN8R7pcY7vH1oyXjRt2lNWDsuTI-","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1761955815437","startTime":"1761955815531","endTime":"1761955815593"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sat, 01 Nov 2025 00:10:15 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

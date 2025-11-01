@@ -1,0 +1,43 @@
+name: pytest
+
+on: [push]
+
+env:
+  PROJECT_ID: 'cal-itp-data-infra-staging'
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/473674835135/locations/global/workloadIdentityPools/github-actions/providers/data-analyses'
+  SERVICE_ACCOUNT: 'github-actions-service-account@cal-itp-data-infra-staging.iam.gserviceaccount.com'
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Authenticate Google Service Account
+        uses: google-github-actions/auth@v2
+        with:
+          create_credentials_file: true
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.SERVICE_ACCOUNT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install share_utils dependencies
+        working-directory: _shared_utils/
+        run: pip install -r requirements.txt
+
+      - name: Run shared_utils tests
+        working-directory: _shared_utils/
+        run: pytest tests

@@ -1,0 +1,62 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql":
+      false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
+      "query": "SELECT bohcg.organization_name, CONCAT(LPAD(CAST(dmg.caltrans_district
+      AS STRING), 2, ''0''), '' - '', dmg.caltrans_district_name) AS caltrans_district,  FROM
+      cal-itp-data-infra-staging.test_shared_utils.bridge_organizations_x_headquarters_county_geography
+      AS bohcg INNER JOIN cal-itp-data-infra-staging.test_shared_utils.dim_county_geography
+      AS dmg ON dmg.key = bohcg.county_geography_key WHERE DATETIME(bohcg._valid_from,
+      ''US/Pacific'') <= DATETIME(''2024-01-17'') AND DATETIME(bohcg._valid_to, ''US/Pacific'')
+      >= DATETIME(''2024-01-17'')", "maxResults": 5000, "requestId": "e1c27457-6ade-4d79-a818-d3b385d45df8"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '767'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra","jobId":"job_ts-YP_NKz2M9ZqsyW0AeBwvtEoED","location":"us-west2"},"totalRows":"0","totalBytesProcessed":"496","jobComplete":true,"cacheHit":false,"queryId":"job_ts-YP_NKz2M9ZqsyW0AeBwvtEoED","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"20971520","totalSlotMs":"24","location":"us-west2","creationTime":"1761943169987","startTime":"1761943170087","endTime":"1761943170224"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Fri, 31 Oct 2025 20:39:30 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1
