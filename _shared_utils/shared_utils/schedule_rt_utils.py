@@ -1,15 +1,35 @@
 """
 Functions to bridge GTFS schedule and RT.
 """
+import os
 from typing import Literal, Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
-from calitp_data_analysis.sql import get_engine, query_sql
+from calitp_data_analysis.sql import query_sql
+from sqlalchemy import select, create_engine
+from sqlalchemy.orm import Session
+
+from shared_utils.models.fct_daily_feed_scheduled_service_summary import FctDailyFeedScheduledServiceSummary
 
 PACIFIC_TIMEZONE = "US/Pacific"
+CALITP_BQ_MAX_BYTES = os.environ.get("CALITP_BQ_MAX_BYTES", 5_000_000_000)
+CALITP_BQ_LOCATION = os.environ.get("CALITP_BQ_LOCATION", "us-west2")
+
+def get_engine(max_bytes=None, project="cal-itp-data-infra", dataset=None):
+    max_bytes = CALITP_BQ_MAX_BYTES if max_bytes is None else max_bytes
+
+    cred_path = os.environ.get("CALITP_SERVICE_KEY_PATH")
+
+    # Note that we should be able to add location as a uri parameter, but
+    # it is not being picked up, so passing as a separate argument for now.
+    return create_engine(
+        f"bigquery://{project}/{dataset if dataset else ''}?maximum_bytes_billed={max_bytes}",  # noqa: E231
+        location=CALITP_BQ_LOCATION,
+        credentials_path=cred_path,
+    )
 
 
 def _query_sql_with_params(query_template: str, search_criteria: dict, as_df: bool) -> pd.DataFrame:
@@ -68,13 +88,14 @@ def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True, **kwargs) -> p
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_gtfs")
 
-    return query_sql(
-        (
-            f"SELECT gtfs_dataset_key, feed_key FROM {project}.{dataset}.fct_daily_feed_scheduled_service_summary "
-            f"WHERE service_date = '{date}'"
-        ),
-        as_df=get_df,
-    )
+    db_engine = get_engine(project=project, dataset=dataset)
+    session = Session(db_engine)
+    statement = select(FctDailyFeedScheduledServiceSummary).where(FctDailyFeedScheduledServiceSummary.service_date == date)
+
+    if get_df:
+        return pd.read_sql(statement, session.bind)
+    else:
+        return session.scalars(statement)
 
 
 def filter_dim_gtfs_datasets(
