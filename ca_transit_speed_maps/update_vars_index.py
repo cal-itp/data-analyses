@@ -3,7 +3,7 @@ import geopandas as gpd
 import datetime as dt
 import yaml
 
-from shared_utils import rt_dates, catalog_utils, schedule_rt_utils
+from shared_utils import rt_dates, catalog_utils
 
 from segment_speed_utils.project_vars import (
     COMPILED_CACHED_VIEWS,

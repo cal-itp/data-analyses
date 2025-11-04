@@ -8,7 +8,6 @@ import pandas as pd
 import yaml
 
 from calitp_data_analysis import geography_utils
-from shared_utils import gtfs_utils_v2, schedule_rt_utils, portfolio_utils
 from update_vars import TRAFFIC_OPS_GCS, analysis_date, GTFS_DATA_DICT, SCHED_GCS
 
 catalog = intake.open_catalog(
