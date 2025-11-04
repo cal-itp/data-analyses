@@ -75,6 +75,7 @@ def set_state_export(
     existing_state: dict = {},
     cache_seconds: int = 3600,
     manual_centroid: list = None,
+    overwrite: bool = False,
 ) -> dict:
     """
     Main function to use single page application webmap.
@@ -128,7 +129,8 @@ def set_state_export(
 
     return {
         "state_dict": spa_map_state,
-        "spa_link": spa_map_export_link(gdf=gdf, path=path, state=spa_map_state, cache_seconds=cache_seconds),
+        "spa_link": spa_map_export_link(gdf=gdf, path=path, state=spa_map_state,
+                                        cache_seconds=cache_seconds, overwrite=overwrite),
     }
 
 
