@@ -121,7 +121,7 @@ def filter_feed_options(
         "use_subfeeds",
         "current_feeds",
         "include_precursor",
-    ]
+    ],
 ) -> siuba.dply.verbs.Pipeable:
     exclude_precursor = filter(_.regional_feed_type != "Regional Precursor Feed")
 
