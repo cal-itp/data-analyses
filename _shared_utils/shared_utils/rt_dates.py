@@ -116,6 +116,7 @@ oct2023_week = get_week(month="oct2023", exclude_wed=False)
 apr2024_week = get_week(month="apr2024", exclude_wed=False)
 oct2024_week = get_week(month="oct2024", exclude_wed=False)
 apr2025_week = get_week(month="apr2025", exclude_wed=False)
+oct2025_week = get_week(month="oct2025", exclude_wed=False)
 
 MONTH_DICT = {
     1: "January",
