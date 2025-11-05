@@ -1,6 +1,7 @@
 """
 Geospatial utility functions
 """
+
 from typing import Union
 
 import geopandas as gpd

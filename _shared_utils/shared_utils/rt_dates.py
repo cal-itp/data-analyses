@@ -3,6 +3,7 @@ Cached dates available in rt_delay/.
 
 GCS: gs://calitp-analytics-data/data-analyses/rt_delay/cached_views/
 """
+
 import datetime
 from typing import Literal
 

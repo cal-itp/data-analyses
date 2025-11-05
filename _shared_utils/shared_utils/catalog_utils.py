@@ -1,6 +1,7 @@
 """
 Functions for opening yaml catalogs in shared_utils.
 """
+
 from pathlib import Path
 from typing import Literal
 

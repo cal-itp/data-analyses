@@ -1,6 +1,7 @@
 """
 Functions to bridge GTFS schedule and RT.
 """
+
 from typing import Literal, Union
 
 import dask.dataframe as dd

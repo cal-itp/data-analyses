@@ -4,6 +4,7 @@ Convienience functions for using web app maps via https://github.com/cal-itp/dat
 These maps perform much better on large datasets, and include a download link. They support a generic style,
 or certain predefined styles, for example for speedmaps and the state highway system.
 """
+
 import base64
 import gzip
 import json
@@ -129,8 +130,9 @@ def set_state_export(
 
     return {
         "state_dict": spa_map_state,
-        "spa_link": spa_map_export_link(gdf=gdf, path=path, state=spa_map_state,
-                                        cache_seconds=cache_seconds, overwrite=overwrite),
+        "spa_link": spa_map_export_link(
+            gdf=gdf, path=path, state=spa_map_state, cache_seconds=cache_seconds, overwrite=overwrite
+        ),
     }
 
 
