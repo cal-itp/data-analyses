@@ -47,4 +47,8 @@ modeled_road_segment_speeds:
 	python project_road_segments.py
 	python model_speeds_for_roads.py
 	python aggregate_road_speeds.py
+
+movingpandas_pipeline:
+	python download_vp_path.py  
+	python trajectify_vp.py  
     

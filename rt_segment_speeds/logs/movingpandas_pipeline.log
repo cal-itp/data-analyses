@@ -1,0 +1,12 @@
+2025-11-05 12:12:02.452 | INFO     | __main__:download_vp_path:61 - download fct_vehicle_locations_path: 2025-08-20: 0:07:03.025239
+2025-11-05 13:34:17.593 | INFO     | __main__:explode_path_by_trip:46 - explode path to long: 0:00:34.091205
+2025-11-05 13:48:01.530 | INFO     | __main__:explode_path_by_trip:46 - explode path to long: 0:00:32.394802
+2025-11-05 14:24:10.566 | INFO     | __main__:download_vp_path:63 - download fct_vehicle_locations_path: 2025-09-24: 0:00:42.597387
+2025-11-05 14:54:32.519 | INFO     | __main__:explode_array_by_trip:46 - explode array to long: 0:06:54.360333
+2025-11-06 10:56:21.413 | INFO     | __main__:add_movingpandas_deltas:146 - add distance: 0:15:54.185785
+2025-11-06 10:56:37.802 | INFO     | __main__:add_movingpandas_deltas:151 - add timedelta: 0:00:16.388564
+2025-11-06 11:13:37.987 | INFO     | __main__:add_movingpandas_deltas:159 - add speed/acceleration: 0:17:00.184669
+2025-11-06 11:21:22.454 | INFO     | __main__:add_movingpandas_deltas:165 - add angular difference/direction: 0:07:44.467524
+2025-11-06 11:21:22.454 | INFO     | __main__:add_movingpandas_deltas:168 - add movingpandas columns: 0:40:55.226991
+2025-11-06 11:28:02.020 | INFO     | __main__:export_results:195 - export: 0:06:39.565490
+2025-11-06 11:28:02.612 | INFO     | __main__:<module>:244 - moving pandas step: 2025-09-24: 0:49:14.984168

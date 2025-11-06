@@ -34,6 +34,8 @@ speeds_tables:
   vp_dwell_premerge: vp_dwell_premerge
   vp_dwell: vp_usable_dwell
   vp_condensed_line: condensed/vp_condensed
+  vp_path: fct_vehicle_locations_path
+  vp_trajectory: vp_trajectory
   timestamp_col: ${speed_vars.timestamp_col}
   time_min_cutoff: ${speed_vars.time_min_cutoff}
 
