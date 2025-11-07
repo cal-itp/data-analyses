@@ -21,15 +21,6 @@ from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
 
 credentials, project = google.auth.default()
 
-def transform_linestring(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
-    """
-    Try shapely.get_coordinates with downloaded gdf.
-    """
-    gdf = gdf.assign(
-        pt_array = gdf.apply(lambda row: shapely.get_coordinates(row.geometry), axis=1),
-    ).drop(columns = ["geometry"])
-
-    return gdf
 
 def transform_array_of_strings(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -39,6 +30,7 @@ def transform_array_of_strings(df: pd.DataFrame) -> pd.DataFrame:
     t0 = datetime.datetime.now()
     
     df = df.assign(
+        service_date = pd.to_datetime(df.service_date),
         pt_array = df.apply(
             lambda x: 
             np.array(
@@ -56,7 +48,13 @@ def transform_array_of_strings(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def explode_tuples(gdf) -> pd.DataFrame:
-    
+    """
+    Get x, y out so it can be used with movingpandas.TrajectoryCollection.
+    Might be able to go back to using fct_vehicle_locations
+    if this is a Python data model with BigFrames, since the bottleneck
+    is in how many rows we can download 
+    (1 single day of vp has to be broken into 4+ batches to be put back as gdf)
+    """
     t0 = datetime.datetime.now()
     
     gdf = gdf.explode(
@@ -73,59 +71,6 @@ def explode_tuples(gdf) -> pd.DataFrame:
     
     return gdf
 
-def explode_array_by_trip(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Get x, y out so it can be used with movingpandas.TrajectoryCollection.
-    Might be able to go back to using fct_vehicle_locations
-    if this is a Python data model with BigFrames, since the bottleneck
-    is in how many rows we can download 
-    (1 single day of vp has to be broken into 4+ batches to be put back as gdf)
-    """
-    t0 = datetime.datetime.now()
-
-    # Try a version of this where pt_array has not been converted to linestring
-    # and see if it works
-    df = df.assign(
-        x = df.apply(lambda row: np.array([shapely.wkt.loads(p).x for p in row.pt_array]), axis=1),
-        y = df.apply(lambda row: np.array([shapely.wkt.loads(p).y for p in row.pt_array]), axis=1),
-    ).drop(columns = ["pt_array"])
-    
-    df = df.explode(
-        column=["location_timestamp_pacific", "x", "y"]
-    ).reset_index(drop=True)
-    
-    t1 = datetime.datetime.now()
-    logger.info(f"explode array to long: {t1 - t0}")
-
-    return df
-
-
-def explode_path_by_trip(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
-    """
-    Get x, y out so it can be used with movingpandas.TrajectoryCollection.
-    Might be able to go back to using fct_vehicle_locations
-    if this is a Python data model with BigFrames, since the bottleneck
-    is in how many rows we can download 
-    (1 single day of vp has to be broken into 4+ batches to be put back as gdf)
-    """
-    t0 = datetime.datetime.now()
-
-    # Try a version of this where pt_array has not been converted to linestring
-    # and see if it works
-    gdf = gdf.assign(
-        x = gdf.apply(lambda x: np.array([p[0] for p in x.geometry.coords]), axis=1),
-        y = gdf.apply(lambda x: np.array([p[1] for p in x.geometry.coords]), axis=1),
-    ).drop(columns = "geometry")
-
-    df = gdf.explode(
-        column=["location_timestamp_pacific", "x", "y"]
-    ).reset_index(drop=True)
-    
-    t1 = datetime.datetime.now()
-    logger.info(f"explode path to long: {t1 - t0}")
-
-    return df
-
 
 def add_movingpandas_deltas(
     df: pd.DataFrame, 
@@ -139,6 +84,11 @@ def add_movingpandas_deltas(
     Take df and make into movingpandas.TrajectoryCollection, then
     add all the columns we can based on our raw vp.
     Decide how to handle it after.
+    
+    See if we can grab just the underlying df from this and export.
+    
+    We should keep vp_key if we want to be able to keep the vp's location and 
+    join it back to fct_vehicle_locations.
     """
     start = datetime.datetime.now()
 
@@ -151,7 +101,7 @@ def add_movingpandas_deltas(
         
     # Add all the columns we can add
     tc.add_distance(overwrite=True, name="distance_meters", units="m")
-    tc.add_distance(overwrite=True, name="distance_miles", units="mi")
+    #tc.add_distance(overwrite=True, name="distance_miles", units="mi")
     
     t1 = datetime.datetime.now()
     logger.info(f"add distance: {t1 - start}")
@@ -175,11 +125,34 @@ def add_movingpandas_deltas(
     t4 = datetime.datetime.now()
     logger.info(f"add angular difference/direction: {t4 - t3}")
     
+    
+    
+    result_df = pd.concat(
+        [traj.df.drop(columns="geometry").pipe(round_columns) for traj in tc], 
+        axis=0, 
+        ignore_index=True
+    )
+    
     end = datetime.datetime.now()
-    logger.info(f"add movingpandas columns: {end - start}")
+    logger.info(f"save out df: {end - start}")
+    
+    return result_df
 
-    return tc
 
+def round_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Round to 3 decimal places
+    """
+    df = df.assign(
+        distance_meters = df.distance_meters.round(3),
+        speed_mph = df.speed_mph.round(3),
+        acceleration_mph_per_sec = df.acceleration_mph_per_sec.round(3),
+        angular_difference = df.angular_difference.round(3),
+        direction = df.direction.round(3),
+    )
+    
+    return df
+                    
 
 def export_results(
     trajectory_collection: mpd.TrajectoryCollection,
@@ -189,11 +162,18 @@ def export_results(
     Return results as line? Save out line segments gdf so we can plot easily, 
     but we might have to change this if it's not suitable to import 
     several days back in and aggregate.
+    
+    We might go with exporting point_gdf instead of line, unless we can figure out
+    how to export just the .df.
+    Having columns that can join back to vp_key in fct_vehicle_locations is best.
+    
+    https://github.com/movingpandas/movingpandas/blob/main/movingpandas/trajectory_collection.py#L150-L159
+    The exporting is taking each trajectory and exporting, then concatenating with pandas.
     """
     t0 = datetime.datetime.now()
     
-    results = trajectory_collection.to_line_gdf().reset_index()
-    #results = trajectory_collection.to_point_gdf().reset_index()
+    #results = trajectory_collection.to_line_gdf().reset_index()
+    results = trajectory_collection.to_point_gdf().reset_index()
     #results = trajectory_collection.df
     
     utils.geoparquet_gcs_export(
@@ -222,34 +202,77 @@ if __name__ == "__main__":
     
     analysis_date_list = [
         rt_dates.DATES[f"{m}2025"] for m in ["sep"] 
-    ]
-    
-    # see how long LA Metro Bus takes...
-    # may have to split out some of the larger ones to do separately
-    # doing it all operators in 1 day seems to get hung up
-    batch0 = [
-        "LA Metro Bus Vehicle Positions"
-    ]
-    
+    ]  
     
     for analysis_date in analysis_date_list:
         
         start = datetime.datetime.now()
         
-        gdf = pd.read_parquet(
+        operators = pd.read_parquet(
             f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
-            #storage_options={"token": credentials.token},
-            filters = [[("gtfs_dataset_name", "in", batch0)]],
-            columns = [
-                "service_date", 
-                "trip_instance_key", 
-                "location_timestamp_pacific", 
-                "pt_array"
+            columns = ["gtfs_dataset_name"]
+        ).gtfs_dataset_name.unique()
+        
+        
+        df = pd.read_parquet(
+                f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
+                columns = [
+                    "service_date", "gtfs_dataset_name",
+                    "gtfs_dataset_key",
+                    "trip_instance_key", 
+                    "location_timestamp_pacific", 
+                    "pt_array"
             ]
-        ).pipe(transform_array_of_strings).pipe(explode_tuples)
+        ).pipe(
+            transform_array_of_strings
+        )
+        
+        for one_operator_name in sorted(operators):
+            
+            start_operator = datetime.datetime.now()
+            print(f"start {one_operator_name}")
+            cleaned_name = one_operator_name.replace(' ', '_').lower()
+            
+            df_subset = df[df.gtfs_dataset_name == one_operator_name].reset_index(drop=True)
+            
+            results = df_subset.pipe(
+                explode_tuples
+            ).pipe(
+                add_movingpandas_deltas
+            )
+            
+            results.to_parquet(
+                f"{SEGMENT_GCS}"
+                f"{EXPORT_FILE}_concat_{analysis_date}/{cleaned_name}.parquet",
+                engine="pyarrow"
+            )
+            
+            results_arrays = (
+                results
+                .groupby(["service_date", "gtfs_dataset_name", "trip_instance_key"])
+                .agg({
+                    "distance_meters": lambda x: list(x),
+                    #"distance_miles": lambda x: list(x),
+                    "timedelta": lambda x: list(x),
+                    "speed_mph": lambda x: list(x),
+                    "acceleration_mph_per_sec": lambda x: list(x),
+                    "angular_difference": lambda x: list(x),
+                    "direction": lambda x: list(x),
+                })
+                .reset_index()
+            )
+            
+            results_arrays.to_parquet(
+                f"{SEGMENT_GCS}"
+                f"{EXPORT_FILE}_flat_{analysis_date}/{cleaned_name}.parquet",
+                engine="pyarrow"
+            )
+            
+            del results, results_arrays
+            
+            end_operator = datetime.datetime.now()
+            logger.info(f"finished {one_operator_name}: {end_operator - start_operator}")
 
-        traj_results = add_movingpandas_deltas(gdf)
-        export_results(traj_results, f"mpd_batch/batch0/{EXPORT_FILE}_{analysis_date}")
         
         end = datetime.datetime.now()
-        logger.info(f"moving pandas step: {analysis_date}: {end - start}")
+        logger.info(f"moving pandas: {analysis_date}: {end - start}")
