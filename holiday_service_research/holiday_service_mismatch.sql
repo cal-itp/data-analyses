@@ -517,26 +517,26 @@ SELECT
     gtfs_xmas as `Christmas GTFS Schedule`,
     mismatch_xmas as `Mismatch Christmas`,
 
-    -- New Year's Eve
-    _2025_12_31 as `New Year's Eve GTFS Trips`,
-    hs_ny_eve as `New Year's Eve Website Schedule`,
-    ny_eve_ratio as `New Year's Eve % of Regular Service in GTFS`,
-    gtfs_ny_eve as `New Year's Eve GTFS Schedule`,
-    mismatch_ny_eve as `Mismatch New Year's Eve`,
+    -- New Years Eve
+    _2025_12_31 as `New Years Eve GTFS Trips`,
+    hs_ny_eve as `New Years Eve Website Schedule`,
+    ny_eve_ratio as `New Years Eve % of Regular Service in GTFS`,
+    gtfs_ny_eve as `New Years Eve GTFS Schedule`,
+    mismatch_ny_eve as `Mismatch New Years Eve`,
 
-    -- New Year's Day
-    _2026_01_01 as `New Year's Day GTFS Trips`,
-    hs_new_years_day as `New Year's Day Website Schedule`,
-    ny_ratio as `New Year's Day % of Regular Service in GTFS`,
-    gtfs_ny as `New Year's Day GTFS Schedule`,
-    mismatch_ny as `Mismatch New Year's Day`,
+    -- New Years Day
+    _2026_01_01 as `New Years Day GTFS Trips`,
+    hs_new_years_day as `New Years Day Website Schedule`,
+    ny_ratio as `New Years Day % of Regular Service in GTFS`,
+    gtfs_ny as `New Years Day GTFS Schedule`,
+    mismatch_ny as `Mismatch New Years Day`,
  
     public_customer_facing_or_regional_subfeed_fixed_route as `Public Customer Facing or Regional Subfeed Fixed Route`,
     use_subfeed_for_reports as `Use Subfeed for Reports`,
     website as `GTFS URL`,
     feed_start_date as `Feed Start Date`,
     feed_end_date as `Feed End Date`,
-    organization_hubspot_company_record_id as `Organization Hubspot Company Record ID`,
+    organization_hubspot_company_record_id as `Organization Hubspot Company Record ID`
   FROM
     output_base
 ORDER BY
