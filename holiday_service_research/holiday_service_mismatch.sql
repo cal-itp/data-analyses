@@ -499,7 +499,7 @@ SELECT
     reduced_ref_eoy as `Reduced Service Reference EOY`,
     regular_ref_eoy as `Regular Service Reference EOY`,
     red_ratio_eoy as `Reduced Service % of Regular Service EOY`,
- 
+
     -- Christmas Eve
     _2025_12_24 as `Christmas Eve GTFS Trips`,
     hs_xmas_eve as `Christmas Eve Website Schedule`,
