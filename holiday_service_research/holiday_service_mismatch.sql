@@ -203,165 +203,163 @@ WITH
       LEAST(1.0*COALESCE(_2025_12_24,0)/_2025_12_17, 1) as xmas_eve_ratio, -- actual ratio of Chirstmas Eve service to regular service
       LEAST(1.0*COALESCE(_2025_12_25,0)/_2025_12_17, 1) as xmas_ratio, -- actual ratio of Chirstmas service to regular service
       LEAST(1.0*COALESCE(_2025_12_31,0)/_2025_12_17, 1) as ny_eve_ratio, -- actual ratio of New Year's Eve service to regular service
-      LEAST(1.0*COALESCE(_2026_01_01,0)/_2025_12_17, 1) as ny_ratio, -- actual ratio of New Year's Day service to regular service
-
+      LEAST(1.0*COALESCE(_2026_01_01,0)/_2025_12_17, 1) as ny_ratio -- actual ratio of New Year's Day service to regular service
     FROM
       holiday_info
-      LEFT JOIN the_bridge ON holiday_info.service_source_record_id = the_bridge.service_source_record_id
-      LEFT JOIN grouped_trips ON the_bridge.schedule_feed_key = grouped_trips.feed_key
+    LEFT JOIN the_bridge ON holiday_info.service_source_record_id = the_bridge.service_source_record_id
+    LEFT JOIN grouped_trips ON the_bridge.schedule_feed_key = grouped_trips.feed_key
    -- Exclude the regional, aggregated feed from results
    WHERE gtfs_dataset_name != 'Bay Area 511 Regional Schedule'
   ),
-
 -- add GTFS service level label
 full_results as (
   SELECT
-  organization_name,
-  service_name,
-  gtfs_dataset_name,
-  holiday_website_condition,
+      organization_name,
+      service_name,
+      gtfs_dataset_name,
+      holiday_website_condition,
 
-  -- Thanksgiving analysis
-  _2025_11_11,
-  hs_vets_day,
-  vets_ratio,
+      -- Thanksgiving analysis
+      _2025_11_11,
+      hs_vets_day,
+      vets_ratio,
 
-  CASE WHEN _2025_11_19 IS NULL THEN NULL
-       -- when there is no differentiation between reduced and regular service, or no info about reduced service, use fixed threshold inherited from last year
-       WHEN red_ratio_thanksgiving = 1 AND vets_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_thanksgiving = 1 AND vets_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_thanksgiving = 1 AND vets_ratio > 0.2 AND vets_ratio < 0.85 THEN 'Reduced service'
-       WHEN red_ratio_thanksgiving = 0 AND vets_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_thanksgiving = 0 AND vets_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_thanksgiving = 0 AND vets_ratio > 0.2 AND vets_ratio < 0.85 THEN 'Reduced service'
-       -- keep the fixed threshold, and also refer to the ratio of reduced service to regular service if we have a reference
-       WHEN vets_ratio >= 1 THEN 'Regular service'
-       WHEN vets_ratio <= LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) THEN 'No service'
-       WHEN vets_ratio > LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) AND vets_ratio < GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Reduced service'
-       WHEN vets_ratio >= GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Regular service'
-       ELSE 'Uncertain' END AS gtfs_veterans,
+      CASE WHEN _2025_11_19 IS NULL THEN NULL
+           -- when there is no differentiation between reduced and regular service, or no info about reduced service, use fixed threshold inherited from last year
+           WHEN red_ratio_thanksgiving = 1 AND vets_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_thanksgiving = 1 AND vets_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_thanksgiving = 1 AND vets_ratio > 0.2 AND vets_ratio < 0.85 THEN 'Reduced service'
+           WHEN red_ratio_thanksgiving = 0 AND vets_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_thanksgiving = 0 AND vets_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_thanksgiving = 0 AND vets_ratio > 0.2 AND vets_ratio < 0.85 THEN 'Reduced service'
+           -- keep the fixed threshold, and also refer to the ratio of reduced service to regular service if we have a reference
+           WHEN vets_ratio >= 1 THEN 'Regular service'
+           WHEN vets_ratio <= LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) THEN 'No service'
+           WHEN vets_ratio > LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) AND vets_ratio < GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Reduced service'
+           WHEN vets_ratio >= GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Regular service'
+           ELSE 'Uncertain' END AS gtfs_veterans,
 
-  _2025_11_15,
-  _2025_11_16,
-  _2025_11_19,
+      _2025_11_15,
+      _2025_11_16,
+      _2025_11_19,
 
-  reduced_ref_thanksgiving,
-  regular_ref_thanksgiving,
-  red_ratio_thanksgiving,
+      reduced_ref_thanksgiving,
+      regular_ref_thanksgiving,
+      red_ratio_thanksgiving,
 
-  _2025_11_27,
-  hs_thanksgiving,
-  thanksgiving_ratio,
-  CASE WHEN _2025_11_19 IS NULL THEN NULL
-       WHEN red_ratio_thanksgiving = 1 AND thanksgiving_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_thanksgiving = 1 AND thanksgiving_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_thanksgiving = 1 AND thanksgiving_ratio > 0.2 AND thanksgiving_ratio < 0.85 THEN 'Reduced service'
-       WHEN red_ratio_thanksgiving = 0 AND thanksgiving_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_thanksgiving = 0 AND thanksgiving_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_thanksgiving = 0 AND thanksgiving_ratio > 0.2 AND thanksgiving_ratio < 0.85 THEN 'Reduced service'
-       WHEN thanksgiving_ratio >= 1 THEN 'Regular service'
-       WHEN thanksgiving_ratio <= LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) THEN 'No service'
-       WHEN thanksgiving_ratio > LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) AND thanksgiving_ratio < GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Reduced service'
-       WHEN thanksgiving_ratio >= GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Regular service'
-       ELSE 'Uncertain' END AS gtfs_thanksgiving,
+      _2025_11_27,
+      hs_thanksgiving,
+      thanksgiving_ratio,
+      CASE WHEN _2025_11_19 IS NULL THEN NULL
+           WHEN red_ratio_thanksgiving = 1 AND thanksgiving_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_thanksgiving = 1 AND thanksgiving_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_thanksgiving = 1 AND thanksgiving_ratio > 0.2 AND thanksgiving_ratio < 0.85 THEN 'Reduced service'
+           WHEN red_ratio_thanksgiving = 0 AND thanksgiving_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_thanksgiving = 0 AND thanksgiving_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_thanksgiving = 0 AND thanksgiving_ratio > 0.2 AND thanksgiving_ratio < 0.85 THEN 'Reduced service'
+           WHEN thanksgiving_ratio >= 1 THEN 'Regular service'
+           WHEN thanksgiving_ratio <= LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) THEN 'No service'
+           WHEN thanksgiving_ratio > LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) AND thanksgiving_ratio < GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Reduced service'
+           WHEN thanksgiving_ratio >= GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Regular service'
+           ELSE 'Uncertain' END AS gtfs_thanksgiving,
 
-  _2025_11_28,
-  hs_day_after_thanksgiving,
-  thanksgiving_fri_ratio,
-  CASE WHEN _2025_11_19 IS NULL THEN NULL
-       WHEN red_ratio_thanksgiving = 1 AND thanksgiving_fri_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_thanksgiving = 1 AND thanksgiving_fri_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_thanksgiving = 1 AND thanksgiving_fri_ratio > 0.2 AND thanksgiving_fri_ratio < 0.85 THEN 'Reduced service'
-       WHEN red_ratio_thanksgiving = 0 AND thanksgiving_fri_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_thanksgiving = 0 AND thanksgiving_fri_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_thanksgiving = 0 AND thanksgiving_fri_ratio > 0.2 AND thanksgiving_fri_ratio < 0.85 THEN 'Reduced service'
-       WHEN thanksgiving_fri_ratio >= 1 THEN 'Regular service'
-       WHEN thanksgiving_fri_ratio <= LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) THEN 'No service'
-       WHEN thanksgiving_fri_ratio > LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) AND thanksgiving_fri_ratio < GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Reduced service'
-       WHEN thanksgiving_fri_ratio >= GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Regular service'
-       ELSE 'Uncertain' END AS gtfs_thanksgiving_fri,
-  
-  -- End of year analysis
-  _2025_12_13,
-  _2025_12_14,
-  _2025_12_17,
+      _2025_11_28,
+      hs_day_after_thanksgiving,
+      thanksgiving_fri_ratio,
+      CASE WHEN _2025_11_19 IS NULL THEN NULL
+           WHEN red_ratio_thanksgiving = 1 AND thanksgiving_fri_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_thanksgiving = 1 AND thanksgiving_fri_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_thanksgiving = 1 AND thanksgiving_fri_ratio > 0.2 AND thanksgiving_fri_ratio < 0.85 THEN 'Reduced service'
+           WHEN red_ratio_thanksgiving = 0 AND thanksgiving_fri_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_thanksgiving = 0 AND thanksgiving_fri_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_thanksgiving = 0 AND thanksgiving_fri_ratio > 0.2 AND thanksgiving_fri_ratio < 0.85 THEN 'Reduced service'
+           WHEN thanksgiving_fri_ratio >= 1 THEN 'Regular service'
+           WHEN thanksgiving_fri_ratio <= LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) THEN 'No service'
+           WHEN thanksgiving_fri_ratio > LEAST(0.2, red_ratio_thanksgiving*(1-tolerance_thanksgiving)) AND thanksgiving_fri_ratio < GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Reduced service'
+           WHEN thanksgiving_fri_ratio >= GREATEST(0.85, red_ratio_thanksgiving*(1+tolerance_thanksgiving)) THEN 'Regular service'
+           ELSE 'Uncertain' END AS gtfs_thanksgiving_fri,
 
-  reduced_ref_eoy,
-  regular_ref_eoy,
-  red_ratio_eoy,
+      -- End of year analysis
+      _2025_12_13,
+      _2025_12_14,
+      _2025_12_17,
 
-  _2025_12_24,
-  hs_xmas_eve,
-  xmas_eve_ratio,
-  CASE WHEN _2025_12_17 IS NULL THEN NULL
-       WHEN red_ratio_eoy = 1 AND xmas_eve_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_eoy = 1 AND xmas_eve_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_eoy = 1 AND xmas_eve_ratio > 0.2 AND xmas_eve_ratio < 0.85 THEN 'Reduced service'
-       WHEN red_ratio_eoy = 0 AND xmas_eve_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_eoy = 0 AND xmas_eve_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_eoy = 0 AND xmas_eve_ratio > 0.2 AND xmas_eve_ratio < 0.85 THEN 'Reduced service'
-       WHEN xmas_eve_ratio >= 1 THEN 'Regular service'
-       WHEN xmas_eve_ratio <= LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) THEN 'No service'
-       WHEN xmas_eve_ratio > LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) AND xmas_eve_ratio < GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Reduced service'
-       WHEN xmas_eve_ratio >= GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Regular service'
-       ELSE 'Uncertain' END AS gtfs_xmas_eve,
+      reduced_ref_eoy,
+      regular_ref_eoy,
+      red_ratio_eoy,
 
-  _2025_12_25,
-  hs_xmas,
-  xmas_ratio,
-  CASE WHEN _2025_12_17 IS NULL THEN NULL
-       WHEN red_ratio_eoy = 1 AND xmas_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_eoy = 1 AND xmas_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_eoy = 1 AND xmas_ratio > 0.2 AND xmas_ratio < 0.85 THEN 'Reduced service'
-       WHEN red_ratio_eoy = 0 AND xmas_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_eoy = 0 AND xmas_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_eoy = 0 AND xmas_ratio > 0.2 AND xmas_ratio < 0.85 THEN 'Reduced service'
-       WHEN xmas_ratio >= 1 THEN 'Regular service'
-       WHEN xmas_ratio <= LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) THEN 'No service'
-       WHEN xmas_ratio > LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) AND xmas_ratio < GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Reduced service'
-       WHEN xmas_ratio >= GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Regular service'
-       ELSE 'Uncertain' END AS gtfs_xmas,
-  
-  _2025_12_31,
-  hs_ny_eve,
-  ny_eve_ratio,
-  CASE WHEN _2025_12_17 IS NULL THEN NULL
-       WHEN red_ratio_eoy = 1 AND ny_eve_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_eoy = 1 AND ny_eve_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_eoy = 1 AND ny_eve_ratio > 0.2 AND ny_eve_ratio < 0.85 THEN 'Reduced service'
-       WHEN red_ratio_eoy = 0 AND ny_eve_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_eoy = 0 AND ny_eve_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_eoy = 0 AND ny_eve_ratio > 0.2 AND ny_eve_ratio < 0.85 THEN 'Reduced service'
-       WHEN ny_eve_ratio >= 1 THEN 'Regular service'
-       WHEN ny_eve_ratio <= LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) THEN 'No service'
-       WHEN ny_eve_ratio > LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) AND ny_eve_ratio < GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Reduced service'
-       WHEN ny_eve_ratio >= GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Regular service'
-       ELSE 'Uncertain' END AS gtfs_ny_eve,
+      _2025_12_24,
+      hs_xmas_eve,
+      xmas_eve_ratio,
+      CASE WHEN _2025_12_17 IS NULL THEN NULL
+           WHEN red_ratio_eoy = 1 AND xmas_eve_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_eoy = 1 AND xmas_eve_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_eoy = 1 AND xmas_eve_ratio > 0.2 AND xmas_eve_ratio < 0.85 THEN 'Reduced service'
+           WHEN red_ratio_eoy = 0 AND xmas_eve_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_eoy = 0 AND xmas_eve_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_eoy = 0 AND xmas_eve_ratio > 0.2 AND xmas_eve_ratio < 0.85 THEN 'Reduced service'
+           WHEN xmas_eve_ratio >= 1 THEN 'Regular service'
+           WHEN xmas_eve_ratio <= LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) THEN 'No service'
+           WHEN xmas_eve_ratio > LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) AND xmas_eve_ratio < GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Reduced service'
+           WHEN xmas_eve_ratio >= GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Regular service'
+           ELSE 'Uncertain' END AS gtfs_xmas_eve,
 
-  _2026_01_01,
-  hs_new_years_day,
-  ny_ratio,
-  CASE WHEN _2025_12_17 IS NULL THEN NULL
-       WHEN red_ratio_eoy = 1 AND ny_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_eoy = 1 AND ny_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_eoy = 1 AND ny_ratio > 0.2 AND ny_ratio < 0.85 THEN 'Reduced service'
-       WHEN red_ratio_eoy = 0 AND ny_ratio >= 0.85 THEN 'Regular service'
-       WHEN red_ratio_eoy = 0 AND ny_ratio <= 0.2 THEN 'No service'
-       WHEN red_ratio_eoy = 0 AND ny_ratio > 0.2 AND ny_ratio < 0.85 THEN 'Reduced service'
-       WHEN ny_ratio >= 1 THEN 'Regular service'
-       WHEN ny_ratio <= LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) THEN 'No service'
-       WHEN ny_ratio > LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) AND ny_ratio < GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Reduced service'
-       WHEN ny_ratio >= GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Regular service'
-       ELSE 'Uncertain' END AS gtfs_ny,
+      _2025_12_25,
+      hs_xmas,
+      xmas_ratio,
+      CASE WHEN _2025_12_17 IS NULL THEN NULL
+           WHEN red_ratio_eoy = 1 AND xmas_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_eoy = 1 AND xmas_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_eoy = 1 AND xmas_ratio > 0.2 AND xmas_ratio < 0.85 THEN 'Reduced service'
+           WHEN red_ratio_eoy = 0 AND xmas_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_eoy = 0 AND xmas_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_eoy = 0 AND xmas_ratio > 0.2 AND xmas_ratio < 0.85 THEN 'Reduced service'
+           WHEN xmas_ratio >= 1 THEN 'Regular service'
+           WHEN xmas_ratio <= LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) THEN 'No service'
+           WHEN xmas_ratio > LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) AND xmas_ratio < GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Reduced service'
+           WHEN xmas_ratio >= GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Regular service'
+           ELSE 'Uncertain' END AS gtfs_xmas,
 
-  public_customer_facing_or_regional_subfeed_fixed_route,
-  use_subfeed_for_reports,
-  CAST(FROM_BASE64(REPLACE(REPLACE(base64_url, '-', '+'), '_', '/')) AS STRING) AS website,
-  feed_start_date,
-  feed_end_date,
-  organization_hubspot_company_record_id,
-FROM
-  analysis_base
+      _2025_12_31,
+      hs_ny_eve,
+      ny_eve_ratio,
+      CASE WHEN _2025_12_17 IS NULL THEN NULL
+           WHEN red_ratio_eoy = 1 AND ny_eve_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_eoy = 1 AND ny_eve_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_eoy = 1 AND ny_eve_ratio > 0.2 AND ny_eve_ratio < 0.85 THEN 'Reduced service'
+           WHEN red_ratio_eoy = 0 AND ny_eve_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_eoy = 0 AND ny_eve_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_eoy = 0 AND ny_eve_ratio > 0.2 AND ny_eve_ratio < 0.85 THEN 'Reduced service'
+           WHEN ny_eve_ratio >= 1 THEN 'Regular service'
+           WHEN ny_eve_ratio <= LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) THEN 'No service'
+           WHEN ny_eve_ratio > LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) AND ny_eve_ratio < GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Reduced service'
+           WHEN ny_eve_ratio >= GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Regular service'
+           ELSE 'Uncertain' END AS gtfs_ny_eve,
+
+      _2026_01_01,
+      hs_new_years_day,
+      ny_ratio,
+      CASE WHEN _2025_12_17 IS NULL THEN NULL
+           WHEN red_ratio_eoy = 1 AND ny_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_eoy = 1 AND ny_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_eoy = 1 AND ny_ratio > 0.2 AND ny_ratio < 0.85 THEN 'Reduced service'
+           WHEN red_ratio_eoy = 0 AND ny_ratio >= 0.85 THEN 'Regular service'
+           WHEN red_ratio_eoy = 0 AND ny_ratio <= 0.2 THEN 'No service'
+           WHEN red_ratio_eoy = 0 AND ny_ratio > 0.2 AND ny_ratio < 0.85 THEN 'Reduced service'
+           WHEN ny_ratio >= 1 THEN 'Regular service'
+           WHEN ny_ratio <= LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) THEN 'No service'
+           WHEN ny_ratio > LEAST(0.2, red_ratio_eoy*(1-tolerance_eoy)) AND ny_ratio < GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Reduced service'
+           WHEN ny_ratio >= GREATEST(0.85, red_ratio_eoy*(1+tolerance_eoy)) THEN 'Regular service'
+           ELSE 'Uncertain' END AS gtfs_ny,
+
+      public_customer_facing_or_regional_subfeed_fixed_route,
+      use_subfeed_for_reports,
+      CAST(FROM_BASE64(REPLACE(REPLACE(base64_url, '-', '+'), '_', '/')) AS STRING) AS website,
+      feed_start_date,
+      feed_end_date,
+      organization_hubspot_company_record_id
+    FROM
+      analysis_base
 ),
 -- mismatch label for holidays
 output_base as (
@@ -456,7 +454,7 @@ output_base as (
       website,
       feed_start_date,
       feed_end_date,
-      organization_hubspot_company_record_id,
+      organization_hubspot_company_record_id
     FROM
       full_results
 )
@@ -539,7 +537,6 @@ SELECT
     organization_hubspot_company_record_id as `Organization Hubspot Company Record ID`
   FROM
     output_base
-ORDER BY
-  organization_name,
-  service_name
-  
+  ORDER BY
+    organization_name,
+    service_name
