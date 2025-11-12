@@ -3,6 +3,12 @@
  * and the actual service data in their GTFS feeds for specific holidays in late 2025 and early 2026.
  * It combines data from a GTFS staging table, an external Airtable with holiday schedules, and GTFS trip data.
  * This serves as a baseline for further analysis on holiday service discrepancies.
+ *
+ * Key definitions:
+ * reduced_reference_holiday_name: reduced service (weekend) reference counts for the corresponding holiday
+ * regular_reference_holiday_name: regular service reference counts for the corresponding holiday
+ * red_ratio_holiday_name: referenced ratio of reduced service (weekend) trips to regular weekday trips for the corresponding holiday
+ * holiday_name_ratio: actual ratio of holiday service to regular weekday service reference for the corresponding holiday
  */
 WITH
   the_bridge AS (
