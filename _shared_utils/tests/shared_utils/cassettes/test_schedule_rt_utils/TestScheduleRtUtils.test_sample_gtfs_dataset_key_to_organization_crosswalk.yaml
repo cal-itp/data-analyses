@@ -1,0 +1,288 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
+      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+      "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
+      [{"value": "schedule"}]}, "name": "type_1"}], "parameterMode": "NAMED", "useLegacySql":
+      false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
+      "query": "SELECT `dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`, `dim_gtfs_datasets`.`name`
+      AS `gtfs_dataset_name`, `dim_gtfs_datasets`.`type`, `dim_gtfs_datasets`.`source_record_id`,
+      `dim_gtfs_datasets`.`regional_feed_type`, `dim_gtfs_datasets`.`base64_url`,
+      `dim_gtfs_datasets`.`uri` \nFROM `dim_gtfs_datasets` \nWHERE `dim_gtfs_datasets`.`data_quality_pipeline`
+      = true AND `dim_gtfs_datasets`.`type` IN UNNEST(@`type_1`)", "maxResults": 5000,
+      "requestId": "c9163231-4621-448f-a8ea-a05224a02dd2"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '922'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"type","type":"STRING","mode":"NULLABLE"},{"name":"source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"regional_feed_type","type":"STRING","mode":"NULLABLE"},{"name":"base64_url","type":"STRING","mode":"NULLABLE"},{"name":"uri","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_4lRh0Z1QCHP3iIGH4vZyqKfYIeSg","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"c51dbfdd47838f86074c4ef3179cc9ed"},{"v":"Santa
+        Ynez Mecatran Schedule"},{"v":"schedule"},{"v":"recuWhPXfxMatv6rL"},{"v":null},{"v":"aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=="},{"v":"http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0"}]},{"f":[{"v":"372a06b593e1716d1c911b1d1d35bedd"},{"v":"Santa
+        Ynez Mecatran Schedule"},{"v":"schedule"},{"v":"recuWhPXfxMatv6rL"},{"v":null},{"v":"aHR0cDovL2FwcC5tZWNhdHJhbi5jb20vdXJiL3dzL2ZlZWQvYzJsMFpUMXplWFowTzJOc2FXVnVkRDF6Wld4bU8yVjRjR2x5WlQwN2RIbHdaVDFuZEdaek8ydGxlVDAwTWpjd056UTBaVFk0TlRBek9UTXlNREl4TURkak56STBNRFJrTXpZeU5UTTRNekkwWXpJMA=="},{"v":"http://app.mecatran.com/urb/ws/feed/c2l0ZT1zeXZ0O2NsaWVudD1zZWxmO2V4cGlyZT07dHlwZT1ndGZzO2tleT00MjcwNzQ0ZTY4NTAzOTMyMDIxMDdjNzI0MDRkMzYyNTM4MzI0YzI0"}]}],"totalBytesProcessed":"1100","jobComplete":true,"cacheHit":false,"queryId":"job_4lRh0Z1QCHP3iIGH4vZyqKfYIeSg","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"52","location":"us-west2","creationTime":"1762222189258","startTime":"1762222189333","endTime":"1762222189537"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 04 Nov 2025 02:09:49 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
+      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+      "STRING"}, "parameterValue": {"value": "US/Pacific"}, "name": "datetime_1"},
+      {"parameterType": {"type": "STRING"}, "parameterValue": {"value": "2025-10-16"},
+      "name": "datetime_2"}, {"parameterType": {"type": "STRING"}, "parameterValue":
+      {"value": "US/Pacific"}, "name": "datetime_3"}, {"parameterType": {"type": "STRING"},
+      "parameterValue": {"value": "2025-10-16"}, "name": "datetime_4"}], "parameterMode":
+      "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp": true},
+      "location": "us-west2", "query": "SELECT DISTINCT `dim_provider_gtfs_data`.`key`,
+      `dim_provider_gtfs_data`.`public_customer_facing_fixed_route`, `dim_provider_gtfs_data`.`public_customer_facing_or_regional_subfeed_fixed_route`,
+      `dim_provider_gtfs_data`.`organization_key`, `dim_provider_gtfs_data`.`organization_name`,
+      `dim_provider_gtfs_data`.`organization_itp_id`, `dim_provider_gtfs_data`.`organization_hubspot_company_record_id`,
+      `dim_provider_gtfs_data`.`organization_ntd_id`, `dim_provider_gtfs_data`.`organization_source_record_id`,
+      `dim_provider_gtfs_data`.`service_key`, `dim_provider_gtfs_data`.`service_name`,
+      `dim_provider_gtfs_data`.`service_source_record_id`, `dim_provider_gtfs_data`.`gtfs_service_data_customer_facing`,
+      `dim_provider_gtfs_data`.`regional_feed_type`, `dim_provider_gtfs_data`.`associated_schedule_gtfs_dataset_key`,
+      `dim_provider_gtfs_data`.`schedule_gtfs_dataset_name`, `dim_provider_gtfs_data`.`schedule_source_record_id`,
+      `dim_provider_gtfs_data`.`service_alerts_gtfs_dataset_name`, `dim_provider_gtfs_data`.`service_alerts_source_record_id`,
+      `dim_provider_gtfs_data`.`vehicle_positions_gtfs_dataset_name`, `dim_provider_gtfs_data`.`vehicle_positions_source_record_id`,
+      `dim_provider_gtfs_data`.`trip_updates_gtfs_dataset_name`, `dim_provider_gtfs_data`.`trip_updates_source_record_id`,
+      `dim_provider_gtfs_data`.`schedule_gtfs_dataset_key`, `dim_provider_gtfs_data`.`service_alerts_gtfs_dataset_key`,
+      `dim_provider_gtfs_data`.`vehicle_positions_gtfs_dataset_key`, `dim_provider_gtfs_data`.`trip_updates_gtfs_dataset_key`,
+      `dim_provider_gtfs_data`.`_valid_from`, `dim_provider_gtfs_data`.`_valid_to`,
+      `dim_provider_gtfs_data`.`_is_current` \nFROM `dim_provider_gtfs_data` \nWHERE
+      datetime(`dim_provider_gtfs_data`.`_valid_from`, @`datetime_1`) <= datetime(@`datetime_2`)
+      AND datetime(`dim_provider_gtfs_data`.`_valid_to`, @`datetime_3`) >= datetime(@`datetime_4`)",
+      "maxResults": 5000, "requestId": "d2f84226-bf07-4e0e-9b43-1990f717e60f"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2638'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"key","type":"STRING","mode":"NULLABLE"},{"name":"public_customer_facing_fixed_route","type":"BOOLEAN","mode":"NULLABLE"},{"name":"public_customer_facing_or_regional_subfeed_fixed_route","type":"BOOLEAN","mode":"NULLABLE"},{"name":"organization_key","type":"STRING","mode":"NULLABLE"},{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"organization_itp_id","type":"INTEGER","mode":"NULLABLE"},{"name":"organization_hubspot_company_record_id","type":"STRING","mode":"NULLABLE"},{"name":"organization_ntd_id","type":"STRING","mode":"NULLABLE"},{"name":"organization_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"service_key","type":"STRING","mode":"NULLABLE"},{"name":"service_name","type":"STRING","mode":"NULLABLE"},{"name":"service_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_service_data_customer_facing","type":"BOOLEAN","mode":"NULLABLE"},{"name":"regional_feed_type","type":"STRING","mode":"NULLABLE"},{"name":"associated_schedule_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"schedule_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"schedule_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"service_alerts_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"service_alerts_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"vehicle_positions_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"vehicle_positions_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"trip_updates_gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"trip_updates_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"schedule_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"service_alerts_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"vehicle_positions_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"trip_updates_gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"_valid_from","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"_valid_to","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"_is_current","type":"BOOLEAN","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_PLfR612j0eM9NCuGF5MAADgfil7_","location":"us-west2"},"totalRows":"4","rows":[{"f":[{"v":"57321774eb04c7c650ef4709fb25a2c8"},{"v":"true"},{"v":"true"},{"v":"624c361fd9a2a9ad100cbf4b729c2df9"},{"v":"City
+        of Solvang"},{"v":"312"},{"v":"8719942682"},{"v":"9R02-91028"},{"v":"reckp33bhAuZlmO1M"},{"v":"55e1099a8610904b4479be54b36875d9"},{"v":"Santa
+        Ynez Valley Transit"},{"v":"recTlfGUkpnZ8cICb"},{"v":"true"},{"v":null},{"v":"bb227dec4b51d9d438125e38d0214784"},{"v":"Santa
+        Ynez Mecatran Schedule"},{"v":"recuWhPXfxMatv6rL"},{"v":null},{"v":null},{"v":"Santa
+        Ynez Vehicle Positions"},{"v":"reccgBgsKC5J7BD8K"},{"v":null},{"v":null},{"v":"372a06b593e1716d1c911b1d1d35bedd"},{"v":null},{"v":"40e0488e732e680cc9d7002fad71adad"},{"v":null},{"v":"1760572800000000"},{"v":"1761264000000000"},{"v":"true"}]},{"f":[{"v":"5beb8a6bf200cfdf00da66ac1521d526"},{"v":"false"},{"v":"false"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"1ba3e20e8edb9c64866206d138aaca83"},{"v":"Ridgecrest
+        Schedule"},{"v":"recb7v2QiflfKM77w"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"1ba3e20e8edb9c64866206d138aaca83"},{"v":null},{"v":null},{"v":null},{"v":"1749859200000000"},{"v":"4070908799999999"},{"v":"true"}]},{"f":[{"v":"145279bf2bb891a6f43abd24403a46d7"},{"v":"false"},{"v":"false"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"b6280b24ea50c714c38f0c02bd8d3a2e"},{"v":"Rosemead
+        Passio Schedule"},{"v":"reccLvZxTMz1FuNii"},{"v":"Rosemead Passio Alerts"},{"v":"recm7XryAyH4sP0ZF"},{"v":"Rosemead
+        Passio Vehicle Positions"},{"v":"rec1RocbLnc4A9eE4"},{"v":"Rosemead Passio
+        Trip Updates"},{"v":"recQtNJAv4UyQjMh4"},{"v":"b6280b24ea50c714c38f0c02bd8d3a2e"},{"v":"c766db2bb5dd244b0e2176f4dfc35999"},{"v":"ad67eda06e383bbd5c174eab700915fb"},{"v":"70b85693df485b227c4a1a87ac46d065"},{"v":"1753401600000000"},{"v":"4070908799999999"},{"v":"true"}]},{"f":[{"v":"90ebcb3f9a649985be20bc10aa3ae3d4"},{"v":"false"},{"v":"false"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"794534a42bc6cbb1f4f7bc4d4bb1be16"},{"v":"Avalon
+        Schedule Historic"},{"v":"recdcpS2s3wuT3QAG"},{"v":"Avalon Alerts Historic"},{"v":"recgHXDRuyrKbOD47"},{"v":"Avalon
+        Vehicle Positions"},{"v":"recvwGOdqwtvPzKhZ"},{"v":"Avalon Trip Updates"},{"v":"recaDdOPYGgkoCOoT"},{"v":"794534a42bc6cbb1f4f7bc4d4bb1be16"},{"v":"688fc08edb6dbba6ce92a11b36929993"},{"v":"66f7f7dfc9290a80d99b5b2e645d8659"},{"v":"b070831f700176fc88e2464cb353c24e"},{"v":"1749859200000000"},{"v":"4070908799999999"},{"v":"true"}]}],"totalBytesProcessed":"1407","jobComplete":true,"cacheHit":false,"queryId":"job_PLfR612j0eM9NCuGF5MAADgfil7_","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"56","location":"us-west2","creationTime":"1762222199962","startTime":"1762222200044","endTime":"1762222200209"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 04 Nov 2025 02:10:00 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
+      "datasetId": "test_shared_utils"}, "queryParameters": [], "useLegacySql": false,
+      "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2", "query":
+      "SELECT `dim_organizations`.`source_record_id` AS `organization_source_record_id`,
+      `dim_organizations`.`name` \nFROM `dim_organizations` \nWHERE `dim_organizations`.`_is_current`
+      = true", "maxResults": 5000, "requestId": "30e1cfd2-9327-4b74-8ec5-20ddcacdf507"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '519'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_source_record_id","type":"STRING","mode":"NULLABLE"},{"name":"name","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_PahzfUc8_KcBGIt1Nv9b95zd6wI4","location":"us-west2"},"totalRows":"4","rows":[{"f":[{"v":"reckp33bhAuZlmO1M"},{"v":"Santa
+        Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California"}]},{"f":[{"v":"recyqZ1zbZMkeA7Vf"},{"v":"City
+        of Patterson"}]},{"f":[{"v":"recOT4QO6t6mRhUEu"},{"v":"City of Chula Vista"}]},{"f":[{"v":"reckGS8egMZryjbX7"},{"v":"City
+        of Mission Viejo"}]}],"totalBytesProcessed":"272","jobComplete":true,"cacheHit":false,"queryId":"job_PahzfUc8_KcBGIt1Nv9b95zd6wI4","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"14","location":"us-west2","creationTime":"1762222201010","startTime":"1762222201126","endTime":"1762222201260"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 04 Nov 2025 02:10:01 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
+      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+      "INT64"}, "parameterValue": {"value": "2"}, "name": "lpad_1"}, {"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": "0"}, "name": "lpad_2"}, {"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": " - "}, "name": "concat_1"},
+      {"parameterType": {"type": "STRING"}, "parameterValue": {"value": "US/Pacific"},
+      "name": "datetime_1"}, {"parameterType": {"type": "STRING"}, "parameterValue":
+      {"value": "2025-10-16"}, "name": "datetime_2"}, {"parameterType": {"type": "STRING"},
+      "parameterValue": {"value": "US/Pacific"}, "name": "datetime_3"}, {"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": "2025-10-16"}, "name": "datetime_4"}],
+      "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
+      true}, "location": "us-west2", "query": "SELECT `bridge_organizations_x_headquarters_county_geography`.`organization_name`,
+      concat(lpad(CAST(`dim_county_geography`.`caltrans_district` AS STRING), @`lpad_1`,
+      @`lpad_2`), @`concat_1`, `dim_county_geography`.`caltrans_district_name`) AS
+      `caltrans_district`, `dim_county_geography`.`caltrans_district` AS `caltrans_district_1`
+      \nFROM `bridge_organizations_x_headquarters_county_geography` JOIN `dim_county_geography`
+      ON `dim_county_geography`.`key` = `bridge_organizations_x_headquarters_county_geography`.`county_geography_key`
+      \nWHERE datetime(`bridge_organizations_x_headquarters_county_geography`.`_valid_from`,
+      @`datetime_1`) <= datetime(@`datetime_2`) AND datetime(`bridge_organizations_x_headquarters_county_geography`.`_valid_to`,
+      @`datetime_3`) >= datetime(@`datetime_4`)", "maxResults": 5000, "requestId":
+      "647bb2ce-73e5-40c0-81b2-ab22f52e72de"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1836'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district_1","type":"INTEGER","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_zl4sw6nWzTDk3mQdx3ihnk24IWJR","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"Santa
+        Ynez Band of Chumash Mission Indians of the Santa Ynez Reservation, California"},{"v":"05
+        - San Luis Obispo / Santa Barbara"},{"v":"5"}]}],"totalBytesProcessed":"496","jobComplete":true,"cacheHit":false,"queryId":"job_zl4sw6nWzTDk3mQdx3ihnk24IWJR","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"20971520","totalSlotMs":"45","location":"us-west2","creationTime":"1762222201904","startTime":"1762222201975","endTime":"1762222202133"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 04 Nov 2025 02:10:02 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,75 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
+      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+      "INT64"}, "parameterValue": {"value": "2"}, "name": "lpad_1"}, {"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": "0"}, "name": "lpad_2"}, {"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": " - "}, "name": "concat_1"},
+      {"parameterType": {"type": "STRING"}, "parameterValue": {"value": "US/Pacific"},
+      "name": "datetime_1"}, {"parameterType": {"type": "STRING"}, "parameterValue":
+      {"value": "2025-06-17"}, "name": "datetime_2"}, {"parameterType": {"type": "STRING"},
+      "parameterValue": {"value": "US/Pacific"}, "name": "datetime_3"}, {"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": "2025-06-17"}, "name": "datetime_4"}],
+      "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
+      true}, "location": "us-west2", "query": "SELECT `bridge_organizations_x_headquarters_county_geography`.`organization_name`,
+      concat(lpad(CAST(`dim_county_geography`.`caltrans_district` AS STRING), @`lpad_1`,
+      @`lpad_2`), @`concat_1`, `dim_county_geography`.`caltrans_district_name`) AS
+      `caltrans_district` \nFROM `bridge_organizations_x_headquarters_county_geography`
+      JOIN `dim_county_geography` ON `dim_county_geography`.`key` = `bridge_organizations_x_headquarters_county_geography`.`county_geography_key`
+      \nWHERE datetime(`bridge_organizations_x_headquarters_county_geography`.`_valid_from`,
+      @`datetime_1`) <= datetime(@`datetime_2`) AND datetime(`bridge_organizations_x_headquarters_county_geography`.`_valid_to`,
+      @`datetime_3`) >= datetime(@`datetime_4`)", "maxResults": 5000, "requestId":
+      "d01eb459-9309-45f6-9308-4d02af777609"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1767'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"organization_name","type":"STRING","mode":"NULLABLE"},{"name":"caltrans_district","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_bc7RmPR6Yp3WcOaEAKCeRO1m58ac","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"City
+        of Rosemead"},{"v":"07 - Los Angeles / Ventura"}]},{"f":[{"v":"Via / Remix
+        Inc."},{"v":"07 - Los Angeles / Ventura"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_bc7RmPR6Yp3WcOaEAKCeRO1m58ac","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1762219677769","startTime":"1762219677879","endTime":"1762219677950"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 04 Nov 2025 01:27:58 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

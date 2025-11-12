@@ -443,18 +443,6 @@ def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
     return (start_sec, end_sec)
 
 
-def filter_start_end_ts(time_filters: dict, time_col: Literal["arrival", "departure"]) -> siuba.dply.verbs.Pipeable:
-    """
-    For arrival or departure, grab the hours to subset and
-    convert the (start_hour, end_hour) tuple into seconds,
-    and return the siuba filter
-    """
-    desired_hour_tuple = time_filters[time_col]
-    (start_sec, end_sec) = hour_tuple_to_seconds(desired_hour_tuple)
-
-    return filter(_[f"{time_col}_sec"] >= start_sec, _[f"{time_col}_sec"] <= end_sec)
-
-
 def get_stop_times(
     selected_date: Union[str, datetime.date],
     operator_feeds: list[str] = [],
