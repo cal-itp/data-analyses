@@ -256,7 +256,7 @@ def filter_dim_county_geography(
 
     df = pd.read_sql(statement, session.bind)
 
-    return df[["organization_name", "caltrans_district"] + keep_cols].drop_duplicates().reset_index(drop=True)
+    return df[set(["organization_name", "caltrans_district"] + keep_cols)].drop_duplicates().reset_index(drop=True)
 
 
 def filter_dim_organizations(
