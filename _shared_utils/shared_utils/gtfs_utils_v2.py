@@ -267,20 +267,23 @@ def schedule_daily_feed_to_gtfs_dataset_name(
     """
     # Get GTFS schedule datasets from Airtable
     dim_gtfs_datasets = schedule_rt_utils.filter_dim_gtfs_datasets(
-        keep_cols=["key", "name", "type", "regional_feed_type"], custom_filtering={"type": ["schedule"]}, get_df=False
+        keep_cols=["key", "name", "type", "regional_feed_type"], custom_filtering={"type": ["schedule"]}, get_df=True
     )
 
     # Merge on gtfs_dataset_key to get organization name
     fact_feeds = (
         tbls.mart_gtfs.fct_daily_schedule_feeds()
         >> filter(_.date == selected_date)
+        #  filter_dim_gtfs_datasets no longer returns Siuba, temp patch to collect here and join dfs
+        #  TODO refactor to match sqlalchemy scalar for non-df option
+        >> collect()
         >> inner_join(_, dim_gtfs_datasets, on=["gtfs_dataset_key", "gtfs_dataset_name"])
     ) >> rename(name="gtfs_dataset_name")
 
     if get_df:
         fact_feeds = (
             fact_feeds
-            >> collect()
+            # >> collect()
             # apparently order matters - if this is placed before
             # the collect(), it filters out wayyyy too many
             >> filter_feed_options(feed_option)
