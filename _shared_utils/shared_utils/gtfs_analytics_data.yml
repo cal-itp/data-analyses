@@ -11,6 +11,7 @@ gcs_paths:
   RT_SCHED_GCS: ${.GCS}rt_vs_schedule/
   SHARED_GCS: ${.GCS}shared_data/
   PREDICTIONS_GCS: ${.GCS}rt_predictions/
+  DIGEST_GCS: ${.GCS}gtfs_digest/
   PUBLIC_GCS: "gs://calitp-publish-data-analysis/"
 
 speed_vars:
@@ -159,3 +160,15 @@ shared_data:
   condensed_shn: condensed_shn_onekm
   road_cols: ["linearid", "mtfcc"]
   road_segment_cols: ["linearid", "mtfcc", "fullname", "segment_sequence"]
+
+gtfs_digest_rollup:
+  dir: ${gcs_paths.DIGEST_GCS}
+  # SELECT * FROM  `{project_name}`.`{dataset_name}`.`{table_name}`"
+  # SELECT * FROM cal-itp-data-infra.mart_gtfs_rollup.fct_monthly_routes
+  schedule_route_direction: "mart_gtfs_rollup.fct_monthly_schedule_route_direction_summary"
+  schedule_rt_route_direction: "tiffany_mart_gtfs_rollup.fct_schedule_rt_route_direction_summary"
+  route_map: "mart_gtfs_rollup.fct_monthly_routes"
+
+open_data_rollup:
+  ca_transit_routes: "mart_gtfs_rollup.fct_monthly_routes"
+  ca_transit_stops: "mart_gtfs_rollup.fct_monthly_scheduled_stops"
