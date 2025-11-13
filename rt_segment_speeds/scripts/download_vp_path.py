@@ -74,10 +74,10 @@ if __name__ == "__main__":
                level="INFO")
     
     analysis_date_list = [
-        rt_dates.DATES[f"{m}2025"] for m in ["sep"] 
+        rt_dates.DATES[f"{m}2025"] for m in ["jul"] 
     ]
     
-    # aug2025 is gdf; sep2025 is df
+    # aug2025 is gdf; sep2025 is df; jul2025 is df
     for analysis_date in analysis_date_list:
         download_vp_path(
             table_name = "fct_vehicle_locations_path", 
