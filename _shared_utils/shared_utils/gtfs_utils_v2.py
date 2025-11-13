@@ -181,16 +181,16 @@ def get_metrolink_feed_key(selected_date: Union[str, datetime.date], get_df: boo
     Get Metrolink's feed_key value.
     """
     metrolink_in_airtable = schedule_rt_utils.filter_dim_gtfs_datasets(
-        keep_cols=["key", "name"], custom_filtering={"name": ["Metrolink Schedule"]}, get_df=False
+        keep_cols=["key", "name"], custom_filtering={"name": ["Metrolink Schedule"]}, get_df=True
     )
 
     metrolink_feed = (
         tbls.mart_gtfs.fct_daily_schedule_feeds()
         >> filter(_.date == selected_date)
+        >> collect() #  TODO patch to sqlalchemy
         >> inner_join(_, metrolink_in_airtable, on=["gtfs_dataset_key", "gtfs_dataset_name"])
         >> rename(name=_.gtfs_dataset_name)
         >> subset_cols(["feed_key", "name"])
-        >> collect()
     )
 
     if get_df:
