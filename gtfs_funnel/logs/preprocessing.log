@@ -21,3 +21,9 @@
 2025-11-04 18:25:54.159 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-10-07: 0:05:55.052795
 2025-11-04 20:52:52.424 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-10-08: 0:05:56.197716
 2025-11-10 08:38:09.947 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-10-09: 0:08:18.128059
+2025-11-10 12:38:54.036 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-10-02: 0:08:15.659593
+2025-11-10 13:19:42.704 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-10-02: 0:08:07.333147
+2025-11-12 08:22:12.413 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-09-16: 0:08:33.685873
+2025-11-12 11:52:31.906 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-09-17: 0:08:14.684962
+2025-11-12 15:21:51.146 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-09-18: 0:08:14.479577
+2025-11-12 18:18:55.760 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2025-09-18: 0:08:04.366060
