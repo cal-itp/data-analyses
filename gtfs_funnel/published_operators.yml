@@ -15,9 +15,7 @@
 2025-07-16:
   - TCRTA TripShot Schedule
   - Guadalupe Flyer Schedule
-  - Foothill Schedule
 2025-08-20:
-  - Bear Schedule
   - eTrans Schedule
   - Roseville Transit GMV Schedule
 2025-09-24:
@@ -25,8 +23,14 @@
   - Culver City Schedule
 2025-10-15:
   - Yolobus Schedule
+  - Go West Schedule
+  - Bay Area 511 Angel Island-Tiburon Ferry Schedule
+  - El Monte Schedule
+  - Nevada County Schedule
+2025-11-05:
   - Santa Ynez Mecatran Schedule
   - SLO Peak Transit Schedule
+  - TCRTA Schedule
   - GET Schedule
   - Flixbus Schedule
   - Tracy Schedule
@@ -39,6 +43,7 @@
   - BruinBus Schedule
   - Unitrans Schedule
   - Visalia Schedule
+  - Bear Schedule
   - Cerritos on Wheels Website Schedule
   - Calabasas Schedule
   - Cudahy Schedule
@@ -63,12 +68,10 @@
   - San Diego Schedule
   - Riverside Schedule
   - WeHo Schedule
-  - Go West Schedule
   - Yuma Schedule
   - San Diego International Airport Shuttles Schedule
   - Bay Area 511 Tri Delta Schedule
   - Bay Area 511 AC Transit Schedule
-  - Bay Area 511 Angel Island-Tiburon Ferry Schedule
   - Bay Area 511 Capitol Corridor Schedule
   - Bay Area 511 BART Schedule
   - Bay Area 511 County Connection Schedule
@@ -116,7 +119,6 @@
   - Amtrak Schedule
   - Clean Air Express Schedule
   - Amtrak San Joaquins Schedule
-  - TCRTA Schedule
   - Tahoe Transportation District Schedule
   - Tehama Schedule
   - Turlock Schedule
@@ -136,9 +138,7 @@
   - Redwood Coast Schedule
   - LADPW Schedule
   - Eastern Sierra Schedule
-  - El Monte Schedule
   - El Dorado Schedule
-  - Nevada County Schedule
   - Humboldt Schedule
   - Kern Schedule
   - Laguna Beach Schedule
@@ -155,14 +155,15 @@
   - Plumas Schedule
   - Palos Verdes PTA Schedule
   - County Express Schedule
+  - Sage Stage Schedule
   - Siskiyou Schedule
   - Santa Cruz Schedule
   - DowneyLink Avail Schedule
   - Dana Point Trolley Schedule
   - Long Beach Schedule
+  - Foothill Schedule
   - Fresno Schedule
   - LA Metro Bus Schedule
-  - Sage Stage Schedule
   - LA Metro Rail Schedule
   - VCTC GMV Schedule
   - Glendale Schedule
@@ -172,6 +173,7 @@
   - Tuolumne Remix Schedule
   - Bellflower Remix Schedule
   - eTrans Schedule Remix
+  - Nevada County Remix Schedule
   - SunLine Avail Schedule
   - Roseville Schedule
   - South County Transit Link Schedule
