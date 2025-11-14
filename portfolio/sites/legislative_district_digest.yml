@@ -1,5 +1,5 @@
 directory: ./gtfs_digest/
-notebook: ./gtfs_digest/legislative_district_report.ipynb
+notebook: ./gtfs_digest/report_legislative_district.ipynb
 parts:
 - caption: Introduction
 - chapters:
