@@ -13,7 +13,8 @@ import pandas as pd
 import shapely
 import siuba  # need this to do type hint in functions
 from calitp_data_analysis import geography_utils
-from calitp_data_analysis.tables import tbls
+from calitp_data_analysis.sql import get_engine
+from calitp_data_analysis.tables import AutoTable, tbls
 from shared_utils import schedule_rt_utils
 from siuba import *
 
@@ -34,6 +35,18 @@ ROUTE_TYPE_DICT = {
 }
 
 RAIL_ROUTE_TYPES = [k for k, v in ROUTE_TYPE_DICT.items() if k not in ["3", "4"]]
+
+
+def _get_tables(project):
+    tables = AutoTable(
+        get_engine(project=project),
+        lambda s: s,  # s.replace(".", "_"),
+    )
+
+    tables._init()
+
+    return tables
+
 
 # ----------------------------------------------------------------#
 # Convenience siuba filtering functions for querying
@@ -176,22 +189,33 @@ METROLINK_SHAPE_TO_ROUTE = {
 METROLINK_ROUTE_TO_SHAPE = dict((v, k) for k, v in METROLINK_SHAPE_TO_ROUTE.items())
 
 
-def get_metrolink_feed_key(selected_date: Union[str, datetime.date], get_df: bool = False) -> pd.DataFrame:
+def get_metrolink_feed_key(selected_date: Union[str, datetime.date], get_df: bool = False, **kwargs) -> pd.DataFrame:
     """
     Get Metrolink's feed_key value.
     """
+
+    project = kwargs.get("project", "cal-itp-data-infra")
+    dataset = kwargs.get("dataset", "mart_gtfs")
+    transit_dataset = kwargs.get("transit_dataset", "mart_transit_database")
+
     metrolink_in_airtable = schedule_rt_utils.filter_dim_gtfs_datasets(
-        keep_cols=["key", "name"], custom_filtering={"name": ["Metrolink Schedule"]}, get_df=False
+        keep_cols=["key", "name"],
+        custom_filtering={"name": ["Metrolink Schedule"]},
+        project=project,
+        dataset=transit_dataset,
+    )
+
+    tables = _get_tables(project=project)
+
+    daily_schedule_feed = (
+        getattr(tables, dataset).fct_daily_schedule_feeds() >> filter(_.date == selected_date) >> collect()
     )
 
     metrolink_feed = (
-        tbls.mart_gtfs.fct_daily_schedule_feeds()
-        >> filter(_.date == selected_date)
-        >> inner_join(_, metrolink_in_airtable, on=["gtfs_dataset_key", "gtfs_dataset_name"])
-        >> rename(name=_.gtfs_dataset_name)
-        >> subset_cols(["feed_key", "name"])
-        >> collect()
-    )
+        daily_schedule_feed.merge(metrolink_in_airtable, on=["gtfs_dataset_key", "gtfs_dataset_name"]).rename(
+            columns={"gtfs_dataset_name": "name"}
+        )
+    )[["feed_key", "name"]]
 
     if get_df:
         return metrolink_feed
