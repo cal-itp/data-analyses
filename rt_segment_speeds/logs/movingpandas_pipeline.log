@@ -1,0 +1,544 @@
+2025-11-05 12:12:02.452 | INFO     | __main__:download_vp_path:61 - download fct_vehicle_locations_path: 2025-08-20: 0:07:03.025239
+2025-11-05 13:34:17.593 | INFO     | __main__:explode_path_by_trip:46 - explode path to long: 0:00:34.091205
+2025-11-05 13:48:01.530 | INFO     | __main__:explode_path_by_trip:46 - explode path to long: 0:00:32.394802
+2025-11-05 14:24:10.566 | INFO     | __main__:download_vp_path:63 - download fct_vehicle_locations_path: 2025-09-24: 0:00:42.597387
+2025-11-05 14:54:32.519 | INFO     | __main__:explode_array_by_trip:46 - explode array to long: 0:06:54.360333
+2025-11-06 10:56:21.413 | INFO     | __main__:add_movingpandas_deltas:146 - add distance: 0:15:54.185785
+2025-11-06 10:56:37.802 | INFO     | __main__:add_movingpandas_deltas:151 - add timedelta: 0:00:16.388564
+2025-11-06 11:13:37.987 | INFO     | __main__:add_movingpandas_deltas:159 - add speed/acceleration: 0:17:00.184669
+2025-11-06 11:21:22.454 | INFO     | __main__:add_movingpandas_deltas:165 - add angular difference/direction: 0:07:44.467524
+2025-11-06 11:21:22.454 | INFO     | __main__:add_movingpandas_deltas:168 - add movingpandas columns: 0:40:55.226991
+2025-11-06 11:28:02.020 | INFO     | __main__:export_results:195 - export: 0:06:39.565490
+2025-11-06 11:28:02.612 | INFO     | __main__:<module>:244 - moving pandas step: 2025-09-24: 0:49:14.984168
+2025-11-07 09:34:04.759 | INFO     | __main__:transform_array_of_strings:45 - parse array of strings: 0:02:23.555699
+2025-11-07 09:34:07.940 | INFO     | __main__:explode_tuples:69 - explode array to long: 0:00:02.544779
+2025-11-07 09:34:47.416 | INFO     | __main__:add_movingpandas_deltas:106 - add distance: 0:00:39.472941
+2025-11-07 09:34:48.663 | INFO     | __main__:add_movingpandas_deltas:111 - add timedelta: 0:00:01.246141
+2025-11-07 09:35:30.201 | INFO     | __main__:add_movingpandas_deltas:119 - add speed/acceleration: 0:00:41.538432
+2025-11-07 09:35:55.334 | INFO     | __main__:add_movingpandas_deltas:125 - add angular difference/direction: 0:00:25.133194
+2025-11-07 09:35:56.721 | INFO     | __main__:add_movingpandas_deltas:134 - save out df: 0:01:48.777198
+2025-11-07 09:48:48.064 | INFO     | __main__:transform_array_of_strings:46 - parse array of strings: 0:02:25.402077
+2025-11-07 09:48:49.714 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.986999
+2025-11-07 09:49:07.940 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:18.222359
+2025-11-07 09:49:08.381 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.441638
+2025-11-07 09:49:29.145 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:20.763249
+2025-11-07 09:49:39.992 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:10.847526
+2025-11-07 09:49:40.693 | INFO     | __main__:add_movingpandas_deltas:135 - save out df: 0:00:50.975111
+2025-11-07 09:49:42.215 | INFO     | __main__:<module>:255 - finished Norwalk Vehicle Positions: 0:00:53.513728
+2025-11-07 09:49:42.216 | INFO     | __main__:<module>:259 - moving pandas: 2025-09-24: 0:03:46.125546
+2025-11-07 12:38:36.824 | INFO     | __main__:transform_array_of_strings:46 - parse array of strings: 0:02:31.301310
+2025-11-07 12:38:37.681 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.251474
+2025-11-07 12:38:41.599 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:03.915941
+2025-11-07 12:38:41.746 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.147182
+2025-11-07 12:38:48.085 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:06.339453
+2025-11-07 12:38:51.288 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:03.202663
+2025-11-07 12:38:51.593 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:13.909863
+2025-11-07 12:38:52.450 | INFO     | __main__:<module>:274 - finished Burbank VehiclePositions: 0:00:15.048763
+2025-11-07 12:38:52.462 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.005221
+2025-11-07 12:38:52.463 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:00.001224
+2025-11-07 12:38:52.464 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.000311
+2025-11-07 12:38:52.464 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:00.000292
+2025-11-07 12:38:52.464 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:00.000297
+2025-11-07 13:12:53.696 | INFO     | __main__:transform_array_of_strings:46 - parse array of strings: 0:02:28.575735
+2025-11-07 13:12:54.620 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.345703
+2025-11-07 13:12:59.280 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:04.657146
+2025-11-07 13:12:59.406 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.125242
+2025-11-07 13:13:07.397 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:07.991422
+2025-11-07 13:13:11.580 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:04.183015
+2025-11-07 13:13:11.965 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:17.342051
+2025-11-07 13:13:13.215 | INFO     | __main__:<module>:274 - finished Commerce VehiclePositions: 0:00:18.969251
+2025-11-07 13:13:15.583 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:02.361849
+2025-11-07 13:13:44.460 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:28.874522
+2025-11-07 13:13:45.961 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:01.501240
+2025-11-07 13:14:39.267 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:53.306128
+2025-11-07 13:15:08.483 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:29.215638
+2025-11-07 13:15:11.922 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:01:56.336475
+2025-11-07 13:15:13.461 | INFO     | __main__:<module>:274 - finished County Connection Swiftly Vehicle Position: 0:02:00.245118
+2025-11-07 13:15:15.143 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:01.674512
+2025-11-07 13:15:33.267 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:18.119573
+2025-11-07 13:15:33.880 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.613111
+2025-11-07 13:16:06.566 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:32.685387
+2025-11-07 13:16:25.046 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:18.480802
+2025-11-07 13:16:26.622 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:01:11.474299
+2025-11-07 13:16:28.062 | INFO     | __main__:<module>:274 - finished Culver City VehiclePositions: 0:01:14.600395
+2025-11-07 13:16:28.175 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.106418
+2025-11-07 13:16:29.529 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:01.351205
+2025-11-07 13:16:29.586 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.057214
+2025-11-07 13:16:32.331 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:02.745307
+2025-11-07 13:16:33.784 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:01.452760
+2025-11-07 13:16:33.914 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:05.736416
+2025-11-07 13:16:34.647 | INFO     | __main__:<module>:274 - finished Desert Roadrunner Vehicle Positions: 0:00:06.583536
+2025-11-07 13:16:34.725 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.070980
+2025-11-07 13:16:35.727 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:01.000980
+2025-11-07 13:16:35.770 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.043168
+2025-11-07 13:16:37.534 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:01.764142
+2025-11-07 13:16:38.697 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:01.163374
+2025-11-07 13:16:38.814 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:04.087927
+2025-11-07 13:16:39.390 | INFO     | __main__:<module>:274 - finished DowneyLink Avail Vehicle Positions: 0:00:04.742034
+2025-11-07 13:16:39.886 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.489095
+2025-11-07 13:16:44.667 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:04.777504
+2025-11-07 13:16:44.875 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.207922
+2025-11-07 13:16:53.652 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:08.777407
+2025-11-07 13:16:58.320 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:04.667695
+2025-11-07 13:16:58.915 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:19.025134
+2025-11-07 13:16:59.980 | INFO     | __main__:<module>:274 - finished Eastern Sierra Vehicle Positions: 0:00:20.589068
+2025-11-07 13:17:00.301 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.316116
+2025-11-07 13:17:07.103 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:06.799727
+2025-11-07 13:17:07.450 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.346999
+2025-11-07 13:17:20.027 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:12.577215
+2025-11-07 13:17:27.480 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:07.452523
+2025-11-07 13:17:28.585 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:28.281313
+2025-11-07 13:17:29.516 | INFO     | __main__:<module>:274 - finished Elk Grove VehiclePositions: 0:00:29.535430
+2025-11-07 13:17:30.907 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:01.384495
+2025-11-07 13:17:36.269 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:05.360288
+2025-11-07 13:17:36.431 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.161597
+2025-11-07 13:17:47.433 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:11.002758
+2025-11-07 13:17:54.161 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:06.727780
+2025-11-07 13:17:54.575 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:23.666518
+2025-11-07 13:17:55.806 | INFO     | __main__:<module>:274 - finished Emery Go-Round TripShot Vehicle Positions: 0:00:26.289136
+2025-11-07 13:17:56.108 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.294837
+2025-11-07 13:18:01.575 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:05.465722
+2025-11-07 13:18:01.947 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.371379
+2025-11-07 13:18:12.127 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:10.180563
+2025-11-07 13:18:17.869 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:05.741684
+2025-11-07 13:18:18.617 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:22.507186
+2025-11-07 13:18:19.498 | INFO     | __main__:<module>:274 - finished Fairfield Vehicle Positions: 0:00:23.691585
+2025-11-07 13:18:28.414 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:08.909393
+2025-11-07 13:19:56.355 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:01:27.935411
+2025-11-07 13:19:59.152 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:02.797944
+2025-11-07 13:22:50.688 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:02:51.535691
+2025-11-07 13:24:20.142 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:01:29.454358
+2025-11-07 13:24:28.569 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:06:00.149621
+2025-11-07 13:24:33.382 | INFO     | __main__:<module>:274 - finished Foothill Vehicle Positions: 0:06:13.882616
+2025-11-07 13:24:39.824 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:06.435716
+2025-11-07 13:25:34.580 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:54.751590
+2025-11-07 13:25:36.427 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:01.846610
+2025-11-07 13:27:20.812 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:01:44.385488
+2025-11-07 13:28:16.545 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:55.733356
+2025-11-07 13:28:21.052 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:03:41.223862
+2025-11-07 13:28:23.427 | INFO     | __main__:<module>:274 - finished Fresno Vehicle Positions: 0:03:50.044300
+2025-11-07 13:28:24.556 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:01.120056
+2025-11-07 13:28:32.583 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:08.023698
+2025-11-07 13:28:32.892 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.308998
+2025-11-07 13:28:49.682 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:16.789888
+2025-11-07 13:28:57.263 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:07.581445
+2025-11-07 13:28:57.949 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:33.390110
+2025-11-07 13:28:59.339 | INFO     | __main__:<module>:274 - finished G Trans Vehicle Positions: 0:00:35.909576
+2025-11-07 13:29:00.919 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:01.572127
+2025-11-07 13:29:20.904 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:19.983365
+2025-11-07 13:29:21.777 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.872853
+2025-11-07 13:29:59.935 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:38.157353
+2025-11-07 13:30:21.166 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:21.231075
+2025-11-07 13:30:23.747 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:01:22.826280
+2025-11-07 13:30:25.015 | INFO     | __main__:<module>:274 - finished GET VehiclePositions: 0:01:25.674189
+2025-11-07 13:30:25.932 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.910895
+2025-11-07 13:30:33.882 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:07.946085
+2025-11-07 13:30:34.117 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.235079
+2025-11-07 13:30:50.576 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:16.458992
+2025-11-07 13:30:57.599 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:07.023222
+2025-11-07 13:30:58.122 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:32.186495
+2025-11-07 13:30:59.200 | INFO     | __main__:<module>:274 - finished Humboldt Vehicle Positions: 0:00:34.184336
+2025-11-07 13:30:59.729 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.521627
+2025-11-07 13:31:01.596 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:01.864911
+2025-11-07 13:31:01.600 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.004647
+2025-11-07 13:31:05.546 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:03.945363
+2025-11-07 13:31:06.544 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:00.997907
+2025-11-07 13:31:06.548 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:06.817608
+2025-11-07 13:31:07.275 | INFO     | __main__:<module>:274 - finished Irvine CONNECT Vehicle Positions: 0:00:08.073407
+2025-11-07 13:31:08.059 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.771041
+2025-11-07 13:31:13.972 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:05.910285
+2025-11-07 13:31:14.107 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.135347
+2025-11-07 13:31:25.245 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:11.137727
+2025-11-07 13:31:29.952 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:04.706936
+2025-11-07 13:31:30.597 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:22.535189
+2025-11-07 13:31:31.595 | INFO     | __main__:<module>:274 - finished Kern Swiftly Vehicle Position: 0:00:24.315449
+2025-11-07 13:31:31.941 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.338251
+2025-11-07 13:31:38.521 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:06.577443
+2025-11-07 13:31:38.827 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.306143
+2025-11-07 13:31:50.668 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:11.841106
+2025-11-07 13:31:57.073 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:06.405493
+2025-11-07 13:31:57.845 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:25.901687
+2025-11-07 13:31:59.079 | INFO     | __main__:<module>:274 - finished Kings Vehicle Positions: 0:00:27.482585
+2025-11-07 13:32:08.880 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:09.792232
+2025-11-07 13:33:48.898 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:01:40.011312
+2025-11-07 13:33:52.767 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:03.869048
+2025-11-07 13:37:00.051 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:03:07.283783
+2025-11-07 13:38:35.882 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:01:35.830617
+2025-11-07 13:38:44.707 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:06:35.820658
+2025-11-07 13:38:48.623 | INFO     | __main__:<module>:274 - finished LA DOT VehiclePositions: 0:06:49.542232
+2025-11-07 13:39:48.536 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:59.900440
+2025-11-07 13:50:14.207 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:10:25.660119
+2025-11-07 13:50:31.603 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:17.396058
+2025-11-07 14:10:24.375 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:19:52.771508
+2025-11-07 14:20:06.885 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:09:42.510592
+2025-11-07 14:20:59.148 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:41:10.601088
+2025-11-07 14:21:27.091 | INFO     | __main__:<module>:274 - finished LA Metro Bus Vehicle Positions: 0:42:38.466015
+2025-11-07 14:21:31.325 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:04.225042
+2025-11-07 14:22:14.392 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:43.062433
+2025-11-07 14:22:16.003 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:01.610693
+2025-11-07 14:23:32.695 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:01:16.692630
+2025-11-07 14:24:12.685 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:39.989566
+2025-11-07 14:24:16.768 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:02:45.438504
+2025-11-07 14:24:18.729 | INFO     | __main__:<module>:274 - finished LA Metro Rail Vehicle Positions: 0:02:51.636759
+2025-11-07 14:24:18.910 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.173504
+2025-11-07 14:24:21.781 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:02.868248
+2025-11-07 14:24:21.937 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.155467
+2025-11-07 14:24:27.526 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:05.589559
+2025-11-07 14:24:30.369 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:02.842958
+2025-11-07 14:24:30.629 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:11.715974
+2025-11-07 14:24:31.349 | INFO     | __main__:<module>:274 - finished Lake Vehicle Positions: 0:00:12.618020
+2025-11-07 14:24:31.430 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.074169
+2025-11-07 14:24:32.422 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:00.991392
+2025-11-07 14:24:32.459 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.036704
+2025-11-07 14:24:34.131 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:01.672276
+2025-11-07 14:24:34.963 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:00.831344
+2025-11-07 14:24:35.063 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:03.632300
+2025-11-07 14:24:35.635 | INFO     | __main__:<module>:274 - finished Lawndale Beat Vehicle Positions: 0:00:04.285070
+2025-11-07 14:24:40.220 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:04.576057
+2025-11-07 14:25:35.986 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:55.764261
+2025-11-07 14:25:38.872 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:02.885792
+2025-11-07 14:27:27.036 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:01:48.163651
+2025-11-07 14:28:25.732 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:58.696478
+2025-11-07 14:28:32.246 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:03:52.024111
+2025-11-07 14:28:34.571 | INFO     | __main__:<module>:274 - finished Long Beach VehiclePositions: 0:03:58.935406
+2025-11-07 14:28:34.987 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.406022
+2025-11-07 14:28:37.764 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:02.772615
+2025-11-07 14:28:37.844 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.079881
+2025-11-07 14:28:43.001 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:05.156783
+2025-11-07 14:28:45.447 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:02.446123
+2025-11-07 14:28:45.644 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:10.651889
+2025-11-07 14:28:46.465 | INFO     | __main__:<module>:274 - finished MVGO VehiclePositions: 0:00:11.891763
+2025-11-07 14:28:46.891 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.418798
+2025-11-07 14:28:48.588 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:01.695735
+2025-11-07 14:28:48.628 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.039909
+2025-11-07 14:28:51.766 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:03.138089
+2025-11-07 14:28:53.109 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:01.342373
+2025-11-07 14:28:53.198 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:06.305287
+2025-11-07 14:28:53.897 | INFO     | __main__:<module>:274 - finished Madera County Connection Vehicle Positions: 0:00:07.430519
+2025-11-07 14:28:54.012 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.109206
+2025-11-07 14:28:55.580 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:01.566717
+2025-11-07 14:28:55.637 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.056806
+2025-11-07 14:28:58.354 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:02.716988
+2025-11-07 14:29:00.040 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:01.685877
+2025-11-07 14:29:00.216 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:06.202551
+2025-11-07 14:29:00.913 | INFO     | __main__:<module>:274 - finished Manteca Vehicle Positions: 0:00:07.015740
+2025-11-07 14:29:03.032 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:02.111598
+2025-11-07 14:29:24.117 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:21.083151
+2025-11-07 14:29:24.863 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.745891
+2025-11-07 14:30:07.253 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:42.389186
+2025-11-07 14:30:32.400 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:25.147749
+2025-11-07 14:30:34.182 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:01:31.147993
+2025-11-07 14:30:35.702 | INFO     | __main__:<module>:274 - finished Marin Swiftly Vehicle Position: 0:01:34.787173
+2025-11-07 14:30:36.130 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.421774
+2025-11-07 14:30:40.237 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:04.105852
+2025-11-07 14:30:40.459 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.221712
+2025-11-07 14:30:47.987 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:07.528006
+2025-11-07 14:30:52.287 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:04.300752
+2025-11-07 14:30:52.667 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:16.535542
+2025-11-07 14:30:53.520 | INFO     | __main__:<module>:274 - finished Mendocino Vehicle Positions: 0:00:17.817769
+2025-11-07 14:30:55.205 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:01.678312
+2025-11-07 14:31:06.992 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:11.782294
+2025-11-07 14:31:07.324 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.332340
+2025-11-07 14:31:30.988 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:23.664429
+2025-11-07 14:31:42.695 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:11.706450
+2025-11-07 14:31:43.563 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:48.353246
+2025-11-07 14:31:44.724 | INFO     | __main__:<module>:274 - finished Merced VehiclePositions: 0:00:51.203026
+2025-11-07 14:31:46.146 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:01.415243
+2025-11-07 14:31:52.728 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:06.580126
+2025-11-07 14:31:53.019 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.291131
+2025-11-07 14:32:04.306 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:11.287358
+2025-11-07 14:32:12.715 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:08.408717
+2025-11-07 14:32:13.310 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:27.162181
+2025-11-07 14:32:14.269 | INFO     | __main__:<module>:274 - finished Metrolink VehiclePositions: 0:00:29.544091
+2025-11-07 14:32:15.186 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.910610
+2025-11-07 14:32:25.898 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:10.708370
+2025-11-07 14:32:26.327 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.429462
+2025-11-07 14:32:46.748 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:20.421129
+2025-11-07 14:32:58.103 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:11.354280
+2025-11-07 14:32:59.332 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:44.142266
+2025-11-07 14:33:00.611 | INFO     | __main__:<module>:274 - finished Montebello Vehicle Positions: 0:00:46.341014
+2025-11-07 14:33:02.365 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:01.746890
+2025-11-07 14:33:31.753 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:29.383997
+2025-11-07 14:33:33.267 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:01.513836
+2025-11-07 14:34:29.724 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:56.456815
+2025-11-07 14:35:02.879 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:33.155215
+2025-11-07 14:35:07.016 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:02:04.646372
+2025-11-07 14:35:08.717 | INFO     | __main__:<module>:274 - finished Monterey Salinas VehiclePositions: 0:02:08.105227
+2025-11-07 14:35:09.363 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.638018
+2025-11-07 14:35:13.665 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:04.296193
+2025-11-07 14:35:13.814 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.149195
+2025-11-07 14:35:21.328 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:07.513226
+2025-11-07 14:35:24.992 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:03.663926
+2025-11-07 14:35:25.291 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:15.921865
+2025-11-07 14:35:26.091 | INFO     | __main__:<module>:274 - finished Mountain Transit GMV VehiclePositions: 0:00:17.371563
+2025-11-07 14:35:26.541 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.444139
+2025-11-07 14:35:28.716 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:02.172108
+2025-11-07 14:35:28.778 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.062302
+2025-11-07 14:35:33.214 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:04.435673
+2025-11-07 14:35:35.280 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:02.066453
+2025-11-07 14:35:35.435 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:08.891296
+2025-11-07 14:35:36.157 | INFO     | __main__:<module>:274 - finished Mountain View Community Shuttle VehiclePositions: 0:00:10.064959
+2025-11-07 14:35:36.280 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.116434
+2025-11-07 14:35:39.101 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:02.819802
+2025-11-07 14:35:39.281 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.180806
+2025-11-07 14:35:44.245 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:04.963265
+2025-11-07 14:35:47.344 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:03.099308
+2025-11-07 14:35:47.714 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:11.433410
+2025-11-07 14:35:48.350 | INFO     | __main__:<module>:274 - finished Nevada County Vehicle Positions: 0:00:12.191938
+2025-11-07 14:35:54.575 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:06.208135
+2025-11-07 14:36:54.232 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:59.652372
+2025-11-07 14:36:56.013 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:01.780928
+2025-11-07 14:38:44.459 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:01:48.445960
+2025-11-07 14:39:43.150 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:58.691282
+2025-11-07 14:39:47.984 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:03:53.404853
+2025-11-07 14:39:50.407 | INFO     | __main__:<module>:274 - finished North County Vehicle Positions: 0:04:02.056117
+2025-11-07 14:39:51.611 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:01.194243
+2025-11-07 14:40:02.170 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:10.554622
+2025-11-07 14:40:02.777 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.606870
+2025-11-07 14:40:21.901 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:19.124234
+2025-11-07 14:40:32.206 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:10.304814
+2025-11-07 14:40:33.209 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:41.593887
+2025-11-07 14:40:34.582 | INFO     | __main__:<module>:274 - finished Norwalk Vehicle Positions: 0:00:44.173433
+2025-11-07 14:40:54.252 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:19.655363
+2025-11-07 14:43:42.626 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:02:48.370110
+2025-11-07 14:43:47.554 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:04.927914
+2025-11-07 14:49:29.857 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:05:42.303210
+2025-11-07 14:52:00.742 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:02:30.884892
+2025-11-07 14:52:11.414 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:11:17.158329
+2025-11-07 14:52:19.522 | INFO     | __main__:<module>:274 - finished OCTA VehiclePositions: 0:11:44.937453
+2025-11-07 14:52:24.955 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:05.420829
+2025-11-07 14:53:29.443 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:01:04.484914
+2025-11-07 14:53:31.422 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:01.978933
+2025-11-07 14:55:37.196 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:02:05.773664
+2025-11-07 14:56:41.481 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:01:04.285155
+2025-11-07 14:56:47.532 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:04:22.573920
+2025-11-07 14:56:50.576 | INFO     | __main__:<module>:274 - finished OmniTrans Vehicle Positions: 0:04:31.051437
+2025-11-07 14:56:51.402 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.808805
+2025-11-07 14:57:04.597 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:13.189528
+2025-11-07 14:57:05.092 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.495100
+2025-11-07 14:57:29.513 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:24.420368
+2025-11-07 14:57:41.054 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:11.540966
+2025-11-07 14:57:42.461 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:51.053269
+2025-11-07 14:57:43.561 | INFO     | __main__:<module>:274 - finished Pasadena VehiclePositions: 0:00:52.983404
+2025-11-07 14:57:43.683 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.112291
+2025-11-07 14:57:45.659 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:01.974786
+2025-11-07 14:57:45.774 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.115594
+2025-11-07 14:57:49.362 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:03.587900
+2025-11-07 14:57:51.599 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:02.236780
+2025-11-07 14:57:51.912 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:08.227652
+2025-11-07 14:57:52.541 | INFO     | __main__:<module>:274 - finished Petaluma GMV Vehicle Positions: 0:00:08.978879
+2025-11-07 14:57:52.787 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.239127
+2025-11-07 14:57:53.968 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:01.179481
+2025-11-07 14:57:54.012 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.044103
+2025-11-07 14:57:56.297 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:02.285526
+2025-11-07 14:57:57.539 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:01.242107
+2025-11-07 14:57:57.672 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:04.883314
+2025-11-07 14:57:58.273 | INFO     | __main__:<module>:274 - finished PresidiGo VehiclePositions: 0:00:05.731352
+2025-11-07 14:57:59.069 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.788290
+2025-11-07 14:58:05.396 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:06.324423
+2025-11-07 14:58:05.622 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.226589
+2025-11-07 14:58:18.387 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:12.764124
+2025-11-07 14:58:24.518 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:06.131193
+2025-11-07 14:58:25.139 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:26.068019
+2025-11-07 14:58:26.252 | INFO     | __main__:<module>:274 - finished Redding Vehicle Positions: 0:00:27.978441
+2025-11-07 14:58:26.398 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.139296
+2025-11-07 14:58:28.349 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:01.950114
+2025-11-07 14:58:28.420 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.070154
+2025-11-07 14:58:32.471 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:04.051763
+2025-11-07 14:58:34.564 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:02.092339
+2025-11-07 14:58:34.761 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:08.361499
+2025-11-07 14:58:35.454 | INFO     | __main__:<module>:274 - finished Redwood Coast Vehicle Positions: 0:00:09.200607
+2025-11-07 14:58:39.373 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:03.907912
+2025-11-07 14:59:20.836 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:41.460766
+2025-11-07 14:59:22.321 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:01.485071
+2025-11-07 15:00:40.234 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:01:17.912986
+2025-11-07 15:01:23.557 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:43.323008
+2025-11-07 15:01:27.519 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:02:48.144252
+2025-11-07 15:01:29.795 | INFO     | __main__:<module>:274 - finished Riverside VehiclePositions: 0:02:54.340236
+2025-11-07 15:01:30.786 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.979423
+2025-11-07 15:01:37.631 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:06.841231
+2025-11-07 15:01:37.811 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.179964
+2025-11-07 15:01:50.642 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:12.830525
+2025-11-07 15:01:57.256 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:06.613874
+2025-11-07 15:01:57.664 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:26.874410
+2025-11-07 15:01:58.659 | INFO     | __main__:<module>:274 - finished Roseville Transit TripShot VehiclePositions: 0:00:28.861606
+2025-11-07 15:02:00.506 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:01.836589
+2025-11-07 15:02:23.581 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:23.071228
+2025-11-07 15:02:24.816 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:01.234788
+2025-11-07 15:03:05.439 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:40.622614
+2025-11-07 15:03:31.091 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:25.652007
+2025-11-07 15:03:35.046 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:01:34.535901
+2025-11-07 15:03:36.339 | INFO     | __main__:<module>:274 - finished SBMTD VehiclePositions: 0:01:37.678841
+2025-11-07 15:03:54.028 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:17.676588
+2025-11-07 15:06:45.484 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:02:51.449911
+2025-11-07 15:06:51.180 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:05.696761
+2025-11-07 15:12:23.893 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:05:32.712821
+2025-11-07 15:15:06.158 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:02:42.264425
+2025-11-07 15:15:17.462 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:11:23.427825
+2025-11-07 15:15:23.845 | INFO     | __main__:<module>:274 - finished SCVTA Swiftly Vehicle Position: 0:11:47.505507
+2025-11-07 15:15:24.180 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.323036
+2025-11-07 15:15:28.382 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:04.199228
+2025-11-07 15:15:28.547 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.165458
+2025-11-07 15:15:36.776 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:08.228121
+2025-11-07 15:15:40.914 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:04.138802
+2025-11-07 15:15:41.406 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:17.222985
+2025-11-07 15:15:42.262 | INFO     | __main__:<module>:274 - finished SLO Vehicle Positions: 0:00:18.414030
+2025-11-07 15:15:42.836 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.566513
+2025-11-07 15:15:50.143 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:07.305198
+2025-11-07 15:15:50.423 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.280415
+2025-11-07 15:16:04.503 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:14.079664
+2025-11-07 15:16:10.919 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:06.415826
+2025-11-07 15:16:11.486 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:28.647926
+2025-11-07 15:16:12.546 | INFO     | __main__:<module>:274 - finished SLORTA VehiclePositions: 0:00:30.283198
+2025-11-07 15:16:13.011 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:00.456915
+2025-11-07 15:16:15.211 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:02.196515
+2025-11-07 15:16:15.260 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:00.049009
+2025-11-07 15:16:19.523 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:00:04.263310
+2025-11-07 15:16:21.645 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:02.122025
+2025-11-07 15:16:21.820 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:00:08.805410
+2025-11-07 15:16:22.543 | INFO     | __main__:<module>:274 - finished SMART Vehicle Positions: 0:00:09.994802
+2025-11-07 15:16:26.329 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:03.774502
+2025-11-07 15:17:16.456 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:00:50.124471
+2025-11-07 15:17:18.806 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:02.350244
+2025-11-07 15:18:53.316 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:01:34.510552
+2025-11-07 15:19:51.801 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:00:58.484704
+2025-11-07 15:19:58.373 | INFO     | __main__:add_movingpandas_deltas:137 - save out df: 0:03:32.041542
+2025-11-07 15:20:00.962 | INFO     | __main__:<module>:274 - finished Sacramento Vehicle Positions: 0:03:38.417930
+2025-11-07 15:20:18.546 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:17.569086
+2025-11-07 15:23:57.749 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:03:39.200616
+2025-11-07 15:24:06.898 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:09.149210
+2025-11-07 15:31:10.260 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:07:03.361352
+2025-11-07 16:10:59.325 | INFO     | __main__:transform_array_of_strings:46 - parse array of strings: 0:02:24.238698
+2025-11-07 16:11:17.750 | INFO     | __main__:explode_tuples:70 - explode array to long: 0:00:17.838244
+2025-11-07 16:15:06.324 | INFO     | __main__:add_movingpandas_deltas:107 - add distance: 0:03:48.568784
+2025-11-07 16:15:17.221 | INFO     | __main__:add_movingpandas_deltas:112 - add timedelta: 0:00:10.897352
+2025-11-07 16:22:40.787 | INFO     | __main__:add_movingpandas_deltas:120 - add speed/acceleration: 0:07:23.566241
+2025-11-07 16:26:36.905 | INFO     | __main__:add_movingpandas_deltas:126 - add angular difference/direction: 0:03:56.117084
+2025-11-07 16:27:05.620 | INFO     | __main__:add_movingpandas_deltas:135 - save out df: 0:15:47.864858
+2025-11-07 16:29:21.455 | INFO     | __main__:download_vp_path:63 - download fct_vehicle_locations_path: 2025-07-16: 0:00:49.874599
+2025-11-07 20:29:47.044 | INFO     | __main__:download_vp_path:63 - download fct_vehicle_locations_path: 2025-08-20: 0:00:46.307597
+2025-11-07 16:30:27.447 | INFO     | __main__:transform_array_of_strings:105 - parse array of strings: 0:00:33.422788
+2025-11-07 16:31:36.765 | INFO     | __main__:explode_tuples:129 - explode array to long: 0:01:09.194067
+2025-11-07 16:43:35.146 | INFO     | __main__:add_movingpandas_deltas:166 - add distance: 0:11:58.366972
+2025-11-07 16:43:55.169 | INFO     | __main__:add_movingpandas_deltas:171 - add timedelta: 0:00:20.022688
+2025-11-07 17:07:44.569 | INFO     | __main__:add_movingpandas_deltas:179 - add speed/acceleration: 0:23:49.399954
+2025-11-07 17:18:40.738 | INFO     | __main__:add_movingpandas_deltas:185 - add angular difference/direction: 0:10:56.169655
+2025-11-07 17:19:32.225 | INFO     | __main__:add_movingpandas_deltas:194 - save out df: 0:47:55.445756
+2025-11-07 17:19:58.735 | INFO     | __main__:<module>:303 - finished 0: 0:50:11.835271
+2025-11-07 17:20:23.093 | INFO     | __main__:transform_array_of_strings:105 - parse array of strings: 0:00:15.623672
+2025-11-07 17:21:04.676 | INFO     | __main__:explode_tuples:129 - explode array to long: 0:00:41.551308
+2025-11-07 17:27:49.699 | INFO     | __main__:add_movingpandas_deltas:166 - add distance: 0:06:45.013042
+2025-11-07 17:28:04.582 | INFO     | __main__:add_movingpandas_deltas:171 - add timedelta: 0:00:14.882872
+2025-11-07 17:40:50.829 | INFO     | __main__:add_movingpandas_deltas:179 - add speed/acceleration: 0:12:46.247129
+2025-11-07 17:47:42.386 | INFO     | __main__:add_movingpandas_deltas:185 - add angular difference/direction: 0:06:51.556787
+2025-11-07 17:48:21.776 | INFO     | __main__:add_movingpandas_deltas:194 - save out df: 0:27:17.089997
+2025-11-07 17:48:37.192 | INFO     | __main__:<module>:303 - finished 1: 0:28:38.456399
+2025-11-07 17:49:11.948 | INFO     | __main__:transform_array_of_strings:105 - parse array of strings: 0:00:28.646704
+2025-11-07 17:50:22.951 | INFO     | __main__:explode_tuples:129 - explode array to long: 0:01:10.943036
+2025-11-07 18:00:40.789 | INFO     | __main__:add_movingpandas_deltas:166 - add distance: 0:10:17.820406
+2025-11-07 18:01:06.745 | INFO     | __main__:add_movingpandas_deltas:171 - add timedelta: 0:00:25.956332
+2025-11-07 18:20:57.721 | INFO     | __main__:add_movingpandas_deltas:179 - add speed/acceleration: 0:19:50.976392
+2025-11-07 18:32:09.859 | INFO     | __main__:add_movingpandas_deltas:185 - add angular difference/direction: 0:11:12.137389
+2025-11-07 18:33:23.197 | INFO     | __main__:add_movingpandas_deltas:194 - save out df: 0:43:00.228944
+2025-11-07 18:33:51.440 | INFO     | __main__:<module>:303 - finished 2: 0:45:14.247639
+2025-11-07 18:34:14.941 | INFO     | __main__:transform_array_of_strings:105 - parse array of strings: 0:00:15.729916
+2025-11-07 18:34:56.643 | INFO     | __main__:explode_tuples:129 - explode array to long: 0:00:41.676130
+2025-11-07 18:42:06.259 | INFO     | __main__:add_movingpandas_deltas:166 - add distance: 0:07:09.603660
+2025-11-07 18:42:22.467 | INFO     | __main__:add_movingpandas_deltas:171 - add timedelta: 0:00:16.208693
+2025-11-07 18:55:54.034 | INFO     | __main__:add_movingpandas_deltas:179 - add speed/acceleration: 0:13:31.566623
+2025-11-07 19:03:16.768 | INFO     | __main__:add_movingpandas_deltas:185 - add angular difference/direction: 0:07:22.733913
+2025-11-07 19:04:00.508 | INFO     | __main__:add_movingpandas_deltas:194 - save out df: 0:29:03.852644
+2025-11-07 19:04:15.060 | INFO     | __main__:<module>:303 - finished 3: 0:30:23.618884
+2025-11-07 19:04:53.714 | INFO     | __main__:transform_array_of_strings:105 - parse array of strings: 0:00:31.574853
+2025-11-07 19:06:06.315 | INFO     | __main__:explode_tuples:129 - explode array to long: 0:01:12.530000
+2025-11-07 19:20:00.081 | INFO     | __main__:add_movingpandas_deltas:166 - add distance: 0:13:53.743355
+2025-11-07 19:20:28.851 | INFO     | __main__:add_movingpandas_deltas:171 - add timedelta: 0:00:28.770315
+2025-11-07 19:47:07.716 | INFO     | __main__:add_movingpandas_deltas:179 - add speed/acceleration: 0:26:38.865470
+2025-11-10 17:57:16.544 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:14:44.266678
+2025-11-10 17:57:40.094 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:23.550237
+2025-11-10 18:09:48.041 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:12:07.946853
+2025-11-10 18:14:29.306 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:04:41.264315
+2025-11-10 18:15:28.836 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:32:56.558635
+2025-11-10 18:15:35.819 | INFO     | __main__:<module>:146 - finished 0: 0:33:49.831797
+2025-11-10 18:24:18.698 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:08:09.434117
+2025-11-10 18:24:36.169 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:17.470453
+2025-11-10 18:31:13.524 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:06:37.355364
+2025-11-10 18:33:59.242 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:02:45.717688
+2025-11-10 18:34:40.103 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:18:30.839170
+2025-11-10 18:34:43.954 | INFO     | __main__:<module>:146 - finished 1: 0:19:08.119012
+2025-11-10 18:50:16.161 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:14:48.320832
+2025-11-10 18:50:47.529 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:31.368488
+2025-11-10 19:00:48.141 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:10:00.612021
+2025-11-10 19:05:18.521 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:04:30.379674
+2025-11-10 19:06:35.073 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:31:07.233054
+2025-11-10 19:06:41.870 | INFO     | __main__:<module>:146 - finished 2: 0:31:57.911870
+2025-11-10 19:16:04.642 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:08:48.579912
+2025-11-10 19:16:23.726 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:19.084064
+2025-11-10 19:23:35.394 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:07:11.667889
+2025-11-10 19:26:34.574 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:02:59.179310
+2025-11-10 19:27:20.389 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:20:04.326825
+2025-11-10 19:27:24.013 | INFO     | __main__:<module>:146 - finished 3: 0:20:42.123225
+2025-11-10 19:45:37.425 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:17:24.890544
+2025-11-10 19:46:11.917 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:34.492333
+2025-11-10 20:00:08.897 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:13:56.979227
+2025-11-10 20:05:40.462 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:05:31.565167
+2025-11-10 20:06:59.190 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:38:46.655090
+2025-11-10 20:07:06.165 | INFO     | __main__:<module>:146 - finished 4: 0:39:42.148208
+2025-11-10 20:19:15.556 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:11:36.955945
+2025-11-10 20:19:47.633 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:32.077528
+2025-11-10 20:28:59.660 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:09:12.027020
+2025-11-10 20:33:01.838 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:04:02.177534
+2025-11-10 20:34:09.068 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:26:30.468180
+2025-11-10 20:34:13.823 | INFO     | __main__:<module>:146 - finished 5: 0:27:07.652220
+2025-11-10 20:34:13.827 | INFO     | __main__:<module>:150 - moving pandas in batches: 2025-07-16: 2:52:30.220862
+2025-11-10 20:53:08.873 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:13:31.260291
+2025-11-10 20:53:31.051 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:22.178220
+2025-11-10 21:04:39.492 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:11:08.440532
+2025-11-10 21:08:52.597 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:04:13.105468
+2025-11-10 21:09:48.951 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:30:11.337867
+2025-11-10 21:09:54.768 | INFO     | __main__:<module>:146 - finished 0: 0:31:00.264714
+2025-11-10 21:19:13.447 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:08:48.684980
+2025-11-10 21:19:31.052 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:17.604953
+2025-11-10 21:26:46.466 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:07:15.414312
+2025-11-10 21:29:43.770 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:02:57.304009
+2025-11-10 21:30:27.605 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:20:02.843273
+2025-11-10 21:30:31.459 | INFO     | __main__:<module>:146 - finished 1: 0:20:36.689096
+2025-11-10 21:39:52.188 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:08:48.108146
+2025-11-10 21:40:15.187 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:22.998938
+2025-11-10 21:47:01.906 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:06:46.718482
+2025-11-10 21:50:14.054 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:03:12.148695
+2025-11-10 21:51:06.769 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:20:02.689163
+2025-11-10 21:51:10.948 | INFO     | __main__:<module>:146 - finished 2: 0:20:39.485921
+2025-11-10 22:00:50.140 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:09:09.351937
+2025-11-10 22:01:09.581 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:19.440546
+2025-11-10 22:08:39.059 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:07:29.477696
+2025-11-10 22:11:45.911 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:03:06.851994
+2025-11-10 22:12:32.473 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:20:51.685013
+2025-11-10 22:12:36.540 | INFO     | __main__:<module>:146 - finished 3: 0:21:25.589367
+2025-11-10 22:31:03.277 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:17:36.882222
+2025-11-10 22:31:37.966 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:34.689429
+2025-11-10 22:46:14.265 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:14:36.298940
+2025-11-10 22:52:06.053 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:05:51.788035
+2025-11-10 22:53:33.831 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:40:07.436216
+2025-11-10 22:53:41.307 | INFO     | __main__:<module>:146 - finished 4: 0:41:04.763589
+2025-11-10 23:06:11.718 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:11:54.615817
+2025-11-10 23:06:42.585 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:30.866571
+2025-11-10 23:16:16.343 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:09:33.757905
+2025-11-10 23:20:25.550 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:04:09.207558
+2025-11-10 23:21:35.515 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:27:18.412455
+2025-11-10 23:21:40.153 | INFO     | __main__:<module>:146 - finished 5: 0:27:58.841758
+2025-11-10 23:21:40.156 | INFO     | __main__:<module>:150 - moving pandas in batches: 2025-09-24: 2:42:47.115250
+2025-11-12 20:23:30.361 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:13:52.027963
+2025-11-12 20:23:53.104 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:22.743632
+2025-11-12 20:35:17.729 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:11:24.625056
+2025-11-12 20:39:36.157 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:04:18.427613
+2025-11-12 20:40:33.882 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:30:55.549222
+2025-11-12 20:40:39.372 | INFO     | __main__:<module>:146 - finished 0: 0:31:46.239608
+2025-11-12 20:50:20.512 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:09:11.750094
+2025-11-12 20:50:39.477 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:18.965669
+2025-11-12 20:58:02.465 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:122 - add speed: 0:07:22.987775
+2025-11-12 21:01:06.639 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:128 - add direction: 0:03:04.174158
+2025-11-12 21:01:52.310 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:139 - save out df: 0:20:43.548925
+2025-11-12 21:01:56.679 | INFO     | __main__:<module>:146 - finished 1: 0:21:17.304273
+2025-11-12 21:11:49.182 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:109 - add distance: 0:09:15.614217
+2025-11-12 21:12:12.913 | INFO     | trajectify_vp_batches_dask:add_movingpandas_deltas:114 - add timedelta: 0:00:23.731560

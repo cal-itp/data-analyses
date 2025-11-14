@@ -15,3 +15,5 @@ quarto==0.1.0
 quarto-cli==1.6.40
 vegafusion==2.0.2
 vl-convert-python>=1.6.0
+movingpandas==0.22.4
+stonesoup==1.8
