@@ -109,6 +109,8 @@ def explode_tuples(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
     if this is a Python data model with BigFrames, since the bottleneck
     is in how many rows we can download 
     (1 single day of vp has to be broken into 4+ batches to be put back as gdf)
+    movingpandas prefers x, y coordinates, it creates geometry under the hood,
+    but didn't find the ability to input geometry column
     """
     
     gdf = gdf.explode(
