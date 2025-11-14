@@ -3,6 +3,7 @@ Cached dates available in rt_delay/.
 
 GCS: gs://calitp-analytics-data/data-analyses/rt_delay/cached_views/
 """
+
 import datetime
 from typing import Literal
 
@@ -72,9 +73,18 @@ DATES = {
     "jun2025": "2025-06-11",
     "jul2025": "2025-07-16",
     "aug2025": "2025-08-20",
+    "sep2025d": "2025-09-16",
+    "sep2025e": "2025-09-17",
+    "sep2025f": "2025-09-18",
     "sep2025a": "2025-09-23",
     "sep2025": "2025-09-24",
     "sep2025b": "2025-09-25",
+    "sep2025c": "2025-09-30",
+    "oct2025c": "2025-10-01",
+    "oct2025d": "2025-10-02",
+    "oct2025e": "2025-10-07",
+    "oct2025f": "2025-10-08",
+    "oct2025g": "2025-10-09",
     "oct2025a": "2025-10-14",
     "oct2025": "2025-10-15",
     "oct2025b": "2025-10-16",

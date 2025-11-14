@@ -3,6 +3,7 @@ Query beyond the 2,000 rows ESRI gives.
 
 https://gis.stackexchange.com/questions/266897/how-to-get-around-the-1000-objectids-limit-on-arcgis-server
 """
+
 import urllib.parse
 
 import geopandas as gpd

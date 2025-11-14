@@ -1,4 +1,3 @@
-files: _shared_utils
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
@@ -12,7 +11,7 @@ repos:
     rev: 7.3.0
     hooks:
       - id: flake8
-        args: ["--ignore=E501,W503,F403,F405,E711,E712,E231,E702,E203"] 
+        args: ["--ignore=E501,W503,F403,F405,E711,E712,E231,E702,E203"]
         # E711: comparison to None should be 'if cond is not None:' (siuba filtering requires we use != None and not is not)
         # E712: line too long and line before binary operator (black is ok with these), assign lambda expression OK, comparison to True with is (siuba uses ==)
         # E231: missing whitespace after colon (we don't want white space when setting gs://)
@@ -21,8 +20,8 @@ repos:
         types:
           - python
         files: _shared_utils
-  - repo: https://github.com/psf/black
-    rev: 23.1.0
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.9.0
     hooks:
       - id: black
         args: ["--line-length", "120"]

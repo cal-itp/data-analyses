@@ -2,6 +2,7 @@
 Common functions for standardizing how outputs
 are displayed in portfolio.
 """
+
 import base64
 import re
 from pathlib import Path
