@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+import sqlalchemy
 from pytest_unordered import unordered
 from shared_utils.schedule_rt_utils import (
     filter_dim_county_geography,
@@ -61,6 +62,11 @@ class TestScheduleRtUtils:
                 },
             ]
         )
+
+    def test_filter_dim_gtfs_datasets_get_df_false(self, project: str, dataset: str):
+        result = filter_dim_gtfs_datasets(project=project, dataset=dataset, get_df=False)
+
+        assert isinstance(result, sqlalchemy.sql.selectable.Select)
 
     @pytest.mark.vcr
     def test_filter_dim_gtfs_datasets_keep_cols_subset(self, project: str, dataset: str):

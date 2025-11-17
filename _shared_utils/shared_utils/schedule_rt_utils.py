@@ -2,13 +2,14 @@
 Functions to bridge GTFS schedule and RT.
 """
 
-import os
 from typing import Literal, Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
 import geopandas as gpd
 import pandas as pd
+import sqlalchemy
+from shared_utils.db_utils import get_engine
 from shared_utils.models.bridge_organizations_x_headquarters_county_geography import (
     BridgeOrganizationsXHeadquartersCountyGeography,
 )
@@ -19,28 +20,11 @@ from shared_utils.models.dim_provider_gtfs_data import DimProviderGtfsData
 from shared_utils.models.fct_daily_feed_scheduled_service_summary import (
     FctDailyFeedScheduledServiceSummary,
 )
-from sqlalchemy import String, create_engine, select
+from sqlalchemy import String, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import and_, cast, func
 
 PACIFIC_TIMEZONE = "US/Pacific"
-CALITP_BQ_MAX_BYTES = os.environ.get("CALITP_BQ_MAX_BYTES", 5_000_000_000)
-CALITP_BQ_LOCATION = os.environ.get("CALITP_BQ_LOCATION", "us-west2")
-
-
-def _get_engine(max_bytes=None, project="cal-itp-data-infra", dataset=None):
-    # TODO: update calitp_data_analysis.sql.get_engine to accept dataset arg
-    max_bytes = CALITP_BQ_MAX_BYTES if max_bytes is None else max_bytes
-
-    cred_path = os.environ.get("CALITP_SERVICE_KEY_PATH")
-
-    # Note that we should be able to add location as a uri parameter, but
-    # it is not being picked up, so passing as a separate argument for now.
-    return create_engine(
-        f"bigquery://{project}/{dataset if dataset else ''}?maximum_bytes_billed={max_bytes}",  # noqa: E231
-        location=CALITP_BQ_LOCATION,
-        credentials_path=cred_path,
-    )
 
 
 def localize_timestamp_col(df: dd.DataFrame, timestamp_col: Union[str, list]) -> dd.DataFrame:
@@ -78,7 +62,7 @@ def get_schedule_gtfs_dataset_key(date: str, get_df: bool = True, **kwargs) -> p
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_gtfs")
 
-    db_engine = _get_engine(project=project, dataset=dataset)
+    db_engine = get_engine(project=project, dataset=dataset)
     session = Session(db_engine)
     statement = select(FctDailyFeedScheduledServiceSummary).where(
         FctDailyFeedScheduledServiceSummary.service_date == date
@@ -95,7 +79,7 @@ def filter_dim_gtfs_datasets(
     custom_filtering: dict = None,
     get_df: bool = True,
     **kwargs,
-) -> pd.DataFrame:
+) -> Union[pd.DataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Filter mart_transit_database.dim_gtfs_dataset table
     and keep only the valid rows that passed data quality checks.
@@ -106,7 +90,7 @@ def filter_dim_gtfs_datasets(
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_transit_database")
 
-    db_engine = _get_engine(project=project, dataset=dataset)
+    db_engine = get_engine(project=project, dataset=dataset)
     session = Session(db_engine)
 
     dim_gtfs_dataset_columns = []
@@ -129,7 +113,7 @@ def filter_dim_gtfs_datasets(
     if get_df:
         return pd.read_sql(statement, session.bind)
     else:
-        return session.scalars(statement)
+        return statement
 
 
 def get_organization_id(
@@ -169,7 +153,7 @@ def get_organization_id(
         project = kwargs.get("project", "cal-itp-data-infra")
         dataset = kwargs.get("dataset", "mart_transit_database")
 
-        db_engine = _get_engine(project=project, dataset=dataset)
+        db_engine = get_engine(project=project, dataset=dataset)
         session = Session(db_engine)
 
         statement = (
@@ -218,7 +202,7 @@ def filter_dim_county_geography(
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_transit_database")
 
-    db_engine = _get_engine(project=project, dataset=dataset)
+    db_engine = get_engine(project=project, dataset=dataset)
     session = Session(db_engine)
 
     columns = [
@@ -272,7 +256,7 @@ def filter_dim_organizations(
     project = kwargs.get("project", "cal-itp-data-infra")
     dataset = kwargs.get("dataset", "mart_transit_database")
 
-    db_engine = _get_engine(project=project, dataset=dataset)
+    db_engine = get_engine(project=project, dataset=dataset)
     session = Session(db_engine)
 
     dim_organization_columns = []
