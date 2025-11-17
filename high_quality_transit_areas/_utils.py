@@ -1,6 +1,7 @@
 """
 Shared utility functions for HQTA
 """
+
 import geopandas as gpd
 import intake
 import pandas as pd
@@ -8,52 +9,57 @@ from shared_utils import portfolio_utils
 
 catalog = intake.open_catalog("catalog.yml")
 
+
 def add_hqta_details(row) -> str:
     """
-    Add HQTA details of why nulls are present 
+    Add HQTA details of why nulls are present
     based on feedback from open data users.
     """
-    if 'mpo' in row.index and isinstance(row.mpo, str) and row.mpo:
+    if "mpo" in row.index and isinstance(row.mpo, str) and row.mpo:
         return "mpo_rtp_planned_major_stop"
-    
+
     if row.hqta_type == "major_stop_bus":
         if row.schedule_gtfs_dataset_key_primary != row.schedule_gtfs_dataset_key_secondary:
             return "intersection_2_bus_routes_different_operators"
         else:
-            return "intersection_2_bus_routes_same_operator"  
-    
+            return "intersection_2_bus_routes_same_operator"
+
     elif row.hqta_type == "hq_corridor_bus":
         if row.avg_trips_per_peak_hr >= 4:
             return "corridor_frequent_stop"
         else:
             return "corridor_other_stop"
-    
-    elif row.hqta_type in ["major_stop_ferry", 
-                           "major_stop_brt", "major_stop_rail"]:
+
+    elif row.hqta_type in ["major_stop_ferry", "major_stop_brt", "major_stop_rail"]:
         return row.hqta_type + "_single_operator"
-    
 
 
 def primary_rename(df: pd.DataFrame) -> pd.DataFrame:
-    return df.rename(
-        columns = {"schedule_gtfs_dataset_key": "schedule_gtfs_dataset_key_primary"})
+    return df.rename(columns={"schedule_gtfs_dataset_key": "schedule_gtfs_dataset_key_primary"})
+
 
 def clip_to_ca(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Clip to CA boundaries. 
-    """    
+    Clip to CA boundaries.
+    """
     ca = catalog.ca_boundary().read().to_crs(gdf.crs)
 
-    gdf2 = gdf.clip(ca, keep_geom_type = False).reset_index(drop=True)
+    gdf2 = gdf.clip(ca, keep_geom_type=False).reset_index(drop=True)
 
     return gdf2
 
-def append_analysis_name(df: pd.DataFrame, analysis_date: str) -> pd.DataFrame:
-    '''
+
+def append_analysis_name(df: pd.DataFrame) -> pd.DataFrame:
+    """
     Drop duplicates based on analysis_name, add it to columns
-    '''
+    """
     cols = df.columns
-    df = portfolio_utils.standardize_operator_info_for_exports(df, analysis_date)
-    df = df[list(cols) + ['analysis_name']]
-    
-    return df
+    lookback_analysis_name = []
+    for date in df.analysis_date.unique():
+        subset = df.query("analysis_date == @date")
+        subset = portfolio_utils.standardize_operator_info_for_exports(subset, date=date)
+        subset = subset[list(cols) + ["analysis_name"]]
+        lookback_analysis_name += [subset]
+    lookback_analysis_name = pd.concat(lookback_analysis_name)
+
+    return lookback_analysis_name
