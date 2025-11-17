@@ -73,3 +73,5 @@
 2025-11-12 14:14:13.552 | INFO     | __main__:summary_speeds_by_peak_offpeak:161 - rt_stop_times summary speed averaging by peak/offpeak for 2025-09-17 execution time: 0:00:14.912569
 2025-11-12 20:43:31.417 | INFO     | __main__:trip_summary_speeds_by_time_of_day:92 - rt_stop_times summary speed averaging by time-of-day 2025-09-18 execution time: 0:00:08.453807
 2025-11-12 20:43:46.919 | INFO     | __main__:summary_speeds_by_peak_offpeak:161 - rt_stop_times summary speed averaging by peak/offpeak for 2025-09-18 execution time: 0:00:15.482597
+2025-11-17 13:02:04.066 | INFO     | __main__:trip_summary_speeds_by_time_of_day:92 - rt_stop_times summary speed averaging by time-of-day 2025-11-05 execution time: 0:00:08.686730
+2025-11-17 13:02:18.627 | INFO     | __main__:summary_speeds_by_peak_offpeak:161 - rt_stop_times summary speed averaging by peak/offpeak for 2025-11-05 execution time: 0:00:14.538236
