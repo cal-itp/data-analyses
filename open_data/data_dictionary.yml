@@ -32,13 +32,13 @@ common-fields:
     definition: "Name of the stop location"
     definition_source: "https://gtfs.org/schedule/reference/#stopstxt"
   - &stop_sequence
-    definition: |- 
+    definition: |-
       Order of stops for a particular trip. The values must increase along the trip but do not need to be consecutive.
     definition_source: "https://gtfs.org/schedule/reference/#stop_timestxt"
   - &stop_pair
-    definition: A pair of stops. Identifies the current stop_id and the subsequent stop_id. The stop pair value is created internally by concatenating two stop ids with double underscores. 
+    definition: A pair of stops. Identifies the current stop_id and the subsequent stop_id. The stop pair value is created internally by concatenating two stop ids with double underscores.
   - &stop_pair_name
-    definition: A pair of stops. Identifies the current stop_name and the subsequent stop_name. The stop pair name value is created internally by concatenating two stop name with double underscores.     
+    definition: A pair of stops. Identifies the current stop_name and the subsequent stop_name. The stop pair name value is created internally by concatenating two stop name with double underscores.
   - &shape_id
     definition: Identifies a shape
     definition_source: "https://gtfs.org/schedule/reference/#shapestxt"
@@ -47,7 +47,7 @@ common-fields:
       Indicates the direction of travel for a trip. This field should not be used in routing; it provides a way to separate trips by direction when publishing time tables. Valid options are
         0 - Travel in one direction (e.g. outbound travel).
         1 - Travel in the opposite direction (e.g. inbound travel).
-    definition_source: "https://gtfs.org/schedule/reference/#tripstxt"  
+    definition_source: "https://gtfs.org/schedule/reference/#tripstxt"
   - &base64_url
     definition: The base64 encoded url for the feed associated with the agency
   - &district
@@ -59,8 +59,8 @@ common-fields:
       The time period over which the metric is calculated. Valid options are
         offpeak - offpeak hours are 12am-6:59am inclusive, 10am-2:59pm inclusive, and 8pm-11:59pm inclusive.
         peak - peak hours are 7am-9:59am inclusive and 3pm-7:59pm inclusive.
-        all_day 
-    definition_source: "https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/time_helpers.py"  
+        all_day
+    definition_source: "https://github.com/cal-itp/data-analyses/blob/main/_shared_utils/shared_utils/time_helpers.py"
   - &hqta_type
     definition: |-
       Indicates the type of High Quality Transit Area as defined in the Public Resources Code that a stop is and/or falls within. Valid options are: hq_corridor_bus (PRC 21155), major_stop_bus (PRC 21064.3), major_stop_rail (PRC 21064.3), major_stop_ferry (PRC 21064.3), major_stop_brt (PRC 21064.3, 21060.2)
@@ -69,158 +69,152 @@ common-fields:
   - &hqta_details
     definition: |-
       Indicates the details associated with High Quality Transit Area type as defined in the Public Resources Code. Valid options are: major_stop_rail_single_operator, major_stop_brt_single_operator, major_stop_ferry_single_operator,   intersection_2_bus_routes_same_operator, intersection_2_bus_routes_different_operators, stop_along_hq_bus_corridor_single_operator, mpo_rtp_planned_major_stop
-    definition_source: |- 
+    definition_source: |-
       https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?lawCode=PRC&sectionNum=21155, https://leginfo.legislature.ca.gov/faces/codes_displayText.xhtml?lawCode=PRC&division=13.&title=&part=&chapter=2.5.&article
 
 tables:
   - dataset_name: ca_hq_transit_areas
     agency_primary: *agency
-    agency_secondary: 
-      definition: |- 
+    agency_secondary:
+      definition: |-
         Full name of the secondary transit agency (for major bus stops only)
     hqta_type: *hqta_type
     hqta_details: *hqta_details
     route_id: *route_id
     base64_url_primary: *base64_url
-    base64_url_secondary: 
-      definition: |- 
+    base64_url_secondary:
+      definition: |-
         The base64 encoded url for the feed associated with the secondary agency
-    # org_id_primary: *org_id
-    org_id_secondary: 
-      definition: Organization identifier for the secondary agency
     mpo:
-      definition: |- 
+      definition: |-
         Metropolitan Planning Organization, for planned major stops only.
     plan_name:
-      definition: |- 
+      definition: |-
         Name of applicable Regional Transportation Plan, for planned major stops only.
     stop_id: *stop_id
     avg_trips_per_peak_hr:
-      definition: |- 
+      definition: |-
         The number of AM and PM hourly trips. Where AM and PM peak trips differ, the lesser value is used.
-  
+
   - dataset_name: ca_hq_transit_stops
     agency_primary: *agency
-    agency_secondary: 
-      definition: |- 
+    agency_secondary:
+      definition: |-
         Full name of the secondary transit agency (for major bus stops only)
     hqta_type: *hqta_type
     hqta_details: *hqta_details
     route_id: *route_id
     stop_id: *stop_id
     base64_url_primary: *base64_url
-    base64_url_secondary: 
-      definition: |- 
+    base64_url_secondary:
+      definition: |-
         The base64 encoded url for the feed associated with the secondary agency
-    # org_id_primary: *org_id
-    org_id_secondary: 
-      definition: Organization identifier for the secondary agency
     avg_trips_per_peak_hr:
-      definition: |- 
+      definition: |-
         The number of AM and PM hourly trips. Where AM and PM peak trips differ, the lesser value is used.
     mpo:
-      definition: |- 
+      definition: |-
         Metropolitan Planning Organization, for planned major stops only.
     plan_name:
-      definition: |- 
+      definition: |-
         Name of applicable Regional Transportation Plan, for planned major stops only.
-        
+
   - dataset_name: ca_transit_routes
     agency: *agency
-    # org_id: *org_id    
+    # org_id: *org_id
     route_id: *route_id
     route_type: *route_type
     route_name: *route_name
     shape_id: *shape_id
-    n_trips: 
-      definition: Daily trips associated with this shape_id and route_id.      
+    n_trips:
+      definition: Daily trips associated with this shape_id and route_id.
     base64_url: *base64_url
     shn_route:
       definition: Route number or numbers of California State Highway System routes that this shape_id and route_id travels on.
-    on_shs:
+    on_shn:
       definition: "0 or 1 indicating if this shape_id or route_id overlaps with the California State Highway System"
     shn_districts:
       definition: Caltrans District numbers containing each California State Highway System route that this shape_id and route_id travels on.
-    pct_route_on_hwy_across_districts:
+    pct_route_on_hwy_all_districts:
       definition: Percentage of shape_id and route_id distance traveling on any California State Highway System route.
 
   - dataset_name: ca_transit_stops
     agency: *agency
-    # org_id: *org_id    
+    # org_id: *org_id
     stop_id: *stop_id
     stop_name: *stop_name
     base64_url: *base64_url
-    n_routes: 
+    n_routes:
       definition: |-
         "# of unique route_ids this stop serves"
       definition_source: |-
         "https://gtfs.org/schedule/reference/#tripstxt"
-    routetypes: 
+    routetypes:
       definition: |-
         "List of unique route types served at the stop. A value of 3 indicates a route_type==3."
       definition_source: |-
         "https://gtfs.org/schedule/reference/#routestxt"
-    route_ids_served: 
+    route_ids_served:
       definition: |-
         "List of unique route_ids served at the stop. A value of 1 indicates route_id==1."
       definition_source: |-
         "https://gtfs.org/schedule/reference/#routestxt"
-    n_arrivals: 
+    n_arrivals:
       definition: |-
         "# daily arrivals (across routes) this stop serves"
       definition_source: |-
         "https://gtfs.org/schedule/reference/#stop_timestxt"
-    n_hours_in_service: 
+    n_hours_in_service:
       definition: |-
-        "# hours this stop has scheduled service (unique departure hours)" 
+        "# hours this stop has scheduled service (unique departure hours)"
       definition_source: |-
         "https://gtfs.org/schedule/reference/#stop_timestxt"
-    meters_to_ca_state_highway: 
+    meters_to_ca_state_highway:
       definition: |-
-        "Distance in meters from this stop to the nearest CA State Highway System centerline" 
+        "Distance in meters from this stop to the nearest CA State Highway System centerline"
       definition_source: |-
         "https://gisdata-caltrans.opendata.arcgis.com/datasets/77f2d7ba94e040a78bfbe36feb6279da_0/explore"
-    district_name: 
+    district_name:
       definition: |-
-        "Caltrans District containing this stop" 
+        "Caltrans District containing this stop"
       definition_source: |-
         "https://gisdata-caltrans.opendata.arcgis.com/datasets/0144574f750f4ccc88749004aca6eb0c_0/explore"
 
   - dataset_name: speeds_by_stop_segments
     agency: *agency
-    # org_id: *org_id    
+    # org_id: *org_id
     route_id: *route_id
     direction_id: *direction_id
     stop_pair: *stop_pair
     stop_pair_name: *stop_pair_name
-    p20_mph: 
-      definition: |- 
+    p20_mph:
+      definition: |-
         The 20th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
     p50_mph:
-      definition: |- 
+      definition: |-
         The 50th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
-    p80_mph: 
-      definition: |- 
+    p80_mph:
+      definition: |-
         The 80th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
-    n_trips: 
-      definition: |- 
+    n_trips:
+      definition: |-
         The number of trips used to find the 20th, 50th, and 80th percentile speeds within the segment.
     time_period: *time_period
     base64_url: *base64_url
     district_name: *district_name
-    
+
   - dataset_name: speeds_by_route_time_of_day
     agency: *agency
-    # org_id: *org_id    
+    # org_id: *org_id
     route_id: *route_id
     route_name: *route_name
     direction_id: *direction_id
     time_period: *time_period
-    speed_mph: 
-      definition: |- 
+    speed_mph:
+      definition: |-
         The average speed_mph for all trips with vehicle positions for that time_period.
-    n_trips: 
-      definition: |- 
+    n_trips:
+      definition: |-
         The number of trips used to calculate the average speed_mph for that route_id, direction_id, and time_period.
     base64_url: *base64_url
     district_name: *district_name
