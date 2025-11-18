@@ -1,8 +1,6 @@
 metadata:
   version: 1
 common-fields:
-  # - &org_id
-  #   definition: Organization identifier for the agency
   - &agency
     definition: Full name of the transit agency
   - &route_id
@@ -121,7 +119,6 @@ tables:
 
   - dataset_name: ca_transit_routes
     agency: *agency
-    # org_id: *org_id
     route_id: *route_id
     route_type: *route_type
     route_name: *route_name
@@ -140,7 +137,6 @@ tables:
 
   - dataset_name: ca_transit_stops
     agency: *agency
-    # org_id: *org_id
     stop_id: *stop_id
     stop_name: *stop_name
     base64_url: *base64_url
@@ -212,7 +208,6 @@ tables:
 
   - dataset_name: speeds_by_route_time_of_day
     agency: *agency
-    # org_id: *org_id
     route_id: *route_id
     route_name: *route_name
     direction_id: *direction_id
