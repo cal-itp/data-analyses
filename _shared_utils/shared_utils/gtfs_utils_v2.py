@@ -33,7 +33,7 @@ ROUTE_TYPE_DICT = {
     "3": "Bus",
     "4": "Ferry",
     "5": "Cable tram",
-    "6": "Aerial lift, suspecnded cable car",
+    "6": "Aerial lift, suspended cable car",
     "7": "Funicular",
     "11": "Trolleybus",
     "12": "Monorail",
