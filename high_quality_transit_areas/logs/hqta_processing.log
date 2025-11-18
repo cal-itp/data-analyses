@@ -367,3 +367,5 @@
 2025-11-17 11:25:07.892 | INFO     | __main__:<module>:197 - C3_create_bus_hqta_types 2025-11-05 execution time: 0:00:25.174186
 2025-11-17 11:25:53.233 | INFO     | __main__:<module>:270 - D1_assemble_hqta_points 2025-11-05 execution time: 0:00:18.593698
 2025-11-17 11:26:33.254 | INFO     | __main__:<module>:171 - D2_assemble_hqta_polygons 2025-11-05 execution time: 0:00:11.797641
+2025-11-17 13:53:41.707 | INFO     | __main__:<module>:265 - D1_assemble_hqta_points 2025-11-05 execution time: 0:00:16.434715
+2025-11-17 13:54:20.842 | INFO     | __main__:<module>:156 - D2_assemble_hqta_polygons 2025-11-05 execution time: 0:00:11.658692
