@@ -80,10 +80,12 @@ STANDARDIZED_COLUMNS_DICT = {
     "agency_name_primary": "agency_primary",
     "agency_name_secondary": "agency_secondary",
     "route_name_used": "route_name",
+    "route_short_name": "route_name",
     "route_types_served": "routetypes",
     "meters_to_shn": "meters_to_ca_state_highway",
     "portfolio_organization_name": "agency",
     "analysis_name": "agency",
+    "time_of_day": "time_period",
 }
 
 
@@ -100,7 +102,14 @@ def remove_internal_keys(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Leave only natural identifiers (route_id, shape_id).
     Remove shape_array_key, gtfs_dataset_key, etc.
     """
-    exclude_list = ["sec_elapsed", "meters_elapsed", "name", "schedule_gtfs_dataset_key"]
+    exclude_list = [
+        "sec_elapsed",
+        "meters_elapsed",
+        "name",
+        "schedule_gtfs_dataset_key",
+        "source_record_id",
+        "stop_pair",
+    ]  #  use segment_id instead, includes stop_ids
     cols = [c for c in df.columns]
 
     internal_cols = [c for c in cols if "_key" in c or c in exclude_list]

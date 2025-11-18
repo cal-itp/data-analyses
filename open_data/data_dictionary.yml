@@ -35,8 +35,8 @@ common-fields:
     definition: |-
       Order of stops for a particular trip. The values must increase along the trip but do not need to be consecutive.
     definition_source: "https://gtfs.org/schedule/reference/#stop_timestxt"
-  - &stop_pair
-    definition: A pair of stops. Identifies the current stop_id and the subsequent stop_id. The stop pair value is created internally by concatenating two stop ids with double underscores.
+  - &segment_id
+    definition: Identifies a segment, formatted as stop_id-stop_id-n. n is 1 for the first segment between those stops. If those stops are farther than 1km apart, additional segments between those stops will be added, incrementing n by 1 for each km.
   - &stop_pair_name
     definition: A pair of stops. Identifies the current stop_name and the subsequent stop_name. The stop pair name value is created internally by concatenating two stop name with double underscores.
   - &shape_id
@@ -182,23 +182,30 @@ tables:
 
   - dataset_name: speeds_by_stop_segments
     agency: *agency
-    # org_id: *org_id
     route_id: *route_id
+    route_name: *route_name
     direction_id: *direction_id
-    stop_pair: *stop_pair
+    shape_id: *shape_id
+    segment_id: *segment_id
     stop_pair_name: *stop_pair_name
     p20_mph:
       definition: |-
-        The 20th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
+        The 20th percentile speed (mph) for all trips associated with the route_id, direction_id, segment_id, and time_period.
     p50_mph:
       definition: |-
-        The 50th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
+        The 50th percentile speed (mph) for all trips associated with the route_id, direction_id, segment_id, and time_period.
     p80_mph:
       definition: |-
-        The 80th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.
+        The 80th percentile speed (mph) for all trips associated with the route_id, direction_id, segment_id, and time_period.
     n_trips:
       definition: |-
-        The number of trips used to find the 20th, 50th, and 80th percentile speeds within the segment.
+        The number of observed trips used to find the 20th, 50th, and 80th percentile speeds within the segment.
+    n_trips_sch:
+      definition: |-
+        The number of trips scheduled to operate for this segment and time period.
+    trips_hr_sch:
+      definition: |-
+        The scheduled frequency for this segment and time period, in trips per hour'/.
     time_period: *time_period
     base64_url: *base64_url
     district_name: *district_name
