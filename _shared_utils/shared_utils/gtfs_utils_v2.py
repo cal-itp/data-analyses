@@ -121,36 +121,6 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
         return filter()
 
 
-def filter_feed_options(
-    feed_option: Literal[
-        "customer_facing",
-        "use_subfeeds",
-        "current_feeds",
-        "include_precursor",
-    ],
-) -> siuba.dply.verbs.Pipeable:
-    exclude_precursor = filter(_.regional_feed_type != "Regional Precursor Feed")
-
-    if feed_option == "customer_facing":
-        return filter(_.regional_feed_type != "Regional Subfeed") >> exclude_precursor
-
-    elif feed_option == "use_subfeeds":
-        return (
-            filter(
-                _["name"] != "Bay Area 511 Regional Schedule"
-            )  # keep VCTC combined because the combined feed is the only feed
-            >> exclude_precursor
-        )
-
-    elif feed_option == "current_feeds":
-        return exclude_precursor
-
-    elif feed_option == "include_precursor":
-        return filter()
-    else:
-        return filter()
-
-
 def check_operator_feeds(operator_feeds: list[str]):
     if len(operator_feeds) == 0:
         raise ValueError("Supply list of feed keys or operator names!")
