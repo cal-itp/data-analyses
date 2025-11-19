@@ -2,21 +2,21 @@
 segmentize:
 	#pip install -r requirements.txt
 	python cut_stop_segments.py
-	python cut_speedmap_segments.py      
+	python cut_speedmap_segments.py
 
 rt_stop_times_pipeline:
 	make segmentize
 	python pipeline_rt_stop_times.py
-	python average_summary_speeds.py  
+	python average_summary_speeds.py
 	#python average_segment_speeds.py  # Now multi-day averages
 
 speedmaps_pipeline:
 	python pipeline_speedmap.py
-  
+
 all_speeds_pipeline:
 	make rt_stop_times_pipeline
 	make speedmaps_pipeline
-	python publish_open_data.py  
+	python publish_open_data.py
 	#python publish_public_gcs.py #rarely used
 
 download_roads:
@@ -32,40 +32,23 @@ census_roads_preprocessing:
 
 modeled_vp_preprocessing:
 	python vp_condenser.py
-	python resample.py 
-	#python modeled_speeds_general.py 
+	python resample.py
+	#python modeled_speeds_general.py
 # dependency is a more minimal version of stop_times_direction
-	#python cut_stop_segments.py  
+	#python cut_stop_segments.py
 
 modeled_rt_stop_times:
 	python stop_times_prep.py
 	python modeled_rt_stop_times_speeds.py
 	python aggregate_modeled_speeds.py
-    
+
 modeled_road_segment_speeds:
-	python crosswalk_vp_roads.py    
+	python crosswalk_vp_roads.py
 	python project_road_segments.py
 	python model_speeds_for_roads.py
 	python aggregate_road_speeds.py
 
-# sep2025 - looping through operators takes really long, maybe 4 hours,
-# it's sensitive to which operators will error, so twice it stopped
-# most of the outputs are really small, so they could do with being batched
+# doing batches by matching how download was done, then splitting
 movingpandas_pipeline:
-	python download_vp_path.py  
-	python trajectify_vp.py  
-
-# doing batches by matching how download was done, then splitting 
-# the very large remaining batch into 3....this worked better
-# but it still stopped after 4 batches, still had 2 more batches
-# just jul2025
-movingpandas_batch_pipeline:
-	python download_vp_path.py  
-	python trajectify_vp_batches.py  
-
-# perhaps figuring out how many partitions for dask map partitions
-# will work? 10? 6? 
-# just aug2025
-movingpandas_batch_pipeline_dask:
-	#python download_vp_path_aug.py  
-	python trajectify_vp_batches_dask.py  
+	python download_vp_path.py
+	python trajectify_vp.py
