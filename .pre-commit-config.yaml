@@ -19,7 +19,6 @@ repos:
         # E203: whitespace before ':', this rule is in conflict with another formatter's.
         types:
           - python
-        files: _shared_utils
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 25.9.0
     hooks:
