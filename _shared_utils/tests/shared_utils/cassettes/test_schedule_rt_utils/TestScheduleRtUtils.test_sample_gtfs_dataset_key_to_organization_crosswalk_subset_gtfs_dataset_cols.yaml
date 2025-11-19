@@ -1,7 +1,6 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
       [{"value": "schedule"}]}, "name": "type_1"}], "parameterMode": "NAMED", "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
@@ -62,8 +61,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "STRING"}, "parameterValue": {"value": "US/Pacific"}, "name": "datetime_1"},
       {"parameterType": {"type": "STRING"}, "parameterValue": {"value": "2025-10-16"},
       "name": "datetime_2"}, {"parameterType": {"type": "STRING"}, "parameterValue":
@@ -150,8 +148,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [], "useLegacySql": false,
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql": false,
       "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2", "query":
       "SELECT `dim_organizations`.`source_record_id` AS `organization_source_record_id`,
       `dim_organizations`.`name` \nFROM `dim_organizations` \nWHERE `dim_organizations`.`_is_current`
@@ -210,8 +207,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "INT64"}, "parameterValue": {"value": "2"}, "name": "lpad_1"}, {"parameterType":
       {"type": "STRING"}, "parameterValue": {"value": "0"}, "name": "lpad_2"}, {"parameterType":
       {"type": "STRING"}, "parameterValue": {"value": " - "}, "name": "concat_1"},

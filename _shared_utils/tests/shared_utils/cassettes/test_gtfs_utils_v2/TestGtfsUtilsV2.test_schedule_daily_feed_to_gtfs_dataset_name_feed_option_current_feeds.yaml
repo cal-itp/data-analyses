@@ -1,22 +1,25 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
-      "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
+      {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
       [{"value": "schedule"}]}, "name": "type_1"}, {"parameterType": {"type": "STRING"},
       "parameterValue": {"value": "2025-09-01"}, "name": "date_1"}, {"parameterType":
       {"type": "STRING"}, "parameterValue": {"value": "Regional Precursor Feed"},
       "name": "regional_feed_type_1"}], "parameterMode": "NAMED", "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
-      "query": "SELECT `dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`, `dim_gtfs_datasets`.`name`
-      AS `gtfs_dataset_name`, `dim_gtfs_datasets`.`type`, `dim_gtfs_datasets`.`regional_feed_type`,
-      `fct_daily_schedule_feeds`.`gtfs_dataset_name` AS `name` \nFROM `dim_gtfs_datasets`
-      JOIN `fct_daily_schedule_feeds` ON `fct_daily_schedule_feeds`.`gtfs_dataset_key`
-      = `dim_gtfs_datasets`.`key` AND `fct_daily_schedule_feeds`.`gtfs_dataset_name`
-      = `dim_gtfs_datasets`.`name` \nWHERE `dim_gtfs_datasets`.`data_quality_pipeline`
-      = true AND `dim_gtfs_datasets`.`type` IN UNNEST(@`type_1`) AND `fct_daily_schedule_feeds`.`date`
-      = @`date_1` AND `dim_gtfs_datasets`.`regional_feed_type` != @`regional_feed_type_1`",
-      "maxResults": 5000, "requestId": "0b046396-a98b-4ff7-8511-c2acf2a5e76d"}'
+      "query": "SELECT `test_shared_utils.dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`,
+      `test_shared_utils.dim_gtfs_datasets`.`name` AS `gtfs_dataset_name`, `test_shared_utils.dim_gtfs_datasets`.`type`,
+      `test_shared_utils.dim_gtfs_datasets`.`regional_feed_type`, `test_shared_utils.fct_daily_schedule_feeds`.`key`,
+      `test_shared_utils.fct_daily_schedule_feeds`.`date`, `test_shared_utils.fct_daily_schedule_feeds`.`feed_key`,
+      `test_shared_utils.fct_daily_schedule_feeds`.`feed_timezone`, `test_shared_utils.fct_daily_schedule_feeds`.`base64_url`,
+      `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_name` AS `name` \nFROM
+      `test_shared_utils.dim_gtfs_datasets` JOIN `test_shared_utils.fct_daily_schedule_feeds`
+      ON `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_key` = `test_shared_utils.dim_gtfs_datasets`.`key`
+      AND `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_name` = `test_shared_utils.dim_gtfs_datasets`.`name`
+      \nWHERE `test_shared_utils.dim_gtfs_datasets`.`data_quality_pipeline` = true
+      AND `test_shared_utils.dim_gtfs_datasets`.`type` IN UNNEST(@`type_1`) AND `test_shared_utils.fct_daily_schedule_feeds`.`date`
+      = @`date_1` AND `test_shared_utils.dim_gtfs_datasets`.`regional_feed_type` !=
+      @`regional_feed_type_1`", "maxResults": 5000, "requestId": "2562e194-b44f-42d7-8cea-c5f0b984aef6"}'
     headers:
       Accept:
       - '*/*'
@@ -27,24 +30,24 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1417'
+      - '1873'
       Content-Type:
       - application/json
       User-Agent:
-      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
       X-Goog-API-Client:
-      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
       x-goog-user-project:
       - cal-itp-data-infra-staging
     method: POST
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"type","type":"STRING","mode":"NULLABLE"},{"name":"regional_feed_type","type":"STRING","mode":"NULLABLE"},{"name":"name","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_r_ojzuWBfkCcX5ki0WDhrAbh7Dx4","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"d6ed100168196d507b4ef1c0d111ee72"},{"v":"Bay
-        Area 511 Regional Schedule"},{"v":"schedule"},{"v":"Combined Regional Feed"},{"v":"Bay
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"type","type":"STRING","mode":"NULLABLE"},{"name":"regional_feed_type","type":"STRING","mode":"NULLABLE"},{"name":"key","type":"STRING","mode":"NULLABLE"},{"name":"date","type":"DATETIME","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"},{"name":"feed_timezone","type":"STRING","mode":"NULLABLE"},{"name":"base64_url","type":"STRING","mode":"NULLABLE"},{"name":"name","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_dXBP1mRrg2lUeYjyyJKz5E0CnYcn","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"d6ed100168196d507b4ef1c0d111ee72"},{"v":"Bay
+        Area 511 Regional Schedule"},{"v":"schedule"},{"v":"Combined Regional Feed"},{"v":"361663508967ce62a3557993829f8bf8"},{"v":"2025-09-01T00:00:00"},{"v":"c86f88ad0b15f5185d073f91f2130285"},{"v":"America/Los_Angeles"},{"v":"aHR0cHM6Ly9hcGkuNTExLm9yZy90cmFuc2l0L2RhdGFmZWVkcz9vcGVyYXRvcl9pZD1SRw=="},{"v":"Bay
         Area 511 Regional Schedule"}]},{"f":[{"v":"9f2566d34fde8d7d0d51b64bdf77a7ba"},{"v":"Bay
-        Area 511 ACE Schedule"},{"v":"schedule"},{"v":"Regional Subfeed"},{"v":"Bay
-        Area 511 ACE Schedule"}]}],"totalBytesProcessed":"1141","jobComplete":true,"cacheHit":false,"queryId":"job_r_ojzuWBfkCcX5ki0WDhrAbh7Dx4","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"20971520","totalSlotMs":"15","location":"us-west2","creationTime":"1763424335329","startTime":"1763424335388","endTime":"1763424335505"}'
+        Area 511 ACE Schedule"},{"v":"schedule"},{"v":"Regional Subfeed"},{"v":"80a64851bc2bcae60ebb5f8a56148ad9"},{"v":"2025-09-01T00:00:00"},{"v":"3bbe132a97a1510d3e1a265875ef7590"},{"v":null},{"v":"aHR0cHM6Ly9hcGkuNTExLm9yZy90cmFuc2l0L2RhdGFmZWVkcz9vcGVyYXRvcl9pZD1DRQ=="},{"v":"Bay
+        Area 511 ACE Schedule"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_dXBP1mRrg2lUeYjyyJKz5E0CnYcn","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1763603619053","startTime":"1763603619106","endTime":"1763603619182"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -53,7 +56,7 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Tue, 18 Nov 2025 00:05:35 GMT
+      - Thu, 20 Nov 2025 01:53:39 GMT
       Server:
       - ESF
       Transfer-Encoding:

@@ -1,7 +1,6 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "STRING"}, "parameterValue": {"value": "2025-09-01"}, "name": "service_date_1"}],
       "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
       true}, "location": "us-west2", "query": "SELECT `fct_daily_feed_scheduled_service_summary`.`service_date`,

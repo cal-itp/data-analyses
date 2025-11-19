@@ -13,25 +13,17 @@ from shared_utils.schedule_rt_utils import (
 
 
 class TestScheduleRtUtils:
-    @pytest.fixture
-    def project(self):
-        return "cal-itp-data-infra-staging"
-
-    @pytest.fixture
-    def dataset(self):
-        return "test_shared_utils"
-
     @pytest.mark.vcr
-    def test_get_schedule_gtfs_dataset_key(self, project: str, dataset: str):
-        result = get_schedule_gtfs_dataset_key(project=project, dataset=dataset, date="2025-09-01")
+    def test_get_schedule_gtfs_dataset_key(self):
+        result = get_schedule_gtfs_dataset_key(date="2025-09-01")
 
         assert len(result) == 1
         assert result.gtfs_dataset_key.values[0] == "0089bd1b0a2b78a8590d8749737d7146"
         assert result.feed_key.values[0] == "10f6bb537140b7e52c8f313f3d611f71"
 
     @pytest.mark.vcr
-    def test_filter_dim_gtfs_datasets(self, project: str, dataset: str):
-        result = filter_dim_gtfs_datasets(project=project, dataset=dataset)
+    def test_filter_dim_gtfs_datasets(self):
+        result = filter_dim_gtfs_datasets()
 
         assert len(result) == 3
         assert result.to_dict(orient="records") == unordered(
@@ -63,14 +55,14 @@ class TestScheduleRtUtils:
             ]
         )
 
-    def test_filter_dim_gtfs_datasets_get_df_false(self, project: str, dataset: str):
-        result = filter_dim_gtfs_datasets(project=project, dataset=dataset, get_df=False)
+    def test_filter_dim_gtfs_datasets_get_df_false(self):
+        result = filter_dim_gtfs_datasets(get_df=False)
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
 
     @pytest.mark.vcr
-    def test_filter_dim_gtfs_datasets_keep_cols_subset(self, project: str, dataset: str):
-        result = filter_dim_gtfs_datasets(keep_cols=["key", "name"], project=project, dataset=dataset)
+    def test_filter_dim_gtfs_datasets_keep_cols_subset(self):
+        result = filter_dim_gtfs_datasets(keep_cols=["key", "name"])
 
         assert len(result) == 3
         assert result.to_dict(orient="records") == unordered(
@@ -88,8 +80,8 @@ class TestScheduleRtUtils:
         )
 
     @pytest.mark.vcr
-    def test_filter_dim_gtfs_datasets_custom_filtering(self, project: str, dataset: str):
-        result = filter_dim_gtfs_datasets(custom_filtering={"type": ["trip_updates"]}, project=project, dataset=dataset)
+    def test_filter_dim_gtfs_datasets_custom_filtering(self):
+        result = filter_dim_gtfs_datasets(custom_filtering={"type": ["trip_updates"]})
 
         assert len(result) == 1
         assert result.to_dict(orient="records") == unordered(
@@ -105,14 +97,12 @@ class TestScheduleRtUtils:
             ]
         )
 
-    def test_filter_dim_gtfs_datasets_keep_cols_key_missing(self, project: str, dataset: str):
+    def test_filter_dim_gtfs_datasets_keep_cols_key_missing(self):
         with pytest.raises(KeyError, match="Include key in keep_cols list"):
-            filter_dim_gtfs_datasets(
-                keep_cols=["name", "type", "regional_feed_type", "uri", "base64_url"], project=project, dataset=dataset
-            )
+            filter_dim_gtfs_datasets(keep_cols=["name", "type", "regional_feed_type", "uri", "base64_url"])
 
     @pytest.mark.vcr
-    def test_get_organization_id_no_merge_cols(self, project: str, dataset: str):
+    def test_get_organization_id_no_merge_cols(self):
         dataframe = pd.DataFrame(
             data=[
                 {
@@ -129,17 +119,15 @@ class TestScheduleRtUtils:
         )
 
         with pytest.raises(IndexError, match="list index out of range"):
-            get_organization_id(df=dataframe, date="2025-10-12", project=project, dataset=dataset)
+            get_organization_id(df=dataframe, date="2025-10-12")
 
-    def test_get_organization_id_invalid_merge_cols(self, project: str, dataset: str):
+    def test_get_organization_id_invalid_merge_cols(self):
         with pytest.raises(KeyError, match="Unable to detect which GTFS quartet"):
-            get_organization_id(
-                df=pd.DataFrame(), date="2025-10-12", merge_cols=["notreal"], project=project, dataset=dataset
-            )
+            get_organization_id(df=pd.DataFrame(), date="2025-10-12", merge_cols=["notreal"])
 
     @pytest.mark.vcr
-    def test_filter_dim_county_geography(self, project: str, dataset: str):
-        result = filter_dim_county_geography(project=project, dataset=dataset, date="2025-06-17")
+    def test_filter_dim_county_geography(self):
+        result = filter_dim_county_geography(date="2025-06-17")
 
         assert len(result) == 2
         assert result.to_dict(orient="records") == unordered(
@@ -153,16 +141,14 @@ class TestScheduleRtUtils:
         )
 
     @pytest.mark.vcr
-    def test_filter_dim_county_geography_date_unavailable(self, project: str, dataset: str):
-        result = filter_dim_county_geography(project=project, dataset=dataset, date="2024-01-17")
+    def test_filter_dim_county_geography_date_unavailable(self):
+        result = filter_dim_county_geography(date="2024-01-17")
 
         assert len(result) == 0
 
     @pytest.mark.vcr
-    def test_filter_dim_county_geography_additional_keep_cols(self, project: str, dataset: str):
+    def test_filter_dim_county_geography_additional_keep_cols(self):
         result = filter_dim_county_geography(
-            project=project,
-            dataset=dataset,
             date="2025-06-17",
             keep_cols=["caltrans_district", "county_geography_name", "msa", "fips"],
         )
@@ -190,8 +176,8 @@ class TestScheduleRtUtils:
         assert result.columns.is_unique == True
 
     @pytest.mark.vcr
-    def test_filter_dim_organizations(self, project: str, dataset: str):
-        result = filter_dim_organizations(project=project, dataset=dataset)
+    def test_filter_dim_organizations(self):
+        result = filter_dim_organizations()
 
         assert len(result) == 3
         assert result.to_dict(orient="records") == unordered(
@@ -204,10 +190,8 @@ class TestScheduleRtUtils:
         assert "coolplace33333bX7" not in result.organization_source_record_id.values
 
     @pytest.mark.vcr
-    def test_filter_dim_organizations_additional_keep_cols(self, project: str, dataset: str):
-        result = filter_dim_organizations(
-            project=project, dataset=dataset, keep_cols=["key", "name", "organization_type"]
-        )
+    def test_filter_dim_organizations_additional_keep_cols(self):
+        result = filter_dim_organizations(keep_cols=["key", "name", "organization_type"])
 
         assert len(result) == 3
         assert result.to_dict(orient="records") == unordered(
@@ -231,12 +215,10 @@ class TestScheduleRtUtils:
         )
 
     @pytest.mark.vcr
-    def test_filter_dim_organizations_custom_filtering(self, project: str, dataset: str):
+    def test_filter_dim_organizations_custom_filtering(self):
         result = filter_dim_organizations(
             custom_filtering={"name": ["City of Mission Viejo", "City of Patterson"]},
-            project=project,
             keep_cols=["name", "source_record_id"],
-            dataset=dataset,
         )
 
         assert len(result) == 2
@@ -248,7 +230,7 @@ class TestScheduleRtUtils:
         )
 
     @pytest.mark.vcr
-    def test_sample_gtfs_dataset_key_to_organization_crosswalk(self, project: str, dataset: str):
+    def test_sample_gtfs_dataset_key_to_organization_crosswalk(self):
         dataframe = pd.DataFrame(
             data=[
                 {
@@ -260,7 +242,9 @@ class TestScheduleRtUtils:
         )
 
         result = sample_gtfs_dataset_key_to_organization_crosswalk(
-            df=dataframe, date="2025-10-16", quartet_data="schedule", project=project, dataset=dataset
+            df=dataframe,
+            date="2025-10-16",
+            quartet_data="schedule",
         )
 
         assert len(result) == 1
@@ -283,9 +267,7 @@ class TestScheduleRtUtils:
         )
 
     @pytest.mark.vcr
-    def test_sample_gtfs_dataset_key_to_organization_crosswalk_subset_gtfs_dataset_cols(
-        self, project: str, dataset: str
-    ):
+    def test_sample_gtfs_dataset_key_to_organization_crosswalk_subset_gtfs_dataset_cols(self):
         dataframe = pd.DataFrame(
             data=[
                 {
@@ -305,8 +287,6 @@ class TestScheduleRtUtils:
                 "name",
                 "source_record_id",
             ],
-            project=project,
-            dataset=dataset,
         )
 
         assert len(result) == 1

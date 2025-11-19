@@ -1,7 +1,6 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "STRING"}, "parameterValue": {"value": "US/Pacific"}, "name": "datetime_1"},
       {"parameterType": {"type": "STRING"}, "parameterValue": {"value": "2025-10-12"},
       "name": "datetime_2"}, {"parameterType": {"type": "STRING"}, "parameterValue":

@@ -1,11 +1,17 @@
+from shared_utils.models.base import get_table_name
 from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
 
 
 class FctDailyFeedScheduledServiceSummary(Base):
-    __tablename__ = "fct_daily_feed_scheduled_service_summary"
+    dataset = "mart_gtfs"
+    table = "fct_daily_feed_scheduled_service_summary"
+
+    @declared_attr
+    def __tablename__(cls):
+        return get_table_name(cls.dataset, cls.table)
 
     service_date = Column(DateTime, primary_key=True)
     feed_key = Column(String, primary_key=True)

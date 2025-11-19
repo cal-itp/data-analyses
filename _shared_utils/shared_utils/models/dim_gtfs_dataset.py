@@ -1,11 +1,17 @@
+from shared_utils.models.base import get_table_name
 from sqlalchemy import Boolean, Column, Date, DateTime, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
 
 
 class DimGtfsDataset(Base):
-    __tablename__ = "dim_gtfs_datasets"
+    dataset = "mart_transit_database"
+    table = "dim_gtfs_datasets"
+
+    @declared_attr
+    def __tablename__(cls):
+        return get_table_name(cls.dataset, cls.table)
 
     key = Column(String, primary_key=True)
     source_record_id = Column(String)

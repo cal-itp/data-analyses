@@ -1,7 +1,6 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
       [{"value": "Metrolink Schedule"}]}, "name": "name_1"}, {"parameterType": {"type":
       "STRING"}, "parameterValue": {"value": "2025-08-23"}, "name": "date_1"}], "parameterMode":

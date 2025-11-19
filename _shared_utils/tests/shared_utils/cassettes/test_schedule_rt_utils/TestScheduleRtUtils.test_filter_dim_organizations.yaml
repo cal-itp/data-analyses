@@ -1,7 +1,6 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [], "useLegacySql": false,
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql": false,
       "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2", "query":
       "SELECT `dim_organizations`.`source_record_id` AS `organization_source_record_id`
       \nFROM `dim_organizations` \nWHERE `dim_organizations`.`_is_current` = true",

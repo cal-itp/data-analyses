@@ -1,7 +1,6 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "INT64"}, "parameterValue": {"value": "2"}, "name": "lpad_1"}, {"parameterType":
       {"type": "STRING"}, "parameterValue": {"value": "0"}, "name": "lpad_2"}, {"parameterType":
       {"type": "STRING"}, "parameterValue": {"value": " - "}, "name": "concat_1"},

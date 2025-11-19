@@ -1,11 +1,18 @@
+from shared_utils.models.base import get_table_name
+
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
 
 
 class DimOrganization(Base):
-    __tablename__ = "dim_organizations"
+    dataset = "mart_transit_database"
+    table = "dim_organizations"
+
+    @declared_attr
+    def __tablename__(cls):
+        return get_table_name(cls.dataset, cls.table)
 
     key = Column(String, primary_key=True)
     source_record_id = Column(String)

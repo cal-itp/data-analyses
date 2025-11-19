@@ -8,20 +8,19 @@ GTFS utils for v2 warehouse
 import datetime
 from typing import Literal, Union
 
+from calitp_data_analysis.tables import tbls
+from shared_utils import DBSession, schedule_rt_utils
+from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
+from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
+
 import geopandas as gpd
 import pandas as pd
 import shapely
 import siuba  # need this to do type hint in functions
 import sqlalchemy
 from calitp_data_analysis import geography_utils
-from calitp_data_analysis.tables import tbls
-from shared_utils import schedule_rt_utils
-from shared_utils.db_utils import get_engine
-from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
-from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
 from siuba import *
 from sqlalchemy import and_
-from sqlalchemy.orm import Session
 
 GCS_PROJECT = "cal-itp-data-infra"
 
@@ -158,21 +157,11 @@ def get_metrolink_feed_key(
     """
     Get Metrolink's feed_key value.
     """
-
-    project = kwargs.get("project", "cal-itp-data-infra")
-    dataset = kwargs.get("dataset", "mart_gtfs")
-    transit_dataset = kwargs.get("transit_dataset", "mart_transit_database")
-
     metrolink_in_airtable = schedule_rt_utils.filter_dim_gtfs_datasets(
         keep_cols=["key", "name"],
         custom_filtering={"name": ["Metrolink Schedule"]},
         get_df=False,
-        project=project,
-        dataset=transit_dataset,
     )
-
-    db_engine = get_engine(project=project, dataset=dataset)
-    session = Session(db_engine)
 
     statement = (
         metrolink_in_airtable.add_columns(FctDailyScheduleFeeds.feed_key)
@@ -186,7 +175,9 @@ def get_metrolink_feed_key(
         .where(FctDailyScheduleFeeds.date == selected_date)
     )
 
-    metrolink_feed = pd.read_sql(statement, session.bind)
+    with DBSession() as session:
+        metrolink_feed = pd.read_sql(statement, session.bind)
+
     metrolink_feed = metrolink_feed.rename(columns={"gtfs_dataset_name": "name"})[["feed_key", "name"]]
 
     if get_df:
@@ -234,7 +225,6 @@ def schedule_daily_feed_to_gtfs_dataset_name(
         "current_feeds",
         "include_precursor",
     ] = "use_subfeeds",
-    **kwargs,
 ) -> Union[pd.DataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Select a date, find what feeds are present, and
@@ -259,20 +249,11 @@ def schedule_daily_feed_to_gtfs_dataset_name(
                 Caution: would result in duplicate organization names
     """
     # Get GTFS schedule datasets from Airtable
-    project = kwargs.get("project", "cal-itp-data-infra")
-    dataset = kwargs.get("dataset", "mart_gtfs")
-    transit_dataset = kwargs.get("transit_dataset", "mart_transit_database")
-
     dim_gtfs_datasets = schedule_rt_utils.filter_dim_gtfs_datasets(
         keep_cols=["key", "name", "type", "regional_feed_type"],
         custom_filtering={"type": ["schedule"]},
         get_df=False,
-        project=project,
-        dataset=transit_dataset,
     )
-
-    db_engine = get_engine(project=project, dataset=dataset)
-    session = Session(db_engine)
 
     additional_search_conditions = {
         "customer_facing": [
@@ -292,7 +273,14 @@ def schedule_daily_feed_to_gtfs_dataset_name(
 
     # Join on gtfs_dataset_key to get organization name
     statement = (
-        dim_gtfs_datasets.add_columns(FctDailyScheduleFeeds.gtfs_dataset_name.label("name"))
+        dim_gtfs_datasets.add_columns(
+            FctDailyScheduleFeeds.key,
+            FctDailyScheduleFeeds.date,
+            FctDailyScheduleFeeds.feed_key,
+            FctDailyScheduleFeeds.feed_timezone,
+            FctDailyScheduleFeeds.base64_url,
+            FctDailyScheduleFeeds.gtfs_dataset_name.label("name"),
+        )
         .join(
             FctDailyScheduleFeeds,
             and_(
@@ -311,7 +299,8 @@ def schedule_daily_feed_to_gtfs_dataset_name(
         statement = statement.with_only_columns(columns)
 
     if get_df:
-        return pd.read_sql(statement, session.bind)
+        with DBSession() as session:
+            return pd.read_sql(statement, session.bind)
 
     return statement
 
