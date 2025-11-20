@@ -181,6 +181,8 @@ class TestScheduleRtUtils:
             ]
         )
 
+        assert result.columns.is_unique == True
+
     @pytest.mark.vcr
     def test_filter_dim_organizations(self, project: str, dataset: str):
         result = filter_dim_organizations(project=project, dataset=dataset)

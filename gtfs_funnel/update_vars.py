@@ -1,5 +1,6 @@
 from shared_utils import catalog_utils, rt_dates
 
+oct2025_week = rt_dates.get_week("oct2025", exclude_wed=True)
 apr2025_week = rt_dates.get_week("apr2025", exclude_wed=True)
 oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
