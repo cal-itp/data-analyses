@@ -2,8 +2,8 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql": false,
       "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2", "query":
-      "SELECT `dim_organizations`.`key`, `dim_organizations`.`name`, `dim_organizations`.`organization_type`
-      \nFROM `dim_organizations` \nWHERE `dim_organizations`.`_is_current` = true",
+      "SELECT `test_shared_utils.dim_organizations`.`key`, `test_shared_utils.dim_organizations`.`name`, `test_shared_utils.dim_organizations`.`organization_type`
+      \nFROM `test_shared_utils.dim_organizations` \nWHERE `test_shared_utils.dim_organizations`.`_is_current` = true",
       "maxResults": 5000, "requestId": "8a36dcec-7885-458c-9d74-694ae378ae54"}'
     headers:
       Accept:

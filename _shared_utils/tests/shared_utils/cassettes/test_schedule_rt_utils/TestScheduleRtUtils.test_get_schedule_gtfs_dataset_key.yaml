@@ -3,15 +3,15 @@ interactions:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "STRING"}, "parameterValue": {"value": "2025-09-01"}, "name": "service_date_1"}],
       "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
-      true}, "location": "us-west2", "query": "SELECT `fct_daily_feed_scheduled_service_summary`.`service_date`,
-      `fct_daily_feed_scheduled_service_summary`.`feed_key`, `fct_daily_feed_scheduled_service_summary`.`gtfs_dataset_key`,
-      `fct_daily_feed_scheduled_service_summary`.`ttl_service_hours`, `fct_daily_feed_scheduled_service_summary`.`n_trips`,
-      `fct_daily_feed_scheduled_service_summary`.`first_departure_sec`, `fct_daily_feed_scheduled_service_summary`.`last_arrival_sec`,
-      `fct_daily_feed_scheduled_service_summary`.`num_stop_times`, `fct_daily_feed_scheduled_service_summary`.`n_routes`,
-      `fct_daily_feed_scheduled_service_summary`.`contains_warning_duplicate_stop_times_primary_key`,
-      `fct_daily_feed_scheduled_service_summary`.`contains_warning_duplicate_trip_primary_key`,
-      `fct_daily_feed_scheduled_service_summary`.`contains_warning_missing_foreign_key_stop_id`
-      \nFROM `fct_daily_feed_scheduled_service_summary` \nWHERE `fct_daily_feed_scheduled_service_summary`.`service_date`
+      true}, "location": "us-west2", "query": "SELECT `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`service_date`,
+      `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`feed_key`, `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`gtfs_dataset_key`,
+      `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`ttl_service_hours`, `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`n_trips`,
+      `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`first_departure_sec`, `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`last_arrival_sec`,
+      `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`num_stop_times`, `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`n_routes`,
+      `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`contains_warning_duplicate_stop_times_primary_key`,
+      `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`contains_warning_duplicate_trip_primary_key`,
+      `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`contains_warning_missing_foreign_key_stop_id`
+      \nFROM `test_shared_utils.fct_daily_feed_scheduled_service_summary` \nWHERE `test_shared_utils.fct_daily_feed_scheduled_service_summary`.`service_date`
       = @`service_date_1`", "maxResults": 5000, "requestId": "9953e7d0-1be5-4c33-85c3-905c2b766bba"}'
     headers:
       Accept:

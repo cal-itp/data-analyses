@@ -2,8 +2,8 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql": false,
       "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2", "query":
-      "SELECT `dim_organizations`.`source_record_id` AS `organization_source_record_id`
-      \nFROM `dim_organizations` \nWHERE `dim_organizations`.`_is_current` = true",
+      "SELECT `test_shared_utils.dim_organizations`.`source_record_id` AS `organization_source_record_id`
+      \nFROM `test_shared_utils.dim_organizations` \nWHERE `test_shared_utils.dim_organizations`.`_is_current` = true",
       "maxResults": 5000, "requestId": "fdea5969-f3fd-4e48-a6c2-efc4ae7141a3"}'
     headers:
       Accept:

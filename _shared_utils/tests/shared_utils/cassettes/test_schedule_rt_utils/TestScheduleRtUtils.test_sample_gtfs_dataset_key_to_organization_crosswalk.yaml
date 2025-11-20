@@ -4,11 +4,11 @@ interactions:
       "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
       [{"value": "schedule"}]}, "name": "type_1"}], "parameterMode": "NAMED", "useLegacySql":
       false, "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2",
-      "query": "SELECT `dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`, `dim_gtfs_datasets`.`name`
-      AS `gtfs_dataset_name`, `dim_gtfs_datasets`.`type`, `dim_gtfs_datasets`.`source_record_id`,
-      `dim_gtfs_datasets`.`regional_feed_type`, `dim_gtfs_datasets`.`base64_url`,
-      `dim_gtfs_datasets`.`uri` \nFROM `dim_gtfs_datasets` \nWHERE `dim_gtfs_datasets`.`data_quality_pipeline`
-      = true AND `dim_gtfs_datasets`.`type` IN UNNEST(@`type_1`)", "maxResults": 5000,
+      "query": "SELECT `test_shared_utils.dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`, `test_shared_utils.dim_gtfs_datasets`.`name`
+      AS `gtfs_dataset_name`, `test_shared_utils.dim_gtfs_datasets`.`type`, `test_shared_utils.dim_gtfs_datasets`.`source_record_id`,
+      `test_shared_utils.dim_gtfs_datasets`.`regional_feed_type`, `test_shared_utils.dim_gtfs_datasets`.`base64_url`,
+      `test_shared_utils.dim_gtfs_datasets`.`uri` \nFROM `test_shared_utils.dim_gtfs_datasets` \nWHERE `test_shared_utils.dim_gtfs_datasets`.`data_quality_pipeline`
+      = true AND `test_shared_utils.dim_gtfs_datasets`.`type` IN UNNEST(@`type_1`)", "maxResults": 5000,
       "requestId": "c9163231-4621-448f-a8ea-a05224a02dd2"}'
     headers:
       Accept:
@@ -70,24 +70,24 @@ interactions:
       {"value": "US/Pacific"}, "name": "datetime_3"}, {"parameterType": {"type": "STRING"},
       "parameterValue": {"value": "2025-10-16"}, "name": "datetime_4"}], "parameterMode":
       "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp": true},
-      "location": "us-west2", "query": "SELECT DISTINCT `dim_provider_gtfs_data`.`key`,
-      `dim_provider_gtfs_data`.`public_customer_facing_fixed_route`, `dim_provider_gtfs_data`.`public_customer_facing_or_regional_subfeed_fixed_route`,
-      `dim_provider_gtfs_data`.`organization_key`, `dim_provider_gtfs_data`.`organization_name`,
-      `dim_provider_gtfs_data`.`organization_itp_id`, `dim_provider_gtfs_data`.`organization_hubspot_company_record_id`,
-      `dim_provider_gtfs_data`.`organization_ntd_id`, `dim_provider_gtfs_data`.`organization_source_record_id`,
-      `dim_provider_gtfs_data`.`service_key`, `dim_provider_gtfs_data`.`service_name`,
-      `dim_provider_gtfs_data`.`service_source_record_id`, `dim_provider_gtfs_data`.`gtfs_service_data_customer_facing`,
-      `dim_provider_gtfs_data`.`regional_feed_type`, `dim_provider_gtfs_data`.`associated_schedule_gtfs_dataset_key`,
-      `dim_provider_gtfs_data`.`schedule_gtfs_dataset_name`, `dim_provider_gtfs_data`.`schedule_source_record_id`,
-      `dim_provider_gtfs_data`.`service_alerts_gtfs_dataset_name`, `dim_provider_gtfs_data`.`service_alerts_source_record_id`,
-      `dim_provider_gtfs_data`.`vehicle_positions_gtfs_dataset_name`, `dim_provider_gtfs_data`.`vehicle_positions_source_record_id`,
-      `dim_provider_gtfs_data`.`trip_updates_gtfs_dataset_name`, `dim_provider_gtfs_data`.`trip_updates_source_record_id`,
-      `dim_provider_gtfs_data`.`schedule_gtfs_dataset_key`, `dim_provider_gtfs_data`.`service_alerts_gtfs_dataset_key`,
-      `dim_provider_gtfs_data`.`vehicle_positions_gtfs_dataset_key`, `dim_provider_gtfs_data`.`trip_updates_gtfs_dataset_key`,
-      `dim_provider_gtfs_data`.`_valid_from`, `dim_provider_gtfs_data`.`_valid_to`,
-      `dim_provider_gtfs_data`.`_is_current` \nFROM `dim_provider_gtfs_data` \nWHERE
-      datetime(`dim_provider_gtfs_data`.`_valid_from`, @`datetime_1`) <= datetime(@`datetime_2`)
-      AND datetime(`dim_provider_gtfs_data`.`_valid_to`, @`datetime_3`) >= datetime(@`datetime_4`)",
+      "location": "us-west2", "query": "SELECT DISTINCT `test_shared_utils.dim_provider_gtfs_data`.`key`,
+      `test_shared_utils.dim_provider_gtfs_data`.`public_customer_facing_fixed_route`, `test_shared_utils.dim_provider_gtfs_data`.`public_customer_facing_or_regional_subfeed_fixed_route`,
+      `test_shared_utils.dim_provider_gtfs_data`.`organization_key`, `test_shared_utils.dim_provider_gtfs_data`.`organization_name`,
+      `test_shared_utils.dim_provider_gtfs_data`.`organization_itp_id`, `test_shared_utils.dim_provider_gtfs_data`.`organization_hubspot_company_record_id`,
+      `test_shared_utils.dim_provider_gtfs_data`.`organization_ntd_id`, `test_shared_utils.dim_provider_gtfs_data`.`organization_source_record_id`,
+      `test_shared_utils.dim_provider_gtfs_data`.`service_key`, `test_shared_utils.dim_provider_gtfs_data`.`service_name`,
+      `test_shared_utils.dim_provider_gtfs_data`.`service_source_record_id`, `test_shared_utils.dim_provider_gtfs_data`.`gtfs_service_data_customer_facing`,
+      `test_shared_utils.dim_provider_gtfs_data`.`regional_feed_type`, `test_shared_utils.dim_provider_gtfs_data`.`associated_schedule_gtfs_dataset_key`,
+      `test_shared_utils.dim_provider_gtfs_data`.`schedule_gtfs_dataset_name`, `test_shared_utils.dim_provider_gtfs_data`.`schedule_source_record_id`,
+      `test_shared_utils.dim_provider_gtfs_data`.`service_alerts_gtfs_dataset_name`, `test_shared_utils.dim_provider_gtfs_data`.`service_alerts_source_record_id`,
+      `test_shared_utils.dim_provider_gtfs_data`.`vehicle_positions_gtfs_dataset_name`, `test_shared_utils.dim_provider_gtfs_data`.`vehicle_positions_source_record_id`,
+      `test_shared_utils.dim_provider_gtfs_data`.`trip_updates_gtfs_dataset_name`, `test_shared_utils.dim_provider_gtfs_data`.`trip_updates_source_record_id`,
+      `test_shared_utils.dim_provider_gtfs_data`.`schedule_gtfs_dataset_key`, `test_shared_utils.dim_provider_gtfs_data`.`service_alerts_gtfs_dataset_key`,
+      `test_shared_utils.dim_provider_gtfs_data`.`vehicle_positions_gtfs_dataset_key`, `test_shared_utils.dim_provider_gtfs_data`.`trip_updates_gtfs_dataset_key`,
+      `test_shared_utils.dim_provider_gtfs_data`.`_valid_from`, `test_shared_utils.dim_provider_gtfs_data`.`_valid_to`,
+      `test_shared_utils.dim_provider_gtfs_data`.`_is_current` \nFROM `test_shared_utils.dim_provider_gtfs_data` \nWHERE
+      datetime(`test_shared_utils.dim_provider_gtfs_data`.`_valid_from`, @`datetime_1`) <= datetime(@`datetime_2`)
+      AND datetime(`test_shared_utils.dim_provider_gtfs_data`.`_valid_to`, @`datetime_3`) >= datetime(@`datetime_4`)",
       "maxResults": 5000, "requestId": "d2f84226-bf07-4e0e-9b43-1990f717e60f"}'
     headers:
       Accept:
@@ -152,8 +152,8 @@ interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql": false,
       "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2", "query":
-      "SELECT `dim_organizations`.`source_record_id` AS `organization_source_record_id`,
-      `dim_organizations`.`name` \nFROM `dim_organizations` \nWHERE `dim_organizations`.`_is_current`
+      "SELECT `test_shared_utils.dim_organizations`.`source_record_id` AS `organization_source_record_id`,
+      `test_shared_utils.dim_organizations`.`name` \nFROM `test_shared_utils.dim_organizations` \nWHERE `test_shared_utils.dim_organizations`.`_is_current`
       = true", "maxResults": 5000, "requestId": "30e1cfd2-9327-4b74-8ec5-20ddcacdf507"}'
     headers:
       Accept:
@@ -219,14 +219,14 @@ interactions:
       "parameterValue": {"value": "US/Pacific"}, "name": "datetime_3"}, {"parameterType":
       {"type": "STRING"}, "parameterValue": {"value": "2025-10-16"}, "name": "datetime_4"}],
       "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
-      true}, "location": "us-west2", "query": "SELECT `bridge_organizations_x_headquarters_county_geography`.`organization_name`,
-      concat(lpad(CAST(`dim_county_geography`.`caltrans_district` AS STRING), @`lpad_1`,
-      @`lpad_2`), @`concat_1`, `dim_county_geography`.`caltrans_district_name`) AS
-      `caltrans_district`, `dim_county_geography`.`caltrans_district` AS `caltrans_district_1`
-      \nFROM `bridge_organizations_x_headquarters_county_geography` JOIN `dim_county_geography`
-      ON `dim_county_geography`.`key` = `bridge_organizations_x_headquarters_county_geography`.`county_geography_key`
-      \nWHERE datetime(`bridge_organizations_x_headquarters_county_geography`.`_valid_from`,
-      @`datetime_1`) <= datetime(@`datetime_2`) AND datetime(`bridge_organizations_x_headquarters_county_geography`.`_valid_to`,
+      true}, "location": "us-west2", "query": "SELECT `test_shared_utils.bridge_organizations_x_headquarters_county_geography`.`organization_name`,
+      concat(lpad(CAST(`test_shared_utils.dim_county_geography`.`caltrans_district` AS STRING), @`lpad_1`,
+      @`lpad_2`), @`concat_1`, `test_shared_utils.dim_county_geography`.`caltrans_district_name`) AS
+      `caltrans_district`, `test_shared_utils.dim_county_geography`.`caltrans_district` AS `caltrans_district_1`
+      \nFROM `test_shared_utils.bridge_organizations_x_headquarters_county_geography` JOIN `test_shared_utils.dim_county_geography`
+      ON `test_shared_utils.dim_county_geography`.`key` = `test_shared_utils.bridge_organizations_x_headquarters_county_geography`.`county_geography_key`
+      \nWHERE datetime(`test_shared_utils.bridge_organizations_x_headquarters_county_geography`.`_valid_from`,
+      @`datetime_1`) <= datetime(@`datetime_2`) AND datetime(`test_shared_utils.bridge_organizations_x_headquarters_county_geography`.`_valid_to`,
       @`datetime_3`) >= datetime(@`datetime_4`)", "maxResults": 5000, "requestId":
       "647bb2ce-73e5-40c0-81b2-ab22f52e72de"}'
     headers:

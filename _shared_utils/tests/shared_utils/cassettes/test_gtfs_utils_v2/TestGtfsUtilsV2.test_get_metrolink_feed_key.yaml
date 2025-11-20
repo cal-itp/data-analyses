@@ -1,17 +1,19 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
-      "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
+      {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
       [{"value": "Metrolink Schedule"}]}, "name": "name_1"}, {"parameterType": {"type":
       "STRING"}, "parameterValue": {"value": "2025-08-23"}, "name": "date_1"}], "parameterMode":
       "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp": true},
-      "location": "us-west2", "query": "SELECT `dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`,
-      `dim_gtfs_datasets`.`name` AS `gtfs_dataset_name`, `fct_daily_schedule_feeds`.`feed_key`
-      \nFROM `dim_gtfs_datasets` JOIN `fct_daily_schedule_feeds` ON `fct_daily_schedule_feeds`.`gtfs_dataset_key`
-      = `dim_gtfs_datasets`.`key` AND `fct_daily_schedule_feeds`.`gtfs_dataset_name`
-      = `dim_gtfs_datasets`.`name` \nWHERE `dim_gtfs_datasets`.`data_quality_pipeline`
-      = true AND `dim_gtfs_datasets`.`name` IN UNNEST(@`name_1`) AND `fct_daily_schedule_feeds`.`date`
-      = @`date_1`", "maxResults": 5000, "requestId": "b9bc5cc4-cc87-465e-a757-9ea2bf7569f9"}'
+      "location": "us-west2", "query": "SELECT `test_shared_utils.dim_gtfs_datasets`.`key`
+      AS `gtfs_dataset_key`, `test_shared_utils.dim_gtfs_datasets`.`name` AS `gtfs_dataset_name`,
+      `test_shared_utils.fct_daily_schedule_feeds`.`feed_key` \nFROM `test_shared_utils.dim_gtfs_datasets`
+      JOIN `test_shared_utils.fct_daily_schedule_feeds` ON `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_key`
+      = `test_shared_utils.dim_gtfs_datasets`.`key` AND `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_name`
+      = `test_shared_utils.dim_gtfs_datasets`.`name` \nWHERE `test_shared_utils.dim_gtfs_datasets`.`data_quality_pipeline`
+      = true AND `test_shared_utils.dim_gtfs_datasets`.`name` IN UNNEST(@`name_1`)
+      AND `test_shared_utils.fct_daily_schedule_feeds`.`date` = @`date_1`", "maxResults":
+      5000, "requestId": "09541b2f-d943-4883-96f6-a4cda71919c1"}'
     headers:
       Accept:
       - '*/*'
@@ -22,21 +24,21 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '1139'
+      - '1258'
       Content-Type:
       - application/json
       User-Agent:
-      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
       X-Goog-API-Client:
-      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.27.0 gapic/3.38.0 gccl/3.38.0
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
       x-goog-user-project:
       - cal-itp-data-infra-staging
     method: POST
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_64oTDsbBP6utXsqv5xlj37oboW4g","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"fe61acc86788295b399a43cb35a9e9c5"},{"v":"Metrolink
-        Schedule"},{"v":"0b0ebeff0c1f7ff681e6a06d6218ecd6"}]}],"totalBytesProcessed":"526","jobComplete":true,"cacheHit":false,"queryId":"job_64oTDsbBP6utXsqv5xlj37oboW4g","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"20971520","totalSlotMs":"16","location":"us-west2","creationTime":"1763407653918","startTime":"1763407653990","endTime":"1763407654145"}'
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_GcWQ3NJ5dTTHG2iNWaHRLcWH-0CX","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"fe61acc86788295b399a43cb35a9e9c5"},{"v":"Metrolink
+        Schedule"},{"v":"0b0ebeff0c1f7ff681e6a06d6218ecd6"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_GcWQ3NJ5dTTHG2iNWaHRLcWH-0CX","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1763667620650","startTime":"1763667620710","endTime":"1763667620781"}'
     headers:
       Alt-Svc:
       - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
@@ -45,7 +47,73 @@ interactions:
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Mon, 17 Nov 2025 19:27:34 GMT
+      - Thu, 20 Nov 2025 19:40:20 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
+      {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
+      [{"value": "Metrolink Schedule"}]}, "name": "name_1"}, {"parameterType": {"type":
+      "STRING"}, "parameterValue": {"value": "2025-08-23"}, "name": "date_1"}], "parameterMode":
+      "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp": true},
+      "location": "us-west2", "query": "SELECT `test_shared_utils.dim_gtfs_datasets`.`key`
+      AS `gtfs_dataset_key`, `test_shared_utils.dim_gtfs_datasets`.`name` AS `gtfs_dataset_name`,
+      `test_shared_utils.fct_daily_schedule_feeds`.`feed_key` \nFROM `test_shared_utils.dim_gtfs_datasets`
+      JOIN `test_shared_utils.fct_daily_schedule_feeds` ON `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_key`
+      = `test_shared_utils.dim_gtfs_datasets`.`key` AND `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_name`
+      = `test_shared_utils.dim_gtfs_datasets`.`name` \nWHERE `test_shared_utils.dim_gtfs_datasets`.`data_quality_pipeline`
+      = true AND `test_shared_utils.dim_gtfs_datasets`.`name` IN UNNEST(@`name_1`)
+      AND `test_shared_utils.fct_daily_schedule_feeds`.`date` = @`date_1`", "maxResults":
+      5000, "requestId": "61a73e9d-5190-4175-a74e-9f66e21c54db"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1258'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_xapQvs-J18xsfZ5JVGUi9uzf5FA2","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"fe61acc86788295b399a43cb35a9e9c5"},{"v":"Metrolink
+        Schedule"},{"v":"0b0ebeff0c1f7ff681e6a06d6218ecd6"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_xapQvs-J18xsfZ5JVGUi9uzf5FA2","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1763667621014","startTime":"1763667621064","endTime":"1763667621133"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Thu, 20 Nov 2025 19:40:21 GMT
       Server:
       - ESF
       Transfer-Encoding:

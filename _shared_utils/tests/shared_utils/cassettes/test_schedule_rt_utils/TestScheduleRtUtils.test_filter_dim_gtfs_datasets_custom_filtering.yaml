@@ -4,11 +4,11 @@ interactions:
       "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
       [{"value": "trip_updates"}]}, "name": "type_1"}], "parameterMode": "NAMED",
       "useLegacySql": false, "formatOptions": {"useInt64Timestamp": true}, "location":
-      "us-west2", "query": "SELECT `dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`,
-      `dim_gtfs_datasets`.`name` AS `gtfs_dataset_name`, `dim_gtfs_datasets`.`type`,
-      `dim_gtfs_datasets`.`regional_feed_type`, `dim_gtfs_datasets`.`uri`, `dim_gtfs_datasets`.`base64_url`
-      \nFROM `dim_gtfs_datasets` \nWHERE `dim_gtfs_datasets`.`data_quality_pipeline`
-      = true AND `dim_gtfs_datasets`.`type` IN UNNEST(@`type_1`)", "maxResults": 5000,
+      "us-west2", "query": "SELECT `test_shared_utils.dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`,
+      `test_shared_utils.dim_gtfs_datasets`.`name` AS `gtfs_dataset_name`, `test_shared_utils.dim_gtfs_datasets`.`type`,
+      `test_shared_utils.dim_gtfs_datasets`.`regional_feed_type`, `test_shared_utils.dim_gtfs_datasets`.`uri`, `test_shared_utils.dim_gtfs_datasets`.`base64_url`
+      \nFROM `test_shared_utils.dim_gtfs_datasets` \nWHERE `test_shared_utils.dim_gtfs_datasets`.`data_quality_pipeline`
+      = true AND `test_shared_utils.dim_gtfs_datasets`.`type` IN UNNEST(@`type_1`)", "maxResults": 5000,
       "requestId": "b0b5231e-bc39-4250-93e3-f5ae201111d0"}'
     headers:
       Accept:
