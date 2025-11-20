@@ -31,6 +31,7 @@ from update_vars import (
 )
 
 gcsgp = GCSGeoPandas()
+fs = get_fs()
 catalog = intake.open_catalog("*.yml")
 
 
