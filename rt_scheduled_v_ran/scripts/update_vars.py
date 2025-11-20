@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from shared_utils import catalog_utils, rt_dates
 
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
@@ -8,7 +6,7 @@ apr2024_week = rt_dates.get_week("apr2024", exclude_wed=True)
 oct2024_week = rt_dates.get_week("oct2024", exclude_wed=True)
 
 
-analysis_date_list = [rt_dates.DATES["sep2025f"]]
+analysis_date_list = [rt_dates.DATES["nov2025"]]
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 

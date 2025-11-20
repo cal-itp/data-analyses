@@ -2,23 +2,31 @@
 Create routes file with identifiers including
 route_id, route_name, operator name.
 """
+
 import datetime
-import geopandas as gpd
-import pandas as pd
-import numpy as np
-import yaml
-import numpy as np 
 
-import open_data_utils
-from shared_utils import portfolio_utils, publish_utils, shared_data, rt_dates, dask_utils
-from calitp_data_analysis import utils, geography_utils
-from segment_speed_utils import helpers
-from update_vars import analysis_date, TRAFFIC_OPS_GCS, AH_TEST, GTFS_DATA_DICT, SCHED_GCS
-
-import google.auth
-credentials, project = google.auth.default()
 import gcsfs
+import geopandas as gpd
+import google.auth
+import numpy as np
+import open_data_utils
+import pandas as pd
+import yaml
+from calitp_data_analysis import geography_utils, utils
+from segment_speed_utils import helpers
+from shared_utils import (
+    dask_utils,
+    portfolio_utils,
+    publish_utils,
+    rt_dates,
+    shared_data,
+)
+from update_vars import GTFS_DATA_DICT, SCHED_GCS, TRAFFIC_OPS_GCS, analysis_date
+
+credentials, project = google.auth.default()
+
 fs = gcsfs.GCSFileSystem()
+
 
 def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
     """
@@ -71,37 +79,31 @@ def create_routes_file_for_export(date: str) -> gpd.GeoDataFrame:
     routes_assembled = routes_assembled.pipe(remove_erroneous_shapes)
 
     routes_assembled = routes_assembled.assign(
-        route_length_feet=routes_assembled.geometry.to_crs(
-            geography_utils.CA_NAD83Albers_ft
-        ).length
+        route_length_feet=routes_assembled.geometry.to_crs(geography_utils.CA_NAD83Albers_ft).length
     )
     return routes_assembled
 
-def remove_erroneous_shapes(
-    shapes_with_route_info: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
+
+def remove_erroneous_shapes(shapes_with_route_info: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
-    Check if line is simple for Amtrak. If it is, keep. 
+    Check if line is simple for Amtrak. If it is, keep.
     If it's not simple (line crosses itself), drop.
-    
-    In Jun 2023, some Amtrak shapes appeared to be funky, 
+
+    In Jun 2023, some Amtrak shapes appeared to be funky,
     but in prior months, it's been ok.
     Checking for length is fairly time-consuming.
     """
     amtrak = "Amtrak Schedule"
-    
-    possible_error = shapes_with_route_info[shapes_with_route_info.name==amtrak]
+
+    possible_error = shapes_with_route_info[shapes_with_route_info.name == amtrak]
     ok = shapes_with_route_info[shapes_with_route_info.name != amtrak]
-    
+
     # Check if the line crosses itself
-    ok_amtrak = possible_error.assign(
-        simple = possible_error.geometry.is_simple
-    ).query("simple == True").drop(columns = "simple")
-    
-    ok_shapes = pd.concat(
-        [ok, ok_amtrak], 
-        axis=0
-    ).reset_index(drop=True)
+    ok_amtrak = (
+        possible_error.assign(simple=possible_error.geometry.is_simple).query("simple == True").drop(columns="simple")
+    )
+
+    ok_shapes = pd.concat([ok, ok_amtrak], axis=0).reset_index(drop=True)
 
     return ok_shapes
 
@@ -124,8 +126,7 @@ def patch_previous_dates(
     patch_operators_dict = {
         str(date): operator_list
         for date, operator_list in published_operators_dict.items()
-        if str(date)
-        != current_date  # Exclude the current (analysis) date, since that does not need to be patched
+        if str(date) != current_date  # Exclude the current (analysis) date, since that does not need to be patched
     }
 
     partial_dfs = []
@@ -134,7 +135,7 @@ def patch_previous_dates(
     for one_date, operator_list in patch_operators_dict.items():
         df_to_add = publish_utils.subset_table_from_previous_date(
             gcs_bucket=TRAFFIC_OPS_GCS,
-            filename=f"ca_transit_routes",
+            filename="ca_transit_routes",
             operator_and_dates_dict=patch_operators_dict,
             date=one_date,
             crosswalk_col="schedule_gtfs_dataset_key",
@@ -146,14 +147,13 @@ def patch_previous_dates(
     patch_routes = pd.concat(partial_dfs, axis=0, ignore_index=True)
 
     # Concat the current data to the "backfill" data
-    published_routes = pd.concat(
-        [current_routes, patch_routes], axis=0, ignore_index=True
-    )
+    published_routes = pd.concat([current_routes, patch_routes], axis=0, ignore_index=True)
 
     # Drop Duplicates
     published_routes = published_routes.drop_duplicates().reset_index(drop=True)
 
     return published_routes
+
 
 def add_route_typologies(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
@@ -164,9 +164,7 @@ def add_route_typologies(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     ROUTE_TYPOLOGIES_FILE = GTFS_DATA_DICT.schedule_tables.route_typologies
 
-    route_typology_paths = [
-        f"{SCHED_GCS}{ROUTE_TYPOLOGIES_FILE}" for year in rt_dates.years_available
-    ]
+    route_typology_paths = [f"{SCHED_GCS}{ROUTE_TYPOLOGIES_FILE}" for year in rt_dates.years_available]
     route_typology_df = dask_utils.get_ddf(
         route_typology_paths,
         rt_dates.years_available,
@@ -206,9 +204,8 @@ def add_route_typologies(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     )
     return m1
 
-def routes_shn_intersection(
-    routes_gdf: gpd.GeoDataFrame, buffer_amount: int
-) -> gpd.GeoDataFrame:
+
+def routes_shn_intersection(routes_gdf: gpd.GeoDataFrame, buffer_amount: int) -> gpd.GeoDataFrame:
     """
     Overlay the most recent transit routes with a buffered version
     of the SHN
@@ -219,9 +216,7 @@ def routes_shn_intersection(
     HWY_FILE = f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_shn_dissolved_by_ct_district_route.parquet"
 
     if fs.exists(HWY_FILE):
-        shn_routes_gdf = gpd.read_parquet(
-            HWY_FILE, storage_options={"token": credentials.token}
-        )
+        shn_routes_gdf = gpd.read_parquet(HWY_FILE, storage_options={"token": credentials.token})
     else:
         shn_routes_gdf = shared_data.buffer_shn(buffer_amount)
 
@@ -230,9 +225,7 @@ def routes_shn_intersection(
     routes_gdf = routes_gdf.to_crs(shn_routes_gdf.crs)
 
     # Overlay transit routes with the SHN geographies.
-    gdf = gpd.overlay(
-        routes_gdf, shn_routes_gdf, how="intersection", keep_geom_type=True
-    )
+    gdf = gpd.overlay(routes_gdf, shn_routes_gdf, how="intersection", keep_geom_type=True)
 
     # Calcuate the percent of the transit route that runs on a highway, round it up and
     # multiply it by 100
@@ -263,10 +256,9 @@ def routes_shn_intersection(
 
     # Delete duplicates
     gdf2 = gdf2.drop_duplicates().reset_index()
-    gdf3 = gdf2.drop_duplicates(
-        subset=["name", "route_id", "shape_id", "shn_route", "shn_districts"]
-    )
+    gdf3 = gdf2.drop_duplicates(subset=["name", "route_id", "shape_id", "shn_route", "shn_districts"])
     return gdf3
+
 
 def group_route_district(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -275,7 +267,7 @@ def group_route_district(df: pd.DataFrame) -> pd.DataFrame:
 
     df: the dataframe you want to aggregate
     pct_route_on_hwy_agg: whether you want to find the max, min, sum, etc on the column
-    "pct_route_on_hwy_across_districts"
+    "pct_route_on_hwy_all_districts"
     """
 
     agg1 = (
@@ -294,11 +286,10 @@ def group_route_district(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Clean up
-    agg1.pct_route_on_hwy_all_districts = (
-        agg1.pct_route_on_hwy_all_districts.astype(float).round(2)
-    )
+    agg1.pct_route_on_hwy_all_districts = agg1.pct_route_on_hwy_all_districts.astype(float).round(2)
 
     return agg1
+
 
 def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
     """
@@ -323,9 +314,7 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
 
     # Add yes/no column to signify if a transit route intersects
     # with a SHN route
-    m1.pct_route_on_hwy_across_districts = m1.pct_route_on_hwy_across_districts.fillna(
-        0
-    )
+    m1.pct_route_on_hwy_all_districts = m1.pct_route_on_hwy_all_districts.fillna(0)
     m1["on_shn"] = np.where(m1["pct_route_on_hwy_all_districts"] == 0, 0, 1)
 
     # Clean up rows that are tagged as "on_shs==N" but still have values
@@ -336,6 +325,7 @@ def add_shn_information(gdf: gpd.GeoDataFrame, buffer_amt: int) -> pd.DataFrame:
     ] = np.nan
 
     return m1
+
 
 def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
@@ -369,11 +359,10 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # col_order = (
     #     route_cols + shape_cols + agency_ids + shn_cols + route_typology + ["geometry"]
     # )
-    col_order = (
-        route_cols + shape_cols + agency_ids + shn_cols + ["geometry"]
-    )
+    col_order = route_cols + shape_cols + agency_ids + shn_cols + ["geometry"]
     df2 = (
-        df[col_order].reindex(columns=col_order)
+        df[col_order]
+        .reindex(columns=col_order)
         .rename(columns=open_data_utils.STANDARDIZED_COLUMNS_DICT)
         .reset_index(drop=True)
     )
@@ -382,40 +371,33 @@ def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     df2 = df2.drop_duplicates()
     return df2
 
+
 if __name__ == "__main__":
     SHN_HWY_BUFFER_FEET = 50
     time0 = datetime.datetime.now()
-    # Make an operator-feed level file (this is published)    
+    # Make an operator-feed level file (this is published)
     routes = create_routes_file_for_export(analysis_date)
-    
+
     # Export into GCS (outside export/)
     # create_routes is different than create_stops, which already has
     # a table created in gtfs_funnel that we can use to patch in previous dates
     # here, we have to create those for each date, then save a copy
     # the export/ folder contains the patched versions of the routes
-    utils.geoparquet_gcs_export(
-        routes,
-        TRAFFIC_OPS_GCS,
-        f"ca_transit_routes_{analysis_date}"
-    )
-    
+    utils.geoparquet_gcs_export(routes, TRAFFIC_OPS_GCS, f"ca_transit_routes_{analysis_date}")
+
     # Patch previous dates and add SHN + Route Typology
     # Amanda: commenting this out for now.
     published_routes = (
-    patch_previous_dates(
-        routes,
-        analysis_date,
+        patch_previous_dates(
+            routes,
+            analysis_date,
+        )
+        .pipe(add_shn_information, SHN_HWY_BUFFER_FEET)
+        # .pipe(add_route_typologies)
+        .pipe(portfolio_utils.standardize_operator_info_for_exports, analysis_date)
+        .pipe(finalize_export_df)
     )
-    .pipe(add_shn_information, SHN_HWY_BUFFER_FEET)
-    # .pipe(add_route_typologies)
-    .pipe(portfolio_utils.standardize_operator_info_for_exports, analysis_date)
-    .pipe(finalize_export_df)
-) 
-    utils.geoparquet_gcs_export(
-        published_routes, 
-        TRAFFIC_OPS_GCS, 
-        "ca_transit_routes"
-    )
-    
+    utils.geoparquet_gcs_export(published_routes, TRAFFIC_OPS_GCS, "ca_transit_routes")
+
     time1 = datetime.datetime.now()
-    print(f"Execution time for routes script: {time1-time0}")
+    print(f"Execution time for routes script: {time1 - time0}")

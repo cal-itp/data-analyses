@@ -3,22 +3,22 @@ metadata:
 common-fields:
   - &publish_entity "Data & Digital Services / California Integrated Travel Project"
   - &public_access "Public."
-  - &place "California"  
+  - &place "California"
   - &status "completed"
-  - &frequency "monthly" 
-  - &theme_topic "transportation" 
-  - &contact_organization "Caltrans" 
+  - &frequency "monthly"
+  - &theme_topic "transportation"
+  - &contact_organization "Caltrans"
   - &boilerplate_desc |-
       The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information Use Limitation - The data are made available to the public solely for informational purposes. Information provided in the Caltrans GIS Data Library is accurate to the best of our knowledge and is subject to change on a regular basis, without notice. While Caltrans makes every effort to provide useful and accurate information, we do not warrant the information to be authoritative, complete, factual, or timely. Information is provided on an 'as is' and an 'as available' basis. The Department of Transportation is not liable to any party for any cost or damages, including any direct, indirect, special, incidental, or consequential damages, arising out of or in connection with the access or use of, or the inability to access or use, the Site or any of the Materials or Services described herein.
-  - &boilerplate_license "Creative Commons 4.0 Attribution." 
-  - &data_dict_type "XML" 
-  - &gtfs_horiz_accuracy "4 meters" 
+  - &boilerplate_license "Creative Commons 4.0 Attribution."
+  - &data_dict_type "XML"
+  - &gtfs_horiz_accuracy "4 meters"
   - &readme_desc |-
       This site allows you to access the code used to create this dataset and provides additional explanatory resources.
   - &hqta_readme |-
       https://github.com/cal-itp/data-analyses/blob/main/high_quality_transit_areas/README.md
   - &hqta_keywords |-
-      Transportation, Land Use, Transit-Oriented Development, TOD, High Quality Transit
+      Transportation, Land Use, Transit-Oriented Development, TOD, High Quality Transit, Transit
   - &hqta_description |-
       Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled frequencies of 15 minutes or less.
   - &traffic_ops_readme |-
@@ -26,13 +26,13 @@ common-fields:
   - &traffic_ops_keywords |-
         Transportation, GTFS, Transit routes, Transit stops, Transit
   - &traffic_ops_purpose |-
-      Provide all CA transit stops and routes (geospatial) from all transit operators.
+      Provide all transit stops and routes (geospatial) from transit operators serving California. Data reflects operator-provided GTFS feeds and may include areas outside California if the operator provides service in multiple states or countries.
   - &traffic_ops_description |-
-      Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates aggregated stop times and route information aggregated for each stops.
+      Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates aggregated stop times and route information for each stop.
   - &speeds_readme |-
       https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/README.md
   - &speeds_keywords |-
-      Transportation, Transit, GTFS, GTFS RT, real time, speeds, vehicle positions         
+      Transportation, Transit, GTFS, GTFS RT, real time, speeds, vehicle positions
 
 tables:
   - dataset_name: ca_hq_transit_areas
@@ -45,7 +45,7 @@ tables:
     status: *status
     frequency: *frequency
     theme_topic: *theme_topic
-    theme_keywords: *hqta_keywords   
+    theme_keywords: *hqta_keywords
     data_dict_type: *data_dict_type
     readme: *hqta_readme
     readme_desc: *readme_desc
@@ -55,7 +55,7 @@ tables:
     horiz_accuracy: *gtfs_horiz_accuracy
     boilerplate_desc: *boilerplate_desc
     boilerplate_license: *boilerplate_license
-  
+
   - dataset_name: ca_hq_transit_stops
     publish_entity: *publish_entity
     summary_purpose: "Estimated stops along High Quality Transit Corridors, plus major transit stops for bus rapid transit, ferry, rail modes as described in Public Resources Code 21155, 21064.3, 21060.2. Existing stops are calculated from General Transit Feed Specification (GTFS) data. Planned major transit stops are from MPO-provided Regional Transportation Plans. See https://github.com/cal-itp/data-analyses/tree/main/high_quality_transit_areas for additional details."
@@ -66,7 +66,7 @@ tables:
     status: *status
     frequency: *frequency
     theme_topic: *theme_topic
-    theme_keywords: *hqta_keywords   
+    theme_keywords: *hqta_keywords
     data_dict_type: *data_dict_type
     readme: *hqta_readme
     readme_desc: *readme_desc
@@ -87,7 +87,7 @@ tables:
     status: *status
     frequency: *frequency
     theme_topic: *theme_topic
-    theme_keywords: *traffic_ops_keywords    
+    theme_keywords: *traffic_ops_keywords
     data_dict_type: *data_dict_type
     readme: *traffic_ops_readme
     readme_desc: *readme_desc
@@ -97,7 +97,7 @@ tables:
     horiz_accuracy: *gtfs_horiz_accuracy
     boilerplate_desc: *boilerplate_desc
     boilerplate_license: *boilerplate_license
-    
+
   - dataset_name: ca_transit_stops
     publish_entity: *publish_entity
     summary_purpose: *traffic_ops_purpose
@@ -108,7 +108,7 @@ tables:
     status: *status
     frequency: *frequency
     theme_topic: *theme_topic
-    theme_keywords: *traffic_ops_keywords    
+    theme_keywords: *traffic_ops_keywords
     data_dict_type: *data_dict_type
     readme: *traffic_ops_readme
     readme_desc: *readme_desc
@@ -123,14 +123,14 @@ tables:
     publish_entity: *publish_entity
     summary_purpose: "Average all-day, peak, and offpeak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data."
     description: |-
-        All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.
+        All day and peak transit 20th, 50th, and 80th percentile speeds on segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data. Segments are primarily stop to stop, but if stops are farther than 1km apart, additional segments between those stops will be added at 1km intervals.
     public_access: *public_access
     creation_date: "2023-06-14"
     place: *place
     status: *status
     frequency: *frequency
     theme_topic: *theme_topic
-    theme_keywords: *speeds_keywords    
+    theme_keywords: *speeds_keywords
     data_dict_type: *data_dict_type
     readme: *speeds_readme
     readme_desc: *readme_desc
@@ -153,7 +153,7 @@ tables:
     status: *status
     frequency: *frequency
     theme_topic: *theme_topic
-    theme_keywords: *speeds_keywords    
+    theme_keywords: *speeds_keywords
     data_dict_type: *data_dict_type
     readme: *speeds_readme
     readme_desc: *readme_desc

@@ -8,7 +8,7 @@ hqta_data:
 	python branching_derived_intersections.py
 	python create_bus_hqta_types.py
 	python assemble_hqta_points.py
-	python assemble_hqta_polygons.py 
+	python assemble_hqta_polygons.py
 
 # Only need this is operator input changes
 # For now, Muni sent over a date-versioned list of stops

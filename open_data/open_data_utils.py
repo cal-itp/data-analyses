@@ -8,14 +8,13 @@ import intake
 import pandas as pd
 import yaml
 from calitp_data_analysis import geography_utils
-from update_vars import GTFS_DATA_DICT, SCHED_GCS, TRAFFIC_OPS_GCS, analysis_date
 
 catalog = intake.open_catalog("../_shared_utils/shared_utils/shared_data_catalog.yml")
 
 with open("../_shared_utils/shared_utils/portfolio_organization_name.yml", "r") as f:
     PORTFOLIO_ORGANIZATIONS_DICT = yaml.safe_load(f)
 
-#  moved to shared_utils/portfolio_utils
+# moved to shared_utils/portfolio_utils
 # def standardize_operator_info_for_exports(df: pd.DataFrame, date: str) -> pd.DataFrame:
 
 
@@ -80,10 +79,12 @@ STANDARDIZED_COLUMNS_DICT = {
     "agency_name_primary": "agency_primary",
     "agency_name_secondary": "agency_secondary",
     "route_name_used": "route_name",
+    "route_short_name": "route_name",
     "route_types_served": "routetypes",
     "meters_to_shn": "meters_to_ca_state_highway",
     "portfolio_organization_name": "agency",
     "analysis_name": "agency",
+    "time_of_day": "time_period",
 }
 
 
@@ -100,7 +101,14 @@ def remove_internal_keys(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     Leave only natural identifiers (route_id, shape_id).
     Remove shape_array_key, gtfs_dataset_key, etc.
     """
-    exclude_list = ["sec_elapsed", "meters_elapsed", "name", "schedule_gtfs_dataset_key"]
+    exclude_list = [
+        "sec_elapsed",
+        "meters_elapsed",
+        "name",
+        "schedule_gtfs_dataset_key",
+        "source_record_id",
+        "stop_pair",
+    ]  # use segment_id instead, includes stop_ids
     cols = [c for c in df.columns]
 
     internal_cols = [c for c in cols if "_key" in c or c in exclude_list]
@@ -124,11 +132,11 @@ def esri_truncate_columns(columns: list | pd.Index) -> dict:
     for col in columns:
         if col[:10] not in truncated_cols:
             truncated_cols += [col[:10]]
-        else:  #  truncated duplicate present
+        else:  # truncated duplicate present
             for i in range(1, 101):
                 if i > 99:
                     raise Exception("gdal does not support more than 99 truncated duplicates")
-                suffix = str(i).rjust(2, "_")  #  pad single digits with _ on left
+                suffix = str(i).rjust(2, "_")  # pad single digits with _ on left
                 if col[:8] + suffix not in truncated_cols:
                     truncated_cols += [col[:8] + suffix]
                     break
