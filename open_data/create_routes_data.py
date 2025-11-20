@@ -5,6 +5,7 @@ route_id, route_name, operator name.
 
 import datetime
 
+import gcsfs
 import geopandas as gpd
 import google.auth
 import numpy as np
@@ -20,16 +21,9 @@ from shared_utils import (
     rt_dates,
     shared_data,
 )
-from update_vars import (
-    AH_TEST,
-    GTFS_DATA_DICT,
-    SCHED_GCS,
-    TRAFFIC_OPS_GCS,
-    analysis_date,
-)
+from update_vars import GTFS_DATA_DICT, SCHED_GCS, TRAFFIC_OPS_GCS, analysis_date
 
 credentials, project = google.auth.default()
-import gcsfs
 
 fs = gcsfs.GCSFileSystem()
 
@@ -141,7 +135,7 @@ def patch_previous_dates(
     for one_date, operator_list in patch_operators_dict.items():
         df_to_add = publish_utils.subset_table_from_previous_date(
             gcs_bucket=TRAFFIC_OPS_GCS,
-            filename=f"ca_transit_routes",
+            filename="ca_transit_routes",
             operator_and_dates_dict=patch_operators_dict,
             date=one_date,
             crosswalk_col="schedule_gtfs_dataset_key",
@@ -406,4 +400,4 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(published_routes, TRAFFIC_OPS_GCS, "ca_transit_routes")
 
     time1 = datetime.datetime.now()
-    print(f"Execution time for routes script: {time1-time0}")
+    print(f"Execution time for routes script: {time1 - time0}")

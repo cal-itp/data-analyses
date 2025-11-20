@@ -5,10 +5,8 @@ for multiday.
 """
 
 import datetime
-import sys
 from typing import Literal, Optional
 
-import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis import utils
 from dask import compute, delayed

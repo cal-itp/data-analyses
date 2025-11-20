@@ -4,22 +4,20 @@ import lookback_wrappers
 import numpy as np
 import pandas as pd
 from _utils import append_analysis_name
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from IPython.display import display
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from tqdm import tqdm
 from update_vars import (
     BRANCHING_OVERLAY_BUFFER,
-    EXPORT_PATH,
     GCS_FILE_PATH,
     MS_TRANSIT_THRESHOLD,
-    PROJECT_CRS,
-    SEGMENT_BUFFER_METERS,
     SHARED_STOP_THRESHOLD,
     TARGET_AREA_DIFFERENCE,
     analysis_date,
 )
 
 tqdm.pandas()
-from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 
 gcsgp = GCSGeoPandas()
 
@@ -62,7 +60,7 @@ def get_trips_with_route_dir(analysis_date: str, published_operators_dict: dict)
     lookback_trips = lookback_wrappers.get_lookback_trips(published_operators_dict, trips_cols)
     lookback_trips_ix = lookback_wrappers.lookback_trips_ix(lookback_trips)
     trips = pd.concat([trips, lookback_trips]).pipe(append_analysis_name)
-    trips = trips[trips["route_type"].isin(["3", "11"])]  #  bus only
+    trips = trips[trips["route_type"].isin(["3", "11"])]  # bus only
     trips.direction_id = trips.direction_id.fillna(0).astype(int).astype(str)
     trips["route_dir"] = trips[["route_id", "direction_id"]].agg("_".join, axis=1)
 
@@ -123,7 +121,6 @@ def evaluate_overlaps(
         sym_diff = sym_diff.assign(
             area=sym_diff.geometry.map(lambda x: x.area), route_dir=sym_diff.route_dir_1.fillna(sym_diff.route_dir_2)
         )
-        diff_area = sym_diff.area.sum()
         area_ratios = sym_diff.area / TARGET_AREA_DIFFERENCE
         if (sym_diff.area > TARGET_AREA_DIFFERENCE).all():
             print(f"passed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target")

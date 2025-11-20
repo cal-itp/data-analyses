@@ -13,8 +13,7 @@ from calitp_data_analysis.geography_utils import WGS84
 from dask import compute, delayed
 from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling, metrics
-from segment_speed_utils.project_vars import SEGMENT_TYPES
-from shared_utils import portfolio_utils, time_helpers
+from shared_utils import portfolio_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 
 
@@ -165,7 +164,6 @@ def summary_speeds_by_peak_offpeak(
 if __name__ == "__main__":
 
     from segment_speed_utils.project_vars import analysis_date_list
-    from shared_utils import rt_dates
 
     LOG_FILE = "../logs/avg_speeds.log"
     logger.add(LOG_FILE, retention="3 months")

@@ -9,6 +9,7 @@ import sys
 
 import _utils
 import geopandas as gpd
+import google.auth
 import intake
 import pandas as pd
 from assemble_hqta_points import get_agency_crosswalk
@@ -25,8 +26,6 @@ from update_vars import (
 )
 
 catalog = intake.open_catalog("*.yml")
-
-import google.auth
 
 credentials, _ = google.auth.default()
 

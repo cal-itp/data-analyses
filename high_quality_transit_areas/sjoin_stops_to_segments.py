@@ -16,6 +16,7 @@ import pandas as pd
 import shapely
 from _utils import append_analysis_name
 from calitp_data_analysis import get_fs, utils
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from loguru import logger
 from segment_speed_utils import helpers
 from update_vars import (
@@ -33,8 +34,6 @@ am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
 pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
 both_peaks_hrs = am_peak_hrs + pm_peak_hrs
 peaks_dict = {key: "am_peak" for key in am_peak_hrs} | {key: "pm_peak" for key in pm_peak_hrs}
-
-from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 
 gcsgp = GCSGeoPandas()
 
@@ -199,7 +198,7 @@ if __name__ == "__main__":
 
     fs = get_fs()
 
-    ## (1) Spatial join stops and stop times to hqta segments
+    # (1) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
     hqta_segments = gcsgp.read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
     stops_cols = ["feed_key", "stop_id", "stop_name", "geometry"]

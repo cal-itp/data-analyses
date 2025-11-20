@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from shared_utils import catalog_utils, rt_dates
 
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)

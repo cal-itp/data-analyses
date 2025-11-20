@@ -10,7 +10,6 @@ Now included MPO-provided planned major transit stops.
 """
 
 import datetime
-import os
 import sys
 
 import _utils
@@ -19,6 +18,7 @@ import intake
 import numpy as np
 import pandas as pd
 from calitp_data_analysis import geography_utils, get_fs, utils
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from loguru import logger
 from segment_speed_utils import helpers
 from shared_utils import gtfs_utils_v2
@@ -30,15 +30,7 @@ from update_vars import (
     analysis_date,
 )
 
-fs = get_fs()
-from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
-
 gcsgp = GCSGeoPandas()
-
-import google.auth
-
-credentials, _ = google.auth.default()
-
 catalog = intake.open_catalog("*.yml")
 
 
@@ -193,7 +185,6 @@ def final_processing_gtfs(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         "mpo",
         "geometry",
     ]
-    public_feed_or_mpo = gdf2.schedule_gtfs_dataset_key_primary.isin(public_feeds)
     gdf3 = (
         gdf2[(gdf2.schedule_gtfs_dataset_key_primary.isin(public_feeds))]
         .reindex(columns=keep_cols)

@@ -20,8 +20,8 @@ from _utils import append_analysis_name
 from calitp_data_analysis import geography_utils, utils
 from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling
-from shared_utils import portfolio_utils, rt_utils
-from update_vars import GCS_FILE_PATH, HQTA_SEGMENT_LENGTH, PROJECT_CRS, analysis_date
+from shared_utils import rt_utils
+from update_vars import GCS_FILE_PATH, HQTA_SEGMENT_LENGTH, analysis_date
 
 
 def difference_overlay_by_route(two_directions_gdf: gpd.GeoDataFrame, segment_length: int) -> gpd.GeoDataFrame:
@@ -174,7 +174,13 @@ def add_azimuth(row: pd.Series, geodesic: pyproj.Geod) -> pd.Series:
     long2, lat2 = row.destination.coords[0]
     assert all([abs(x) <= 180 for x in [long1, lat1, long2, lat2]]), "CRS must be WGS84"
     fwd_azimuth, back_azimuth, _distance = geodesic.inv(long1, lat1, long2, lat2, return_back_azimuth=True)
-    signed_azimuth_to_360_deg = lambda x: 360 + x if x <= 0 else x
+
+    def signed_azimuth_to_360_deg(x):
+        if x <= 0:
+            return 360 + x
+        else:
+            return x
+
     row["fwd_azimuth"] = fwd_azimuth
     row["fwd_azimuth_360"] = signed_azimuth_to_360_deg(fwd_azimuth)
 

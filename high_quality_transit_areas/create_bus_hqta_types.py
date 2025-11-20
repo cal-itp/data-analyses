@@ -17,6 +17,7 @@ import _utils
 import geopandas as gpd
 import lookback_wrappers
 import pandas as pd
+from _utils import append_analysis_name
 from calitp_data_analysis import utils
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from loguru import logger
@@ -26,12 +27,10 @@ from update_vars import (
     GCS_FILE_PATH,
     INTERSECTION_BUFFER_METERS,
     PROJECT_CRS,
-    SEGMENT_BUFFER_METERS,
     analysis_date,
 )
 
 gcsgp = GCSGeoPandas()
-from _utils import append_analysis_name
 
 
 def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame:

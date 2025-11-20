@@ -1,6 +1,5 @@
 import datetime as dt
 
-import geopandas as gpd
 import pandas as pd
 import yaml
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
@@ -66,7 +65,7 @@ def get_lookback_st(published_operators_dict: dict, lookback_trips_ix: pd.DataFr
             date,
             columns=st_cols,
             filters=[["feed_key", "in", feed_keys]],
-            with_direction=False,  #  required to include rail/ferry/brt stops w/out shapes
+            with_direction=False,  # required to include rail/ferry/brt stops w/out shapes
             get_pandas=True,
         )
         # display(st)

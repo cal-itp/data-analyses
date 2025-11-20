@@ -11,14 +11,11 @@ from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from siuba import *
 from update_vars import (
     AM_PEAK,
-    EXPORT_PATH,
     GCS_FILE_PATH,
     HQ_TRANSIT_THRESHOLD,
     MS_TRANSIT_THRESHOLD,
     PM_PEAK,
-    PROJECT_CRS,
     ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP,
-    SEGMENT_BUFFER_METERS,
     SHARED_STOP_THRESHOLD,
     analysis_date,
 )
@@ -62,7 +59,7 @@ def add_route_dir(trips: pd.DataFrame, stop_times: pd.DataFrame, analysis_date: 
     add route and direction to stop times,
     also filter to bus and trolleybus only
     """
-    trips = trips[trips["route_type"].isin(["3", "11"])]  #  bus only
+    trips = trips[trips["route_type"].isin(["3", "11"])]  # bus only
 
     stop_times = stop_times.merge(trips, on=["feed_key", "trip_id", "schedule_gtfs_dataset_key"])
 
@@ -117,7 +114,7 @@ def get_explode_multiroute_only(
     )
     multi_only_explode = multi_only_explode.sort_values(
         ["schedule_gtfs_dataset_key", "stop_id", "route_dir"]
-    )  #  sorting crucial for next step
+    )  # sorting crucial for next step
     # print(f'{multi_only_explode.stop_id.nunique()} stops may qualify with multi-route aggregation')
     return multi_only_explode
 
@@ -135,7 +132,7 @@ def accumulate_share_count(route_dir_exploded: pd.DataFrame, share_counts: dict)
     for route_dir in rt_dir:
         route = route_dir.split("_")[
             0
-        ]  #  don't compare opposite dirs of same route, leads to edge cases like AC Transit 45
+        ]  # don't compare opposite dirs of same route, leads to edge cases like AC Transit 45
         other_dirs = [x for x in rt_dir if x != route_dir and x.split("_")[0] != route]
         for other_dir in other_dirs:
             key = schedule_gtfs_dataset_key + "__" + route_dir + "__" + other_dir
@@ -228,7 +225,7 @@ def filter_qualifying_stops(one_stop_st: pd.DataFrame, qualify_pairs: list) -> p
     )
     this_stop_route_dirs = (
         one_stop_st >> distinct(_.route_dir, _.route_dir_count)
-    ).route_dir.to_numpy()  #  preserves sort order
+    ).route_dir.to_numpy()  # preserves sort order
     aggregation_ok_route_dirs = check_stop(this_stop_route_dirs, qualify_pairs)
     return one_stop_st >> filter(_.route_dir.isin(aggregation_ok_route_dirs))
 
@@ -366,7 +363,7 @@ if __name__ == "__main__":
     )
     max_arrivals_by_stop_single.to_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet"
-    )  #  for branching_derived_intersections.py
+    )  # for branching_derived_intersections.py
     max_arrivals_by_stop_multi = st_prepped.pipe(
         stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=False
     )
