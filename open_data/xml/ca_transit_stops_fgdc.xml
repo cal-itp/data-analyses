@@ -8,8 +8,8 @@
 			</citeinfo>
 		</citation>
 		<descript>
-			<abstract>Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates route information to stops.</abstract>
-			<purpose>Provide all CA transit stops and routes (geospatial) from all transit operators.</purpose>
+			<abstract>Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates aggregated stop times and route information for each stop.</abstract>
+			<purpose>Provide all transit stops and routes (geospatial) from transit operators serving California. Data reflects operator-provided GTFS feeds and may include areas outside California if the operator provides service in multiple states or countries.</purpose>
 		</descript>
 		<keywords>
 			<theme>

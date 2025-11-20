@@ -18,7 +18,7 @@ common-fields:
   - &hqta_readme |-
       https://github.com/cal-itp/data-analyses/blob/main/high_quality_transit_areas/README.md
   - &hqta_keywords |-
-      Transportation, Land Use, Transit-Oriented Development, TOD, High Quality Transit
+      Transportation, Land Use, Transit-Oriented Development, TOD, High Quality Transit, Transit
   - &hqta_description |-
       Use GTFS schedule trips, stop_times, shapes, and stops to estimate whether corridor segments have scheduled frequencies of 15 minutes or less.
   - &traffic_ops_readme |-
@@ -28,7 +28,7 @@ common-fields:
   - &traffic_ops_purpose |-
       Provide all transit stops and routes (geospatial) from transit operators serving California. Data reflects operator-provided GTFS feeds and may include areas outside California if the operator provides service in multiple states or countries.
   - &traffic_ops_description |-
-      Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates aggregated stop times and route information aggregated for each stops.
+      Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates aggregated stop times and route information for each stop.
   - &speeds_readme |-
       https://github.com/cal-itp/data-analyses/blob/main/rt_segment_speeds/README.md
   - &speeds_keywords |-
@@ -123,7 +123,7 @@ tables:
     publish_entity: *publish_entity
     summary_purpose: "Average all-day, peak, and offpeak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data."
     description: |-
-        All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.
+        All day and peak transit 20th, 50th, and 80th percentile speeds on segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data. Segments are primarily stop to stop, but if stops are farther than 1km apart, additional segments between those stops will be added at 1km intervals.
     public_access: *public_access
     creation_date: "2023-06-14"
     place: *place

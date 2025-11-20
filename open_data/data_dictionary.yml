@@ -35,6 +35,7 @@ common-fields:
     definition_source: "https://gtfs.org/schedule/reference/#stop_timestxt"
   - &segment_id
     definition: Identifies a segment, formatted as stop_id-stop_id-n. n is 1 for the first segment between those stops. If those stops are farther than 1km apart, additional segments between those stops will be added, incrementing n by 1 for each km.
+    definition_source: "https://gtfs.org/schedule/reference/#stopstxt"
   - &stop_pair_name
     definition: A pair of stops. Identifies the current stop_name and the subsequent stop_name. The stop pair name value is created internally by concatenating two stop name with double underscores.
   - &shape_id
@@ -201,7 +202,7 @@ tables:
         The number of trips scheduled to operate for this segment and time period.
     trips_hr_sch:
       definition: |-
-        The scheduled frequency for this segment and time period, in trips per hour'/.
+        The scheduled frequency for this segment and time period, in trips per hour
     time_period: *time_period
     base64_url: *base64_url
     district_name: *district_name

@@ -8,7 +8,7 @@
 			</citeinfo>
 		</citation>
 		<descript>
-			<abstract>All day and peak transit 20th, 50th, and 80th percentile speeds on stop segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data.</abstract>
+			<abstract>All day and peak transit 20th, 50th, and 80th percentile speeds on segments estimated on a single day for all CA transit operators that provide GTFS real-time vehicle positions data. Segments are primarily stop to stop, but if stops are farther than 1km apart, additional segments between those stops will be added at 1km intervals.</abstract>
 			<purpose>Average all-day, peak, and offpeak transit speeds by segments for all CA operators that provide GTFS real-time vehicle positions data.</purpose>
 		</descript>
 		<keywords>
@@ -70,12 +70,13 @@
 				<attrdef>Full name of the transit agency</attrdef>
 			</attr>
 			<attr>
-				<attrlabl>org_id</attrlabl>
-				<attrdef>Organization identifier for the agency</attrdef>
-			</attr>
-			<attr>
 				<attrlabl>route_id</attrlabl>
 				<attrdef>Identifies a route</attrdef>
+				<attrdefs>https://gtfs.org/schedule/reference/#routestxt</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>route_name</attrlabl>
+				<attrdef>A standardized route_name for the route_id (can be route_short_name, route_long_name, or route_desc)</attrdef>
 				<attrdefs>https://gtfs.org/schedule/reference/#routestxt</attrdefs>
 			</attr>
 			<attr>
@@ -86,8 +87,14 @@
 				<attrdefs>https://gtfs.org/schedule/reference/#tripstxt</attrdefs>
 			</attr>
 			<attr>
-				<attrlabl>stop_pair</attrlabl>
-				<attrdef>A pair of stops. Identifies the current stop_id and the subsequent stop_id. The stop pair value is created internally by concatenating two stop ids with double underscores.</attrdef>
+				<attrlabl>shape_id</attrlabl>
+				<attrdef>Identifies a shape</attrdef>
+				<attrdefs>https://gtfs.org/schedule/reference/#shapestxt</attrdefs>
+			</attr>
+			<attr>
+				<attrlabl>segment_id</attrlabl>
+				<attrdef>Identifies a segment, formatted as stop_id-stop_id-n. n is 1 for the first segment between those stops. If those stops are farther than 1km apart, additional segments between those stops will be added, incrementing n by 1 for each km.</attrdef>
+				<attrdefs>https://gtfs.org/schedule/reference/#stopstxt</attrdefs>
 			</attr>
 			<attr>
 				<attrlabl>stop_pair_name</attrlabl>
@@ -95,19 +102,27 @@
 			</attr>
 			<attr>
 				<attrlabl>p20_mph</attrlabl>
-				<attrdef>The 20th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.</attrdef>
+				<attrdef>The 20th percentile speed (mph) for all trips associated with the route_id, direction_id, segment_id, and time_period.</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>p50_mph</attrlabl>
-				<attrdef>The 50th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.</attrdef>
+				<attrdef>The 50th percentile speed (mph) for all trips associated with the route_id, direction_id, segment_id, and time_period.</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>p80_mph</attrlabl>
-				<attrdef>The 80th percentile speed (mph) for all trips associated with the route_id, direction_id, stop_pair, and time_period.</attrdef>
+				<attrdef>The 80th percentile speed (mph) for all trips associated with the route_id, direction_id, segment_id, and time_period.</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>n_trips</attrlabl>
 				<attrdef>The number of trips used to find the 20th, 50th, and 80th percentile speeds within the segment.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>n_trips_sch</attrlabl>
+				<attrdef>The number of trips scheduled to operate for this segment and time period.</attrdef>
+			</attr>
+			<attr>
+				<attrlabl>trips_hr_sch</attrlabl>
+				<attrdef>The scheduled frequency for this segment and time period, in trips per hour</attrdef>
 			</attr>
 			<attr>
 				<attrlabl>time_period</attrlabl>

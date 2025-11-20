@@ -15,7 +15,7 @@
 <contact gco:nilReason="missing">
 </contact>
 <dateStamp>
-<gco:Date>2025-10-08</gco:Date>
+<gco:Date>2025-11-19</gco:Date>
 </dateStamp>
 <metadataStandardName>
 <gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
@@ -72,7 +72,7 @@
 <gco:CharacterString>Provide compiled GTFS schedule data in geospatial format. Transit routes associates route information to shapes. Transit stops associates aggregated stop times and route information aggregated for each stops.</gco:CharacterString>
 </abstract>
 <purpose>
-<gco:CharacterString>Provide all CA transit stops and routes (geospatial) from all transit operators.</gco:CharacterString>
+<gco:CharacterString>Provide all transit stops and routes (geospatial) from transit operators serving California. Data reflects operator-provided GTFS feeds and may include areas outside California if the operator provides service in multiple states or countries.</gco:CharacterString>
 </purpose>
 <descriptiveKeywords>
 <MD_Keywords>
@@ -110,7 +110,7 @@
 <MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf8" codeSpace="ISOTC211/19115">utf8</MD_CharacterSetCode>
 </characterSet>
 <environmentDescription>
-<gco:CharacterString>Microsoft Windows 10 Version 10.0 (Build 22631) ; Esri ArcGIS 12.9.12.32739</gco:CharacterString>
+<gco:CharacterString>Microsoft Windows 10 Version 10.0 (Build 22631) ; Esri ArcGIS 13.1.8.41833</gco:CharacterString>
 </environmentDescription>
 </MD_DataIdentification>
 </identificationInfo>
