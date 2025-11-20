@@ -8,17 +8,16 @@ GTFS utils for v2 warehouse
 import datetime
 from typing import Literal, Union
 
-from calitp_data_analysis.tables import tbls
-from shared_utils import DBSession, schedule_rt_utils
-from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
-from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
-
 import geopandas as gpd
 import pandas as pd
 import shapely
 import siuba  # need this to do type hint in functions
 import sqlalchemy
 from calitp_data_analysis import geography_utils
+from calitp_data_analysis.tables import tbls
+from shared_utils import DBSession, schedule_rt_utils
+from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
+from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
 from siuba import *
 from sqlalchemy import and_
 

@@ -1,12 +1,11 @@
-from shared_utils.gtfs_utils_v2 import (
-    get_metrolink_feed_key,
-    schedule_daily_feed_to_gtfs_dataset_name,
-)
-
 import pytest
 import sqlalchemy
 from pandas._libs.tslibs.timestamps import Timestamp
 from pytest_unordered import unordered
+from shared_utils.gtfs_utils_v2 import (
+    get_metrolink_feed_key,
+    schedule_daily_feed_to_gtfs_dataset_name,
+)
 
 
 class TestGtfsUtilsV2:

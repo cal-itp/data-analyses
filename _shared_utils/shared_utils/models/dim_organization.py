@@ -1,5 +1,4 @@
 from shared_utils.models.base import get_table_name
-
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import declarative_base, declared_attr
 

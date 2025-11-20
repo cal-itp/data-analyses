@@ -1,9 +1,8 @@
 import json
 import sys
 
-from vcr.request import Request
-
 import pytest
+from vcr.request import Request
 
 
 def pytest_configure(config):
