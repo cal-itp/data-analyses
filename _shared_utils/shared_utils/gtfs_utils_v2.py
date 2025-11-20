@@ -19,7 +19,7 @@ from shared_utils import DBSession, schedule_rt_utils
 from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
 from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
 from siuba import *
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 GCS_PROJECT = "cal-itp-data-infra"
 
@@ -254,16 +254,18 @@ def schedule_daily_feed_to_gtfs_dataset_name(
         get_df=False,
     )
 
+    is_not_regional_precursor = func.IFNULL(DimGtfsDataset.regional_feed_type, "") != "Regional Precursor Feed"
     additional_search_conditions = {
         "customer_facing": [
-            DimGtfsDataset.regional_feed_type != "Regional Precursor Feed",
-            DimGtfsDataset.regional_feed_type != "Regional Subfeed",
+            is_not_regional_precursor,
+            func.IFNULL(DimGtfsDataset.regional_feed_type, "") != "Regional Subfeed",
         ],
         "use_subfeeds": [
-            DimGtfsDataset.regional_feed_type != "Regional Precursor Feed",
-            DimGtfsDataset.name != "Bay Area 511 Regional Schedule",
+            is_not_regional_precursor,
+            # keep VCTC combined because the combined feed is the only feed
+            func.IFNULL(DimGtfsDataset.name, "") != "Bay Area 511 Regional Schedule",
         ],
-        "current_feeds": [DimGtfsDataset.regional_feed_type != "Regional Precursor Feed"],
+        "current_feeds": [is_not_regional_precursor],
     }
 
     search_conditions = [FctDailyScheduleFeeds.date == selected_date] + additional_search_conditions.get(
@@ -272,12 +274,15 @@ def schedule_daily_feed_to_gtfs_dataset_name(
 
     # Join on gtfs_dataset_key to get organization name
     statement = (
-        dim_gtfs_datasets.add_columns(
+        dim_gtfs_datasets.with_only_columns(
+            DimGtfsDataset.regional_feed_type,
+            DimGtfsDataset.type,
             FctDailyScheduleFeeds.key,
             FctDailyScheduleFeeds.date,
             FctDailyScheduleFeeds.feed_key,
             FctDailyScheduleFeeds.feed_timezone,
             FctDailyScheduleFeeds.base64_url,
+            FctDailyScheduleFeeds.gtfs_dataset_key,
             FctDailyScheduleFeeds.gtfs_dataset_name.label("name"),
         )
         .join(
