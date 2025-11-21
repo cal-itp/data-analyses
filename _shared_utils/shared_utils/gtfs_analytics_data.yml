@@ -165,9 +165,11 @@ gtfs_digest_rollup:
   dir: ${gcs_paths.DIGEST_GCS}
   # SELECT * FROM  `{project_name}`.`{dataset_name}`.`{table_name}`"
   # SELECT * FROM cal-itp-data-infra.mart_gtfs_rollup.fct_monthly_routes
-  schedule_route_direction: "mart_gtfs_rollup.fct_monthly_schedule_route_direction_summary"
-  schedule_rt_route_direction: "tiffany_mart_gtfs_rollup.fct_schedule_rt_route_direction_summary"
+  schedule_route_direction: "mart_gtfs_rollup.fct_monthly_schedule_route_direction_summary" # this one might not be needed
+  schedule_rt_route_direction: "mart_gtfs_rollup.fct_schedule_rt_route_direction_summary"
   route_map: "mart_gtfs_rollup.fct_monthly_routes"
+  operator_summary: "tiffany_mart_gtfs_rollup.fct_monthly_operator_summary"
+  hourly_day_type_summary: "tiffany_mart_gtfs_rollup.fct_operator_hourly_summary"
 
 open_data_rollup:
   ca_transit_routes: "mart_gtfs_rollup.fct_monthly_routes"
