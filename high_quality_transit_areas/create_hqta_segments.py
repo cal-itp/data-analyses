@@ -98,7 +98,7 @@ def select_shapes_and_segment(analysis_date: str, segment_length: int) -> gpd.Ge
     Returns the hqta_segments for all the routes across all operators.
     """
     # Only include certain Amtrak routes
-    outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips( # noqa: F841
+    outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips(  # noqa: F841
         analysis_date, inside_ca=False
     ).shape_array_key.unique()
 

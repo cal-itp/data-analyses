@@ -112,7 +112,7 @@ def get_lookback_agency_crosswalk(published_operators_dict: dict, lookback_trips
 
     lookback_agency_info = []
     for date in published_operators_dict.keys():
-        schedule_gtfs_dataset_keys = lookback_trips_ix.query( # noqa: F841
+        schedule_gtfs_dataset_keys = lookback_trips_ix.query(  # noqa: F841
             "lookback_date == @date"
         ).schedule_gtfs_dataset_key.unique()
         agency_info = get_agency_crosswalk(analysis_date=date).query(
