@@ -71,7 +71,7 @@ def get_shapes_with_lookback(analysis_date: str, published_operators_dict: dict,
     """
     Get shapes (including lookback) and add route_dir and area.
     """
-    outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips(
+    outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips( # noqa: F841
         analysis_date=analysis_date, inside_ca=False
     ).shape_array_key.unique()
     shapes = (
