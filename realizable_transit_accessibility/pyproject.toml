@@ -11,6 +11,7 @@ dependencies = [
     "numpy < 2",
     "shared_utils",
     "segment_speed_utils",
+    "raw_feed_download_utils",
     "calitp-data-analysis==2025.6.24",
     "sqlalchemy-bigquery (>=1.4.4, <2.0.0)", # shared_utils dep
     "siuba>=0.4.0", # shared_utils dep
@@ -30,6 +31,7 @@ package-mode = false
 [tool.poetry.dependencies]
 shared_utils = {path = "../_shared_utils"}
 segment_speed_utils = {path = "../rt_segment_speeds"}
+raw_feed_download_utils = {path = "../conveyal_update"}
 
 [tool.black]
 line-length = 120
