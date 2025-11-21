@@ -98,9 +98,9 @@ def get_lookback_hqta_shapes(published_operators_dict, lookback_trips_ix, no_dro
     """
     lookback_shapes = []
     for date in published_operators_dict.keys():
-        feed_keys = lookback_trips_ix.query("analysis_date == @date").feed_key.unique()
+        feed_keys = lookback_trips_ix.query("analysis_date == @date").feed_key.unique() # noqa: F841
         # Only include certain Amtrak routes
-        outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips(
+        outside_amtrak_shapes = gtfs_schedule_wrangling.amtrak_trips( # noqa: F841
             analysis_date=date, inside_ca=False
         ).shape_array_key.unique()
 
