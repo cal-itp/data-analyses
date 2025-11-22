@@ -1,10 +1,9 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [], "useLegacySql": false,
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [], "useLegacySql": false,
       "formatOptions": {"useInt64Timestamp": true}, "location": "us-west2", "query":
-      "SELECT `dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`, `dim_gtfs_datasets`.`name`
-      AS `gtfs_dataset_name` \nFROM `dim_gtfs_datasets` \nWHERE `dim_gtfs_datasets`.`data_quality_pipeline`
+      "SELECT `test_shared_utils.dim_gtfs_datasets`.`key` AS `gtfs_dataset_key`, `test_shared_utils.dim_gtfs_datasets`.`name`
+      AS `gtfs_dataset_name` \nFROM `test_shared_utils.dim_gtfs_datasets` \nWHERE `test_shared_utils.dim_gtfs_datasets`.`data_quality_pipeline`
       = true", "maxResults": 5000, "requestId": "47029e4f-7838-41c6-86df-93740b07550e"}'
     headers:
       Accept:

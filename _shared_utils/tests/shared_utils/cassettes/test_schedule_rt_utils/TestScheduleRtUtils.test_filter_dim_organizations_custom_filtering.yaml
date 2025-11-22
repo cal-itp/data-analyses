@@ -1,13 +1,12 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
       [{"value": "City of Mission Viejo"}, {"value": "City of Patterson"}]}, "name":
       "name_1"}], "parameterMode": "NAMED", "useLegacySql": false, "formatOptions":
-      {"useInt64Timestamp": true}, "location": "us-west2", "query": "SELECT `dim_organizations`.`name`,
-      `dim_organizations`.`source_record_id` AS `organization_source_record_id` \nFROM
-      `dim_organizations` \nWHERE `dim_organizations`.`_is_current` = true AND `dim_organizations`.`name`
+      {"useInt64Timestamp": true}, "location": "us-west2", "query": "SELECT `test_shared_utils.dim_organizations`.`name`,
+      `test_shared_utils.dim_organizations`.`source_record_id` AS `organization_source_record_id` \nFROM
+      `test_shared_utils.dim_organizations` \nWHERE `test_shared_utils.dim_organizations`.`_is_current` = true AND `test_shared_utils.dim_organizations`.`name`
       IN UNNEST(@`name_1`)", "maxResults": 5000, "requestId": "5297ac44-0c46-4450-8162-c285ea4c4947"}'
     headers:
       Accept:

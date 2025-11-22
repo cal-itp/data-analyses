@@ -1,7 +1,6 @@
 interactions:
 - request:
-    body: '{"maximumBytesBilled": "5000000000", "defaultDataset": {"projectId": "cal-itp-data-infra-staging",
-      "datasetId": "test_shared_utils"}, "queryParameters": [{"parameterType": {"type":
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType": {"type":
       "INT64"}, "parameterValue": {"value": "2"}, "name": "lpad_1"}, {"parameterType":
       {"type": "STRING"}, "parameterValue": {"value": "0"}, "name": "lpad_2"}, {"parameterType":
       {"type": "STRING"}, "parameterValue": {"value": " - "}, "name": "concat_1"},
@@ -11,13 +10,13 @@ interactions:
       "parameterValue": {"value": "US/Pacific"}, "name": "datetime_3"}, {"parameterType":
       {"type": "STRING"}, "parameterValue": {"value": "2025-06-17"}, "name": "datetime_4"}],
       "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
-      true}, "location": "us-west2", "query": "SELECT `bridge_organizations_x_headquarters_county_geography`.`organization_name`,
-      concat(lpad(CAST(`dim_county_geography`.`caltrans_district` AS STRING), @`lpad_1`,
-      @`lpad_2`), @`concat_1`, `dim_county_geography`.`caltrans_district_name`) AS
-      `caltrans_district` \nFROM `bridge_organizations_x_headquarters_county_geography`
-      JOIN `dim_county_geography` ON `dim_county_geography`.`key` = `bridge_organizations_x_headquarters_county_geography`.`county_geography_key`
-      \nWHERE datetime(`bridge_organizations_x_headquarters_county_geography`.`_valid_from`,
-      @`datetime_1`) <= datetime(@`datetime_2`) AND datetime(`bridge_organizations_x_headquarters_county_geography`.`_valid_to`,
+      true}, "location": "us-west2", "query": "SELECT `test_shared_utils.bridge_organizations_x_headquarters_county_geography`.`organization_name`,
+      concat(lpad(CAST(`test_shared_utils.dim_county_geography`.`caltrans_district` AS STRING), @`lpad_1`,
+      @`lpad_2`), @`concat_1`, `test_shared_utils.dim_county_geography`.`caltrans_district_name`) AS
+      `caltrans_district` \nFROM `test_shared_utils.bridge_organizations_x_headquarters_county_geography`
+      JOIN `test_shared_utils.dim_county_geography` ON `test_shared_utils.dim_county_geography`.`key` = `test_shared_utils.bridge_organizations_x_headquarters_county_geography`.`county_geography_key`
+      \nWHERE datetime(`test_shared_utils.bridge_organizations_x_headquarters_county_geography`.`_valid_from`,
+      @`datetime_1`) <= datetime(@`datetime_2`) AND datetime(`test_shared_utils.bridge_organizations_x_headquarters_county_geography`.`_valid_to`,
       @`datetime_3`) >= datetime(@`datetime_4`)", "maxResults": 5000, "requestId":
       "d01eb459-9309-45f6-9308-4d02af777609"}'
     headers:

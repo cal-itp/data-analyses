@@ -12,10 +12,14 @@ import geopandas as gpd
 import pandas as pd
 import shapely
 import siuba  # need this to do type hint in functions
+import sqlalchemy
 from calitp_data_analysis import geography_utils
 from calitp_data_analysis.tables import tbls
-from shared_utils import schedule_rt_utils
+from shared_utils import DBSession, schedule_rt_utils
+from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
+from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
 from siuba import *
+from sqlalchemy import and_, func
 
 GCS_PROJECT = "cal-itp-data-infra"
 
@@ -27,7 +31,7 @@ ROUTE_TYPE_DICT = {
     "3": "Bus",
     "4": "Ferry",
     "5": "Cable tram",
-    "6": "Aerial lift, suspecnded cable car",
+    "6": "Aerial lift, suspended cable car",
     "7": "Funicular",
     "11": "Trolleybus",
     "12": "Monorail",
@@ -115,36 +119,6 @@ def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
         return filter()
 
 
-def filter_feed_options(
-    feed_option: Literal[
-        "customer_facing",
-        "use_subfeeds",
-        "current_feeds",
-        "include_precursor",
-    ],
-) -> siuba.dply.verbs.Pipeable:
-    exclude_precursor = filter(_.regional_feed_type != "Regional Precursor Feed")
-
-    if feed_option == "customer_facing":
-        return filter(_.regional_feed_type != "Regional Subfeed") >> exclude_precursor
-
-    elif feed_option == "use_subfeeds":
-        return (
-            filter(
-                _["name"] != "Bay Area 511 Regional Schedule"
-            )  # keep VCTC combined because the combined feed is the only feed
-            >> exclude_precursor
-        )
-
-    elif feed_option == "current_feeds":
-        return exclude_precursor
-
-    elif feed_option == "include_precursor":
-        return filter()
-    else:
-        return filter()
-
-
 def check_operator_feeds(operator_feeds: list[str]):
     if len(operator_feeds) == 0:
         raise ValueError("Supply list of feed keys or operator names!")
@@ -176,22 +150,34 @@ METROLINK_SHAPE_TO_ROUTE = {
 METROLINK_ROUTE_TO_SHAPE = dict((v, k) for k, v in METROLINK_SHAPE_TO_ROUTE.items())
 
 
-def get_metrolink_feed_key(selected_date: Union[str, datetime.date], get_df: bool = False) -> pd.DataFrame:
+def get_metrolink_feed_key(
+    selected_date: Union[str, datetime.date], get_df: bool = False, **kwargs
+) -> Union[pd.DataFrame, str]:
     """
     Get Metrolink's feed_key value.
     """
     metrolink_in_airtable = schedule_rt_utils.filter_dim_gtfs_datasets(
-        keep_cols=["key", "name"], custom_filtering={"name": ["Metrolink Schedule"]}, get_df=False
+        keep_cols=["key", "name"],
+        custom_filtering={"name": ["Metrolink Schedule"]},
+        get_df=False,
     )
 
-    metrolink_feed = (
-        tbls.mart_gtfs.fct_daily_schedule_feeds()
-        >> filter(_.date == selected_date)
-        >> inner_join(_, metrolink_in_airtable, on=["gtfs_dataset_key", "gtfs_dataset_name"])
-        >> rename(name=_.gtfs_dataset_name)
-        >> subset_cols(["feed_key", "name"])
-        >> collect()
+    statement = (
+        metrolink_in_airtable.add_columns(FctDailyScheduleFeeds.feed_key)
+        .join(
+            FctDailyScheduleFeeds,
+            and_(
+                FctDailyScheduleFeeds.gtfs_dataset_key == DimGtfsDataset.key,
+                FctDailyScheduleFeeds.gtfs_dataset_name == DimGtfsDataset.name,
+            ),
+        )
+        .where(FctDailyScheduleFeeds.date == selected_date)
     )
+
+    with DBSession() as session:
+        metrolink_feed = pd.read_sql(statement, session.bind)
+
+    metrolink_feed = metrolink_feed.rename(columns={"gtfs_dataset_name": "name"})[["feed_key", "name"]]
 
     if get_df:
         return metrolink_feed
@@ -237,9 +223,8 @@ def schedule_daily_feed_to_gtfs_dataset_name(
         "use_subfeeds",
         "current_feeds",
         "include_precursor",
-        "include_precursor_and_future",
     ] = "use_subfeeds",
-) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+) -> Union[pd.DataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Select a date, find what feeds are present, and
     merge in organization name
@@ -261,32 +246,67 @@ def schedule_daily_feed_to_gtfs_dataset_name(
 
     * include_precursor: include precursor feeds
                 Caution: would result in duplicate organization names
-
-    * include_precursor_and_future: include precursor feeds and future feeds.
-                Caution: would result in duplicate organization names
     """
     # Get GTFS schedule datasets from Airtable
     dim_gtfs_datasets = schedule_rt_utils.filter_dim_gtfs_datasets(
-        keep_cols=["key", "name", "type", "regional_feed_type"], custom_filtering={"type": ["schedule"]}, get_df=False
+        keep_cols=["key", "name", "type", "regional_feed_type"],
+        custom_filtering={"type": ["schedule"]},
+        get_df=False,
     )
 
-    # Merge on gtfs_dataset_key to get organization name
-    fact_feeds = (
-        tbls.mart_gtfs.fct_daily_schedule_feeds()
-        >> filter(_.date == selected_date)
-        >> inner_join(_, dim_gtfs_datasets, on=["gtfs_dataset_key", "gtfs_dataset_name"])
-    ) >> rename(name="gtfs_dataset_name")
+    is_not_regional_precursor = func.IFNULL(DimGtfsDataset.regional_feed_type, "") != "Regional Precursor Feed"
+    additional_search_conditions = {
+        "customer_facing": [
+            is_not_regional_precursor,
+            func.IFNULL(DimGtfsDataset.regional_feed_type, "") != "Regional Subfeed",
+        ],
+        "use_subfeeds": [
+            is_not_regional_precursor,
+            # keep VCTC combined because the combined feed is the only feed
+            func.IFNULL(DimGtfsDataset.name, "") != "Bay Area 511 Regional Schedule",
+        ],
+        "current_feeds": [is_not_regional_precursor],
+    }
+
+    search_conditions = [FctDailyScheduleFeeds.date == selected_date] + additional_search_conditions.get(
+        feed_option, []
+    )
+
+    # Join on gtfs_dataset_key to get organization name
+    statement = (
+        dim_gtfs_datasets.with_only_columns(
+            DimGtfsDataset.regional_feed_type,
+            DimGtfsDataset.type,
+            FctDailyScheduleFeeds.key,
+            FctDailyScheduleFeeds.date,
+            FctDailyScheduleFeeds.feed_key,
+            FctDailyScheduleFeeds.feed_timezone,
+            FctDailyScheduleFeeds.base64_url,
+            FctDailyScheduleFeeds.gtfs_dataset_key,
+            FctDailyScheduleFeeds.gtfs_dataset_name.label("name"),
+        )
+        .join(
+            FctDailyScheduleFeeds,
+            and_(
+                FctDailyScheduleFeeds.gtfs_dataset_key == DimGtfsDataset.key,
+                FctDailyScheduleFeeds.gtfs_dataset_name == DimGtfsDataset.name,
+            ),
+        )
+        .where(and_(*search_conditions))
+    )
+
+    if keep_cols and len(keep_cols):
+        columns = []
+        for column in keep_cols:
+            new_column = DimGtfsDataset.name if column == "name" else getattr(FctDailyScheduleFeeds, column)
+            columns.append(new_column)
+        statement = statement.with_only_columns(columns)
 
     if get_df:
-        fact_feeds = (
-            fact_feeds
-            >> collect()
-            # apparently order matters - if this is placed before
-            # the collect(), it filters out wayyyy too many
-            >> filter_feed_options(feed_option)
-        )
+        with DBSession() as session:
+            return pd.read_sql(statement, session.bind)
 
-    return fact_feeds >> subset_cols(keep_cols)
+    return statement
 
 
 def get_trips(
