@@ -1,7 +1,7 @@
-import pandas as pd
 from datetime import datetime
 
-MONTH_ABBR_YEAR_FMT = "%b%Y" #oct2023
+MONTH_ABBR_YEAR_FMT = "%b%Y"  # oct2023
+
 
 def parse_monthyear_string(monthyear_string: str) -> tuple[int, str]:
     """
@@ -10,9 +10,9 @@ def parse_monthyear_string(monthyear_string: str) -> tuple[int, str]:
     oct2023 -> 2023 (year), October (month)
     """
     parsed_date = datetime.strptime(monthyear_string, MONTH_ABBR_YEAR_FMT)
-    
+
     return parsed_date.year, parsed_date.strftime("%B")
-    
+
 
 def get_public_filename(monthyear_string: str) -> str:
     """
@@ -49,5 +49,6 @@ DATES = {
     "may2025": "2025-07",
     "jun2025": "2005-08",
     "jul2025": "2025-09",
-    "aug2025": "2025-10"
+    "aug2025": "2025-10",
+    "sep2025": "2025-11",
 }
