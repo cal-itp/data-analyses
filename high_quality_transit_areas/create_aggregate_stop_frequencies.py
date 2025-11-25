@@ -98,15 +98,28 @@ def get_explode_multiroute_only(
     further processing.
     """
     #  note this is max -- still evaluate stops meeting the lower threshold as single-route in case they meet the higher threshold as multi
-    single_qual_max = single_route_aggregation >> filter(
-        _.am_max_trips_hr >= max(frequency_thresholds), _.pm_max_trips_hr >= max(frequency_thresholds)
+    single_qual_max = single_route_aggregation[
+        (single_route_aggregation.am_max_trips_hr >= max(frequency_thresholds))
+        & (single_route_aggregation.pm_max_trips_hr >= max(frequency_thresholds))
+    ]
+
+    multi_qual = multi_route_aggregation[
+        (multi_route_aggregation.am_max_trips_hr >= min(frequency_thresholds))
+        & (multi_route_aggregation.pm_max_trips_hr >= min(frequency_thresholds))
+    ]
+
+    multi_only = multi_qual.merge(
+        single_qual_max[["schedule_gtfs_dataset_key", "stop_id"]],
+        on=["schedule_gtfs_dataset_key", "stop_id"],
+        how="left",
+        indicator=True,
     )
-    multi_qual = multi_route_aggregation >> filter(
-        _.am_max_trips_hr >= min(frequency_thresholds), _.pm_max_trips_hr >= min(frequency_thresholds)
-    )
-    multi_only = multi_qual >> anti_join(_, single_qual_max, on=["schedule_gtfs_dataset_key", "stop_id"])
+    multi_only = multi_only[multi_only["_merge"] == "left_only"].drop(columns=["_merge"]).reset_index(drop=True)
+
     #  only consider route_dir that run at least hourly when doing multi-route aggregation, should reduce edge cases
-    single_hourly = single_route_aggregation >> filter(_.am_max_trips_hr >= 1, _.pm_max_trips_hr >= 1)
+    single_hourly = single_route_aggregation[
+        (single_route_aggregation.am_max_trips_hr >= 1) & (single_route_aggregation.pm_max_trips_hr >= 1)
+    ]
     single_hourly = single_hourly.explode("route_dir")[["route_dir", "schedule_gtfs_dataset_key", "stop_id"]]
     multi_only_explode = multi_only[["schedule_gtfs_dataset_key", "stop_id", "route_dir"]].explode("route_dir")
     multi_only_explode = multi_only_explode.merge(
