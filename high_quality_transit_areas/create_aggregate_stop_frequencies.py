@@ -264,19 +264,23 @@ def collinear_filter_feed(
     if st_qual_filter_1.empty:
         return
     trips_per_peak_qual_1 = stop_times_aggregation_max_by_stop(st_qual_filter_1, analysis_date, single_route_dir=False)
-    trips_per_peak_qual_1 = trips_per_peak_qual_1 >> filter(
-        _.am_max_trips_hr >= min(frequency_thresholds), _.pm_max_trips_hr >= min(frequency_thresholds)
-    )
-    short_routes = (
-        trips_per_peak_qual_1.explode("route_dir") >> count(_.route_dir) >> filter(_.n < SHARED_STOP_THRESHOLD)
-    )
+
+    trips_per_peak_qual_1 = trips_per_peak_qual_1[
+        (trips_per_peak_qual_1.am_max_trips_hr >= min(frequency_thresholds))
+        & (trips_per_peak_qual_1.pm_max_trips_hr >= min(frequency_thresholds))
+    ]
+
+    df = trips_per_peak_qual_1.explode("route_dir")[["route_dir", "stop_id"]].groupby("route_dir").count().reset_index()
+    short_routes = df[df.stop_id < SHARED_STOP_THRESHOLD]
     # print('short routes, all_short stops:')
     # display(short_routes)
     trips_per_peak_qual_1["all_short"] = trips_per_peak_qual_1.route_dir.map(
         lambda x: np.array([True if y in list(short_routes.route_dir) else False for y in x]).all()
     )
-    # display(trips_per_peak_qual_1 >> filter(_.all_short)) #  stops where _every_ shared route has less than SHARED_STOP_THRESHOLD frequent stops (even after aggregation)
-    trips_per_peak_qual_2 = trips_per_peak_qual_1 >> filter(-_.all_short) >> select(-_.all_short)
+    display(
+        trips_per_peak_qual_1[trips_per_peak_qual_1.all_short]
+    )  # stops where _every_ shared route has less than SHARED_STOP_THRESHOLD frequent stops (even after aggregation)
+    trips_per_peak_qual_2 = trips_per_peak_qual_1[~trips_per_peak_qual_1.all_short].drop(columns=["all_short"])
 
     return trips_per_peak_qual_2
 
