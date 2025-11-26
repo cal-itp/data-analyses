@@ -178,23 +178,21 @@ def feed_level_filter(
     any_appearance = np.unique(arr)
 
     #  only need to check stops that qualify as multi-route only
-    stops_to_eval = multi_only_explode >> filter(_.schedule_gtfs_dataset_key == gtfs_dataset_key) >> distinct(_.stop_id)
-    st_prepped = st_prepped >> filter(
-        _.schedule_gtfs_dataset_key == gtfs_dataset_key,
-        _.stop_id.isin(stops_to_eval.stop_id),
-    )
+    stops_to_eval = multi_only_explode[
+        multi_only_explode.schedule_gtfs_dataset_key == gtfs_dataset_key
+    ].stop_id.unique()
+    st_prepped = st_prepped[
+        (st_prepped.schedule_gtfs_dataset_key == gtfs_dataset_key) & (st_prepped.stop_id.isin(stops_to_eval))
+    ]
     # print(f'{st_prepped.shape}')
-    st_to_eval = st_prepped >> filter(_.route_dir.isin(any_appearance))
+    st_to_eval = st_prepped[st_prepped.route_dir.isin(any_appearance)]
     # print(f'{st_to_eval.shape}')
     #  cut down problem space by checking if stops still could qual after filtering for any appearance
     min_rows = min(frequency_thresholds) * len(both_peaks_hrs)
-    st_could_qual = (
-        st_to_eval
-        >> group_by(_.stop_id)
-        >> mutate(could_qualify=_.shape[0] >= min_rows)
-        >> ungroup()
-        >> filter(_.could_qualify)
-    )
+    df = st_to_eval.groupby("stop_id")[["trip_id"]].count().reset_index()
+    df = df[df.trip_id > min_rows]
+    st_to_eval = st_to_eval.assign(could_qualify=st_to_eval.stop_id.isin(df.stop_id))
+    st_could_qual = st_to_eval[st_to_eval["could_qualify"]]
     # print(f'{st_could_qual.shape}')
     return st_could_qual, qualify_pairs
 
