@@ -1,9 +1,13 @@
+import datetime
+import re
+
 import pytest
 import sqlalchemy
 from pandas._libs.tslibs.timestamps import Timestamp
 from pytest_unordered import unordered
 from shared_utils.gtfs_utils_v2 import (
     get_metrolink_feed_key,
+    get_trips,
     schedule_daily_feed_to_gtfs_dataset_name,
 )
 
@@ -224,3 +228,308 @@ class TestGtfsUtilsV2:
                 },
             ]
         )
+
+    @pytest.mark.vcr
+    def test_get_trips(self):
+        result = get_trips(selected_date="2025-09-01", operator_feeds=["c86f88ad0b15f5185d073f91f2130285"])
+
+        assert len(result) == 3
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "key": "50e9e6e644f82ec29801c580ec0c772a",
+                    "trip_instance_key": "d7d7502d292a35c41ee5a6c3c43f2fd5",
+                    "feed_timezone": "America/Los_Angeles",
+                    "base64_url": "aHR0cHM6Ly9hcGkuNTExLm9yZy90cmFuc2l0L2RhdGFmZWVkcz9vcGVyYXRvcl9pZD1SRw==",
+                    "name": "Bay Area 511 Regional Schedule",
+                    "regional_feed_type": "Combined Regional Feed",
+                    "gtfs_dataset_key": "d6ed100168196d507b4ef1c0d111ee72",
+                    "service_date": datetime.date(2025, 9, 1),
+                    "feed_key": "c86f88ad0b15f5185d073f91f2130285",
+                    "service_id": "3D:72971",
+                    "trip_key": "7909be049636fabeaf2d7e519a099f23",
+                    "trip_id": "3D:1358",
+                    "iteration_num": 0,
+                    "frequencies_defined_trip": False,
+                    "trip_short_name": None,
+                    "direction_id": 0,
+                    "block_id": "3D:301",
+                    "route_key": "bc23b5e936992cd318d7b35d3b18462b",
+                    "route_id": "3D:374",
+                    "route_type": "3",
+                    "route_short_name": "374",
+                    "route_long_name": "Pittsburg-Bay Point BART / Bay Point",
+                    "route_continuous_pickup": None,
+                    "route_continuous_drop_off": None,
+                    "route_desc": None,
+                    "route_color": "A03B00",
+                    "route_text_color": "FFFFFF",
+                    "agency_id": "3D",
+                    "network_id": "3D",
+                    "shape_array_key": "2ce3f738fbdcfdf229cab4c19b1dfc08",
+                    "shape_id": "3D:25",
+                    "contains_warning_duplicate_trip_primary_key": False,
+                    "num_distinct_stops_served": 27,
+                    "num_stop_times": 28,
+                    "trip_first_departure_sec": 35460,
+                    "trip_last_arrival_sec": 37560,
+                    "trip_start_timezone": "America/Los_Angeles",
+                    "trip_end_timezone": "America/Los_Angeles",
+                    "service_hours": 0.5833333333333334,
+                    "flex_service_hours": None,
+                    "contains_warning_duplicate_stop_times_primary_key": False,
+                    "contains_warning_missing_foreign_key_stop_id": False,
+                    "trip_first_departure_ts": Timestamp("2025-09-01 16:51:00+0000", tz="UTC"),
+                    "trip_last_arrival_ts": Timestamp("2025-09-01 17:26:00+0000", tz="UTC"),
+                    "first_start_pickup_drop_off_window_sec": None,
+                    "last_end_pickup_drop_off_window_sec": None,
+                    "is_gtfs_flex_trip": False,
+                    "is_entirely_demand_responsive_trip": False,
+                    "num_gtfs_flex_stop_times": 0,
+                    "num_approximate_timepoint_stop_times": 25,
+                    "num_exact_timepoint_stop_times": 3,
+                    "num_arrival_times_populated_stop_times": 28,
+                    "num_departure_times_populated_stop_times": 28,
+                    "trip_first_start_pickup_drop_off_window_ts": None,
+                    "trip_last_end_pickup_drop_off_window_ts": None,
+                    "trip_start_date_pacific": datetime.date(2025, 9, 1),
+                    "trip_first_departure_datetime_pacific": Timestamp("2025-09-01 09:51:00"),
+                    "trip_last_arrival_datetime_pacific": Timestamp("2025-09-01 10:26:00"),
+                    "trip_start_date_local_tz": datetime.date(2025, 9, 1),
+                    "trip_first_departure_datetime_local_tz": Timestamp("2025-09-01 09:51:00"),
+                    "trip_last_arrival_datetime_local_tz": Timestamp("2025-09-01 10:26:00"),
+                    "trip_first_start_pickup_drop_off_window_date_pacific": None,
+                    "trip_first_start_pickup_drop_off_window_datetime_pacific": None,
+                    "trip_last_end_pickup_drop_off_window_pacific": None,
+                    "trip_first_start_pickup_drop_off_window_date_local_tz": None,
+                    "trip_first_start_pickup_drop_off_window_datetime_local_tz": None,
+                    "trip_last_end_pickup_drop_off_window_datetime_local_tz": None,
+                    "time_of_day": "AM Peak",
+                },
+                {
+                    "key": "791f8f41e0e017eecfe2fd8771e0c69b",
+                    "trip_instance_key": "9299b8bc55f25684bfac1f9e3f08448f",
+                    "feed_timezone": "America/Los_Angeles",
+                    "base64_url": "aHR0cHM6Ly9hcGkuNTExLm9yZy90cmFuc2l0L2RhdGFmZWVkcz9vcGVyYXRvcl9pZD1SRw==",
+                    "name": "Bay Area 511 Regional Schedule",
+                    "regional_feed_type": "Combined Regional Feed",
+                    "gtfs_dataset_key": "d6ed100168196d507b4ef1c0d111ee72",
+                    "service_date": datetime.date(2025, 9, 1),
+                    "feed_key": "c86f88ad0b15f5185d073f91f2130285",
+                    "service_id": "3D:72971",
+                    "trip_key": "2a1be21c6c902ddefe1bd13c7582c2c0",
+                    "trip_id": "3D:2388",
+                    "iteration_num": 0,
+                    "frequencies_defined_trip": False,
+                    "trip_short_name": None,
+                    "direction_id": 0,
+                    "block_id": "3D:310",
+                    "route_key": "bc23b5e936992cd318d7b35d3b18462b",
+                    "route_id": "3D:374",
+                    "route_type": "3",
+                    "route_short_name": "374",
+                    "route_long_name": "Pittsburg-Bay Point BART / Bay Point",
+                    "route_continuous_pickup": None,
+                    "route_continuous_drop_off": None,
+                    "route_desc": None,
+                    "route_color": "A03B00",
+                    "route_text_color": "FFFFFF",
+                    "agency_id": "3D",
+                    "network_id": "3D",
+                    "shape_array_key": "2ce3f738fbdcfdf229cab4c19b1dfc08",
+                    "shape_id": "3D:25",
+                    "contains_warning_duplicate_trip_primary_key": False,
+                    "num_distinct_stops_served": 27,
+                    "num_stop_times": 28,
+                    "trip_first_departure_sec": 42660,
+                    "trip_last_arrival_sec": 44760,
+                    "trip_start_timezone": "America/Los_Angeles",
+                    "trip_end_timezone": "America/Los_Angeles",
+                    "service_hours": 0.5833333333333334,
+                    "flex_service_hours": None,
+                    "contains_warning_duplicate_stop_times_primary_key": False,
+                    "contains_warning_missing_foreign_key_stop_id": False,
+                    "trip_first_departure_ts": Timestamp("2025-09-01 18:51:00+0000", tz="UTC"),
+                    "trip_last_arrival_ts": Timestamp("2025-09-01 19:26:00+0000", tz="UTC"),
+                    "first_start_pickup_drop_off_window_sec": None,
+                    "last_end_pickup_drop_off_window_sec": None,
+                    "is_gtfs_flex_trip": False,
+                    "is_entirely_demand_responsive_trip": False,
+                    "num_gtfs_flex_stop_times": 0,
+                    "num_approximate_timepoint_stop_times": 25,
+                    "num_exact_timepoint_stop_times": 3,
+                    "num_arrival_times_populated_stop_times": 28,
+                    "num_departure_times_populated_stop_times": 28,
+                    "trip_first_start_pickup_drop_off_window_ts": None,
+                    "trip_last_end_pickup_drop_off_window_ts": None,
+                    "trip_start_date_pacific": datetime.date(2025, 9, 1),
+                    "trip_first_departure_datetime_pacific": Timestamp("2025-09-01 11:51:00"),
+                    "trip_last_arrival_datetime_pacific": Timestamp("2025-09-01 12:26:00"),
+                    "trip_start_date_local_tz": datetime.date(2025, 9, 1),
+                    "trip_first_departure_datetime_local_tz": Timestamp("2025-09-01 11:51:00"),
+                    "trip_last_arrival_datetime_local_tz": Timestamp("2025-09-01 12:26:00"),
+                    "trip_first_start_pickup_drop_off_window_date_pacific": None,
+                    "trip_first_start_pickup_drop_off_window_datetime_pacific": None,
+                    "trip_last_end_pickup_drop_off_window_pacific": None,
+                    "trip_first_start_pickup_drop_off_window_date_local_tz": None,
+                    "trip_first_start_pickup_drop_off_window_datetime_local_tz": None,
+                    "trip_last_end_pickup_drop_off_window_datetime_local_tz": None,
+                    "time_of_day": "Midday",
+                },
+                {
+                    "key": "f789870e309d49e7611884ccbe992e01",
+                    "trip_instance_key": "0a229cae7bc0a4d23e0a5163cc5b388d",
+                    "feed_timezone": "America/Los_Angeles",
+                    "base64_url": "aHR0cHM6Ly9hcGkuNTExLm9yZy90cmFuc2l0L2RhdGFmZWVkcz9vcGVyYXRvcl9pZD1SRw==",
+                    "name": "Bay Area 511 Regional Schedule",
+                    "regional_feed_type": "Combined Regional Feed",
+                    "gtfs_dataset_key": "d6ed100168196d507b4ef1c0d111ee72",
+                    "service_date": datetime.date(2025, 9, 1),
+                    "feed_key": "c86f88ad0b15f5185d073f91f2130285",
+                    "service_id": "3D:72971",
+                    "trip_key": "89f044f6394d163eb0fb0af1e8d85bc4",
+                    "trip_id": "3D:1401",
+                    "iteration_num": 0,
+                    "frequencies_defined_trip": False,
+                    "trip_short_name": None,
+                    "direction_id": 0,
+                    "block_id": "3D:303",
+                    "route_key": "bc23b5e936992cd318d7b35d3b18462b",
+                    "route_id": "3D:374",
+                    "route_type": "3",
+                    "route_short_name": "374",
+                    "route_long_name": "Pittsburg-Bay Point BART / Bay Point",
+                    "route_continuous_pickup": None,
+                    "route_continuous_drop_off": None,
+                    "route_desc": None,
+                    "route_color": "A03B00",
+                    "route_text_color": "FFFFFF",
+                    "agency_id": "3D",
+                    "network_id": "3D",
+                    "shape_array_key": "2ce3f738fbdcfdf229cab4c19b1dfc08",
+                    "shape_id": "3D:25",
+                    "contains_warning_duplicate_trip_primary_key": False,
+                    "num_distinct_stops_served": 27,
+                    "num_stop_times": 28,
+                    "trip_first_departure_sec": 39060,
+                    "trip_last_arrival_sec": 41160,
+                    "trip_start_timezone": "America/Los_Angeles",
+                    "trip_end_timezone": "America/Los_Angeles",
+                    "service_hours": 0.5833333333333334,
+                    "flex_service_hours": None,
+                    "contains_warning_duplicate_stop_times_primary_key": False,
+                    "contains_warning_missing_foreign_key_stop_id": False,
+                    "trip_first_departure_ts": Timestamp("2025-09-01 17:51:00+0000", tz="UTC"),
+                    "trip_last_arrival_ts": Timestamp("2025-09-01 18:26:00+0000", tz="UTC"),
+                    "first_start_pickup_drop_off_window_sec": None,
+                    "last_end_pickup_drop_off_window_sec": None,
+                    "is_gtfs_flex_trip": False,
+                    "is_entirely_demand_responsive_trip": False,
+                    "num_gtfs_flex_stop_times": 0,
+                    "num_approximate_timepoint_stop_times": 25,
+                    "num_exact_timepoint_stop_times": 3,
+                    "num_arrival_times_populated_stop_times": 28,
+                    "num_departure_times_populated_stop_times": 28,
+                    "trip_first_start_pickup_drop_off_window_ts": None,
+                    "trip_last_end_pickup_drop_off_window_ts": None,
+                    "trip_start_date_pacific": datetime.date(2025, 9, 1),
+                    "trip_first_departure_datetime_pacific": Timestamp("2025-09-01 10:51:00"),
+                    "trip_last_arrival_datetime_pacific": Timestamp("2025-09-01 11:26:00"),
+                    "trip_start_date_local_tz": datetime.date(2025, 9, 1),
+                    "trip_first_departure_datetime_local_tz": Timestamp("2025-09-01 10:51:00"),
+                    "trip_last_arrival_datetime_local_tz": Timestamp("2025-09-01 11:26:00"),
+                    "trip_first_start_pickup_drop_off_window_date_pacific": None,
+                    "trip_first_start_pickup_drop_off_window_datetime_pacific": None,
+                    "trip_last_end_pickup_drop_off_window_pacific": None,
+                    "trip_first_start_pickup_drop_off_window_date_local_tz": None,
+                    "trip_first_start_pickup_drop_off_window_datetime_local_tz": None,
+                    "trip_last_end_pickup_drop_off_window_datetime_local_tz": None,
+                    "time_of_day": "Midday",
+                },
+            ]
+        )
+
+    @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_trips.yaml")
+    @pytest.mark.vcr
+    def test_get_trips_get_df_false(self):
+        result = get_trips(
+            selected_date="2025-09-01", operator_feeds=["c86f88ad0b15f5185d073f91f2130285"], get_df=False
+        )
+
+        assert isinstance(result, sqlalchemy.sql.selectable.Select)
+
+    @pytest.mark.vcr
+    def test_get_trips_trip_cols(self):
+        result = get_trips(
+            selected_date="2025-09-01",
+            operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
+            trip_cols=["name", "gtfs_dataset_key", "feed_key", "trip_id", "route_id", "route_type"],
+        )
+
+        assert len(result) == 3
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "name": "Bay Area 511 Regional Schedule",
+                    "gtfs_dataset_key": "d6ed100168196d507b4ef1c0d111ee72",
+                    "feed_key": "c86f88ad0b15f5185d073f91f2130285",
+                    "trip_id": "3D:1358",
+                    "route_id": "3D:374",
+                    "route_type": "3",
+                },
+                {
+                    "name": "Bay Area 511 Regional Schedule",
+                    "gtfs_dataset_key": "d6ed100168196d507b4ef1c0d111ee72",
+                    "feed_key": "c86f88ad0b15f5185d073f91f2130285",
+                    "trip_id": "3D:2388",
+                    "route_id": "3D:374",
+                    "route_type": "3",
+                },
+                {
+                    "name": "Bay Area 511 Regional Schedule",
+                    "gtfs_dataset_key": "d6ed100168196d507b4ef1c0d111ee72",
+                    "feed_key": "c86f88ad0b15f5185d073f91f2130285",
+                    "trip_id": "3D:1401",
+                    "route_id": "3D:374",
+                    "route_type": "3",
+                },
+            ]
+        )
+
+    @pytest.mark.vcr
+    def test_get_trips_custom_filtering(self):
+        result = get_trips(
+            selected_date="2025-09-01",
+            operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
+            trip_cols=["name", "gtfs_dataset_key", "feed_key", "trip_id"],
+            custom_filtering={"trip_instance_key": ["d7d7502d292a35c41ee5a6c3c43f2fd5"]},
+        )
+
+        assert len(result) == 1
+        assert result.to_dict(orient="records") == [
+            {
+                "name": "Bay Area 511 Regional Schedule",
+                "gtfs_dataset_key": "d6ed100168196d507b4ef1c0d111ee72",
+                "feed_key": "c86f88ad0b15f5185d073f91f2130285",
+                "trip_id": "3D:1358",
+            }
+        ]
+
+    def test_get_trips_no_operator_feeds(self):
+        with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
+            get_trips(selected_date="2025-08-23")
+
+    @pytest.mark.vcr
+    def test_get_trips_no_metrolink_feed(self, capfd):
+        result = get_trips(selected_date="2025-09-01", operator_feeds=["0bae2a76ef6c160c9524c4f64f9ec9b3"])
+        out, err = capfd.readouterr()
+
+        assert re.search("could not get metrolink feed on 2025-09-01!", out), "The expected text was not printed."
+        assert len(result) == 1
+
+        assert result[["name", "feed_key"]].to_dict(orient="records") == [
+            {
+                "name": "SLO Peak Transit Schedule",
+                "feed_key": "0bae2a76ef6c160c9524c4f64f9ec9b3",
+            }
+        ]
