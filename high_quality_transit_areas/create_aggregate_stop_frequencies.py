@@ -200,9 +200,12 @@ def feed_level_filter(
 def check_stop(this_stop_route_dirs, qualify_pairs):
     """
     Check if all possible route_dir combinations at this stop qualify for aggregation.
-    If so, return list of those route_dir. If not, try again excluding the least frequent
+    If so, return list of those route_dir. If not, try again excluding the last
     route and continue recursively until a subset all qualifies or combinations are
     exhausted.
+
+    this_stop_route_dirs should be sorted by frequency at stop, descending before
+    calling this function.
     """
     this_stop_route_dirs = list(this_stop_route_dirs)
     if len(this_stop_route_dirs) == 1:
