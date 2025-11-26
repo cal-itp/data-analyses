@@ -3,10 +3,13 @@ import re
 
 import pytest
 import sqlalchemy
+from calitp_data_analysis import geography_utils
 from pandas._libs.tslibs.timestamps import Timestamp
 from pytest_unordered import unordered
+from shapely import LineString
 from shared_utils.gtfs_utils_v2 import (
     get_metrolink_feed_key,
+    get_shapes,
     get_trips,
     schedule_daily_feed_to_gtfs_dataset_name,
 )
@@ -550,3 +553,181 @@ class TestGtfsUtilsV2:
     def test_get_trips_no_operator_feeds(self):
         with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
             get_trips(selected_date="2025-08-23")
+
+    @pytest.mark.vcr
+    def test_get_shapes(self):
+        result = get_shapes(
+            selected_date="2025-10-01",
+            operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d", "ebeaafe0a365384015dfe01dd80b683d"],
+        )
+
+        assert len(result) == 2
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    # I truncated the pt_array values in the BigQuery test DB to 10 points just to have a succinct example. Typically, there are hundreds of points in a pt_array LineString.
+                    "geometry": LineString(
+                        [
+                            [-120.95261, 39.09977],
+                            [-120.95261, 39.09976],
+                            [-120.95258, 39.09982],
+                            [-120.95239, 39.09974],
+                            [-120.95177, 39.09964],
+                            [-120.95158, 39.09966],
+                            [-120.95109, 39.09787],
+                            [-120.95086, 39.09687],
+                            [-120.95073, 39.09627],
+                            [-120.95071, 39.09604],
+                        ]
+                    )
+                },
+                {
+                    "geometry": LineString(
+                        [
+                            [-116.99362, 34.88429],
+                            [-116.99375, 34.88388],
+                            [-116.99368, 34.88388],
+                            [-116.99368, 34.88394],
+                            [-116.99368, 34.88437],
+                            [-116.99368, 34.88459],
+                            [-116.99368, 34.8849],
+                            [-116.99376, 34.88502],
+                            [-116.99376, 34.88528],
+                            [-116.99377, 34.88553],
+                        ]
+                    )
+                },
+            ]
+        )
+
+    @pytest.mark.vcr
+    def test_get_shapes_shape_cols(self):
+        result = get_shapes(
+            selected_date="2025-10-01",
+            operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d"],
+            shape_cols=[
+                "feed_key",
+                "feed_timezone",
+                "service_date",
+                "shape_first_departure_datetime_pacific",
+                "shape_last_arrival_datetime_pacific",
+                "shape_id",
+                "shape_array_key",
+                "n_trips",
+            ],
+        )
+        assert len(result) == 1
+        assert result.to_dict(orient="records") == [
+            {
+                "feed_key": "3ea60aa240ddc543da5415ccc759fd6d",
+                "feed_timezone": "America/Los_Angeles",
+                "service_date": datetime.date(2025, 10, 1),
+                "shape_first_departure_datetime_pacific": Timestamp("2025-10-01 09:45:00"),
+                "shape_last_arrival_datetime_pacific": Timestamp("2025-10-01 11:35:00"),
+                "shape_id": "2m8h",
+                "shape_array_key": "a023425d1b44b2af7ffa58e220b7da8b",
+                "n_trips": 1,
+                "geometry": LineString(
+                    [
+                        [-120.95261, 39.09977],
+                        [-120.95261, 39.09976],
+                        [-120.95258, 39.09982],
+                        [-120.95239, 39.09974],
+                        [-120.95177, 39.09964],
+                        [-120.95158, 39.09966],
+                        [-120.95109, 39.09787],
+                        [-120.95086, 39.09687],
+                        [-120.95073, 39.09627],
+                        [-120.95071, 39.09604],
+                    ]
+                ),
+            }
+        ]
+
+    @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_shapes_shape_cols.yaml")
+    @pytest.mark.vcr
+    def test_get_shapes_crs_esri(self):
+        result = get_shapes(
+            selected_date="2025-10-01",
+            operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d"],
+            crs=geography_utils.CA_NAD83Albers_ft,
+        )
+        assert len(result) == 1
+
+        assert result.geometry.values[0].equals_exact(
+            LineString(
+                [
+                    [-270052.919, 9519794.721],
+                    [-270052.956, 9519791.075],
+                    [-270044.231, 9519812.866],
+                    [-269990.664, 9519783.156],
+                    [-269815.273, 9519744.929],
+                    [-269761.339, 9519751.681],
+                    [-269628.982, 9519097.624],
+                    [-269567.438, 9518732.354],
+                    [-269532.778, 9518513.214],
+                    [-269527.949, 9518429.296],
+                ]
+            ),
+            tolerance=0.001,
+        )
+
+    @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_shapes_shape_cols.yaml")
+    @pytest.mark.vcr
+    def test_get_shapes_crs_epsg(self):
+        result = get_shapes(
+            selected_date="2025-10-01",
+            operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d"],
+            crs=geography_utils.CA_NAD83Albers_m,
+        )
+        assert len(result) == 1
+
+        assert result.geometry.values[0].equals_exact(
+            LineString(
+                [
+                    [-82312.294, 120841.673],
+                    [-82312.305, 120840.561],
+                    [-82309.646, 120847.203],
+                    [-82293.319, 120838.148],
+                    [-82239.860, 120826.496],
+                    [-82223.421, 120828.554],
+                    [-82183.078, 120629.197],
+                    [-82164.319, 120517.863],
+                    [-82153.755, 120451.069],
+                    [-82152.283, 120425.490],
+                ]
+            ),
+            tolerance=0.001,
+        )
+
+    @pytest.mark.vcr
+    def test_get_shapes_custom_filtering(self):
+        result = get_shapes(
+            selected_date="2025-10-01",
+            operator_feeds=["89c9390b2669927a67a4594f119986d6"],
+            custom_filtering={"shape_array_key": ["166d1656656c24bb26a66f0df49edf1c"], "n_trips": 39},
+        )
+
+        assert len(result) == 1
+        assert result.to_dict(orient="records") == [
+            {
+                "geometry": LineString(
+                    [
+                        [-122.29491, 37.8045],
+                        [-122.29469, 37.80446],
+                        [-122.29447, 37.80441],
+                        [-122.2944, 37.8044],
+                        [-122.29419, 37.80434],
+                        [-122.2941, 37.80431],
+                        [-122.29403, 37.80429],
+                        [-122.29391, 37.80427],
+                        [-122.29387, 37.8044],
+                        [-122.29381, 37.80457],
+                    ]
+                )
+            }
+        ]
+
+    def test_get_shapes_no_operator_feeds(self):
+        with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
+            get_shapes(selected_date="2025-09-19")
