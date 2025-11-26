@@ -423,8 +423,10 @@ def get_shapes(
     elif shape_cols:
         shape_cols_with_geom = shape_cols[:]
 
+    tables = _get_tables()
+
     shapes = (
-        tbls.mart_gtfs.fct_daily_scheduled_shapes()
+        getattr(tables, "test_shared_utils").fct_daily_scheduled_shapes()
         >> filter_date(selected_date, date_col="service_date")
         >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
