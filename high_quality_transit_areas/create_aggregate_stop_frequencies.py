@@ -45,10 +45,8 @@ def get_st_trips(analysis_date: str) -> (pd.DataFrame, pd.DataFrame):
         get_pandas=True,
     )
     lookback_stop_times = lookback_wrappers.get_lookback_st(published_operators_dict, lookback_trips_ix, st_cols)
-    stop_times = (
-        pd.concat([stop_times, lookback_stop_times])
-        .merge(trips[["feed_key", "schedule_gtfs_dataset_key", "analysis_date"]].drop_duplicates(), on="feed_key")
-        .pipe(append_analysis_name)
+    stop_times = pd.concat([stop_times, lookback_stop_times]).merge(
+        trips[["feed_key", "schedule_gtfs_dataset_key", "analysis_date"]].drop_duplicates(), on=["feed_key"]
     )
 
     return stop_times, trips
@@ -61,7 +59,7 @@ def add_route_dir(trips: pd.DataFrame, stop_times: pd.DataFrame, analysis_date: 
     """
     trips = trips[trips["route_type"].isin(["3", "11"])]  # bus only
 
-    stop_times = stop_times.merge(trips, on=["feed_key", "trip_id", "schedule_gtfs_dataset_key"])
+    stop_times = stop_times.merge(trips, on=["feed_key", "trip_id", "schedule_gtfs_dataset_key", "analysis_date"])
 
     stop_times.direction_id = stop_times.direction_id.fillna(0).astype(int).astype(str)
     stop_times["route_dir"] = stop_times[["route_id", "direction_id"]].agg("_".join, axis=1)
