@@ -228,18 +228,19 @@ def filter_qualifying_stops(one_stop_st: pd.DataFrame, qualify_pairs: list) -> p
     Given stop_times for a single stop, and list of route_dir pairs that can be aggregated,
     filter this stop's stop_times to routes that can be aggregated
     """
-    one_stop_st = (
-        one_stop_st
-        >> group_by(_.route_dir)
-        >> mutate(route_dir_count=_.shape[0])
-        >> ungroup()
-        >> arrange(-_.route_dir_count)
+    count = (
+        one_stop_st.groupby("route_dir")[["trip_id"]]
+        .count()
+        .reset_index()
+        .rename(columns={"trip_id": "route_dir_count"})
     )
-    this_stop_route_dirs = (
-        one_stop_st >> distinct(_.route_dir, _.route_dir_count)
-    ).route_dir.to_numpy()  # preserves sort order
-    aggregation_ok_route_dirs = check_stop(this_stop_route_dirs, qualify_pairs)
-    return one_stop_st >> filter(_.route_dir.isin(aggregation_ok_route_dirs))
+    one_stop_st = one_stop_st.merge(count, on="route_dir").sort_values("route_dir_count", ascending=False)
+
+    this_stop_route_dirs = one_stop_st.drop_duplicates(subset=["route_dir", "route_dir_count"]).route_dir.to_numpy()
+    aggregation_ok_route_dirs = casf.check_stop(this_stop_route_dirs, qualify_pairs)
+    # print(aggregation_ok_route_dirs)
+    aggregation_ok_st = one_stop_st[one_stop_st.route_dir.isin(aggregation_ok_route_dirs)]
+    return aggregation_ok_st
 
 
 def collinear_filter_feed(
