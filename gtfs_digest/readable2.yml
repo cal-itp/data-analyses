@@ -67,7 +67,7 @@ timeliness_trips_graph:
   colors: ${color_palettes.tri_color}
 
 frequency_graph:
-  title: "Frequency of Trips in Minutes"
+  title: "Headway in Minutes"
   subtitle: "Understanding how often a trip comes. If the bar says 120 minutes, that means a trip will pass that particular direction once every 2 hours."
   tooltip: ["Date","Route","Direction","Period", "Headway (Minutes)",]
   # Headways of 0-15 are green, 30-60 are yellow, and 60+ are red.
