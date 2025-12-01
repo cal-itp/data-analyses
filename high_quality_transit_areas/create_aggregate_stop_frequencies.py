@@ -8,7 +8,6 @@ import pandas as pd
 from _utils import append_analysis_name
 from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
-from siuba import *
 from update_vars import (
     AM_PEAK,
     GCS_FILE_PATH,
@@ -70,7 +69,7 @@ def prep_stop_times(stop_times: pd.DataFrame, am_peak: tuple = AM_PEAK, pm_peak:
     """
     Add fixed peak period information to stop_times for next calculations.
     """
-
+    stop_times = stop_times.copy()
     stop_times = stop_times[stop_times["arrival_hour"].isin(both_peaks_hrs)]
     stop_times["peak"] = stop_times["arrival_hour"].map(peaks_dict)
     #  don't count the same trip serving the same stop multiple times -- i.e. trips that start and end at a transit center
@@ -277,9 +276,9 @@ def collinear_filter_feed(
     trips_per_peak_qual_1["all_short"] = trips_per_peak_qual_1.route_dir.map(
         lambda x: np.array([True if y in list(short_routes.route_dir) else False for y in x]).all()
     )
-    display(
-        trips_per_peak_qual_1[trips_per_peak_qual_1.all_short]
-    )  # stops where _every_ shared route has less than SHARED_STOP_THRESHOLD frequent stops (even after aggregation)
+    # display(
+    #     trips_per_peak_qual_1[trips_per_peak_qual_1.all_short]
+    # )  # stops where _every_ shared route has less than SHARED_STOP_THRESHOLD frequent stops (even after aggregation)
     trips_per_peak_qual_2 = trips_per_peak_qual_1[~trips_per_peak_qual_1.all_short].drop(columns=["all_short"])
 
     return trips_per_peak_qual_2
