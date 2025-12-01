@@ -237,7 +237,7 @@ def filter_qualifying_stops(one_stop_st: pd.DataFrame, qualify_pairs: list) -> p
     one_stop_st = one_stop_st.merge(count, on="route_dir").sort_values("route_dir_count", ascending=False)
 
     this_stop_route_dirs = one_stop_st.drop_duplicates(subset=["route_dir", "route_dir_count"]).route_dir.to_numpy()
-    aggregation_ok_route_dirs = casf.check_stop(this_stop_route_dirs, qualify_pairs)
+    aggregation_ok_route_dirs = check_stop(this_stop_route_dirs, qualify_pairs)
     # print(aggregation_ok_route_dirs)
     aggregation_ok_st = one_stop_st[one_stop_st.route_dir.isin(aggregation_ok_route_dirs)]
     return aggregation_ok_st
@@ -301,12 +301,21 @@ def filter_all_prepare_export(
     for gtfs_dataset_key in feeds_to_filter:
         df = collinear_filter_feed(gtfs_dataset_key, multi_only_explode, qualify_dict, st_prepped, frequency_thresholds)
         all_collinear = pd.concat([df, all_collinear])
-    #  use min here in order to ensure we include stops that meet the lower threshold as single route
-    single_qual_min = max_arrivals_by_stop_single >> filter(
-        _.am_max_trips_hr >= min((HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD)),
-        _.pm_max_trips_hr >= min((HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD)),
+
+    single_qual_min = max_arrivals_by_stop_single[
+        (max_arrivals_by_stop_single.am_max_trips_hr >= min((HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD)))
+        & (max_arrivals_by_stop_single.pm_max_trips_hr >= min((HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD)))
+    ]
+
+    single_only_export = single_qual_min.merge(
+        all_collinear[["schedule_gtfs_dataset_key", "stop_id"]],
+        on=["schedule_gtfs_dataset_key", "stop_id"],
+        how="left",
+        indicator=True,
     )
-    single_only_export = single_qual_min >> anti_join(_, all_collinear, on=["schedule_gtfs_dataset_key", "stop_id"])
+    single_only_export = (
+        single_only_export[single_only_export["_merge"] == "left_only"].drop(columns=["_merge"]).reset_index(drop=True)
+    )
     combined_export = pd.concat([single_only_export, all_collinear])
     combined_export = combined_export.explode("route_dir")
     combined_export["route_id"] = combined_export["route_dir"].str[:-2]
@@ -398,7 +407,7 @@ if __name__ == "__main__":
     for key_part in ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP:
         keys_to_drop += [key for key in qualify_dict.keys() if key_part in key]
     if not len(keys_to_drop) == len(ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP):
-        raise Exception("matched keys should exactly equal number of key parts in search")
+        raise Exception("matched keys should equal number of key parts in search")
     for key in keys_to_drop:
         qualify_dict.pop(key)
 
