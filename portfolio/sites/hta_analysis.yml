@@ -1,0 +1,7 @@
+title: Origin Destination Analysis
+directory: ./hta_analysis/
+readme: ./hta_analysis/README.md
+parts:
+- caption: Cal Poly Humboldt Origin Destination Analysis for HTA
+- chapters:
+    - notebook: ./hta_analysis/big_data_od_analysis.ipynb
