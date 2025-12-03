@@ -17,6 +17,7 @@ from calitp_data_analysis.tables import AutoTable, tbls
 from shared_utils import DBSession, schedule_rt_utils
 from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
 from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
+from shared_utils.models.fct_daily_scheduled_shapes import FctDailyScheduledShapes
 from shared_utils.models.fct_scheduled_trips import FctScheduledTrips
 from siuba import *
 from sqlalchemy import and_, create_engine, func, or_, select
@@ -407,7 +408,7 @@ def get_shapes(
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     custom_filtering: dict = None,
-) -> gpd.GeoDataFrame:
+) -> Union[gpd.GeoDataFrame | sqlalchemy.sql.selectable.Select]:
     """
     Query fct_daily_scheduled_shapes.
 
@@ -416,24 +417,19 @@ def get_shapes(
     """
     check_operator_feeds(operator_feeds)
 
-    # If pt_array is not kept in the final, we still need it
-    # to turn this into a gdf
-    if "pt_array" not in shape_cols:
-        shape_cols_with_geom = shape_cols + ["pt_array"]
-    elif shape_cols:
-        shape_cols_with_geom = shape_cols[:]
+    search_conditions = [
+        FctDailyScheduledShapes.service_date == selected_date,
+        FctDailyScheduledShapes.feed_key.in_(operator_feeds),
+    ]
 
-    tables = _get_tables()
+    for k, v in (custom_filtering or {}).items():
+        search_conditions.append(getattr(FctDailyScheduledShapes, k).in_(v))
 
-    shapes = (
-        getattr(tables, "test_shared_utils").fct_daily_scheduled_shapes()
-        >> filter_date(selected_date, date_col="service_date")
-        >> filter_operator(operator_feeds, include_name=False)
-        >> filter_custom_col(custom_filtering)
-    )
+    statement = select(FctDailyScheduledShapes).where(and_(*search_conditions))
 
     if get_df:
-        shapes = shapes >> collect()
+        with DBSession() as session:
+            shapes = pd.read_sql(statement, session.bind)
 
         # maintain usual behaviour of returning all in absence of subset param
         # must first drop pt_array since it's replaced by make_routes_gdf
@@ -442,7 +438,12 @@ def get_shapes(
         return shapes_gdf
 
     else:
-        return shapes >> subset_cols(shape_cols_with_geom)
+        columns = {func.ST_ASBINARY(FctDailyScheduledShapes.pt_array)}
+
+        for column in shape_cols:
+            columns.add(getattr(FctDailyScheduledShapes, column))
+
+        return statement.with_only_columns(*list(columns))
 
 
 def get_stops(
