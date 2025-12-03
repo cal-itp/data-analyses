@@ -705,7 +705,7 @@ class TestGtfsUtilsV2:
         result = get_shapes(
             selected_date="2025-10-01",
             operator_feeds=["89c9390b2669927a67a4594f119986d6"],
-            custom_filtering={"shape_array_key": ["166d1656656c24bb26a66f0df49edf1c"], "n_trips": 39},
+            custom_filtering={"shape_array_key": ["166d1656656c24bb26a66f0df49edf1c"], "n_trips": [39]},
         )
 
         assert len(result) == 1
@@ -731,3 +731,12 @@ class TestGtfsUtilsV2:
     def test_get_shapes_no_operator_feeds(self):
         with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
             get_shapes(selected_date="2025-09-19")
+
+    def test_get_shapes_get_df_false(self):
+        result = get_shapes(
+            selected_date="2025-09-01", operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d"], get_df=False
+        )
+
+        assert isinstance(result, sqlalchemy.sql.selectable.Select)
+        statement = str(result)
+        assert re.search(r"SELECT\s.*pt_array.*\sFROM", statement), "The statement did not include pt_array column."
