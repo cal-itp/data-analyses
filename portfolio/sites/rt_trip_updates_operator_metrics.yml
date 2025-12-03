@@ -1,0 +1,155 @@
+directory: ./rt_predictions/
+notebook: ./rt_predictions/rt_trip_updates_operator_report.ipynb
+parts:
+- caption: Introduction
+- chapters:
+  - params:
+      name: AC Transit Schedule
+  - params:
+      name: Anaheim Resort Schedule
+  - params:
+      name: Anaheim Resort Schedule v2
+  - params:
+      name: Banning Pass Schedule
+  - params:
+      name: Basin Transit GMV Schedule
+  - params:
+      name: Bay Area 511 AC Transit Schedule
+  - params:
+      name: Bay Area 511 ACE Schedule
+  - params:
+      name: Bay Area 511 Capitol Corridor Schedule
+  - params:
+      name: Bay Area 511 County Connection Schedule
+  - params:
+      name: Bay Area 511 Fairfield and Suisun Transit Schedule
+  - params:
+      name: Bay Area 511 Golden Gate Transit Schedule
+  - params:
+      name: Bay Area 511 Marin Schedule
+  - params:
+      name: Bay Area 511 Petaluma Schedule
+  - params:
+      name: Bay Area 511 PresidiGo Schedule
+  - params:
+      name: Bay Area 511 SamTrans Schedule
+  - params:
+      name: Bay Area 511 San Francisco Bay Ferry Schedule
+  - params:
+      name: Bay Area 511 Santa Clara Transit Schedule
+  - params:
+      name: Bay Area 511 Santa Rosa CityBus Schedule
+  - params:
+      name: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
+  - params:
+      name: Bay Area 511 Tri Delta Schedule
+  - params:
+      name: Bay Area 511 Tri-Valley Wheels Schedule
+  - params:
+      name: Bay Area 511 Union City Transit Schedule
+  - params:
+      name: Bay Area 511 Vine Transit Schedule
+  - params:
+      name: Beach Cities GMV Schedule
+  - params:
+      name: Beaumont Transit Schedule
+  - params:
+      name: Big Blue Bus Swiftly Schedule
+  - params:
+      name: BruinBus Schedule
+  - params:
+      name: Burbank Schedule
+  - params:
+      name: Commerce Schedule
+  - params:
+      name: County Connection Schedule
+  - params:
+      name: Desert Roadrunner GMV Schedule
+  - params:
+      name: Eastern Sierra Schedule
+  - params:
+      name: Fairfield Schedule
+  - params:
+      name: Fresno Schedule
+  - params:
+      name: Humboldt Schedule
+  - params:
+      name: Irvine CONNECT Schedule
+  - params:
+      name: Kern Schedule
+  - params:
+      name: LA DOT Schedule
+  - params:
+      name: LA Metro Bus Schedule
+  - params:
+      name: LA Metro Rail Schedule
+  - params:
+      name: Lake Schedule
+  - params:
+      name: Lawndale Beat GMV Schedule
+  - params:
+      name: Madera County Connection Schedule
+  - params:
+      name: Marin GMV Schedule
+  - params:
+      name: Marin Optibus Schedule
+  - params:
+      name: Mendocino Schedule
+  - params:
+      name: Merced GMV Schedule
+  - params:
+      name: Monterey Salinas Schedule
+  - params:
+      name: Mountain Transit GMV Schedule
+  - params:
+      name: Nevada County Schedule
+  - params:
+      name: North County Schedule
+  - params:
+      name: OCTA Schedule
+  - params:
+      name: Petaluma GMV Schedule
+  - params:
+      name: PresidiGo Schedule
+  - params:
+      name: Redding Schedule
+  - params:
+      name: Redwood Coast Schedule
+  - params:
+      name: Roseville Transit GMV Schedule
+  - params:
+      name: SCVTA Schedule
+  - params:
+      name: SMART Schedule
+  - params:
+      name: San Francisco Bay Ferry Schedule
+  - params:
+      name: San Joaquin Schedule
+  - params:
+      name: Santa Rosa CityBus GMV Schedule
+  - params:
+      name: TCRTA TripShot Schedule
+  - params:
+      name: Tahoe Transportation District GMV Schedule
+  - params:
+      name: Tehama Schedule
+  - params:
+      name: Torrance Schedule
+  - params:
+      name: Tri-Valley Wheels Schedule
+  - params:
+      name: Tuolumne Remix Schedule
+  - params:
+      name: Turlock Schedule
+  - params:
+      name: Union City GMV Schedule
+  - params:
+      name: VCTC GMV Schedule
+  - params:
+      name: Victor Valley GMV Schedule
+  - params:
+      name: Vine GMV Schedule
+  - params:
+      name: Visalia Schedule
+readme: ./rt_predictions/README.md
+title: GTFS Real-Time Operator Summary Metrics
