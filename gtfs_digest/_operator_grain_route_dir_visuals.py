@@ -323,6 +323,7 @@ def line_chart(
             y=alt.Y(
                 f"{y_col}:Q",
                 title=y_col,
+                axis = None,
             ),
             color=alt.Color(
                 f"{color_col}:N",
