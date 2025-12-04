@@ -1,15 +1,18 @@
 import datetime
 import re
 
+import geopandas as gpd
 import pytest
 import sqlalchemy
 from calitp_data_analysis import geography_utils
 from pandas._libs.tslibs.timestamps import Timestamp
 from pytest_unordered import unordered
 from shapely import LineString
+from shapely.geometry import Point
 from shared_utils.gtfs_utils_v2 import (
     get_metrolink_feed_key,
     get_shapes,
+    get_stops,
     get_trips,
     schedule_daily_feed_to_gtfs_dataset_name,
 )
@@ -740,3 +743,178 @@ class TestGtfsUtilsV2:
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
         statement = str(result)
         assert re.search(r"SELECT\s.*pt_array.*\sFROM", statement), "The statement did not include pt_array column."
+
+    @pytest.mark.vcr
+    def test_get_stops(self):
+        result = get_stops(selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"])
+
+        assert len(result) == 2
+        assert isinstance(result, gpd.GeoDataFrame)
+        assert result.drop(columns=["geometry", "_feed_valid_from"]).to_dict(orient="records") == unordered(
+            [
+                {
+                    "key": "32f3ba416f67b9c5e0e08ca63d611acb",
+                    "service_date": datetime.date(2025, 11, 2),
+                    "feed_key": "de3b4f439f8542021168b5ca6f64cc9c",
+                    "stop_id": "0117",
+                    "feed_timezone": "America/Los_Angeles",
+                    "stop_event_count": 11,
+                    "first_stop_arrival_datetime_pacific": Timestamp("2025-11-02 05:15:09"),
+                    "last_stop_departure_datetime_pacific": Timestamp("2025-11-02 22:47:09"),
+                    "route_type_0": None,
+                    "route_type_1": None,
+                    "route_type_2": None,
+                    "route_type_3": 11,
+                    "route_type_4": None,
+                    "route_type_5": None,
+                    "route_type_6": None,
+                    "route_type_7": None,
+                    "route_type_11": None,
+                    "route_type_12": None,
+                    "missing_route_type": None,
+                    "contains_warning_duplicate_stop_times_primary_key": False,
+                    "contains_warning_duplicate_trip_primary_key": False,
+                    "route_type_array": [3],
+                    "transit_mode_array": ["bus"],
+                    "n_transit_modes": 1,
+                    "contains_warning_duplicate_stop_primary_key": False,
+                    "stop_key": "1284349c884cb8ff0e0ed39bc0cd6ce6",
+                    "tts_stop_name": None,
+                    "parent_station": None,
+                    "stop_code": "0117",
+                    "stop_name": "Garfield & Jefferson SW",
+                    "stop_desc": None,
+                    "location_type": 0,
+                    "stop_timezone_coalesced": "America/Los_Angeles",
+                    "wheelchair_boarding": None,
+                },
+                {
+                    "key": "6f8f617b300e48402c060c94a5e507c7",
+                    "service_date": datetime.date(2025, 11, 2),
+                    "feed_key": "de3b4f439f8542021168b5ca6f64cc9c",
+                    "stop_id": "0119",
+                    "feed_timezone": "America/Los_Angeles",
+                    "stop_event_count": 11,
+                    "first_stop_arrival_datetime_pacific": Timestamp("2025-11-02 05:14:28"),
+                    "last_stop_departure_datetime_pacific": Timestamp("2025-11-02 22:46:28"),
+                    "route_type_0": None,
+                    "route_type_1": None,
+                    "route_type_2": None,
+                    "route_type_3": 11,
+                    "route_type_4": None,
+                    "route_type_5": None,
+                    "route_type_6": None,
+                    "route_type_7": None,
+                    "route_type_11": None,
+                    "route_type_12": None,
+                    "missing_route_type": None,
+                    "contains_warning_duplicate_stop_times_primary_key": False,
+                    "contains_warning_duplicate_trip_primary_key": False,
+                    "route_type_array": [3],
+                    "transit_mode_array": ["bus"],
+                    "n_transit_modes": 1,
+                    "contains_warning_duplicate_stop_primary_key": False,
+                    "stop_key": "23aefd38535a5ec8dec23f02765c8421",
+                    "tts_stop_name": None,
+                    "parent_station": None,
+                    "stop_code": "0119",
+                    "stop_name": "Garfield & Somerset SW",
+                    "stop_desc": None,
+                    "location_type": 0,
+                    "stop_timezone_coalesced": "America/Los_Angeles",
+                    "wheelchair_boarding": None,
+                },
+            ]
+        )
+
+        assert (
+            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            .item()
+            .equals_exact(Point(-118.169, 33.893), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            .item()
+            .equals_exact(Point(-118.169, 33.896), tolerance=0.001)
+        )
+
+    # @pytest.mark.vcr
+    # def test_get_stops_stop_cols(self):
+    #     result = get_stops(selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"], stop_cols=["key", "stop_id"])
+    #
+    #     assert len(result) == 2
+    #     assert isinstance(result, gpd.GeoDataFrame)
+    #     assert result.drop(columns=["geometry"]).to_dict(orient="records") == unordered([
+    #         {'key': '32f3ba416f67b9c5e0e08ca63d611acb',
+    #          'stop_id': '0117',},
+    #         {'key': '6f8f617b300e48402c060c94a5e507c7',
+    #          'stop_id': '0119',}])
+    #
+    #     assert result.loc[result.key == '32f3ba416f67b9c5e0e08ca63d611acb', 'geometry'].item().equals_exact(
+    #         Point(-118.169, 33.893), tolerance=0.001)
+    #     assert result.loc[result.key == '6f8f617b300e48402c060c94a5e507c7', 'geometry'].item().equals_exact(
+    #         Point(-118.169, 33.896), tolerance=0.001)
+
+    @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_stops.yaml")
+    @pytest.mark.vcr
+    def test_get_stops_crs_esri(self):
+        result = get_stops(
+            selected_date="2025-11-02",
+            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            crs=geography_utils.CA_NAD83Albers_ft,
+        )
+
+        assert len(result) == 2
+        assert isinstance(result, gpd.GeoDataFrame)
+        assert (
+            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            .item()
+            .equals_exact(Point(555734.413, 7625849.975), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            .item()
+            .equals_exact(Point(555702.09, 7627130.429), tolerance=0.001)
+        )
+
+    @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_stops.yaml")
+    @pytest.mark.vcr
+    def test_get_stops_crs_epsg(self):
+        result = get_stops(
+            selected_date="2025-11-02",
+            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            crs=geography_utils.CA_NAD83Albers_m,
+        )
+
+        assert len(result) == 2
+        assert isinstance(result, gpd.GeoDataFrame)
+        assert (
+            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            .item()
+            .equals_exact(Point(169388.188, -456433.84), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            .item()
+            .equals_exact(Point(169378.336, -456043.557), tolerance=0.001)
+        )
+
+    @pytest.mark.vcr
+    def test_get_stops_custom_filtering(self):
+        result = get_stops(
+            selected_date="2025-11-02",
+            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            custom_filtering={"stop_id": ["0119"]},
+        )
+
+        assert len(result) == 1
+        assert isinstance(result, gpd.GeoDataFrame)
+        assert result.key.values[0] == "6f8f617b300e48402c060c94a5e507c7"
+        assert result.stop_id.values[0] == "0119"
+
+    def test_get_stops_no_operator_feeds(self):
+        with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
+            get_stops(selected_date="2025-11-01")
+
+    # def test_get_stops_get_df_false(self):
+    #     result = get_stops(selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"], get_df=False)
