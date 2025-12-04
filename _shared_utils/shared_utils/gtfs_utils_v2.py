@@ -469,8 +469,10 @@ def get_stops(
     else:
         stop_cols_with_geom = stop_cols[:]
 
+    tables = _get_tables()
+
     stops = (
-        tbls.mart_gtfs.fct_daily_scheduled_stops()
+        getattr(tables, "test_shared_utils").fct_daily_scheduled_stops()
         >> filter_date(selected_date, date_col="service_date")
         >> filter_operator(operator_feeds, include_name=False)
         >> filter_custom_col(custom_filtering)
