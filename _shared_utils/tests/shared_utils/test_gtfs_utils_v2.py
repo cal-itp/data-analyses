@@ -838,22 +838,39 @@ class TestGtfsUtilsV2:
             .equals_exact(Point(-118.169, 33.896), tolerance=0.001)
         )
 
-    # @pytest.mark.vcr
-    # def test_get_stops_stop_cols(self):
-    #     result = get_stops(selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"], stop_cols=["key", "stop_id"])
-    #
-    #     assert len(result) == 2
-    #     assert isinstance(result, gpd.GeoDataFrame)
-    #     assert result.drop(columns=["geometry"]).to_dict(orient="records") == unordered([
-    #         {'key': '32f3ba416f67b9c5e0e08ca63d611acb',
-    #          'stop_id': '0117',},
-    #         {'key': '6f8f617b300e48402c060c94a5e507c7',
-    #          'stop_id': '0119',}])
-    #
-    #     assert result.loc[result.key == '32f3ba416f67b9c5e0e08ca63d611acb', 'geometry'].item().equals_exact(
-    #         Point(-118.169, 33.893), tolerance=0.001)
-    #     assert result.loc[result.key == '6f8f617b300e48402c060c94a5e507c7', 'geometry'].item().equals_exact(
-    #         Point(-118.169, 33.896), tolerance=0.001)
+    @pytest.mark.vcr
+    def test_get_stops_stop_cols(self):
+        result = get_stops(
+            selected_date="2025-11-02",
+            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            stop_cols=["key", "stop_id"],
+        )
+
+        assert len(result) == 2
+        assert isinstance(result, gpd.GeoDataFrame)
+        assert result.drop(columns=["geometry"]).to_dict(orient="records") == unordered(
+            [
+                {
+                    "key": "32f3ba416f67b9c5e0e08ca63d611acb",
+                    "stop_id": "0117",
+                },
+                {
+                    "key": "6f8f617b300e48402c060c94a5e507c7",
+                    "stop_id": "0119",
+                },
+            ]
+        )
+
+        assert (
+            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            .item()
+            .equals_exact(Point(-118.169, 33.893), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            .item()
+            .equals_exact(Point(-118.169, 33.896), tolerance=0.001)
+        )
 
     @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_stops.yaml")
     @pytest.mark.vcr
@@ -916,5 +933,9 @@ class TestGtfsUtilsV2:
         with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
             get_stops(selected_date="2025-11-01")
 
-    # def test_get_stops_get_df_false(self):
-    #     result = get_stops(selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"], get_df=False)
+    def test_get_stops_get_df_false(self):
+        result = get_stops(
+            selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"], get_df=False
+        )
+
+        assert isinstance(result, sqlalchemy.sql.selectable.Select)
