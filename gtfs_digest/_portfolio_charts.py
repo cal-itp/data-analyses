@@ -19,6 +19,7 @@ def configure_chart(
     )
     return chart2
 
+
 def circle_chart(
     df: pd.DataFrame,
     x_col: str,
@@ -53,6 +54,7 @@ def circle_chart(
     
     return chart 
 
+
 def line_chart(
     df: pd.DataFrame,
     x_col: str,
@@ -78,6 +80,7 @@ def line_chart(
         )
     )
     return chart
+
 
 def bar_chart(
     df: pd.DataFrame,
@@ -117,6 +120,7 @@ def bar_chart(
 
     return chart
 
+
 def text_table(df: pd.DataFrame) -> alt.Chart:
 
     # Create the chart
@@ -129,6 +133,7 @@ def text_table(df: pd.DataFrame) -> alt.Chart:
     text_chart = text_chart.encode(text="combo_col:N")
 
     return text_chart
+
 
 def create_bg_service_chart() -> alt.Chart:
     """
@@ -181,6 +186,7 @@ def create_bg_service_chart() -> alt.Chart:
 
     return chart
 
+
 def create_hourly_summary(df: pd.DataFrame, day_type: str):
     
     chart_dict = readable_dict.hourly_summary
@@ -219,7 +225,7 @@ def create_hourly_summary(df: pd.DataFrame, day_type: str):
         .transform_filter(xcol_param)
     )
     
-    bg = _operator_grain_scheduled_service.create_bg_service_chart()
+    bg = create_bg_service_chart()
     
     chart = (chart + bg).properties(
     resolve=alt.Resolve(

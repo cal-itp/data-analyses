@@ -1,7 +1,6 @@
 import _sql_query
 import pandas as pd
-import publish_public_data
-from shared_utils import gtfs_utils_v2, portfolio_utils, publish_utils
+from shared_utils import portfolio_utils
 from update_vars import GTFS_DATA_DICT
 
 def download_schedule_rt_route_direction_summary() -> pd.DataFrame:
@@ -17,6 +16,7 @@ def download_schedule_rt_route_direction_summary() -> pd.DataFrame:
 
     return df
 
+
 def download_operator_summary() -> pd.DataFrame:
     df = _sql_query.download_with_pandas_gbq(
         project="cal-itp-data-infra-staging",
@@ -29,6 +29,7 @@ def download_operator_summary() -> pd.DataFrame:
     )
     return df
 
+
 def download_fct_monthly_routes() -> pd.DataFrame:
     df = _sql_query.download_with_pandas_gbq(
         project="cal-itp-data-infra-staging",
@@ -40,6 +41,7 @@ def download_fct_monthly_routes() -> pd.DataFrame:
         f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}raw/fct_monthly_routes.parquet"
     )
     return df
+
 
 def download_fct_operator_hourly_summary() -> pd.DataFrame:
     df = _sql_query.download_with_pandas_gbq(
