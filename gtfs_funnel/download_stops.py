@@ -66,7 +66,7 @@ def download_one_day(analysis_date: str):
     utils.geoparquet_gcs_export(stops, COMPILED_CACHED_VIEWS, f"{dataset}_{analysis_date}.parquet")
 
     end = dt.datetime.now()
-    logger.info(f"execution time: {end-start}")
+    logger.info(f"execution time: {end - start}")
 
     return
 
