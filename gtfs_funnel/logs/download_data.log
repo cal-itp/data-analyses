@@ -521,3 +521,15 @@
 2025-11-13 10:54:53.078 | INFO     | __main__:download_one_day:33 - # operators to run: 191
 2025-11-13 10:54:53.078 | INFO     | __main__:download_one_day:37 - *********** Download st data ***********
 2025-11-13 10:55:54.839 | INFO     | __main__:download_one_day:60 - execution time: 0:01:05.101268
+2025-12-05 01:52:49.538 | INFO     | __main__:download_one_day:23 - Analysis date: 2025-10-15
+2025-12-05 01:52:50.151 | INFO     | __main__:download_one_day:30 - # operators to run: 224
+2025-12-05 01:52:50.152 | INFO     | __main__:download_one_day:34 - *********** Download stops data ***********
+2025-12-05 01:53:01.879 | INFO     | __main__:download_one_day:69 - execution time: 0:00:12.319741
+2025-12-05 01:57:17.136 | INFO     | __main__:download_one_day:23 - Analysis date: 2025-11-05
+2025-12-05 01:57:17.639 | INFO     | __main__:download_one_day:30 - # operators to run: 223
+2025-12-05 01:57:17.640 | INFO     | __main__:download_one_day:34 - *********** Download stops data ***********
+2025-12-05 01:57:28.222 | INFO     | __main__:download_one_day:69 - execution time: 0:00:11.085534
+2025-12-05 01:58:35.290 | INFO     | __main__:download_one_day:23 - Analysis date: 2025-09-24
+2025-12-05 01:58:35.966 | INFO     | __main__:download_one_day:30 - # operators to run: 225
+2025-12-05 01:58:35.966 | INFO     | __main__:download_one_day:34 - *********** Download stops data ***********
+2025-12-05 01:58:46.277 | INFO     | __main__:download_one_day:69 - execution time: 0:00:10.985812
