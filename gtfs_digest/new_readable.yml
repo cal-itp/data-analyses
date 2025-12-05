@@ -1,0 +1,75 @@
+# Color Palettes
+# This color palette is good for categorizing nominal values.
+# The colors do not represent "good" or "bad", they merely differentiate the values.
+color_palettes:
+  two_colors: ["#dd217d","#fcb40e"]
+  tri_color: ["#ccbb44","#5b8efd","#dd217d"]
+  four_colors: ["#dd217d","#fcb40e","#ccbb44","#5b8efd"]
+  full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44", "#c5c5c4"]
+  headway_scale: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d","#dd217d","#dd217d"] 
+  vp_tu_scale: ["#dd217d","#fc5c04","#fcb40e","#ccbb44"]
+  
+# Scheduled Service Hours
+hourly_summary:
+    title: "Daily Scheduled Service Hours for "
+    subtitle: "Use the legend to highlight a particular month and hover over the line for additional information."
+    tooltip: ["Date", 'Departure Hour', "N Trips"] 
+    colors: []
+    
+# fct_monthly_operator_summary
+trip_updates_minute:
+    title: "Trip Update Messages per Minute"
+    subtitle: "Based on Weekday Data"
+    tooltip: ["Date", "TU Messages Per Minute"]
+    colors: ["#dd217d","#fc5c04","#fcb40e","#ccbb44"]
+    ticks: []
+  
+vehicle_positions_minute:
+   title: "Vehicle Positions per Minute"
+   subtitle: "Based on Weekday Data"
+   tooltip: ["Date", "VP Messages Per Minute"]
+   colors: ${color_palettes.vp_tu_scale} 
+   ticks: []
+  
+vehicle_positions_pct:
+  title: "Percentage of Trips with Vehicle Positions"
+  subtitle: ""
+  tooltip: ["Date", "Percent of Trips with Vehicle Positions"]
+  colors: ${color_palettes.vp_tu_scale} 
+  ticks: []
+  
+trip_update_pct:
+  title: "Percentage of Trips with Trip Updates"
+  subtitle: ""
+  tooltip: ["Date", "Percent of Trips with Trip Updates",]
+  colors: []
+  ticks: []
+  
+# fct_monthly_schedule_route_direction_summary
+avg_scheduled_minutes:
+  title: "Average Scheduled Minutes"
+  subtitle: "The average minutes a trip is scheduled to run in each direction."
+  tooltip: ["Date", "Route", "Direction", "Average Scheduled Minutes"]
+  colors: ${color_palettes.four_colors} 
+  ticks: [i for i in range(0, int(90) + 15, 15)]
+
+scheduled:
+  title: "Total Scheduled Trips"
+  subtitle: ""
+  tooltip: ["Date","Route", "Direction","Daily Trips All Day",]
+  colors: ${color_palettes.four_colors}
+  ticks: [i for i in range(0, int(200) + 50, 50)]
+
+frequency:
+  title: "Headway in Minutes"
+  subtitle: "Understanding how often a trip comes. If the bar says 120 minutes, that means a trip will pass that particular direction once every 2 hours."
+  tooltip: ["Date","Route", "Direction","Daily Trips All Day",]
+  colors: ${color_palettes.headway_scale}
+  ticks: [i for i in range(0, int(240) + 30, 30)]
+
+text: 
+  title: "Data taken from the most recent date of "
+  subtitle: ""
+  tooltip: []
+  colors: []
+  ticks: 

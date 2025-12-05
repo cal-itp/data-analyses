@@ -5,8 +5,8 @@ import altair as alt
 alt.data_transformers.enable('default', max_rows=None)
 
 # Other
-from segment_speed_utils.project_vars import RT_SCHED_GCS, SCHED_GCS
-from shared_utils import catalog_utils, rt_dates, rt_utils
+from segment_speed_utils.project_vars import RT_SCHED_GCS
+from shared_utils import catalog_utils
 
 # Data Dictionary
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
@@ -323,6 +323,7 @@ def line_chart(
             y=alt.Y(
                 f"{y_col}:Q",
                 title=y_col,
+                axis = None,
             ),
             color=alt.Color(
                 f"{color_col}:N",
