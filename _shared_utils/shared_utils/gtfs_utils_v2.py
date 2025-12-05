@@ -18,6 +18,7 @@ from shared_utils import DBSession, schedule_rt_utils
 from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
 from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
 from shared_utils.models.fct_daily_scheduled_shapes import FctDailyScheduledShapes
+from shared_utils.models.fct_daily_scheduled_stops import FctDailyScheduledStops
 from shared_utils.models.fct_scheduled_trips import FctScheduledTrips
 from siuba import *
 from sqlalchemy import and_, create_engine, func, or_, select
@@ -462,33 +463,34 @@ def get_stops(
     """
     check_operator_feeds(operator_feeds)
 
-    # If pt_geom is not kept in the final, we still need it
-    # to turn this into a gdf
-    if (stop_cols) and ("pt_geom" not in stop_cols):
-        stop_cols_with_geom = stop_cols + ["pt_geom"]
-    else:
-        stop_cols_with_geom = stop_cols[:]
+    search_conditions = [
+        FctDailyScheduledStops.service_date == selected_date,
+        FctDailyScheduledStops.feed_key.in_(operator_feeds),
+    ]
 
-    tables = _get_tables()
+    for k, v in (custom_filtering or {}).items():
+        search_conditions.append(getattr(FctDailyScheduledStops, k).in_(v))
 
-    stops = (
-        getattr(tables, "test_shared_utils").fct_daily_scheduled_stops()
-        >> filter_date(selected_date, date_col="service_date")
-        >> filter_operator(operator_feeds, include_name=False)
-        >> filter_custom_col(custom_filtering)
-        >> subset_cols(stop_cols_with_geom)
-    )
+    statement = select(FctDailyScheduledStops).where(and_(*search_conditions))
+
+    if stop_cols and len(stop_cols):
+        columns = [FctDailyScheduledStops.pt_geom]
+
+        for column in stop_cols:
+            columns.append(getattr(FctDailyScheduledStops, column))
+
+        statement = statement.with_only_columns(*columns)
 
     if get_df:
-        stops = stops >> collect()
+        with DBSession() as session:
+            stops = pd.read_sql(statement, session.bind)
 
         geom = [shapely.wkt.loads(x) for x in stops.pt_geom]
-
         stops = gpd.GeoDataFrame(stops, geometry=geom, crs="EPSG:4326").to_crs(crs).drop(columns="pt_geom")
 
         return stops
     else:
-        return stops >> subset_cols(stop_cols)
+        return statement
 
 
 def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
