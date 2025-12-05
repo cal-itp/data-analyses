@@ -360,7 +360,7 @@ def get_trips(
     for k, v in (custom_filtering or {}).items():
         search_conditions.append(getattr(FctScheduledTrips, k).in_(v))
 
-    trips = select(FctScheduledTrips).where(and_(*search_conditions))
+    statement = select(FctScheduledTrips).where(and_(*search_conditions))
 
     # subset of columns must happen after Metrolink fix...
     # otherwise, the Metrolink fix may depend on more columns that
@@ -381,8 +381,8 @@ def get_trips(
                 print(f"could not get metrolink feed on {selected_date}!")
             # Handle Metrolink when we need to
             if not metrolink_empty and ((metrolink_feed_key in operator_feeds) or (metrolink_name in operator_feeds)):
-                metrolink_trips_statement = trips.where(FctScheduledTrips.feed_key == metrolink_feed_key)
-                not_metrolink_trips_statement = trips.where(FctScheduledTrips.feed_key != metrolink_feed_key)
+                metrolink_trips_statement = statement.where(FctScheduledTrips.feed_key == metrolink_feed_key)
+                not_metrolink_trips_statement = statement.where(FctScheduledTrips.feed_key != metrolink_feed_key)
                 metrolink_trips = pd.read_sql(metrolink_trips_statement, session.bind)
                 not_metrolink_trips = pd.read_sql(not_metrolink_trips_statement, session.bind)
 
@@ -395,10 +395,10 @@ def get_trips(
                 ].reset_index(drop=True)
 
             elif metrolink_empty or (metrolink_feed_key not in operator_feeds):
-                statement = trips.with_only_columns(*columns) if len(columns) else trips
+                statement = statement.with_only_columns(*columns) if len(columns) else statement
                 return pd.read_sql(statement, session.bind)
 
-    return trips.with_only_columns(*columns) if len(columns) else trips
+    return statement.with_only_columns(*columns) if len(columns) else statement
 
 
 def get_shapes(
