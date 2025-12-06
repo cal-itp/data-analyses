@@ -13,7 +13,7 @@ import siuba  # need this to do type hint in functions
 import sqlalchemy
 from calitp_data_analysis import geography_utils
 from calitp_data_analysis.sql import CALITP_BQ_LOCATION, CALITP_BQ_MAX_BYTES
-from calitp_data_analysis.tables import AutoTable, tbls
+from calitp_data_analysis.tables import AutoTable
 from shared_utils import DBSession, schedule_rt_utils
 from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
 from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
@@ -542,9 +542,11 @@ def get_stop_times(
         elif isinstance(trip_df, pd.DataFrame):
             trips_on_day = trip_df[trip_id_cols]
 
+    tables = _get_tables()
+
     if not isinstance(trips_on_day, pd.DataFrame):
         stop_times = (
-            tbls.mart_gtfs.dim_stop_times()
+            getattr(tables, "test_shared_utils").dim_stop_times()
             >> filter_operator(operator_feeds, include_name=True)
             >> inner_join(_, trips_on_day, on=trip_id_cols)
             >> filter_custom_col(custom_filtering)
@@ -555,7 +557,7 @@ def get_stop_times(
         # if trips is pd.DataFrame, can't use inner_join because that needs LazyTbl
         # on both sides. Use .isin then
         stop_times = (
-            tbls.mart_gtfs.dim_stop_times()
+            getattr(tables, "test_shared_utils").dim_stop_times()
             >> filter_operator(operator_feeds, include_name=False)
             >> filter(_.trip_id.isin(trips_on_day.trip_id))
             >> filter_custom_col(custom_filtering)
