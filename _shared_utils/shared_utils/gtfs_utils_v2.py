@@ -16,6 +16,7 @@ from calitp_data_analysis.sql import CALITP_BQ_LOCATION, CALITP_BQ_MAX_BYTES
 from calitp_data_analysis.tables import AutoTable
 from shared_utils import DBSession, schedule_rt_utils
 from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
+from shared_utils.models.dim_stop_time import DimStopTime
 from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
 from shared_utils.models.fct_daily_scheduled_shapes import FctDailyScheduledShapes
 from shared_utils.models.fct_daily_scheduled_stops import FctDailyScheduledStops
@@ -513,10 +514,10 @@ def get_stop_times(
     selected_date: Union[str, datetime.date],
     operator_feeds: list[str] = [],
     stop_time_cols: list[str] = [],
-    get_df: bool = False,
-    trip_df: Union[pd.DataFrame, siuba.sql.verbs.LazyTbl] = None,
+    get_df: bool = True,
+    trip_df: pd.DataFrame = None,
     custom_filtering: dict = None,
-) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+) -> Union[pd.DataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Download stop times table for operator on a day.
 
@@ -527,45 +528,34 @@ def get_stop_times(
             If True, return pd.DataFrame
     """
     check_operator_feeds(operator_feeds)
-
     trip_id_cols = ["feed_key", "trip_id"]
 
     if trip_df is None:
         # Grab the trips for that day
-        trips_on_day = get_trips(selected_date=selected_date, trip_cols=trip_id_cols, get_df=False)
+        trip_df = get_trips(selected_date=selected_date, operator_feeds=operator_feeds, trip_cols=trip_id_cols)
 
-    elif trip_df is not None:
-        if isinstance(trip_df, siuba.sql.verbs.LazyTbl):
-            trips_on_day = trip_df >> select(trip_id_cols)
+    trip_df = trip_df[trip_id_cols]
 
-        # Have to handle pd.DataFrame separately later
-        elif isinstance(trip_df, pd.DataFrame):
-            trips_on_day = trip_df[trip_id_cols]
+    columns = [DimStopTime]
 
-    tables = _get_tables()
+    if stop_time_cols and len(stop_time_cols):
+        columns = []
+        columns.append(DimStopTime.arrival_sec) if "arrival_sec" not in stop_time_cols else None
+        columns.append(DimStopTime.departure_sec) if "departure_sec" not in stop_time_cols else None
 
-    if not isinstance(trips_on_day, pd.DataFrame):
-        stop_times = (
-            getattr(tables, "test_shared_utils").dim_stop_times()
-            >> filter_operator(operator_feeds, include_name=True)
-            >> inner_join(_, trips_on_day, on=trip_id_cols)
-            >> filter_custom_col(custom_filtering)
-            >> subset_cols(stop_time_cols)
-        )
+        for column in stop_time_cols:
+            columns.append(getattr(DimStopTime, column))
 
-    elif isinstance(trips_on_day, pd.DataFrame):
-        # if trips is pd.DataFrame, can't use inner_join because that needs LazyTbl
-        # on both sides. Use .isin then
-        stop_times = (
-            getattr(tables, "test_shared_utils").dim_stop_times()
-            >> filter_operator(operator_feeds, include_name=False)
-            >> filter(_.trip_id.isin(trips_on_day.trip_id))
-            >> filter_custom_col(custom_filtering)
-            >> subset_cols(stop_time_cols)
-        )
+    search_conditions = [DimStopTime.feed_key.in_(operator_feeds), DimStopTime.trip_id.in_(trip_df.trip_id)]
+
+    for k, v in (custom_filtering or {}).items():
+        search_conditions.append(getattr(DimStopTime, k).in_(v))
+
+    statement = select(*columns).where(and_(*search_conditions))
 
     if get_df:
-        stop_times = stop_times >> collect()
+        with DBSession() as session:
+            stop_times = pd.read_sql(statement, session.bind)
 
         # Since we can parse by arrival or departure hour, let's
         # make it available when df is returned
@@ -574,7 +564,12 @@ def get_stop_times(
             departure_hour=pd.to_datetime(stop_times.departure_sec, unit="s").dt.hour,
         )
 
-    return stop_times
+        if stop_time_cols and len(stop_time_cols):
+            stop_times = stop_times[stop_time_cols + ["arrival_hour", "departure_hour"]]
+
+        return stop_times
+
+    return statement
 
 
 def filter_to_public_schedule_gtfs_dataset_keys(get_df: bool = False) -> list:

@@ -4,7 +4,6 @@ import re
 import geopandas as gpd
 import pandas as pd
 import pytest
-import siuba
 import sqlalchemy
 from calitp_data_analysis import geography_utils
 from dateutil.relativedelta import relativedelta
@@ -23,6 +22,17 @@ from shared_utils.gtfs_utils_v2 import (
 
 
 class TestGtfsUtilsV2:
+    @pytest.fixture
+    def trip(self):
+        return pd.DataFrame(
+            data=[
+                {
+                    "feed_key": "4321a7e3901b2275805494a746ec1c6a",
+                    "trip_id": "(MWF)_t_5405971_b_55349_tn_0",
+                }
+            ]
+        )
+
     @pytest.mark.vcr
     def test_get_metrolink_feed_key(self):
         result = get_metrolink_feed_key(selected_date="2025-08-23")
@@ -945,38 +955,11 @@ class TestGtfsUtilsV2:
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
 
     @pytest.mark.vcr
-    def test_get_stop_times(self):
-        trip_df = pd.DataFrame(
-            data=[
-                {
-                    "feed_key": "4321a7e3901b2275805494a746ec1c6a",
-                    "trip_id": "(MWF)_t_5405971_b_55349_tn_0",
-                }
-            ]
-        )
-
-        result = get_stop_times(
-            selected_date="2025-11-24", trip_df=trip_df, operator_feeds=["4321a7e3901b2275805494a746ec1c6a"]
-        )
-
-        assert isinstance(result, siuba.sql.verbs.LazyTbl)
-
-    @pytest.mark.vcr
-    def test_get_stop_times_get_df(self):
-        trip_df = pd.DataFrame(
-            data=[
-                {
-                    "feed_key": "4321a7e3901b2275805494a746ec1c6a",
-                    "trip_id": "(MWF)_t_5405971_b_55349_tn_0",
-                }
-            ]
-        )
-
+    def test_get_stop_times(self, trip):
         result = get_stop_times(
             selected_date="2025-11-24",
-            trip_df=trip_df,
+            trip_df=trip,
             operator_feeds=["4321a7e3901b2275805494a746ec1c6a"],
-            get_df=True,
         )
 
         assert len(result) == 2
@@ -1067,38 +1050,100 @@ class TestGtfsUtilsV2:
             ]
         )
 
-    # @pytest.mark.vcr
-    # def test_get_stop_times_get_df_stop_time_cols(self):
-    #     trip_df = pd.DataFrame(
-    #         data=[
-    #             {
-    #                 "feed_key": "4321a7e3901b2275805494a746ec1c6a",
-    #                 "trip_id": "(MWF)_t_5405971_b_55349_tn_0",
-    #             }
-    #         ]
-    #     )
-    #
-    #     result = get_stop_times(
-    #         selected_date="2025-11-24",
-    #         trip_df=trip_df,
-    #         operator_feeds=["4321a7e3901b2275805494a746ec1c6a"],
-    #         stop_time_cols=["feed_key"],
-    #         get_df=True,
-    #     )
-    #
-    #     assert len(result) == 2
-    #     assert result.drop(columns=["_feed_valid_from"]).to_dict(orient="records") == unordered(
-    #         [
-    #             {"feed_key": "4321a7e3901b2275805494a746ec1c6a", "arrival_hour": 11, "departure_hour": 11},
-    #             {"feed_key": "4321a7e3901b2275805494a746ec1c6a", "arrival_hour": 11, "departure_hour": 11},
-    #         ]
-    #     )
+    @pytest.mark.vcr
+    def test_get_stop_times_stop_time_cols(self, trip):
+        result = get_stop_times(
+            selected_date="2025-11-24",
+            trip_df=trip,
+            operator_feeds=["4321a7e3901b2275805494a746ec1c6a"],
+            stop_time_cols=["feed_key"],
+        )
 
-    # def test_get_stop_times_no_trip_df(self):
-    #     result = get_stop_times(selected_date="2025-11-24", operator_feeds=["4321a7e3901b2275805494a746ec1c6a"])
-    #
-    #     assert isinstance(result, siuba.sql.verbs.LazyTbl)
+        assert len(result) == 2
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {"feed_key": "4321a7e3901b2275805494a746ec1c6a", "arrival_hour": 11, "departure_hour": 11},
+                {"feed_key": "4321a7e3901b2275805494a746ec1c6a", "arrival_hour": 11, "departure_hour": 11},
+            ]
+        )
 
-    # def test_get_stop_times_no_operator_feeds(self):
-    #     with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
-    #         get_stop_times(selected_date="2025-11-01")
+    @pytest.mark.vcr
+    def test_get_stop_times_get_df_false(self, trip):
+        result = get_stop_times(
+            selected_date="2025-11-24", trip_df=trip, operator_feeds=["4321a7e3901b2275805494a746ec1c6a"], get_df=False
+        )
+
+        assert isinstance(result, sqlalchemy.sql.selectable.Select)
+
+    @pytest.mark.vcr
+    def test_get_stop_times_no_trip_df(self):
+        result = get_stop_times(selected_date="2025-11-24", operator_feeds=["918ed58c79d05e956cf6f0c15e2a9902"])
+
+        assert len(result) == 1
+        assert result.drop(columns=["_feed_valid_from"]).to_dict(orient="records") == unordered(
+            [
+                {
+                    "key": "af69a8e874fd726f64bcc1a9992ae8ce",
+                    "_gtfs_key": "33ab39c71a2559553bf32581d4ae43ee",
+                    "base64_url": "aHR0cHM6Ly93d3cubWV0cm9saW5rdHJhaW5zLmNvbS9nbG9iYWxhc3NldHMvYWJvdXQvZ3Rmcy9ndGZzLnppcA==",
+                    "feed_key": "918ed58c79d05e956cf6f0c15e2a9902",
+                    "trip_id": "294100132",
+                    "stop_id": "103",
+                    "stop_sequence": 1,
+                    "arrival_time": "15:36:00",
+                    "departure_time": "15:36:00",
+                    "arrival_time_interval": relativedelta(hours=+15, minutes=+36),
+                    "departure_time_interval": relativedelta(hours=+15, minutes=+36),
+                    "stop_headsign": "L.A. Union Station",
+                    "pickup_type": 0,
+                    "drop_off_type": None,
+                    "continuous_pickup": None,
+                    "continuous_drop_off": None,
+                    "shape_dist_traveled": None,
+                    "timepoint": 1,
+                    "warning_duplicate_gtfs_key": False,
+                    "warning_missing_foreign_key_stop_id": False,
+                    "_dt": datetime.date(2025, 8, 26),
+                    "_line_number": 876,
+                    "feed_timezone": "America/Los_Angeles",
+                    "arrival_sec": 56160,
+                    "departure_sec": 56160,
+                    "start_pickup_drop_off_window": None,
+                    "end_pickup_drop_off_window": None,
+                    "start_pickup_drop_off_window_interval": None,
+                    "end_pickup_drop_off_window_interval": None,
+                    "start_pickup_drop_off_window_sec": None,
+                    "end_pickup_drop_off_window_sec": None,
+                    "mean_duration_factor": None,
+                    "mean_duration_offset": None,
+                    "safe_duration_factor": None,
+                    "safe_duration_offset": None,
+                    "pickup_booking_rule_id": None,
+                    "drop_off_booking_rule_id": None,
+                    "arrival_hour": 15,
+                    "departure_hour": 15,
+                }
+            ]
+        )
+
+    @pytest.mark.vcr
+    def test_get_stop_times_custom_filtering(self):
+        result = get_stop_times(
+            selected_date="2025-11-24",
+            operator_feeds=["4321a7e3901b2275805494a746ec1c6a"],
+            custom_filtering={"stop_id": ["18197"]},
+        )
+
+        assert len(result) == 1
+        assert result[["key", "feed_key", "trip_id", "stop_id"]].to_dict(orient="records") == [
+            {
+                "key": "952a6434038bef86c05f25a2d13f6dda",
+                "feed_key": "4321a7e3901b2275805494a746ec1c6a",
+                "trip_id": "(MWF)_t_5405971_b_55349_tn_0",
+                "stop_id": "18197",
+            },
+        ]
+
+    def test_get_stop_times_no_operator_feeds(self):
+        with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
+            get_stop_times(selected_date="2025-11-01")
