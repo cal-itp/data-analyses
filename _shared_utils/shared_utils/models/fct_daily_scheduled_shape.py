@@ -5,7 +5,7 @@ from sqlalchemy.orm import declarative_base, declared_attr
 Base = declarative_base()
 
 
-class FctDailyScheduledShapes(Base):
+class FctDailyScheduledShape(Base):
     dataset = "mart_gtfs"
     table = "fct_daily_scheduled_shapes"
 
