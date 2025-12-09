@@ -1,5 +1,5 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import Boolean, Column, Date, DateTime, Integer, Numeric, String
+from sqlalchemy import Boolean, Column, Date, DateTime, Integer, Numeric, String, Time
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
@@ -23,10 +23,10 @@ class DimStopTime(Base):
     arrival_time = Column(String)
     departure_time = Column(String)
     # arrival_time_interval, departure_time_interval, start_pickup_drop_off_window_interval, and end_pickup_drop_off_window_interval should
-    # all be Interval type, however this is not currently supported with sqlalchemy-bigquery https://github.com/googleapis/python-bigquery-sqlalchemy/issues/453
-    # https://github.com/googleapis/python-bigquery/issues/826. Falling back to String satisfies our current usage.
-    arrival_time_interval = Column(String)  # Interval
-    departure_time_interval = Column(String)  # Interval
+    # be Interval type, however this is not currently supported with sqlalchemy-bigquery https://github.com/googleapis/python-bigquery-sqlalchemy/issues/453
+    # https://github.com/googleapis/python-bigquery/issues/826. Falling back to Time satisfies our current usage.
+    arrival_time_interval = Column(Time)  # Interval
+    departure_time_interval = Column(Time)  # Interval
     stop_headsign = Column(String)
     pickup_type = Column(Integer)
     drop_off_type = Column(Integer)
@@ -44,8 +44,8 @@ class DimStopTime(Base):
     departure_sec = Column(Integer)
     start_pickup_drop_off_window = Column(String)
     end_pickup_drop_off_window = Column(String)
-    start_pickup_drop_off_window_interval = Column(String)  # Interval
-    end_pickup_drop_off_window_interval = Column(String)  # Interval
+    start_pickup_drop_off_window_interval = Column(Time)  # Interval
+    end_pickup_drop_off_window_interval = Column(Time)  # Interval
     start_pickup_drop_off_window_sec = Column(Integer)
     end_pickup_drop_off_window_sec = Column(Integer)
     mean_duration_factor = Column(Numeric)

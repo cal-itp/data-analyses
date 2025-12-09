@@ -23,4 +23,5 @@ class FctDailyScheduledShape(Base):
     shape_first_departure_datetime_pacific = Column(DateTime)
     shape_last_arrival_datetime_pacific = Column(DateTime)
     contains_warning_duplicate_trip_primary_key = Column(Boolean)
-    pt_array = Column(String)
+    # pt_array should be GEOMETRY type to match BigQuery, however the current code expects a text representation
+    pt_array = Column(String)  # GEOMETRY
