@@ -17,10 +17,10 @@ from calitp_data_analysis.tables import AutoTable
 from shared_utils import DBSession, schedule_rt_utils
 from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
 from shared_utils.models.dim_stop_time import DimStopTime
-from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
-from shared_utils.models.fct_daily_scheduled_shapes import FctDailyScheduledShapes
-from shared_utils.models.fct_daily_scheduled_stops import FctDailyScheduledStops
-from shared_utils.models.fct_scheduled_trips import FctScheduledTrips
+from shared_utils.models.fct_daily_schedule_feed import FctDailyScheduleFeed
+from shared_utils.models.fct_daily_scheduled_shape import FctDailyScheduledShape
+from shared_utils.models.fct_daily_scheduled_stop import FctDailyScheduledStop
+from shared_utils.models.fct_scheduled_trip import FctScheduledTrip
 from siuba import *
 from sqlalchemy import and_, create_engine, func, or_, select
 
@@ -193,15 +193,15 @@ def get_metrolink_feed_key(
     )
 
     statement = (
-        metrolink_in_airtable.add_columns(FctDailyScheduleFeeds.feed_key)
+        metrolink_in_airtable.add_columns(FctDailyScheduleFeed.feed_key)
         .join(
-            FctDailyScheduleFeeds,
+            FctDailyScheduleFeed,
             and_(
-                FctDailyScheduleFeeds.gtfs_dataset_key == DimGtfsDataset.key,
-                FctDailyScheduleFeeds.gtfs_dataset_name == DimGtfsDataset.name,
+                FctDailyScheduleFeed.gtfs_dataset_key == DimGtfsDataset.key,
+                FctDailyScheduleFeed.gtfs_dataset_name == DimGtfsDataset.name,
             ),
         )
-        .where(FctDailyScheduleFeeds.date == selected_date)
+        .where(FctDailyScheduleFeed.date == selected_date)
     )
 
     with DBSession() as session:
@@ -298,28 +298,26 @@ def schedule_daily_feed_to_gtfs_dataset_name(
         "current_feeds": [is_not_regional_precursor],
     }
 
-    search_conditions = [FctDailyScheduleFeeds.date == selected_date] + additional_search_conditions.get(
-        feed_option, []
-    )
+    search_conditions = [FctDailyScheduleFeed.date == selected_date] + additional_search_conditions.get(feed_option, [])
 
     # Join on gtfs_dataset_key to get organization name
     statement = (
         dim_gtfs_datasets.with_only_columns(
             DimGtfsDataset.regional_feed_type,
             DimGtfsDataset.type,
-            FctDailyScheduleFeeds.key,
-            FctDailyScheduleFeeds.date,
-            FctDailyScheduleFeeds.feed_key,
-            FctDailyScheduleFeeds.feed_timezone,
-            FctDailyScheduleFeeds.base64_url,
-            FctDailyScheduleFeeds.gtfs_dataset_key,
-            FctDailyScheduleFeeds.gtfs_dataset_name.label("name"),
+            FctDailyScheduleFeed.key,
+            FctDailyScheduleFeed.date,
+            FctDailyScheduleFeed.feed_key,
+            FctDailyScheduleFeed.feed_timezone,
+            FctDailyScheduleFeed.base64_url,
+            FctDailyScheduleFeed.gtfs_dataset_key,
+            FctDailyScheduleFeed.gtfs_dataset_name.label("name"),
         )
         .join(
-            FctDailyScheduleFeeds,
+            FctDailyScheduleFeed,
             and_(
-                FctDailyScheduleFeeds.gtfs_dataset_key == DimGtfsDataset.key,
-                FctDailyScheduleFeeds.gtfs_dataset_name == DimGtfsDataset.name,
+                FctDailyScheduleFeed.gtfs_dataset_key == DimGtfsDataset.key,
+                FctDailyScheduleFeed.gtfs_dataset_name == DimGtfsDataset.name,
             ),
         )
         .where(and_(*search_conditions))
@@ -328,7 +326,7 @@ def schedule_daily_feed_to_gtfs_dataset_name(
     if keep_cols and len(keep_cols):
         columns = []
         for column in keep_cols:
-            new_column = DimGtfsDataset.name if column == "name" else getattr(FctDailyScheduleFeeds, column)
+            new_column = DimGtfsDataset.name if column == "name" else getattr(FctDailyScheduleFeed, column)
             columns.append(new_column)
         statement = statement.with_only_columns(columns)
 
@@ -355,14 +353,14 @@ def get_trips(
     check_operator_feeds(operator_feeds)
 
     search_conditions = [
-        FctScheduledTrips.service_date == selected_date,
-        or_(FctScheduledTrips.feed_key.in_(operator_feeds), FctScheduledTrips.name.in_(operator_feeds)),
+        FctScheduledTrip.service_date == selected_date,
+        or_(FctScheduledTrip.feed_key.in_(operator_feeds), FctScheduledTrip.name.in_(operator_feeds)),
     ]
 
     for k, v in (custom_filtering or {}).items():
-        search_conditions.append(getattr(FctScheduledTrips, k).in_(v))
+        search_conditions.append(getattr(FctScheduledTrip, k).in_(v))
 
-    statement = select(FctScheduledTrips).where(and_(*search_conditions))
+    statement = select(FctScheduledTrip).where(and_(*search_conditions))
 
     # subset of columns must happen after Metrolink fix...
     # otherwise, the Metrolink fix may depend on more columns that
@@ -370,7 +368,7 @@ def get_trips(
     columns = []
 
     for column in trip_cols:
-        columns.append(getattr(FctScheduledTrips, column))
+        columns.append(getattr(FctScheduledTrip, column))
 
     if get_df:
         with DBSession() as session:
@@ -383,8 +381,8 @@ def get_trips(
                 print(f"could not get metrolink feed on {selected_date}!")
             # Handle Metrolink when we need to
             if not metrolink_empty and ((metrolink_feed_key in operator_feeds) or (metrolink_name in operator_feeds)):
-                metrolink_trips_statement = statement.where(FctScheduledTrips.feed_key == metrolink_feed_key)
-                not_metrolink_trips_statement = statement.where(FctScheduledTrips.feed_key != metrolink_feed_key)
+                metrolink_trips_statement = statement.where(FctScheduledTrip.feed_key == metrolink_feed_key)
+                not_metrolink_trips_statement = statement.where(FctScheduledTrip.feed_key != metrolink_feed_key)
                 metrolink_trips = pd.read_sql(metrolink_trips_statement, session.bind)
                 not_metrolink_trips = pd.read_sql(not_metrolink_trips_statement, session.bind)
 
@@ -420,14 +418,14 @@ def get_shapes(
     check_operator_feeds(operator_feeds)
 
     search_conditions = [
-        FctDailyScheduledShapes.service_date == selected_date,
-        FctDailyScheduledShapes.feed_key.in_(operator_feeds),
+        FctDailyScheduledShape.service_date == selected_date,
+        FctDailyScheduledShape.feed_key.in_(operator_feeds),
     ]
 
     for k, v in (custom_filtering or {}).items():
-        search_conditions.append(getattr(FctDailyScheduledShapes, k).in_(v))
+        search_conditions.append(getattr(FctDailyScheduledShape, k).in_(v))
 
-    statement = select(FctDailyScheduledShapes).where(and_(*search_conditions))
+    statement = select(FctDailyScheduledShape).where(and_(*search_conditions))
 
     if get_df:
         with DBSession() as session:
@@ -440,10 +438,10 @@ def get_shapes(
         return shapes_gdf
 
     else:
-        columns = {func.ST_ASBINARY(FctDailyScheduledShapes.pt_array)}
+        columns = {func.ST_ASBINARY(FctDailyScheduledShape.pt_array)}
 
         for column in shape_cols:
-            columns.add(getattr(FctDailyScheduledShapes, column))
+            columns.add(getattr(FctDailyScheduledShape, column))
 
         return statement.with_only_columns(*list(columns))
 
@@ -465,20 +463,20 @@ def get_stops(
     check_operator_feeds(operator_feeds)
 
     search_conditions = [
-        FctDailyScheduledStops.service_date == selected_date,
-        FctDailyScheduledStops.feed_key.in_(operator_feeds),
+        FctDailyScheduledStop.service_date == selected_date,
+        FctDailyScheduledStop.feed_key.in_(operator_feeds),
     ]
 
     for k, v in (custom_filtering or {}).items():
-        search_conditions.append(getattr(FctDailyScheduledStops, k).in_(v))
+        search_conditions.append(getattr(FctDailyScheduledStop, k).in_(v))
 
-    statement = select(FctDailyScheduledStops).where(and_(*search_conditions))
+    statement = select(FctDailyScheduledStop).where(and_(*search_conditions))
 
     if stop_cols and len(stop_cols):
-        columns = [FctDailyScheduledStops.pt_geom]
+        columns = [FctDailyScheduledStop.pt_geom]
 
         for column in stop_cols:
-            columns.append(getattr(FctDailyScheduledStops, column))
+            columns.append(getattr(FctDailyScheduledStop, column))
 
         statement = statement.with_only_columns(*columns)
 

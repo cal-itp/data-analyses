@@ -10,8 +10,8 @@ import geopandas as gpd
 import pandas as pd
 import sqlalchemy
 from shared_utils import DBSession
-from shared_utils.models.bridge_organizations_x_headquarters_county_geography import (
-    BridgeOrganizationsXHeadquartersCountyGeography,
+from shared_utils.models.bridge_organization_x_headquarters_county_geography import (
+    BridgeOrganizationXHeadquartersCountyGeography,
 )
 from shared_utils.models.dim_county_geography import DimCountyGeography
 from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
@@ -184,7 +184,7 @@ def filter_dim_county_geography(
     Organizations belong to county, and counties are assigned to districts.
     """
     columns = [
-        BridgeOrganizationsXHeadquartersCountyGeography.organization_name,
+        BridgeOrganizationXHeadquartersCountyGeography.organization_name,
         func.concat(
             func.lpad(cast(DimCountyGeography.caltrans_district, String), 2, "0"),
             " - ",
@@ -194,8 +194,8 @@ def filter_dim_county_geography(
 
     for column in keep_cols:
         attribute = (
-            getattr(BridgeOrganizationsXHeadquartersCountyGeography, column)
-            if hasattr(BridgeOrganizationsXHeadquartersCountyGeography, column)
+            getattr(BridgeOrganizationXHeadquartersCountyGeography, column)
+            if hasattr(BridgeOrganizationXHeadquartersCountyGeography, column)
             else getattr(DimCountyGeography, column)
         )
         columns.append(attribute)
@@ -204,13 +204,13 @@ def filter_dim_county_geography(
         select(*columns)
         .join(
             DimCountyGeography,
-            DimCountyGeography.key == BridgeOrganizationsXHeadquartersCountyGeography.county_geography_key,
+            DimCountyGeography.key == BridgeOrganizationXHeadquartersCountyGeography.county_geography_key,
         )
         .where(
             and_(
-                func.datetime(BridgeOrganizationsXHeadquartersCountyGeography._valid_from, PACIFIC_TIMEZONE)
+                func.datetime(BridgeOrganizationXHeadquartersCountyGeography._valid_from, PACIFIC_TIMEZONE)
                 <= func.datetime(date),
-                func.datetime(BridgeOrganizationsXHeadquartersCountyGeography._valid_to, PACIFIC_TIMEZONE)
+                func.datetime(BridgeOrganizationXHeadquartersCountyGeography._valid_to, PACIFIC_TIMEZONE)
                 >= func.datetime(date),
             )
         )

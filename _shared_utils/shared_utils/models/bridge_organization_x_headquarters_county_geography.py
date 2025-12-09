@@ -5,7 +5,7 @@ from sqlalchemy.orm import declarative_base, declared_attr
 Base = declarative_base()
 
 
-class BridgeOrganizationsXHeadquartersCountyGeography(Base):
+class BridgeOrganizationXHeadquartersCountyGeography(Base):
     dataset = "mart_transit_database"
     table = "bridge_organizations_x_headquarters_county_geography"
 
