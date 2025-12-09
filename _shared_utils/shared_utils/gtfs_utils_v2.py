@@ -570,7 +570,7 @@ def get_stop_times(
     return statement
 
 
-def filter_to_public_schedule_gtfs_dataset_keys(get_df: bool = False) -> list:
+def filter_to_public_schedule_gtfs_dataset_keys(get_df: bool = False) -> Union[list, pd.DataFrame]:
     """
     Return a list of schedule_gtfs_dataset_keys that have
     private_dataset == None.
@@ -581,10 +581,15 @@ def filter_to_public_schedule_gtfs_dataset_keys(get_df: bool = False) -> list:
         custom_filtering={
             "type": ["schedule"],
         },
-        get_df=True,
-    ) >> filter(_.private_dataset != True)
+        get_df=False,
+    )
+
+    statement = dim_gtfs_datasets.where(DimGtfsDataset.private_dataset.is_(None))
+
+    with DBSession() as session:
+        filtered_dim_gtfs_datasets = pd.read_sql(statement, session.bind)
 
     if get_df:
-        return dim_gtfs_datasets
+        return filtered_dim_gtfs_datasets
     else:
-        return dim_gtfs_datasets.gtfs_dataset_key.unique().tolist()
+        return filtered_dim_gtfs_datasets.gtfs_dataset_key.unique().tolist()
