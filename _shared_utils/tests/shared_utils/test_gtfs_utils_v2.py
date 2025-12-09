@@ -12,6 +12,7 @@ from pytest_unordered import unordered
 from shapely import LineString
 from shapely.geometry import Point
 from shared_utils.gtfs_utils_v2 import (
+    filter_to_public_schedule_gtfs_dataset_keys,
     get_metrolink_feed_key,
     get_shapes,
     get_stop_times,
@@ -1147,3 +1148,75 @@ class TestGtfsUtilsV2:
     def test_get_stop_times_no_operator_feeds(self):
         with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
             get_stop_times(selected_date="2025-11-01")
+
+    @pytest.mark.vcr
+    def test_filter_to_public_schedule_gtfs_dataset_keys(self):
+        result = filter_to_public_schedule_gtfs_dataset_keys()
+
+        assert len(result) == 8
+        assert result == unordered(
+            "1165b1474df778cb0fc3ba9246e32035",
+            "224050930309d60dbfad4b0b1ff8f17f",
+            "fe61acc86788295b399a43cb35a9e9c5",
+            "ff87c8304a909c02ef5045cc802864ab",
+            "372a06b593e1716d1c911b1d1d35bedd",
+            "c51dbfdd47838f86074c4ef3179cc9ed",
+            "d6ed100168196d507b4ef1c0d111ee72",
+            "2f506f822a5f9b2afa48bda762a5e81d",
+        )
+
+    @pytest.mark.default_cassette("TestGtfsUtilsV2.test_filter_to_public_schedule_gtfs_dataset_keys.yaml")
+    @pytest.mark.vcr
+    def test_filter_to_public_schedule_gtfs_dataset_keys_get_df(self):
+        result = filter_to_public_schedule_gtfs_dataset_keys(get_df=True)
+
+        assert len(result) == 9
+        assert result.to_dict(orient="records") == unordered(
+            [
+                {
+                    "gtfs_dataset_key": "1165b1474df778cb0fc3ba9246e32035",
+                    "gtfs_dataset_name": "Amtrak Schedule",
+                    "private_dataset": None,
+                },
+                {
+                    "gtfs_dataset_key": "224050930309d60dbfad4b0b1ff8f17f",
+                    "gtfs_dataset_name": "Alhambra Schedule",
+                    "private_dataset": None,
+                },
+                {
+                    "gtfs_dataset_key": "fe61acc86788295b399a43cb35a9e9c5",
+                    "gtfs_dataset_name": "Metrolink Schedule",
+                    "private_dataset": None,
+                },
+                {
+                    "gtfs_dataset_key": "ff87c8304a909c02ef5045cc802864ab",
+                    "gtfs_dataset_name": "Metrolink Schedule",
+                    "private_dataset": None,
+                },
+                {
+                    "gtfs_dataset_key": "ff87c8304a909c02ef5045cc802864ab",
+                    "gtfs_dataset_name": "Metrolink Schedule",
+                    "private_dataset": None,
+                },
+                {
+                    "gtfs_dataset_key": "372a06b593e1716d1c911b1d1d35bedd",
+                    "gtfs_dataset_name": "Santa Ynez Mecatran Schedule",
+                    "private_dataset": None,
+                },
+                {
+                    "gtfs_dataset_key": "c51dbfdd47838f86074c4ef3179cc9ed",
+                    "gtfs_dataset_name": "Santa Ynez Mecatran Schedule",
+                    "private_dataset": None,
+                },
+                {
+                    "gtfs_dataset_key": "d6ed100168196d507b4ef1c0d111ee72",
+                    "gtfs_dataset_name": "Bay Area 511 Regional Schedule",
+                    "private_dataset": None,
+                },
+                {
+                    "gtfs_dataset_key": "2f506f822a5f9b2afa48bda762a5e81d",
+                    "gtfs_dataset_name": "AC Transit Schedule",
+                    "private_dataset": None,
+                },
+            ]
+        )
