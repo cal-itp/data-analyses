@@ -3,17 +3,13 @@ GTFS utils for v2 warehouse
 """
 
 import datetime
-import os
 from typing import Literal, Union
 
 import geopandas as gpd
 import pandas as pd
 import shapely
-import siuba  # need this to do type hint in functions
 import sqlalchemy
 from calitp_data_analysis import geography_utils
-from calitp_data_analysis.sql import CALITP_BQ_LOCATION, CALITP_BQ_MAX_BYTES
-from calitp_data_analysis.tables import AutoTable
 from shared_utils import DBSession, schedule_rt_utils
 from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
 from shared_utils.models.dim_stop_time import DimStopTime
@@ -21,8 +17,7 @@ from shared_utils.models.fct_daily_schedule_feed import FctDailyScheduleFeed
 from shared_utils.models.fct_daily_scheduled_shape import FctDailyScheduledShape
 from shared_utils.models.fct_daily_scheduled_stop import FctDailyScheduledStop
 from shared_utils.models.fct_scheduled_trip import FctScheduledTrip
-from siuba import *
-from sqlalchemy import and_, create_engine, func, or_, select
+from sqlalchemy import and_, func, or_, select
 
 ROUTE_TYPE_DICT = {
     # https://gtfs.org/documentation/schedule/reference/#routestxt
@@ -39,114 +34,6 @@ ROUTE_TYPE_DICT = {
 }
 
 RAIL_ROUTE_TYPES = [k for k, v in ROUTE_TYPE_DICT.items() if k not in ["3", "4"]]
-
-
-def _get_engine(max_bytes=None, project="cal-itp-data-infra"):
-    max_bytes = CALITP_BQ_MAX_BYTES if max_bytes is None else max_bytes
-
-    cred_path = os.environ.get("CALITP_SERVICE_KEY_PATH")
-
-    # Note that we should be able to add location as a uri parameter, but
-    # it is not being picked up, so passing as a separate argument for now.
-
-    engine = create_engine(
-        f"bigquery://{project}/?maximum_bytes_billed={max_bytes}",  # noqa: E231
-        location=CALITP_BQ_LOCATION,
-        credentials_path=cred_path,
-    )
-
-    return engine
-
-
-def _get_tables():
-    tables = AutoTable(
-        _get_engine(project="cal-itp-data-infra-staging"),
-        lambda s: s,  # s.replace(".", "_"),
-    )
-
-    tables._init()
-
-    return tables
-
-
-# ----------------------------------------------------------------#
-# Convenience siuba filtering functions for querying
-# ----------------------------------------------------------------#
-
-
-def filter_operator(operator_feeds: list, include_name: bool = False) -> siuba.dply.verbs.Pipeable:
-    """
-    Filter if operator_list is present.
-    For trips table, operator_feeds can be a list of names or feed_keys.
-    For stops, shapes, stop_times, operator_feeds can only be a list of feed_keys.
-    """
-    # in testing, using _.feed_key or _.name came up with a
-    # siuba verb not implemented
-    # https://github.com/machow/siuba/issues/407
-    # put brackets around should work
-    if include_name:
-        return filter(_["feed_key"].isin(operator_feeds) | _["name"].isin(operator_feeds))
-    else:
-        return filter(_["feed_key"].isin(operator_feeds))
-
-
-def filter_date(
-    selected_date: Union[str, datetime.date], date_col: Literal["service_date", "activity_date"]
-) -> siuba.dply.verbs.Pipeable:
-    return filter(_[date_col] == selected_date)
-
-
-def subset_cols(cols: list) -> siuba.dply.verbs.Pipeable:
-    """
-    Select subset of columns, if column list is present.
-    Otherwise, skip.
-    """
-    if cols:
-        return select(*cols)
-    elif not cols or len(cols) == 0:
-        # Can't use select(), because we'll select no columns
-        # But, without knowing full list of columns, let's just
-        # filter out nothing
-        return filter()
-
-
-def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
-    """
-    Unpack the dictionary of custom columns / value to filter on.
-    Will unpack up to 5 other conditions...since we now have
-    a larger fct_daily_trips table.
-
-    Key: column name
-    Value: list with values to keep
-
-    Otherwise, skip.
-    """
-    if (filter_dict != {}) and (filter_dict is not None):
-        keys, values = zip(*filter_dict.items())
-
-        # Accommodate 3 filtering conditions for now
-        if len(keys) >= 1:
-            filter1 = filter(_[keys[0]].isin(values[0]))
-            return filter1
-
-        elif len(keys) >= 2:
-            filter2 = filter(_[keys[1]].isin(values[1]))
-            return filter1 >> filter2
-
-        elif len(keys) >= 3:
-            filter3 = filter(_[keys[2]].isin(values[2]))
-            return filter1 >> filter2 >> filter3
-
-        elif len(keys) >= 4:
-            filter4 = filter(_[keys[3]].isin(values[3]))
-            return filter1 >> filter2 >> filter3 >> filter4
-
-        elif len(keys) >= 5:
-            filter5 = filter(_[keys[4]].isin(values[4]))
-            return filter1 >> filter2 >> filter3 >> filter4 >> filter5
-
-    elif (filter_dict == {}) or (filter_dict is None):
-        return filter()
 
 
 def check_operator_feeds(operator_feeds: list[str]):
@@ -408,7 +295,7 @@ def get_shapes(
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     custom_filtering: dict = None,
-) -> Union[gpd.GeoDataFrame | sqlalchemy.sql.selectable.Select]:
+) -> Union[gpd.GeoDataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Query fct_daily_scheduled_shapes.
 
@@ -453,7 +340,7 @@ def get_stops(
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     custom_filtering: dict = None,
-) -> Union[gpd.GeoDataFrame, siuba.sql.verbs.LazyTbl]:
+) -> Union[gpd.GeoDataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Query fct_daily_scheduled_stops.
 
