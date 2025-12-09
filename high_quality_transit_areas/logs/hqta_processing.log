@@ -380,3 +380,4 @@
 2025-12-01 10:32:44.612 | INFO     | __main__:<module>:181 - C3_create_bus_hqta_types 2025-11-05 execution time: 0:00:22.845770
 2025-12-01 10:33:33.445 | INFO     | __main__:<module>:257 - D1_assemble_hqta_points 2025-11-05 execution time: 0:00:18.800981
 2025-12-01 10:34:18.610 | INFO     | __main__:<module>:155 - D2_assemble_hqta_polygons 2025-11-05 execution time: 0:00:13.157360
+2025-12-08 16:46:55.335 | INFO     | __main__:<module>:246 - B3_sjoin_stops_to_segments 2025-11-05 execution time: 0:00:29.562558
