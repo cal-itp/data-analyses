@@ -41,7 +41,8 @@ class FctDailyScheduledStop(Base):
     contains_warning_duplicate_stop_primary_key = Column(Boolean)
     stop_key = Column(String)
     tts_stop_name = Column(String)
-    pt_geom = Column(String)
+    # pt_geom should be GEOMETRY type to match BigQuery, however the current code expects a text representation
+    pt_geom = Column(String)  # GEOMETRY
     parent_station = Column(String)
     stop_code = Column(String)
     stop_name = Column(String)

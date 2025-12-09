@@ -438,10 +438,10 @@ def get_shapes(
         return shapes_gdf
 
     else:
-        columns = {func.ST_ASBINARY(FctDailyScheduledShape.pt_array)}
+        columns = [func.ST_ASBINARY(FctDailyScheduledShape.pt_array)]
 
         for column in shape_cols:
-            columns.add(getattr(FctDailyScheduledShape, column))
+            columns.append(getattr(FctDailyScheduledShape, column)) if column != "pt_array" else None
 
         return statement.with_only_columns(*list(columns))
 
