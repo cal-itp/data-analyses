@@ -6,6 +6,7 @@ or certain predefined styles, for example for speedmaps and the state highway sy
 """
 
 import base64
+import copy
 import gzip
 import json
 
@@ -98,6 +99,7 @@ def set_state_export(
     assert not gdf.empty, "geodataframe is empty!"
     if existing_state and "state_dict" in existing_state.keys():
         existing_state = existing_state["state_dict"]
+    existing_state = copy.deepcopy(existing_state)
     spa_map_state = existing_state or {"name": "null", "layers": [], "lat_lon": (), "zoom": 13}
     path = f"{bucket}{subfolder}{filename}.geojson.gz"
     gdf = gdf.to_crs(geography_utils.WGS84)
