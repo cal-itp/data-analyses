@@ -113,13 +113,19 @@ def evaluate_overlaps(
     unique_qualify_pairs_possible = [list(x) for x in qualify_sets]
 
     unique_qualify_pairs = []
+    qualify_pair_spatial = []
+    no_qualify_spatial = []
     for pair in unique_qualify_pairs_possible:
         print(f"{pair}...", end="")
-        these_shapes = shapes.query("route_dir.isin(@pair) & schedule_gtfs_dataset_key == @gtfs_dataset_key")
+        these_shapes = shapes.query("route_dir.isin(@pair) & schedule_gtfs_dataset_key == @gtfs_dataset_key").assign(
+            shape_or_sym_diff="gtfs_shapes"
+        )
         first_row = these_shapes.iloc[0:1][["schedule_gtfs_dataset_key", "route_dir", "shape_array_key", "geometry"]]
         sym_diff = first_row.overlay(these_shapes.iloc[1:2][["route_dir", "geometry"]], how="symmetric_difference")
         sym_diff = sym_diff.assign(
-            area=sym_diff.geometry.map(lambda x: x.area), route_dir=sym_diff.route_dir_1.fillna(sym_diff.route_dir_2)
+            area=sym_diff.geometry.map(lambda x: x.area),
+            route_dir=sym_diff.route_dir_1.fillna(sym_diff.route_dir_2),
+            shape_or_sym_diff="sym_difference",
         )
         area_ratios = sym_diff.area / TARGET_AREA_DIFFERENCE
         if (sym_diff.area > TARGET_AREA_DIFFERENCE).all():
@@ -128,12 +134,18 @@ def evaluate_overlaps(
             if show_map:
                 display(sym_diff.explore(column="route_dir", m=m, tiles="CartoDB Positron"))
             unique_qualify_pairs += [pair]
+            spatial = pd.concat([these_shapes.copy(), sym_diff.copy()])
+            spatial["route_dir_pair"] = str(pair)
+            qualify_pair_spatial += [spatial]
         else:
             print(f"failed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target")
             if show_map:
                 display(these_shapes.explore(column="route_dir", tiles="CartoDB Positron"))
+            spatial = these_shapes.copy()
+            spatial["route_dir_pair"] = str(pair)
+            no_qualify_spatial += [spatial]
 
-    return unique_qualify_pairs
+    return unique_qualify_pairs, qualify_pair_spatial, no_qualify_spatial
 
 
 def find_stops_this_pair(feed_stops: pd.DataFrame, one_feed_pair: list) -> pd.DataFrame:
