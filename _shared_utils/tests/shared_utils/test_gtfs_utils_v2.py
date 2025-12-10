@@ -1054,7 +1054,6 @@ class TestGtfsUtilsV2:
     @pytest.mark.vcr
     def test_get_stop_times_stop_time_cols(self, trip):
         result = get_stop_times(
-            selected_date="2025-11-24",
             trip_df=trip,
             operator_feeds=["4321a7e3901b2275805494a746ec1c6a"],
             stop_time_cols=["feed_key"],
@@ -1070,9 +1069,7 @@ class TestGtfsUtilsV2:
 
     @pytest.mark.vcr
     def test_get_stop_times_get_df_false(self, trip):
-        result = get_stop_times(
-            selected_date="2025-11-24", trip_df=trip, operator_feeds=["4321a7e3901b2275805494a746ec1c6a"], get_df=False
-        )
+        result = get_stop_times(trip_df=trip, operator_feeds=["4321a7e3901b2275805494a746ec1c6a"], get_df=False)
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
 
