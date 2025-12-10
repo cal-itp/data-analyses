@@ -396,7 +396,7 @@ def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
 
 
 def get_stop_times(
-    selected_date: Union[str, datetime.date],
+    selected_date: Union[str, datetime.date] = None,
     operator_feeds: list[str] = [],
     stop_time_cols: list[str] = [],
     get_df: bool = True,
@@ -413,13 +413,14 @@ def get_stop_times(
             If True, return pd.DataFrame
     """
     check_operator_feeds(operator_feeds)
-    trip_id_cols = ["feed_key", "trip_id"]
 
     if trip_df is None:
         # Grab the trips for that day
-        trip_df = get_trips(selected_date=selected_date, operator_feeds=operator_feeds, trip_cols=trip_id_cols)
-
-    trip_df = trip_df[trip_id_cols]
+        if not selected_date:
+            raise ValueError("selected_date must be provided to fetch trips")
+        trip_df = get_trips(
+            selected_date=selected_date, operator_feeds=operator_feeds, trip_cols=["feed_key", "trip_id"]
+        )
 
     columns = [DimStopTime]
 
