@@ -20,8 +20,7 @@ from shared_utils.models.dim_provider_gtfs_data import DimProviderGtfsData
 from shared_utils.models.fct_daily_feed_scheduled_service_summary import (
     FctDailyFeedScheduledServiceSummary,
 )
-from sqlalchemy import String, select
-from sqlalchemy.sql.expression import and_, cast, func
+from sqlalchemy import String, and_, cast, func, select
 
 PACIFIC_TIMEZONE = "US/Pacific"
 
