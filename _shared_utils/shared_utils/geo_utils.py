@@ -11,6 +11,7 @@ import shapely
 from calitp_data_analysis import geography_utils
 from scipy.spatial import KDTree
 from shared_utils import rt_utils
+from typing import Literal, Union
 
 # Could we use distance to filter for nearest neighbor?
 # It can make the length of results more unpredictable...maybe we stick to
@@ -181,3 +182,27 @@ def draw_line_between_points(gdf: gpd.GeoDataFrame, group_cols: list) -> gpd.Geo
     )
 
     return gdf
+
+
+def convert_to_gdf(
+    df: pd.DataFrame, 
+    geom_col: str,
+    geom_type: Literal["point", "line"]
+) -> gpd.GeoDataFrame:
+    """
+    For stops, we want to make pt_geom a point.
+    For vp_path and shapes, we want to make pt_array a linestring.
+    """
+    if geom_type == "point":
+        df["geometry"] = [shapely.wkt.loads(x) for x in df[geom_col]]
+
+    elif geom_type == "line":
+        df["geometry"] = df[geom_col].apply(geography_utils.make_linestring)
+
+    gdf = gpd.GeoDataFrame(
+        df.drop(columns = geom_col), geometry="geometry", 
+        crs="EPSG:4326"
+    )
+
+    return gdf
+

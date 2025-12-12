@@ -84,7 +84,7 @@ def data_wrangling_operator_map(portfolio_organization_names: list) -> gpd.GeoDa
     )
 
     # Buffer
-    operator_route_gdf.geometry = operator_route_gdf.geometry.buffer(35)
+    # operator_route_gdf.geometry = operator_route_gdf.geometry.buffer(35)
     operator_route_gdf = operator_route_gdf.dissolve(by="analysis_name").reset_index()
 
     # Need to create a number column in order for webmaps to work

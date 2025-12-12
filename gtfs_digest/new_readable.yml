@@ -44,32 +44,34 @@ trip_update_pct:
   tooltip: ["Date", "Percent of Trips with Trip Updates",]
   colors: []
   ticks: []
+
   
 # fct_monthly_schedule_route_direction_summary
 avg_scheduled_minutes:
   title: "Average Scheduled Minutes"
-  subtitle: "The average minutes a trip is scheduled to run in each direction."
+  subtitle: "The average minutes a trip is scheduled to run in each direction for weekdays."
   tooltip: ["Date", "Route", "Direction", "Average Scheduled Minutes"]
   colors: ${color_palettes.four_colors} 
-  ticks: [i for i in range(0, int(90) + 15, 15)]
+  ticks: [0, 15, 30, 45, 60, 75, 90]
 
 scheduled:
   title: "Total Scheduled Trips"
-  subtitle: ""
+  subtitle: "Based on Weekday Data."
   tooltip: ["Date","Route", "Direction","Daily Trips All Day",]
   colors: ${color_palettes.four_colors}
-  ticks: [i for i in range(0, int(200) + 50, 50)]
+  ticks: [0, 50, 100, 150, 200]
 
 frequency:
   title: "Headway in Minutes"
-  subtitle: "Understanding how often a trip comes. If the bar says 120 minutes, that means a trip will pass that particular direction once every 2 hours."
-  tooltip: ["Date","Route", "Direction","Daily Trips All Day",]
+  subtitle: "Based on Weekday Data."
+  tooltip: ["Date","Route", "Direction", "Headway All Day",]
   colors: ${color_palettes.headway_scale}
-  ticks: [i for i in range(0, int(240) + 30, 30)]
+  ticks: [0, 30, 60, 90, 120, 150, 180, 210, 240]
+
 
 text: 
-  title: "Data taken from the most recent date of "
-  subtitle: ""
+  title: "Route Statistics"
+  subtitle: "Use the menus to filter for directions and routes."
   tooltip: []
   colors: []
   ticks: 
