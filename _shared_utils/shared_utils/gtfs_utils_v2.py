@@ -2,26 +2,22 @@
 GTFS utils for v2 warehouse
 """
 
-# import os
-# os.environ["CALITP_BQ_MAX_BYTES"] = str(200_000_000_000)
-
 import datetime
 from typing import Literal, Union
 
 import geopandas as gpd
 import pandas as pd
 import shapely
-import siuba  # need this to do type hint in functions
 import sqlalchemy
 from calitp_data_analysis import geography_utils
-from calitp_data_analysis.tables import tbls
 from shared_utils import DBSession, schedule_rt_utils
 from shared_utils.models.dim_gtfs_dataset import DimGtfsDataset
-from shared_utils.models.fct_daily_schedule_feeds import FctDailyScheduleFeeds
-from siuba import *
-from sqlalchemy import and_, func
-
-GCS_PROJECT = "cal-itp-data-infra"
+from shared_utils.models.dim_stop_time import DimStopTime
+from shared_utils.models.fct_daily_schedule_feed import FctDailyScheduleFeed
+from shared_utils.models.fct_daily_scheduled_shape import FctDailyScheduledShape
+from shared_utils.models.fct_daily_scheduled_stop import FctDailyScheduledStop
+from shared_utils.models.fct_scheduled_trip import FctScheduledTrip
+from sqlalchemy import and_, func, or_, select
 
 ROUTE_TYPE_DICT = {
     # https://gtfs.org/documentation/schedule/reference/#routestxt
@@ -38,85 +34,6 @@ ROUTE_TYPE_DICT = {
 }
 
 RAIL_ROUTE_TYPES = [k for k, v in ROUTE_TYPE_DICT.items() if k not in ["3", "4"]]
-
-# ----------------------------------------------------------------#
-# Convenience siuba filtering functions for querying
-# ----------------------------------------------------------------#
-
-
-def filter_operator(operator_feeds: list, include_name: bool = False) -> siuba.dply.verbs.Pipeable:
-    """
-    Filter if operator_list is present.
-    For trips table, operator_feeds can be a list of names or feed_keys.
-    For stops, shapes, stop_times, operator_feeds can only be a list of feed_keys.
-    """
-    # in testing, using _.feed_key or _.name came up with a
-    # siuba verb not implemented
-    # https://github.com/machow/siuba/issues/407
-    # put brackets around should work
-    if include_name:
-        return filter(_["feed_key"].isin(operator_feeds) | _["name"].isin(operator_feeds))
-    else:
-        return filter(_["feed_key"].isin(operator_feeds))
-
-
-def filter_date(
-    selected_date: Union[str, datetime.date], date_col: Literal["service_date", "activity_date"]
-) -> siuba.dply.verbs.Pipeable:
-    return filter(_[date_col] == selected_date)
-
-
-def subset_cols(cols: list) -> siuba.dply.verbs.Pipeable:
-    """
-    Select subset of columns, if column list is present.
-    Otherwise, skip.
-    """
-    if cols:
-        return select(*cols)
-    elif not cols or len(cols) == 0:
-        # Can't use select(), because we'll select no columns
-        # But, without knowing full list of columns, let's just
-        # filter out nothing
-        return filter()
-
-
-def filter_custom_col(filter_dict: dict) -> siuba.dply.verbs.Pipeable:
-    """
-    Unpack the dictionary of custom columns / value to filter on.
-    Will unpack up to 5 other conditions...since we now have
-    a larger fct_daily_trips table.
-
-    Key: column name
-    Value: list with values to keep
-
-    Otherwise, skip.
-    """
-    if (filter_dict != {}) and (filter_dict is not None):
-        keys, values = zip(*filter_dict.items())
-
-        # Accommodate 3 filtering conditions for now
-        if len(keys) >= 1:
-            filter1 = filter(_[keys[0]].isin(values[0]))
-            return filter1
-
-        elif len(keys) >= 2:
-            filter2 = filter(_[keys[1]].isin(values[1]))
-            return filter1 >> filter2
-
-        elif len(keys) >= 3:
-            filter3 = filter(_[keys[2]].isin(values[2]))
-            return filter1 >> filter2 >> filter3
-
-        elif len(keys) >= 4:
-            filter4 = filter(_[keys[3]].isin(values[3]))
-            return filter1 >> filter2 >> filter3 >> filter4
-
-        elif len(keys) >= 5:
-            filter5 = filter(_[keys[4]].isin(values[4]))
-            return filter1 >> filter2 >> filter3 >> filter4 >> filter5
-
-    elif (filter_dict == {}) or (filter_dict is None):
-        return filter()
 
 
 def check_operator_feeds(operator_feeds: list[str]):
@@ -163,15 +80,15 @@ def get_metrolink_feed_key(
     )
 
     statement = (
-        metrolink_in_airtable.add_columns(FctDailyScheduleFeeds.feed_key)
+        metrolink_in_airtable.add_columns(FctDailyScheduleFeed.feed_key)
         .join(
-            FctDailyScheduleFeeds,
+            FctDailyScheduleFeed,
             and_(
-                FctDailyScheduleFeeds.gtfs_dataset_key == DimGtfsDataset.key,
-                FctDailyScheduleFeeds.gtfs_dataset_name == DimGtfsDataset.name,
+                FctDailyScheduleFeed.gtfs_dataset_key == DimGtfsDataset.key,
+                FctDailyScheduleFeed.gtfs_dataset_name == DimGtfsDataset.name,
             ),
         )
-        .where(FctDailyScheduleFeeds.date == selected_date)
+        .where(FctDailyScheduleFeed.date == selected_date)
     )
 
     with DBSession() as session:
@@ -268,28 +185,26 @@ def schedule_daily_feed_to_gtfs_dataset_name(
         "current_feeds": [is_not_regional_precursor],
     }
 
-    search_conditions = [FctDailyScheduleFeeds.date == selected_date] + additional_search_conditions.get(
-        feed_option, []
-    )
+    search_conditions = [FctDailyScheduleFeed.date == selected_date] + additional_search_conditions.get(feed_option, [])
 
     # Join on gtfs_dataset_key to get organization name
     statement = (
         dim_gtfs_datasets.with_only_columns(
             DimGtfsDataset.regional_feed_type,
             DimGtfsDataset.type,
-            FctDailyScheduleFeeds.key,
-            FctDailyScheduleFeeds.date,
-            FctDailyScheduleFeeds.feed_key,
-            FctDailyScheduleFeeds.feed_timezone,
-            FctDailyScheduleFeeds.base64_url,
-            FctDailyScheduleFeeds.gtfs_dataset_key,
-            FctDailyScheduleFeeds.gtfs_dataset_name.label("name"),
+            FctDailyScheduleFeed.key,
+            FctDailyScheduleFeed.date,
+            FctDailyScheduleFeed.feed_key,
+            FctDailyScheduleFeed.feed_timezone,
+            FctDailyScheduleFeed.base64_url,
+            FctDailyScheduleFeed.gtfs_dataset_key,
+            FctDailyScheduleFeed.gtfs_dataset_name.label("name"),
         )
         .join(
-            FctDailyScheduleFeeds,
+            FctDailyScheduleFeed,
             and_(
-                FctDailyScheduleFeeds.gtfs_dataset_key == DimGtfsDataset.key,
-                FctDailyScheduleFeeds.gtfs_dataset_name == DimGtfsDataset.name,
+                FctDailyScheduleFeed.gtfs_dataset_key == DimGtfsDataset.key,
+                FctDailyScheduleFeed.gtfs_dataset_name == DimGtfsDataset.name,
             ),
         )
         .where(and_(*search_conditions))
@@ -298,7 +213,7 @@ def schedule_daily_feed_to_gtfs_dataset_name(
     if keep_cols and len(keep_cols):
         columns = []
         for column in keep_cols:
-            new_column = DimGtfsDataset.name if column == "name" else getattr(FctDailyScheduleFeeds, column)
+            new_column = DimGtfsDataset.name if column == "name" else getattr(FctDailyScheduleFeed, column)
             columns.append(new_column)
         statement = statement.with_only_columns(columns)
 
@@ -315,7 +230,7 @@ def get_trips(
     trip_cols: list[str] = [],
     get_df: bool = True,
     custom_filtering: dict = None,
-) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+) -> Union[pd.DataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Query fct_scheduled_trips
 
@@ -324,41 +239,53 @@ def get_trips(
     """
     check_operator_feeds(operator_feeds)
 
-    trips = (
-        tbls.mart_gtfs.fct_scheduled_trips()
-        >> filter_date(selected_date, date_col="service_date")
-        >> filter_operator(operator_feeds, include_name=True)
-        >> filter_custom_col(custom_filtering)
-    )
+    search_conditions = [
+        FctScheduledTrip.service_date == selected_date,
+        or_(FctScheduledTrip.feed_key.in_(operator_feeds), FctScheduledTrip.name.in_(operator_feeds)),
+    ]
+
+    for k, v in (custom_filtering or {}).items():
+        search_conditions.append(getattr(FctScheduledTrip, k).in_(v))
+
+    statement = select(FctScheduledTrip).where(and_(*search_conditions))
 
     # subset of columns must happen after Metrolink fix...
     # otherwise, the Metrolink fix may depend on more columns that
     # get subsetted out
+    columns = []
+
+    for column in trip_cols:
+        columns.append(getattr(FctScheduledTrip, column))
+
     if get_df:
-        metrolink_feed_key_name_df = get_metrolink_feed_key(selected_date=selected_date, get_df=True)
-        metrolink_empty = metrolink_feed_key_name_df.empty
-        if not metrolink_empty:
-            metrolink_feed_key = metrolink_feed_key_name_df.feed_key.iloc[0]
-            metrolink_name = metrolink_feed_key_name_df.name.iloc[0]
-        else:
-            print(f"could not get metrolink feed on {selected_date}!")
-        # Handle Metrolink when we need to
-        if not metrolink_empty and ((metrolink_feed_key in operator_feeds) or (metrolink_name in operator_feeds)):
-            metrolink_trips = trips >> filter(_.feed_key == metrolink_feed_key) >> collect()
-            not_metrolink_trips = trips >> filter(_.feed_key != metrolink_feed_key) >> collect()
+        with DBSession() as session:
+            metrolink_feed_key_name_df = get_metrolink_feed_key(selected_date=selected_date, get_df=True)
+            metrolink_empty = metrolink_feed_key_name_df.empty
+            if not metrolink_empty:
+                metrolink_feed_key = metrolink_feed_key_name_df.feed_key.iloc[0]
+                metrolink_name = metrolink_feed_key_name_df.name.iloc[0]
+            else:
+                print(f"could not get metrolink feed on {selected_date}!")
+            # Handle Metrolink when we need to
+            if not metrolink_empty and ((metrolink_feed_key in operator_feeds) or (metrolink_name in operator_feeds)):
+                metrolink_trips_statement = statement.where(FctScheduledTrip.feed_key == metrolink_feed_key)
+                not_metrolink_trips_statement = statement.where(FctScheduledTrip.feed_key != metrolink_feed_key)
+                metrolink_trips = pd.read_sql(metrolink_trips_statement, session.bind)
+                not_metrolink_trips = pd.read_sql(not_metrolink_trips_statement, session.bind)
 
-            # Fix Metrolink trips as a pd.DataFrame, then concatenate
-            # This means that LazyTbl output will not show correct results
-            corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(metrolink_trips, metrolink_feed_key)
+                # Fix Metrolink trips as a pd.DataFrame, then concatenate
+                # This means that LazyTbl output will not show correct results
+                corrected_metrolink = fill_in_metrolink_trips_df_with_shape_id(metrolink_trips, metrolink_feed_key)
 
-            trips = pd.concat([not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True)[
-                trip_cols
-            ].reset_index(drop=True)
+                return pd.concat([not_metrolink_trips, corrected_metrolink], axis=0, ignore_index=True)[
+                    trip_cols
+                ].reset_index(drop=True)
 
-        elif metrolink_empty or (metrolink_feed_key not in operator_feeds):
-            trips = trips >> subset_cols(trip_cols) >> collect()
+            elif metrolink_empty or (metrolink_feed_key not in operator_feeds):
+                statement = statement.with_only_columns(*columns) if len(columns) else statement
+                return pd.read_sql(statement, session.bind)
 
-    return trips >> subset_cols(trip_cols)
+    return statement.with_only_columns(*columns) if len(columns) else statement
 
 
 def get_shapes(
@@ -368,7 +295,7 @@ def get_shapes(
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     custom_filtering: dict = None,
-) -> gpd.GeoDataFrame:
+) -> Union[gpd.GeoDataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Query fct_daily_scheduled_shapes.
 
@@ -377,22 +304,19 @@ def get_shapes(
     """
     check_operator_feeds(operator_feeds)
 
-    # If pt_array is not kept in the final, we still need it
-    # to turn this into a gdf
-    if "pt_array" not in shape_cols:
-        shape_cols_with_geom = shape_cols + ["pt_array"]
-    elif shape_cols:
-        shape_cols_with_geom = shape_cols[:]
+    search_conditions = [
+        FctDailyScheduledShape.service_date == selected_date,
+        FctDailyScheduledShape.feed_key.in_(operator_feeds),
+    ]
 
-    shapes = (
-        tbls.mart_gtfs.fct_daily_scheduled_shapes()
-        >> filter_date(selected_date, date_col="service_date")
-        >> filter_operator(operator_feeds, include_name=False)
-        >> filter_custom_col(custom_filtering)
-    )
+    for k, v in (custom_filtering or {}).items():
+        search_conditions.append(getattr(FctDailyScheduledShape, k).in_(v))
+
+    statement = select(FctDailyScheduledShape).where(and_(*search_conditions))
 
     if get_df:
-        shapes = shapes >> collect()
+        with DBSession() as session:
+            shapes = pd.read_sql(statement, session.bind)
 
         # maintain usual behaviour of returning all in absence of subset param
         # must first drop pt_array since it's replaced by make_routes_gdf
@@ -401,7 +325,12 @@ def get_shapes(
         return shapes_gdf
 
     else:
-        return shapes >> subset_cols(shape_cols_with_geom)
+        columns = [func.ST_ASBINARY(FctDailyScheduledShape.pt_array)]
+
+        for column in shape_cols:
+            columns.append(getattr(FctDailyScheduledShape, column)) if column != "pt_array" else None
+
+        return statement.with_only_columns(*list(columns))
 
 
 def get_stops(
@@ -411,7 +340,7 @@ def get_stops(
     get_df: bool = True,
     crs: str = geography_utils.WGS84,
     custom_filtering: dict = None,
-) -> Union[gpd.GeoDataFrame, siuba.sql.verbs.LazyTbl]:
+) -> Union[gpd.GeoDataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Query fct_daily_scheduled_stops.
 
@@ -420,31 +349,34 @@ def get_stops(
     """
     check_operator_feeds(operator_feeds)
 
-    # If pt_geom is not kept in the final, we still need it
-    # to turn this into a gdf
-    if (stop_cols) and ("pt_geom" not in stop_cols):
-        stop_cols_with_geom = stop_cols + ["pt_geom"]
-    else:
-        stop_cols_with_geom = stop_cols[:]
+    search_conditions = [
+        FctDailyScheduledStop.service_date == selected_date,
+        FctDailyScheduledStop.feed_key.in_(operator_feeds),
+    ]
 
-    stops = (
-        tbls.mart_gtfs.fct_daily_scheduled_stops()
-        >> filter_date(selected_date, date_col="service_date")
-        >> filter_operator(operator_feeds, include_name=False)
-        >> filter_custom_col(custom_filtering)
-        >> subset_cols(stop_cols_with_geom)
-    )
+    for k, v in (custom_filtering or {}).items():
+        search_conditions.append(getattr(FctDailyScheduledStop, k).in_(v))
+
+    statement = select(FctDailyScheduledStop).where(and_(*search_conditions))
+
+    if stop_cols and len(stop_cols):
+        columns = [FctDailyScheduledStop.pt_geom]
+
+        for column in stop_cols:
+            columns.append(getattr(FctDailyScheduledStop, column))
+
+        statement = statement.with_only_columns(*columns)
 
     if get_df:
-        stops = stops >> collect()
+        with DBSession() as session:
+            stops = pd.read_sql(statement, session.bind)
 
         geom = [shapely.wkt.loads(x) for x in stops.pt_geom]
-
         stops = gpd.GeoDataFrame(stops, geometry=geom, crs="EPSG:4326").to_crs(crs).drop(columns="pt_geom")
 
         return stops
     else:
-        return stops >> subset_cols(stop_cols)
+        return statement
 
 
 def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
@@ -464,13 +396,13 @@ def hour_tuple_to_seconds(hour_tuple: tuple[int]) -> tuple[int]:
 
 
 def get_stop_times(
-    selected_date: Union[str, datetime.date],
+    selected_date: Union[str, datetime.date] = None,
     operator_feeds: list[str] = [],
     stop_time_cols: list[str] = [],
-    get_df: bool = False,
-    trip_df: Union[pd.DataFrame, siuba.sql.verbs.LazyTbl] = None,
+    get_df: bool = True,
+    trip_df: pd.DataFrame = None,
     custom_filtering: dict = None,
-) -> Union[pd.DataFrame, siuba.sql.verbs.LazyTbl]:
+) -> Union[pd.DataFrame, sqlalchemy.sql.selectable.Select]:
     """
     Download stop times table for operator on a day.
 
@@ -482,42 +414,34 @@ def get_stop_times(
     """
     check_operator_feeds(operator_feeds)
 
-    trip_id_cols = ["feed_key", "trip_id"]
-
     if trip_df is None:
         # Grab the trips for that day
-        trips_on_day = get_trips(selected_date=selected_date, trip_cols=trip_id_cols, get_df=False)
-
-    elif trip_df is not None:
-        if isinstance(trip_df, siuba.sql.verbs.LazyTbl):
-            trips_on_day = trip_df >> select(trip_id_cols)
-
-        # Have to handle pd.DataFrame separately later
-        elif isinstance(trip_df, pd.DataFrame):
-            trips_on_day = trip_df[trip_id_cols]
-
-    if not isinstance(trips_on_day, pd.DataFrame):
-        stop_times = (
-            tbls.mart_gtfs.dim_stop_times()
-            >> filter_operator(operator_feeds, include_name=True)
-            >> inner_join(_, trips_on_day, on=trip_id_cols)
-            >> filter_custom_col(custom_filtering)
-            >> subset_cols(stop_time_cols)
+        if not selected_date:
+            raise ValueError("selected_date must be provided to fetch trips")
+        trip_df = get_trips(
+            selected_date=selected_date, operator_feeds=operator_feeds, trip_cols=["feed_key", "trip_id"]
         )
 
-    elif isinstance(trips_on_day, pd.DataFrame):
-        # if trips is pd.DataFrame, can't use inner_join because that needs LazyTbl
-        # on both sides. Use .isin then
-        stop_times = (
-            tbls.mart_gtfs.dim_stop_times()
-            >> filter_operator(operator_feeds, include_name=False)
-            >> filter(_.trip_id.isin(trips_on_day.trip_id))
-            >> filter_custom_col(custom_filtering)
-            >> subset_cols(stop_time_cols)
-        )
+    columns = [DimStopTime]
+
+    if stop_time_cols and len(stop_time_cols):
+        columns = []
+        columns.append(DimStopTime.arrival_sec) if "arrival_sec" not in stop_time_cols else None
+        columns.append(DimStopTime.departure_sec) if "departure_sec" not in stop_time_cols else None
+
+        for column in stop_time_cols:
+            columns.append(getattr(DimStopTime, column))
+
+    search_conditions = [DimStopTime.feed_key.in_(operator_feeds), DimStopTime.trip_id.in_(trip_df.trip_id)]
+
+    for k, v in (custom_filtering or {}).items():
+        search_conditions.append(getattr(DimStopTime, k).in_(v))
+
+    statement = select(*columns).where(and_(*search_conditions))
 
     if get_df:
-        stop_times = stop_times >> collect()
+        with DBSession() as session:
+            stop_times = pd.read_sql(statement, session.bind)
 
         # Since we can parse by arrival or departure hour, let's
         # make it available when df is returned
@@ -526,10 +450,15 @@ def get_stop_times(
             departure_hour=pd.to_datetime(stop_times.departure_sec, unit="s").dt.hour,
         )
 
-    return stop_times
+        if stop_time_cols and len(stop_time_cols):
+            stop_times = stop_times[stop_time_cols + ["arrival_hour", "departure_hour"]]
+
+        return stop_times
+
+    return statement
 
 
-def filter_to_public_schedule_gtfs_dataset_keys(get_df: bool = False) -> list:
+def filter_to_public_schedule_gtfs_dataset_keys(get_df: bool = False) -> Union[list, pd.DataFrame]:
     """
     Return a list of schedule_gtfs_dataset_keys that have
     private_dataset == None.
@@ -540,10 +469,15 @@ def filter_to_public_schedule_gtfs_dataset_keys(get_df: bool = False) -> list:
         custom_filtering={
             "type": ["schedule"],
         },
-        get_df=True,
-    ) >> filter(_.private_dataset != True)
+        get_df=False,
+    )
+
+    statement = dim_gtfs_datasets.where(DimGtfsDataset.private_dataset.is_(None))
+
+    with DBSession() as session:
+        filtered_dim_gtfs_datasets = pd.read_sql(statement, session.bind)
 
     if get_df:
-        return dim_gtfs_datasets
+        return filtered_dim_gtfs_datasets
     else:
-        return dim_gtfs_datasets.gtfs_dataset_key.unique().tolist()
+        return filtered_dim_gtfs_datasets.gtfs_dataset_key.unique().tolist()

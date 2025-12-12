@@ -1,0 +1,176 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
+      {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
+      [{"value": "Metrolink Schedule"}]}, "name": "name_1"}, {"parameterType": {"type":
+      "STRING"}, "parameterValue": {"value": "2025-11-24"}, "name": "date_1"}], "parameterMode":
+      "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp": true},
+      "location": "us-west2", "query": "SELECT `test_shared_utils.dim_gtfs_datasets`.`key`
+      AS `gtfs_dataset_key`, `test_shared_utils.dim_gtfs_datasets`.`name` AS `gtfs_dataset_name`,
+      `test_shared_utils.fct_daily_schedule_feeds`.`feed_key` \nFROM `test_shared_utils.dim_gtfs_datasets`
+      JOIN `test_shared_utils.fct_daily_schedule_feeds` ON `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_key`
+      = `test_shared_utils.dim_gtfs_datasets`.`key` AND `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_name`
+      = `test_shared_utils.dim_gtfs_datasets`.`name` \nWHERE `test_shared_utils.dim_gtfs_datasets`.`data_quality_pipeline`
+      = true AND `test_shared_utils.dim_gtfs_datasets`.`name` IN UNNEST(@`name_1`)
+      AND `test_shared_utils.fct_daily_schedule_feeds`.`date` = @`date_1`", "maxResults":
+      5000, "requestId": "9cf6e56d-a057-4fb4-9848-b1b54019eb38"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1258'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_h53NPxqIXAP4aesamYfZGyGaRWZN","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"ff87c8304a909c02ef5045cc802864ab"},{"v":"Metrolink
+        Schedule"},{"v":"918ed58c79d05e956cf6f0c15e2a9902"}]},{"f":[{"v":"ff87c8304a909c02ef5045cc802864ab"},{"v":"Metrolink
+        Schedule"},{"v":"918ed58c79d05e956cf6f0c15e2a9902"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_h53NPxqIXAP4aesamYfZGyGaRWZN","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1764642124648","startTime":"1764642124719","endTime":"1764642124804"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 02 Dec 2025 02:22:04 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": "2025-11-24"}, "name": "service_date_1"},
+      {"parameterType": {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue":
+      {"arrayValues": [{"value": "4321a7e3901b2275805494a746ec1c6a"}]}, "name": "feed_key_1"},
+      {"parameterType": {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue":
+      {"arrayValues": [{"value": "4321a7e3901b2275805494a746ec1c6a"}]}, "name": "name_1"}],
+      "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
+      true}, "location": "us-west2", "query": "SELECT `test_shared_utils.fct_scheduled_trips`.`key`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_instance_key`, `test_shared_utils.fct_scheduled_trips`.`feed_timezone`,
+      `test_shared_utils.fct_scheduled_trips`.`base64_url`, `test_shared_utils.fct_scheduled_trips`.`name`,
+      `test_shared_utils.fct_scheduled_trips`.`regional_feed_type`, `test_shared_utils.fct_scheduled_trips`.`gtfs_dataset_key`,
+      `test_shared_utils.fct_scheduled_trips`.`service_date`, `test_shared_utils.fct_scheduled_trips`.`feed_key`,
+      `test_shared_utils.fct_scheduled_trips`.`service_id`, `test_shared_utils.fct_scheduled_trips`.`trip_key`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_id`, `test_shared_utils.fct_scheduled_trips`.`iteration_num`,
+      `test_shared_utils.fct_scheduled_trips`.`frequencies_defined_trip`, `test_shared_utils.fct_scheduled_trips`.`trip_short_name`,
+      `test_shared_utils.fct_scheduled_trips`.`direction_id`, `test_shared_utils.fct_scheduled_trips`.`block_id`,
+      `test_shared_utils.fct_scheduled_trips`.`route_key`, `test_shared_utils.fct_scheduled_trips`.`route_id`,
+      `test_shared_utils.fct_scheduled_trips`.`route_type`, `test_shared_utils.fct_scheduled_trips`.`route_short_name`,
+      `test_shared_utils.fct_scheduled_trips`.`route_long_name`, `test_shared_utils.fct_scheduled_trips`.`route_continuous_pickup`,
+      `test_shared_utils.fct_scheduled_trips`.`route_continuous_drop_off`, `test_shared_utils.fct_scheduled_trips`.`route_desc`,
+      `test_shared_utils.fct_scheduled_trips`.`route_color`, `test_shared_utils.fct_scheduled_trips`.`route_text_color`,
+      `test_shared_utils.fct_scheduled_trips`.`agency_id`, `test_shared_utils.fct_scheduled_trips`.`network_id`,
+      `test_shared_utils.fct_scheduled_trips`.`shape_array_key`, `test_shared_utils.fct_scheduled_trips`.`shape_id`,
+      `test_shared_utils.fct_scheduled_trips`.`contains_warning_duplicate_trip_primary_key`,
+      `test_shared_utils.fct_scheduled_trips`.`num_distinct_stops_served`, `test_shared_utils.fct_scheduled_trips`.`num_stop_times`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_first_departure_sec`, `test_shared_utils.fct_scheduled_trips`.`trip_last_arrival_sec`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_start_timezone`, `test_shared_utils.fct_scheduled_trips`.`trip_end_timezone`,
+      `test_shared_utils.fct_scheduled_trips`.`service_hours`, `test_shared_utils.fct_scheduled_trips`.`flex_service_hours`,
+      `test_shared_utils.fct_scheduled_trips`.`contains_warning_duplicate_stop_times_primary_key`,
+      `test_shared_utils.fct_scheduled_trips`.`contains_warning_missing_foreign_key_stop_id`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_first_departure_ts`, `test_shared_utils.fct_scheduled_trips`.`trip_last_arrival_ts`,
+      `test_shared_utils.fct_scheduled_trips`.`first_start_pickup_drop_off_window_sec`,
+      `test_shared_utils.fct_scheduled_trips`.`last_end_pickup_drop_off_window_sec`,
+      `test_shared_utils.fct_scheduled_trips`.`is_gtfs_flex_trip`, `test_shared_utils.fct_scheduled_trips`.`is_entirely_demand_responsive_trip`,
+      `test_shared_utils.fct_scheduled_trips`.`num_gtfs_flex_stop_times`, `test_shared_utils.fct_scheduled_trips`.`num_approximate_timepoint_stop_times`,
+      `test_shared_utils.fct_scheduled_trips`.`num_exact_timepoint_stop_times`, `test_shared_utils.fct_scheduled_trips`.`num_arrival_times_populated_stop_times`,
+      `test_shared_utils.fct_scheduled_trips`.`num_departure_times_populated_stop_times`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_first_start_pickup_drop_off_window_ts`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_last_end_pickup_drop_off_window_ts`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_start_date_pacific`, `test_shared_utils.fct_scheduled_trips`.`trip_first_departure_datetime_pacific`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_last_arrival_datetime_pacific`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_start_date_local_tz`, `test_shared_utils.fct_scheduled_trips`.`trip_first_departure_datetime_local_tz`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_last_arrival_datetime_local_tz`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_first_start_pickup_drop_off_window_date_pacific`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_first_start_pickup_drop_off_window_datetime_pacific`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_last_end_pickup_drop_off_window_pacific`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_first_start_pickup_drop_off_window_date_local_tz`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_first_start_pickup_drop_off_window_datetime_local_tz`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_last_end_pickup_drop_off_window_datetime_local_tz`,
+      `test_shared_utils.fct_scheduled_trips`.`time_of_day` \nFROM `test_shared_utils.fct_scheduled_trips`
+      \nWHERE `test_shared_utils.fct_scheduled_trips`.`service_date` = @`service_date_1`
+      AND (`test_shared_utils.fct_scheduled_trips`.`feed_key` IN UNNEST(@`feed_key_1`)
+      OR `test_shared_utils.fct_scheduled_trips`.`name` IN UNNEST(@`name_1`))", "maxResults":
+      5000, "requestId": "115797d3-7de7-422e-8780-cb53d08c7d67"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '5604'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"key","type":"STRING","mode":"NULLABLE"},{"name":"trip_instance_key","type":"STRING","mode":"NULLABLE"},{"name":"feed_timezone","type":"STRING","mode":"NULLABLE"},{"name":"base64_url","type":"STRING","mode":"NULLABLE"},{"name":"name","type":"STRING","mode":"NULLABLE"},{"name":"regional_feed_type","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"service_date","type":"DATE","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"},{"name":"service_id","type":"STRING","mode":"NULLABLE"},{"name":"trip_key","type":"STRING","mode":"NULLABLE"},{"name":"trip_id","type":"STRING","mode":"NULLABLE"},{"name":"iteration_num","type":"INTEGER","mode":"NULLABLE"},{"name":"frequencies_defined_trip","type":"BOOLEAN","mode":"NULLABLE"},{"name":"trip_short_name","type":"STRING","mode":"NULLABLE"},{"name":"direction_id","type":"INTEGER","mode":"NULLABLE"},{"name":"block_id","type":"STRING","mode":"NULLABLE"},{"name":"route_key","type":"STRING","mode":"NULLABLE"},{"name":"route_id","type":"STRING","mode":"NULLABLE"},{"name":"route_type","type":"STRING","mode":"NULLABLE"},{"name":"route_short_name","type":"STRING","mode":"NULLABLE"},{"name":"route_long_name","type":"STRING","mode":"NULLABLE"},{"name":"route_continuous_pickup","type":"INTEGER","mode":"NULLABLE"},{"name":"route_continuous_drop_off","type":"INTEGER","mode":"NULLABLE"},{"name":"route_desc","type":"STRING","mode":"NULLABLE"},{"name":"route_color","type":"STRING","mode":"NULLABLE"},{"name":"route_text_color","type":"STRING","mode":"NULLABLE"},{"name":"agency_id","type":"STRING","mode":"NULLABLE"},{"name":"network_id","type":"STRING","mode":"NULLABLE"},{"name":"shape_array_key","type":"STRING","mode":"NULLABLE"},{"name":"shape_id","type":"STRING","mode":"NULLABLE"},{"name":"contains_warning_duplicate_trip_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"num_distinct_stops_served","type":"INTEGER","mode":"NULLABLE"},{"name":"num_stop_times","type":"INTEGER","mode":"NULLABLE"},{"name":"trip_first_departure_sec","type":"INTEGER","mode":"NULLABLE"},{"name":"trip_last_arrival_sec","type":"INTEGER","mode":"NULLABLE"},{"name":"trip_start_timezone","type":"STRING","mode":"NULLABLE"},{"name":"trip_end_timezone","type":"STRING","mode":"NULLABLE"},{"name":"service_hours","type":"FLOAT","mode":"NULLABLE"},{"name":"flex_service_hours","type":"FLOAT","mode":"NULLABLE"},{"name":"contains_warning_duplicate_stop_times_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"contains_warning_missing_foreign_key_stop_id","type":"BOOLEAN","mode":"NULLABLE"},{"name":"trip_first_departure_ts","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"trip_last_arrival_ts","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"first_start_pickup_drop_off_window_sec","type":"INTEGER","mode":"NULLABLE"},{"name":"last_end_pickup_drop_off_window_sec","type":"INTEGER","mode":"NULLABLE"},{"name":"is_gtfs_flex_trip","type":"BOOLEAN","mode":"NULLABLE"},{"name":"is_entirely_demand_responsive_trip","type":"BOOLEAN","mode":"NULLABLE"},{"name":"num_gtfs_flex_stop_times","type":"INTEGER","mode":"NULLABLE"},{"name":"num_approximate_timepoint_stop_times","type":"INTEGER","mode":"NULLABLE"},{"name":"num_exact_timepoint_stop_times","type":"INTEGER","mode":"NULLABLE"},{"name":"num_arrival_times_populated_stop_times","type":"INTEGER","mode":"NULLABLE"},{"name":"num_departure_times_populated_stop_times","type":"INTEGER","mode":"NULLABLE"},{"name":"trip_first_start_pickup_drop_off_window_ts","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"trip_last_end_pickup_drop_off_window_ts","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"trip_start_date_pacific","type":"DATE","mode":"NULLABLE"},{"name":"trip_first_departure_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"trip_last_arrival_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"trip_start_date_local_tz","type":"DATE","mode":"NULLABLE"},{"name":"trip_first_departure_datetime_local_tz","type":"DATETIME","mode":"NULLABLE"},{"name":"trip_last_arrival_datetime_local_tz","type":"DATETIME","mode":"NULLABLE"},{"name":"trip_first_start_pickup_drop_off_window_date_pacific","type":"DATE","mode":"NULLABLE"},{"name":"trip_first_start_pickup_drop_off_window_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"trip_last_end_pickup_drop_off_window_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"trip_first_start_pickup_drop_off_window_date_local_tz","type":"DATE","mode":"NULLABLE"},{"name":"trip_first_start_pickup_drop_off_window_datetime_local_tz","type":"DATETIME","mode":"NULLABLE"},{"name":"trip_last_end_pickup_drop_off_window_datetime_local_tz","type":"DATETIME","mode":"NULLABLE"},{"name":"time_of_day","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_jC5l4BfwwcmdR36O2eg5ljzc0Z08","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"ba69b435fb5a4f5fd85a9700d18a7557"},{"v":"8e9e1a54c18f5d6d3d10599bb7390315"},{"v":"America/Los_Angeles"},{"v":"aHR0cHM6Ly9kYXRhLnRyaWxsaXVtdHJhbnNpdC5jb20vZ3Rmcy9wbHVtYXMtY2EtdXMvcGx1bWFzLWNhLXVzLnppcA=="},{"v":"Plumas
+        Schedule"},{"v":null},{"v":"c872474db7f5825b5f360ddad4361331"},{"v":"2025-11-24"},{"v":"4321a7e3901b2275805494a746ec1c6a"},{"v":"(MWF)"},{"v":"747b00bbf5430e65066ee595faec23ac"},{"v":"(MWF)_t_5405971_b_55349_tn_0"},{"v":"0"},{"v":"false"},{"v":null},{"v":"1"},{"v":null},{"v":"68f1a43e9ebefddaf92713bcd17a565a"},{"v":"125"},{"v":"3"},{"v":null},{"v":"East
+        County"},{"v":"1"},{"v":"1"},{"v":null},{"v":"247BFA"},{"v":null},{"v":"20"},{"v":null},{"v":"b6efd98bf8b93ff5b08a5413746d4285"},{"v":"1426834"},{"v":"false"},{"v":"30"},{"v":"30"},{"v":"39600"},{"v":"47040"},{"v":"America/Los_Angeles"},{"v":"America/Los_Angeles"},{"v":"2.066666666666667"},{"v":null},{"v":"false"},{"v":"false"},{"v":"1764010800000000"},{"v":"1764018240000000"},{"v":null},{"v":null},{"v":"false"},{"v":"false"},{"v":"0"},{"v":"1"},{"v":"29"},{"v":"30"},{"v":"30"},{"v":null},{"v":null},{"v":"2025-11-24"},{"v":"2025-11-24T11:00:00"},{"v":"2025-11-24T13:04:00"},{"v":"2025-11-24"},{"v":"2025-11-24T11:00:00"},{"v":"2025-11-24T13:04:00"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"Midday"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_jC5l4BfwwcmdR36O2eg5ljzc0Z08","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1764642125061","startTime":"1764642125144","endTime":"1764642125233"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Tue, 02 Dec 2025 02:22:05 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

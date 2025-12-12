@@ -1,0 +1,77 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": "2025-10-01"}, "name": "service_date_1"},
+      {"parameterType": {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue":
+      {"arrayValues": [{"value": "3ea60aa240ddc543da5415ccc759fd6d"}, {"value": "ebeaafe0a365384015dfe01dd80b683d"}]},
+      "name": "feed_key_1"}], "parameterMode": "NAMED", "useLegacySql": false, "formatOptions":
+      {"useInt64Timestamp": true}, "location": "us-west2", "query": "SELECT `test_shared_utils.fct_daily_scheduled_shapes`.`key`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`feed_key`, `test_shared_utils.fct_daily_scheduled_shapes`.`service_date`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`shape_id`, `test_shared_utils.fct_daily_scheduled_shapes`.`shape_array_key`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`feed_timezone`, `test_shared_utils.fct_daily_scheduled_shapes`.`n_trips`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`shape_first_departure_datetime_pacific`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`shape_last_arrival_datetime_pacific`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`contains_warning_duplicate_trip_primary_key`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`pt_array` \nFROM `test_shared_utils.fct_daily_scheduled_shapes`
+      \nWHERE `test_shared_utils.fct_daily_scheduled_shapes`.`service_date` = @`service_date_1`
+      AND `test_shared_utils.fct_daily_scheduled_shapes`.`feed_key` IN UNNEST(@`feed_key_1`)",
+      "maxResults": 5000, "requestId": "8e69c706-bb6a-46a3-8acf-cc907bff0cf4"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1581'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"key","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"},{"name":"service_date","type":"DATE","mode":"NULLABLE"},{"name":"shape_id","type":"STRING","mode":"NULLABLE"},{"name":"shape_array_key","type":"STRING","mode":"NULLABLE"},{"name":"feed_timezone","type":"STRING","mode":"NULLABLE"},{"name":"n_trips","type":"INTEGER","mode":"NULLABLE"},{"name":"shape_first_departure_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"shape_last_arrival_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"contains_warning_duplicate_trip_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"pt_array","type":"GEOGRAPHY","mode":"REPEATED"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_oquuFL420hrSEyZQLxC4pTw08EZt","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"81abadafeff2562c9b650445450b11ef"},{"v":"ebeaafe0a365384015dfe01dd80b683d"},{"v":"2025-10-01"},{"v":"5"},{"v":"70bad6a9522ecb542d0e2435bbdeb4a4"},{"v":"America/Los_Angeles"},{"v":"1"},{"v":"2025-10-01T04:15:00"},{"v":"2025-10-01T05:26:00"},{"v":"false"},{"v":[{"v":"POINT(-116.99362
+        34.88429)"},{"v":"POINT(-116.99375 34.88388)"},{"v":"POINT(-116.99368 34.88388)"},{"v":"POINT(-116.99368
+        34.88394)"},{"v":"POINT(-116.99368 34.88437)"},{"v":"POINT(-116.99368 34.88459)"},{"v":"POINT(-116.99368
+        34.8849)"},{"v":"POINT(-116.99376 34.88502)"},{"v":"POINT(-116.99376 34.88528)"},{"v":"POINT(-116.99377
+        34.88553)"}]}]},{"f":[{"v":"7919234bd287ec04bee4729eb7a1bcd3"},{"v":"3ea60aa240ddc543da5415ccc759fd6d"},{"v":"2025-10-01"},{"v":"2m8h"},{"v":"a023425d1b44b2af7ffa58e220b7da8b"},{"v":"America/Los_Angeles"},{"v":"1"},{"v":"2025-10-01T09:45:00"},{"v":"2025-10-01T11:35:00"},{"v":"false"},{"v":[{"v":"POINT(-120.95261
+        39.09977)"},{"v":"POINT(-120.95261 39.09976)"},{"v":"POINT(-120.95258 39.09982)"},{"v":"POINT(-120.95239
+        39.09974)"},{"v":"POINT(-120.95177 39.09964)"},{"v":"POINT(-120.95158 39.09966)"},{"v":"POINT(-120.95109
+        39.09787)"},{"v":"POINT(-120.95086 39.09687)"},{"v":"POINT(-120.95073 39.09627)"},{"v":"POINT(-120.95071
+        39.09604)"}]}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_oquuFL420hrSEyZQLxC4pTw08EZt","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1764802457225","startTime":"1764802457330","endTime":"1764802457397"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Wed, 03 Dec 2025 22:54:17 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1
