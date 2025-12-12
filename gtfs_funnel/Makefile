@@ -19,34 +19,10 @@ preprocess_vp:
 	python merge_vp_dwell_usable.py
 	python vp_condenser.py
 
-preprocess_schedule_only:
-	#make route_typologies_data # run quarterly
-	python schedule_stats_by_route_direction.py # this no longer has route typology
-	python operator_scheduled_stats.py # adjust this to use yearly route typology
-	python schedule_stats_by_stop.py
-	python track_publish_dates.py
-
-route_typologies_data:
-#	python stop_arrivals_in_roads.py # quarterly cadence (Jan/Apr/Jul/Oct)
-	python route_typologies.py
-
-# Start compiling scripts needed when we start concatenating several days
-# Clean route names for displaying across time
-timeseries_preprocessing:
-	python clean_route_naming.py
-
-# monthly scheduled service, download after the end of each month
-monthly_scheduled_data:
-	python download_monthly_service.py
-	python concatenate_monthly_scheduled_service.py
-
 funnel_gtfs_single_day:
-#	make download_gtfs_data
+	make download_gtfs_data
 	make preprocess_schedule_vp_dependency
 	make preprocess_vp
-	make preprocess_schedule_only
-	make timeseries_preprocessing
-	#make monthly_scheduled_data
 
 all:
 	make funnel_gtfs_single_day
