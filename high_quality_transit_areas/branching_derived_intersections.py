@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 from _utils import append_analysis_name
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
-from IPython.display import display
+from calitp_data_analysis.geography_utils import CA_NAD83Albers_m
+from IPython.display import Markdown, display
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from tqdm import tqdm
 from update_vars import (
@@ -113,39 +114,56 @@ def evaluate_overlaps(
     unique_qualify_pairs_possible = [list(x) for x in qualify_sets]
 
     unique_qualify_pairs = []
-    qualify_pair_spatial = []
-    no_qualify_spatial = []
     for pair in unique_qualify_pairs_possible:
-        print(f"{pair}...", end="")
-        these_shapes = shapes.query("route_dir.isin(@pair) & schedule_gtfs_dataset_key == @gtfs_dataset_key").assign(
-            shape_or_sym_diff="gtfs_shapes"
-        )
+        # print(f"{pair}...", end="")
+        these_shapes = shapes.query("route_dir.isin(@pair) & schedule_gtfs_dataset_key == @gtfs_dataset_key")
         first_row = these_shapes.iloc[0:1][["schedule_gtfs_dataset_key", "route_dir", "shape_array_key", "geometry"]]
         sym_diff = first_row.overlay(these_shapes.iloc[1:2][["route_dir", "geometry"]], how="symmetric_difference")
+        intersect = first_row.overlay(
+            these_shapes.iloc[1:2][["route_dir", "geometry"]], how="intersection"
+        ).geometry.iloc[0]
         sym_diff = sym_diff.assign(
             area=sym_diff.geometry.map(lambda x: x.area),
             route_dir=sym_diff.route_dir_1.fillna(sym_diff.route_dir_2),
-            shape_or_sym_diff="sym_difference",
         )
         area_ratios = sym_diff.area / TARGET_AREA_DIFFERENCE
         if (sym_diff.area > TARGET_AREA_DIFFERENCE).all():
-            print(f"passed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target")
             m = these_shapes.explore(color="gray", tiles="CartoDB Positron")
             if show_map:
+                display(
+                    Markdown(
+                        f"### {these_shapes.analysis_name.iloc[0]} {pair} passed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target"
+                    )
+                )
                 display(sym_diff.explore(column="route_dir", m=m, tiles="CartoDB Positron"))
-            unique_qualify_pairs += [pair]
-            spatial = pd.concat([these_shapes.copy(), sym_diff.copy()])
-            spatial["route_dir_pair"] = str(pair)
-            qualify_pair_spatial += [spatial]
+            results = {
+                "route_direction_pair": pair,
+                "schedule_gtfs_dataset_key": gtfs_dataset_key,
+                "branching_qualify": True,
+                "unique_km_rt0": area_ratios[0],
+                "unique_km_rt1": area_ratios[1],
+                "intersect_geom": intersect,
+            }
+            unique_qualify_pairs += [results]
         else:
-            print(f"failed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target")
             if show_map:
+                display(
+                    Markdown(
+                        f"### {these_shapes.analysis_name.iloc[0]} {pair} failed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target"
+                    )
+                )
                 display(these_shapes.explore(column="route_dir", tiles="CartoDB Positron"))
-            spatial = these_shapes.copy()
-            spatial["route_dir_pair"] = str(pair)
-            no_qualify_spatial += [spatial]
-
-    return unique_qualify_pairs, qualify_pair_spatial, no_qualify_spatial
+            results = {
+                "route_direction_pair": pair,
+                "schedule_gtfs_dataset_key": gtfs_dataset_key,
+                "branching_qualify": False,
+                "unique_km_rt0": area_ratios[0],
+                "unique_km_rt1": area_ratios[1],
+                "intersect_geom": intersect,
+            }
+            unique_qualify_pairs += [results]
+        gdf = gpd.GeoDataFrame(unique_qualify_pairs, geometry="intersect_geom", crs=CA_NAD83Albers_m)
+    return gdf
 
 
 def find_stops_this_pair(feed_stops: pd.DataFrame, one_feed_pair: list) -> pd.DataFrame:
@@ -160,14 +178,15 @@ def find_stops_this_pair(feed_stops: pd.DataFrame, one_feed_pair: list) -> pd.Da
 
 
 def find_stops_this_feed(
-    gtfs_dataset_key: str, max_arrivals_by_stop_single: pd.DataFrame, unique_qualify_pairs: list
+    gtfs_dataset_key: str, max_arrivals_by_stop_single: pd.DataFrame, evaluated_route_pairs: pd.DataFrame
 ) -> pd.DataFrame:
     """
     Get all stops in shared trunk section for a route_dir pair. These are major transit stops.
     """
     feed_stops = max_arrivals_by_stop_single.query("schedule_gtfs_dataset_key == @gtfs_dataset_key")
+    qualify_pairs = evaluated_route_pairs[evaluated_route_pairs.branching_qualify].route_direction_pair.to_list()
     stop_dfs = []
-    for pair in unique_qualify_pairs:
+    for pair in qualify_pairs:
         these_stops = find_stops_this_pair(feed_stops, pair)
         stop_dfs += [these_stops]
     if len(stop_dfs) > 0:
