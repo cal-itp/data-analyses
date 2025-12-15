@@ -14,6 +14,7 @@ from update_vars import (
     HQ_TRANSIT_THRESHOLD,
     MS_TRANSIT_THRESHOLD,
     PM_PEAK,
+    PUBLIC_FILE_PATH,
     ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP,
     SHARED_STOP_THRESHOLD,
     analysis_date,
@@ -389,6 +390,7 @@ if __name__ == "__main__":
     max_arrivals_by_stop_single.to_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet"
     )  # for branching_derived_intersections.py
+    max_arrivals_by_stop_single.to_parquet(f"{PUBLIC_FILE_PATH}max_arrivals_by_stop_single_route.parquet")
     max_arrivals_by_stop_multi = st_prepped.pipe(
         stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=False
     )
@@ -420,6 +422,7 @@ if __name__ == "__main__":
         (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD),
     )
     combined_export.to_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
+    combined_export.to_parquet(f"{PUBLIC_FILE_PATH}max_arrivals_by_stop.parquet")
 
     end = datetime.datetime.now()
     logger.info(f"B2_create_aggregate_stop_frequencies {analysis_date} " f"execution time: {end - start}")

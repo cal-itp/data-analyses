@@ -6,6 +6,7 @@ from shared_utils import rt_dates
 analysis_date = rt_dates.DATES["nov2025"]
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/" "high_quality_transit_areas/"
+PUBLIC_FILE_PATH = "gs://calitp-public-data-analysis/" "hqta_explorer/"
 PROJECT_CRS = geography_utils.CA_NAD83Albers_m  # "EPSG:3310"
 HQTA_SEGMENT_LENGTH = 1_250  # meters
 SEGMENT_BUFFER_METERS = 35  # buffer around segment to sjoin to stops
