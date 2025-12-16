@@ -1,0 +1,136 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
+      {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue": {"arrayValues":
+      [{"value": "Metrolink Schedule"}]}, "name": "name_1"}, {"parameterType": {"type":
+      "STRING"}, "parameterValue": {"value": "2025-09-01"}, "name": "date_1"}], "parameterMode":
+      "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp": true},
+      "location": "us-west2", "query": "SELECT `test_shared_utils.dim_gtfs_datasets`.`key`
+      AS `gtfs_dataset_key`, `test_shared_utils.dim_gtfs_datasets`.`name` AS `gtfs_dataset_name`,
+      `test_shared_utils.fct_daily_schedule_feeds`.`feed_key` \nFROM `test_shared_utils.dim_gtfs_datasets`
+      JOIN `test_shared_utils.fct_daily_schedule_feeds` ON `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_key`
+      = `test_shared_utils.dim_gtfs_datasets`.`key` AND `test_shared_utils.fct_daily_schedule_feeds`.`gtfs_dataset_name`
+      = `test_shared_utils.dim_gtfs_datasets`.`name` \nWHERE `test_shared_utils.dim_gtfs_datasets`.`data_quality_pipeline`
+      = true AND `test_shared_utils.dim_gtfs_datasets`.`name` IN UNNEST(@`name_1`)
+      AND `test_shared_utils.fct_daily_schedule_feeds`.`date` = @`date_1`", "maxResults":
+      5000, "requestId": "de2951ad-79b9-4ef3-baaa-863bd2136088"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1258'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_name","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_OKQiroV2DI68V1e90uEVMMdAbSal","location":"us-west2"},"totalRows":"0","totalBytesProcessed":"1369","jobComplete":true,"cacheHit":false,"queryId":"job_OKQiroV2DI68V1e90uEVMMdAbSal","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"20971520","totalSlotMs":"33","location":"us-west2","creationTime":"1764627262152","startTime":"1764627262249","endTime":"1764627262433"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 01 Dec 2025 22:14:22 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": "2025-09-01"}, "name": "service_date_1"},
+      {"parameterType": {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue":
+      {"arrayValues": [{"value": "c86f88ad0b15f5185d073f91f2130285"}]}, "name": "feed_key_1"},
+      {"parameterType": {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue":
+      {"arrayValues": [{"value": "c86f88ad0b15f5185d073f91f2130285"}]}, "name": "name_1"},
+      {"parameterType": {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue":
+      {"arrayValues": [{"value": "d7d7502d292a35c41ee5a6c3c43f2fd5"}]}, "name": "trip_instance_key_1"}],
+      "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
+      true}, "location": "us-west2", "query": "SELECT `test_shared_utils.fct_scheduled_trips`.`name`,
+      `test_shared_utils.fct_scheduled_trips`.`gtfs_dataset_key`, `test_shared_utils.fct_scheduled_trips`.`feed_key`,
+      `test_shared_utils.fct_scheduled_trips`.`trip_id`, `test_shared_utils.fct_scheduled_trips`.`trip_instance_key`
+      \nFROM `test_shared_utils.fct_scheduled_trips` \nWHERE `test_shared_utils.fct_scheduled_trips`.`service_date`
+      = @`service_date_1` AND (`test_shared_utils.fct_scheduled_trips`.`feed_key`
+      IN UNNEST(@`feed_key_1`) OR `test_shared_utils.fct_scheduled_trips`.`name` IN
+      UNNEST(@`name_1`)) AND `test_shared_utils.fct_scheduled_trips`.`trip_instance_key`
+      IN UNNEST(@`trip_instance_key_1`)", "maxResults": 5000, "requestId": "adadddb5-4a29-43c3-8555-d79a7364b938"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1564'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"name","type":"STRING","mode":"NULLABLE"},{"name":"gtfs_dataset_key","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"},{"name":"trip_id","type":"STRING","mode":"NULLABLE"},{"name":"trip_instance_key","type":"STRING","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_IIZh3Aqrsu3ZiH5s02e7Hh10jpTD","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"Bay
+        Area 511 Regional Schedule"},{"v":"d6ed100168196d507b4ef1c0d111ee72"},{"v":"c86f88ad0b15f5185d073f91f2130285"},{"v":"3D:1358"},{"v":"d7d7502d292a35c41ee5a6c3c43f2fd5"}]}],"totalBytesProcessed":"883","jobComplete":true,"cacheHit":false,"queryId":"job_IIZh3Aqrsu3ZiH5s02e7Hh10jpTD","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"24","location":"us-west2","creationTime":"1764627262752","startTime":"1764627262828","endTime":"1764627262981"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Mon, 01 Dec 2025 22:14:23 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1
