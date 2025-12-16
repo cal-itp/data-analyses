@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 from _utils import append_analysis_name
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
-from IPython.display import display
+from calitp_data_analysis.geography_utils import CA_NAD83Albers_m
+from IPython.display import Markdown, display
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from tqdm import tqdm
 from update_vars import (
@@ -22,19 +23,15 @@ tqdm.pandas()
 gcsgp = GCSGeoPandas()
 
 
-def get_explode_singles(single_route_aggregation: pd.DataFrame, ms_precursor_threshold: int | float) -> pd.DataFrame:
+def get_filter_singles(single_route_aggregation: pd.DataFrame, ms_precursor_threshold: int | float) -> pd.DataFrame:
     """
     Find all stops with single-route frequencies above the major stop precursor threshold.
     """
-    single_qual = (
-        single_route_aggregation.query(
-            "am_max_trips_hr >= @ms_precursor_threshold & pm_max_trips_hr >= @ms_precursor_threshold"
-        )
-        .explode("route_dir")
-        .sort_values(["schedule_gtfs_dataset_key", "stop_id", "route_dir"])[
-            ["schedule_gtfs_dataset_key", "stop_id", "route_dir"]
-        ]
-    )
+    single_qual = single_route_aggregation.query(
+        "am_max_trips_hr >= @ms_precursor_threshold & pm_max_trips_hr >= @ms_precursor_threshold"
+    ).sort_values(["schedule_gtfs_dataset_key", "stop_id", "route_dir"])[
+        ["schedule_gtfs_dataset_key", "stop_id", "route_dir"]
+    ]
     return single_qual
 
 
@@ -114,26 +111,55 @@ def evaluate_overlaps(
 
     unique_qualify_pairs = []
     for pair in unique_qualify_pairs_possible:
-        print(f"{pair}...", end="")
+        # print(f"{pair}...", end="")
         these_shapes = shapes.query("route_dir.isin(@pair) & schedule_gtfs_dataset_key == @gtfs_dataset_key")
         first_row = these_shapes.iloc[0:1][["schedule_gtfs_dataset_key", "route_dir", "shape_array_key", "geometry"]]
         sym_diff = first_row.overlay(these_shapes.iloc[1:2][["route_dir", "geometry"]], how="symmetric_difference")
+        intersect = first_row.overlay(
+            these_shapes.iloc[1:2][["route_dir", "geometry"]], how="intersection"
+        ).geometry.iloc[0]
         sym_diff = sym_diff.assign(
-            area=sym_diff.geometry.map(lambda x: x.area), route_dir=sym_diff.route_dir_1.fillna(sym_diff.route_dir_2)
+            area=sym_diff.geometry.map(lambda x: x.area),
+            route_dir=sym_diff.route_dir_1.fillna(sym_diff.route_dir_2),
         )
         area_ratios = sym_diff.area / TARGET_AREA_DIFFERENCE
         if (sym_diff.area > TARGET_AREA_DIFFERENCE).all():
-            print(f"passed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target")
             m = these_shapes.explore(color="gray", tiles="CartoDB Positron")
             if show_map:
+                display(
+                    Markdown(
+                        f"### {these_shapes.analysis_name.iloc[0]} {pair} passed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target"
+                    )
+                )
                 display(sym_diff.explore(column="route_dir", m=m, tiles="CartoDB Positron"))
-            unique_qualify_pairs += [pair]
+            results = {
+                "route_direction_pair": pair,
+                "schedule_gtfs_dataset_key": gtfs_dataset_key,
+                "branching_qualify": True,
+                "unique_km_rt0": area_ratios[0],
+                "unique_km_rt1": area_ratios[1],
+                "intersect_geom": intersect,
+            }
+            unique_qualify_pairs += [results]
         else:
-            print(f"failed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target")
             if show_map:
+                display(
+                    Markdown(
+                        f"### {these_shapes.analysis_name.iloc[0]} {pair} failed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target"
+                    )
+                )
                 display(these_shapes.explore(column="route_dir", tiles="CartoDB Positron"))
-
-    return unique_qualify_pairs
+            results = {
+                "route_direction_pair": pair,
+                "schedule_gtfs_dataset_key": gtfs_dataset_key,
+                "branching_qualify": False,
+                "unique_km_rt0": area_ratios[0],
+                "unique_km_rt1": area_ratios[1],
+                "intersect_geom": intersect,
+            }
+            unique_qualify_pairs += [results]
+        gdf = gpd.GeoDataFrame(unique_qualify_pairs, geometry="intersect_geom", crs=CA_NAD83Albers_m)
+    return gdf
 
 
 def find_stops_this_pair(feed_stops: pd.DataFrame, one_feed_pair: list) -> pd.DataFrame:
@@ -148,14 +174,15 @@ def find_stops_this_pair(feed_stops: pd.DataFrame, one_feed_pair: list) -> pd.Da
 
 
 def find_stops_this_feed(
-    gtfs_dataset_key: str, max_arrivals_by_stop_single: pd.DataFrame, unique_qualify_pairs: list
+    gtfs_dataset_key: str, max_arrivals_by_stop_single: pd.DataFrame, evaluated_route_pairs: pd.DataFrame
 ) -> pd.DataFrame:
     """
     Get all stops in shared trunk section for a route_dir pair. These are major transit stops.
     """
     feed_stops = max_arrivals_by_stop_single.query("schedule_gtfs_dataset_key == @gtfs_dataset_key")
+    qualify_pairs = evaluated_route_pairs[evaluated_route_pairs.branching_qualify].route_direction_pair.to_list()
     stop_dfs = []
-    for pair in unique_qualify_pairs:
+    for pair in qualify_pairs:
         these_stops = find_stops_this_pair(feed_stops, pair)
         stop_dfs += [these_stops]
     if len(stop_dfs) > 0:
@@ -184,11 +211,11 @@ if __name__ == "__main__":
     shapes = get_shapes_with_lookback(analysis_date, published_operators_dict, lookback_trips_ix)
 
     max_arrivals_by_stop_single = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet")
-    singles_explode = get_explode_singles(max_arrivals_by_stop_single, MS_TRANSIT_THRESHOLD).explode("route_dir")
+    single_qualify = get_filter_singles(max_arrivals_by_stop_single, MS_TRANSIT_THRESHOLD)
 
     share_counts = {}
     (
-        singles_explode.groupby(["schedule_gtfs_dataset_key", "stop_id"]).progress_apply(
+        single_qualify.groupby(["schedule_gtfs_dataset_key", "stop_id"]).progress_apply(
             create_aggregate_stop_frequencies.accumulate_share_count, share_counts=share_counts
         )
     )

@@ -8,12 +8,14 @@ import pandas as pd
 from _utils import append_analysis_name
 from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
+from shared_utils import portfolio_utils
 from update_vars import (
     AM_PEAK,
     GCS_FILE_PATH,
     HQ_TRANSIT_THRESHOLD,
     MS_TRANSIT_THRESHOLD,
     PM_PEAK,
+    PUBLIC_FILE_PATH,
     ROUTE_COLLINEARITY_KEY_PARTS_TO_DROP,
     SHARED_STOP_THRESHOLD,
     analysis_date,
@@ -385,10 +387,14 @@ if __name__ == "__main__":
 
     max_arrivals_by_stop_single = st_prepped.pipe(
         stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=True
-    )
+    ).explode("route_dir")
     max_arrivals_by_stop_single.to_parquet(
         f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet"
     )  # for branching_derived_intersections.py
+    publish_export_single = portfolio_utils.standardize_operator_info_for_exports(
+        max_arrivals_by_stop_single, analysis_date
+    ).drop(columns=["base64_url", "source_record_id"])
+    publish_export_single.to_csv(f"{PUBLIC_FILE_PATH}max_arrivals_by_stop_single_route.csv", index=False)
     max_arrivals_by_stop_multi = st_prepped.pipe(
         stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=False
     )
@@ -420,6 +426,10 @@ if __name__ == "__main__":
         (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD),
     )
     combined_export.to_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
+    publish_export = portfolio_utils.standardize_operator_info_for_exports(combined_export, analysis_date).drop(
+        columns=["base64_url", "source_record_id"]
+    )
+    publish_export.to_csv(f"{PUBLIC_FILE_PATH}max_arrivals_by_stop.csv", index=False)
 
     end = datetime.datetime.now()
     logger.info(f"B2_create_aggregate_stop_frequencies {analysis_date} " f"execution time: {end - start}")

@@ -1,0 +1,10 @@
+title: HQ Transit Corridor & Major Bus Stop Explorer
+directory: ./high_quality_transit_areas/
+readme: ./high_quality_transit_areas/explorer/README.md
+parts:
+- caption: Major Bus Stop Explorer
+- chapters:
+  - notebook: ./high_quality_transit_areas/18_stop_frequency_collinear.ipynb
+  - notebook: ./high_quality_transit_areas/19_spatial_pathway.ipynb
+  - notebook: ./high_quality_transit_areas/20_branching_pathway.ipynb
+  - notebook: ./high_quality_transit_areas/21_final_maps.ipynb

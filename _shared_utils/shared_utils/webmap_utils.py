@@ -6,6 +6,7 @@ or certain predefined styles, for example for speedmaps and the state highway sy
 """
 
 import base64
+import copy
 import gzip
 import json
 
@@ -98,6 +99,7 @@ def set_state_export(
     assert not gdf.empty, "geodataframe is empty!"
     if existing_state and "state_dict" in existing_state.keys():
         existing_state = existing_state["state_dict"]
+    existing_state = copy.deepcopy(existing_state)
     spa_map_state = existing_state or {"name": "null", "layers": [], "lat_lon": (), "zoom": 13}
     path = f"{bucket}{subfolder}{filename}.geojson.gz"
     gdf = gdf.to_crs(geography_utils.WGS84)
@@ -211,3 +213,22 @@ def export_legend(cmap: branca.colormap.StepColormap, filename: str, inner_label
     with fs.open(path, "w") as writer:  # write out to public-facing GCS?
         writer.write(legend)
     print(f"legend written to {path}, public_url https://storage.googleapis.com/{path}")
+
+
+def categorical_cmap(cmap: branca.colormap, categories: list) -> dict:
+    """
+    Given a branca colormap and a list of categorical values, map unique values to each color
+    """
+    categories = list(set(categories))
+    cmap = cmap.scale(vmin=0, vmax=len(cmap.colors))
+    cmap_colors_rgb = [cmap.rgb_bytes_tuple(x) for x in range(1, len(cmap.colors) + 1)]
+    n_categories = len(categories)
+    n_colors = len(cmap_colors_rgb)
+    if n_categories > n_colors:
+        print(f"{n_categories} categories exceed {n_colors} colors, colors will be duplicated")
+        cmap_multiplier = (n_categories // n_colors) + 1
+        cmap_colors_rgb = cmap_colors_rgb * cmap_multiplier
+
+    categorical_cmap_dict = dict(zip(categories, cmap_colors_rgb))
+
+    return categorical_cmap_dict

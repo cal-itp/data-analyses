@@ -225,6 +225,7 @@ if __name__ == "__main__":
         .pipe(append_analysis_name)
     )
 
+    gcsgp.geo_data_frame_to_parquet(stops, f"{GCS_FILE_PATH}stops_with_lookback.parquet")
     max_arrivals_by_stop = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
 
     hqta_corr = sjoin_stops_and_stop_times_to_hqta_segments(
@@ -243,5 +244,3 @@ if __name__ == "__main__":
 
     end = datetime.datetime.now()
     logger.info(f"B3_sjoin_stops_to_segments {analysis_date} " f"execution time: {end - start}")
-
-    # client.close()

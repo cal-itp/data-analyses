@@ -47,7 +47,7 @@ While the datasets don't fully match just yet, this site is now based on the sam
 The site also includes a more informative speed and variation by time of day chart at the bottom of the page.
 
 Route segments with no data are now shown as thin, dark gray or black segments on the maps. These may be due to the route not running at that time of day, or a data availability or processing issue.
-    
+
 ## Data Sources
 Archived GTFS-Realtime Vehicle Positions data, plus corresponding GTFS Schedule data.
 
@@ -61,7 +61,7 @@ Questions or feedback? Please email hello@calitp.org
 
 ## Who We Are
 
-This website was created by the [California Department of Transportation](https://dot.ca.gov/)'s Division of Data and Digital Services. We are a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. For more of our work, visit our [portfolio](https://analysis.calitp.org/).
+This website was created by the [California Department of Transportation](https://dot.ca.gov/)'s Division of Data and Digital Services. We are a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. For more of our work, visit our [portfolio](https://https://analysis.dds.dot.ca.gov/).
 
 <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/CT_logo_Wht_outline.gif" alt="Alt text" width="129" height="100">
 
