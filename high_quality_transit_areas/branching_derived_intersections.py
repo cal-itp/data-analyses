@@ -23,19 +23,15 @@ tqdm.pandas()
 gcsgp = GCSGeoPandas()
 
 
-def get_explode_singles(single_route_aggregation: pd.DataFrame, ms_precursor_threshold: int | float) -> pd.DataFrame:
+def get_filter_singles(single_route_aggregation: pd.DataFrame, ms_precursor_threshold: int | float) -> pd.DataFrame:
     """
     Find all stops with single-route frequencies above the major stop precursor threshold.
     """
-    single_qual = (
-        single_route_aggregation.query(
-            "am_max_trips_hr >= @ms_precursor_threshold & pm_max_trips_hr >= @ms_precursor_threshold"
-        )
-        .explode("route_dir")
-        .sort_values(["schedule_gtfs_dataset_key", "stop_id", "route_dir"])[
-            ["schedule_gtfs_dataset_key", "stop_id", "route_dir"]
-        ]
-    )
+    single_qual = single_route_aggregation.query(
+        "am_max_trips_hr >= @ms_precursor_threshold & pm_max_trips_hr >= @ms_precursor_threshold"
+    ).sort_values(["schedule_gtfs_dataset_key", "stop_id", "route_dir"])[
+        ["schedule_gtfs_dataset_key", "stop_id", "route_dir"]
+    ]
     return single_qual
 
 
@@ -215,11 +211,11 @@ if __name__ == "__main__":
     shapes = get_shapes_with_lookback(analysis_date, published_operators_dict, lookback_trips_ix)
 
     max_arrivals_by_stop_single = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet")
-    singles_explode = get_explode_singles(max_arrivals_by_stop_single, MS_TRANSIT_THRESHOLD).explode("route_dir")
+    single_qualify = get_filter_singles(max_arrivals_by_stop_single, MS_TRANSIT_THRESHOLD)
 
     share_counts = {}
     (
-        singles_explode.groupby(["schedule_gtfs_dataset_key", "stop_id"]).progress_apply(
+        single_qualify.groupby(["schedule_gtfs_dataset_key", "stop_id"]).progress_apply(
             create_aggregate_stop_frequencies.accumulate_share_count, share_counts=share_counts
         )
     )

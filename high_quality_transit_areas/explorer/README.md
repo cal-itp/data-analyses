@@ -1,4 +1,6 @@
-# Major Bus Stop Explorer
+# High Quality Transit Corridor & Major Bus Stop Explorer
+
+
 
 ## Who We Are
 
