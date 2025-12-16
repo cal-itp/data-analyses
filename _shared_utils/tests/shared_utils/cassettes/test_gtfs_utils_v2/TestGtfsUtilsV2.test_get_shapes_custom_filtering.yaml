@@ -1,0 +1,79 @@
+interactions:
+- request:
+    body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
+      {"type": "STRING"}, "parameterValue": {"value": "2025-10-01"}, "name": "service_date_1"},
+      {"parameterType": {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue":
+      {"arrayValues": [{"value": "89c9390b2669927a67a4594f119986d6"}]}, "name": "feed_key_1"},
+      {"parameterType": {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue":
+      {"arrayValues": [{"value": "166d1656656c24bb26a66f0df49edf1c"}]}, "name": "shape_array_key_1"},
+      {"parameterType": {"type": "ARRAY", "arrayType": {"type": "INT64"}}, "parameterValue":
+      {"arrayValues": [{"value": "39"}]}, "name": "n_trips_1"}], "parameterMode":
+      "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp": true},
+      "location": "us-west2", "query": "SELECT `test_shared_utils.fct_daily_scheduled_shapes`.`key`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`feed_key`, `test_shared_utils.fct_daily_scheduled_shapes`.`service_date`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`shape_id`, `test_shared_utils.fct_daily_scheduled_shapes`.`shape_array_key`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`feed_timezone`, `test_shared_utils.fct_daily_scheduled_shapes`.`n_trips`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`shape_first_departure_datetime_pacific`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`shape_last_arrival_datetime_pacific`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`contains_warning_duplicate_trip_primary_key`,
+      `test_shared_utils.fct_daily_scheduled_shapes`.`pt_array` \nFROM `test_shared_utils.fct_daily_scheduled_shapes`
+      \nWHERE `test_shared_utils.fct_daily_scheduled_shapes`.`service_date` = @`service_date_1`
+      AND `test_shared_utils.fct_daily_scheduled_shapes`.`feed_key` IN UNNEST(@`feed_key_1`)
+      AND `test_shared_utils.fct_daily_scheduled_shapes`.`shape_array_key` IN UNNEST(@`shape_array_key_1`)
+      AND `test_shared_utils.fct_daily_scheduled_shapes`.`n_trips` IN UNNEST(@`n_trips_1`)",
+      "maxResults": 5000, "requestId": "5f2b572a-97e7-4d64-b519-bbae88187e4b"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip
+      Authorization:
+      - FILTERED
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2049'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      X-Goog-API-Client:
+      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      x-goog-user-project:
+      - cal-itp-data-infra-staging
+    method: POST
+    uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
+  response:
+    body:
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"key","type":"STRING","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"},{"name":"service_date","type":"DATE","mode":"NULLABLE"},{"name":"shape_id","type":"STRING","mode":"NULLABLE"},{"name":"shape_array_key","type":"STRING","mode":"NULLABLE"},{"name":"feed_timezone","type":"STRING","mode":"NULLABLE"},{"name":"n_trips","type":"INTEGER","mode":"NULLABLE"},{"name":"shape_first_departure_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"shape_last_arrival_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"contains_warning_duplicate_trip_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"pt_array","type":"GEOGRAPHY","mode":"REPEATED"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_45rLiBnHihNf40qNNDbjg_P1_3_p","location":"us-west2"},"totalRows":"1","rows":[{"f":[{"v":"9187185b8ee7d59f6d0f9c7acb92583f"},{"v":"89c9390b2669927a67a4594f119986d6"},{"v":"2025-10-01"},{"v":"AC:shp-36-04"},{"v":"166d1656656c24bb26a66f0df49edf1c"},{"v":"America/Los_Angeles"},{"v":"39"},{"v":"2025-10-01T05:00:00"},{"v":"2025-10-02T00:50:00"},{"v":"false"},{"v":[{"v":"POINT(-122.29491
+        37.8045)"},{"v":"POINT(-122.29469 37.80446)"},{"v":"POINT(-122.29447 37.80441)"},{"v":"POINT(-122.2944
+        37.8044)"},{"v":"POINT(-122.29419 37.80434)"},{"v":"POINT(-122.2941 37.80431)"},{"v":"POINT(-122.29403
+        37.80429)"},{"v":"POINT(-122.29391 37.80427)"},{"v":"POINT(-122.29387 37.8044)"},{"v":"POINT(-122.29381
+        37.80457)"}]}]}],"totalBytesProcessed":"95110","jobComplete":true,"cacheHit":false,"queryId":"job_45rLiBnHihNf40qNNDbjg_P1_3_p","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"46","location":"us-west2","creationTime":"1764802457987","startTime":"1764802458035","endTime":"1764802458162"}'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Wed, 03 Dec 2025 22:54:18 GMT
+      Server:
+      - ESF
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Origin
+      - X-Origin
+      - Referer
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-XSS-Protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

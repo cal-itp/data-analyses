@@ -2,6 +2,7 @@
 gcs_paths:
   GCS: gs://calitp-analytics-data/data-analyses/
   PREDICTIONS_GCS: ${.GCS}rt_predictions/
+  VP_GCS: ${.GCS}rt_vehicle_positions/
 
 # Existing dbt models or tweaks to existing dbt models
 rt_trip_updates_downloads:
@@ -10,8 +11,11 @@ rt_trip_updates_downloads:
   daily_stop_grain: "fct_trip_updates_stop_metrics_2025-06-01_2025-06-15"
   daily_schedule_rt_trip_grain: "test_schedule_rt_trip_metrics"
 
-  
-# Stage future dbt models that are aggregations or joins across quartet 
+rt_vehicle_position_models:
+  dir: ${gcs_paths.VP_GCS}
+  daily_stop_grain: "test_dp3_vp_stop_metrics"
+
+# Stage future dbt models that are aggregations or joins across quartet
 rt_schedule_models:
   dir: ${gcs_paths.PREDICTIONS_GCS}
   weekday_route_direction_grain: "test_schedule_rt_route_direction_metrics"
