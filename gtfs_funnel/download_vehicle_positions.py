@@ -4,6 +4,7 @@ Download vehicle positions for a day.
 
 import datetime
 import os
+os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 import sys
 
 import gcsfs
@@ -14,7 +15,6 @@ from shared_utils.models.fct_vehicle_location import FctVehicleLocation
 from sqlalchemy import and_, select
 from update_vars import SEGMENT_GCS
 
-os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 os.environ["USE_PYGEOS"] = "0"
 
 fs = gcsfs.GCSFileSystem()
