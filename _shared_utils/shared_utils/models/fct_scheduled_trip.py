@@ -1,5 +1,14 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import Boolean, Column, Date, DateTime, Float, Integer, String
+from sqlalchemy import (
+    TIMESTAMP,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
@@ -55,8 +64,8 @@ class FctScheduledTrip(Base):
     flex_service_hours = Column(Float)
     contains_warning_duplicate_stop_times_primary_key = Column(Boolean)
     contains_warning_missing_foreign_key_stop_id = Column(Boolean)
-    trip_first_departure_ts = Column(DateTime)
-    trip_last_arrival_ts = Column(DateTime)
+    trip_first_departure_ts = Column(TIMESTAMP)
+    trip_last_arrival_ts = Column(TIMESTAMP)
     first_start_pickup_drop_off_window_sec = Column(Integer)
     last_end_pickup_drop_off_window_sec = Column(Integer)
     is_gtfs_flex_trip = Column(Boolean)
@@ -66,8 +75,8 @@ class FctScheduledTrip(Base):
     num_exact_timepoint_stop_times = Column(Integer)
     num_arrival_times_populated_stop_times = Column(Integer)
     num_departure_times_populated_stop_times = Column(Integer)
-    trip_first_start_pickup_drop_off_window_ts = Column(DateTime)
-    trip_last_end_pickup_drop_off_window_ts = Column(DateTime)
+    trip_first_start_pickup_drop_off_window_ts = Column(TIMESTAMP)
+    trip_last_end_pickup_drop_off_window_ts = Column(TIMESTAMP)
     trip_start_date_pacific = Column(Date)
     trip_first_departure_datetime_pacific = Column(DateTime)
     trip_last_arrival_datetime_pacific = Column(DateTime)

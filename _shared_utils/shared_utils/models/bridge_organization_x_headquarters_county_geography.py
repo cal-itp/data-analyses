@@ -1,5 +1,5 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import TIMESTAMP, Boolean, Column, String
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
@@ -17,6 +17,6 @@ class BridgeOrganizationXHeadquartersCountyGeography(Base):
     county_geography_key = Column(String)
     organization_name = Column(String)
     county_geography_name = Column(String)
-    _valid_from = Column(DateTime)
-    _valid_to = Column(DateTime)
+    _valid_from = Column(TIMESTAMP)
+    _valid_to = Column(TIMESTAMP)
     _is_current = Column(Boolean)

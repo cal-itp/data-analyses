@@ -1,5 +1,5 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import Boolean, Column, Date, DateTime, Integer, String
+from sqlalchemy import TIMESTAMP, Boolean, Column, Date, DateTime, Integer, String
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
@@ -21,7 +21,7 @@ class FctDailyScheduledStop(Base):
     stop_event_count = Column(Integer)
     first_stop_arrival_datetime_pacific = Column(DateTime)
     last_stop_departure_datetime_pacific = Column(DateTime)
-    _feed_valid_from = Column(DateTime)
+    _feed_valid_from = Column(TIMESTAMP)
     route_type_0 = Column(Integer)
     route_type_1 = Column(Integer)
     route_type_2 = Column(Integer)
