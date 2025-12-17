@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 
 import pytest
@@ -7,10 +8,12 @@ from vcr.request import Request
 
 def pytest_configure(config):
     sys._called_from_test = True
+    os.environ["TEST_DATASET"] = "test_shared_utils"
 
 
 def pytest_unconfigure(config):
     del sys._called_from_test
+    del os.environ["TEST_DATASET"]
 
 
 @pytest.fixture(scope="module")
