@@ -445,11 +445,11 @@ def check_accessibility(
     """
 
     site_output_dir = PORTFOLIO_DIR / Path(site.value)
-    directory_path = f"{site_output_dir}/_build/html/"
+    directory_path = f"{Path.cwd()}/{site_output_dir}/_build/html/"
     opts = webdriver.ChromeOptions()
     opts.headless = True
-    opts.add_argument("--no-sandbox")
     opts.add_argument("--headless")
+    opts.add_argument("--no-sandbox")
     driver = webdriver.Chrome(options=opts)
     axe = Axe(driver)
 
