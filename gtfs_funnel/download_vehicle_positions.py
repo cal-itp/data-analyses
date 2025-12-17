@@ -8,10 +8,10 @@ import sys
 
 import gcsfs
 import pandas as pd
-from calitp_data_analysis.tables import tbls
 from loguru import logger
-from shared_utils import schedule_rt_utils
-from siuba import *
+from shared_utils import DBSession, schedule_rt_utils
+from shared_utils.models.fct_vehicle_location import FctVehicleLocation
+from sqlalchemy import and_, select
 from update_vars import SEGMENT_GCS
 
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
@@ -57,25 +57,18 @@ def determine_batches(rt_names: list) -> dict:
 
 
 def download_vehicle_positions(date: str, operator_names: list) -> pd.DataFrame:
+    statement = select(
+        FctVehicleLocation.gtfs_dataset_key,
+        FctVehicleLocation.gtfs_dataset_name,
+        FctVehicleLocation.schedule_gtfs_dataset_key,
+        FctVehicleLocation.trip_id,
+        FctVehicleLocation.trip_instance_key,
+        FctVehicleLocation.location_timestamp,
+        FctVehicleLocation.location,
+    ).where(and_(FctVehicleLocation.service_date == date, FctVehicleLocation.gtfs_dataset_name.in_(operator_names)))
 
-    df = (
-        tbls.mart_gtfs.fct_vehicle_locations()
-        >> filter(_.service_date == date)
-        >> filter(_.gtfs_dataset_name.isin(operator_names))
-        >> select(
-            _.gtfs_dataset_key,
-            _.gtfs_dataset_name,
-            _.schedule_gtfs_dataset_key,
-            _.trip_id,
-            _.trip_instance_key,
-            _.location_timestamp,
-            _.location,
-        )
-        >> collect()
-    )
-
-    # query_sql, parsing by the hour timestamp BQ column confusing
-    # https://www.yuichiotsuka.com/bigquery-timestamp-datetime/
+    with DBSession() as session:
+        df = pd.read_sql(statement, session.bind)
 
     return df
 
@@ -115,7 +108,9 @@ if __name__ == "__main__":
         keep_cols=["key", "name", "type", "regional_feed_type"],
         custom_filtering={"type": ["vehicle_positions"]},
         get_df=True,
-    ) >> rename(name="gtfs_dataset_name")
+    )
+
+    rt_datasets = rt_datasets.rename(columns={"gtfs_dataset_name": "name"})
 
     # Exclude regional feed and precursors
     exclude = ["Bay Area 511 Regional VehiclePositions"]
