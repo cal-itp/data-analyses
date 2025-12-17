@@ -1,5 +1,5 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
@@ -24,5 +24,5 @@ class DimCountyGeography(Base):
     organization_key = Column(String)
     service_key = Column(String)
     _is_current = Column(Boolean)
-    _valid_from = Column(DateTime)
-    _valid_to = Column(DateTime)
+    _valid_from = Column(TIMESTAMP)
+    _valid_to = Column(TIMESTAMP)

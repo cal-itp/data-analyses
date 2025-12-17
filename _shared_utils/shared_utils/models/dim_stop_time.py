@@ -1,5 +1,5 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import Boolean, Column, Date, DateTime, Integer, Numeric, String, Time
+from sqlalchemy import TIMESTAMP, Boolean, Column, Date, Integer, Numeric, String, Time
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
@@ -37,7 +37,7 @@ class DimStopTime(Base):
     warning_duplicate_gtfs_key = Column(Boolean)
     warning_missing_foreign_key_stop_id = Column(Boolean)
     _dt = Column(Date)
-    _feed_valid_from = Column(DateTime)
+    _feed_valid_from = Column(TIMESTAMP)
     _line_number = Column(Integer)
     feed_timezone = Column(String)
     arrival_sec = Column(Integer)

@@ -1,5 +1,5 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy import TIMESTAMP, Boolean, Column, Integer, String
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
@@ -40,6 +40,6 @@ class DimProviderGtfsData(Base):
     service_alerts_gtfs_dataset_key = Column(String)
     vehicle_positions_gtfs_dataset_key = Column(String)
     trip_updates_gtfs_dataset_key = Column(String)
-    _valid_from = Column(DateTime)
-    _valid_to = Column(DateTime)
+    _valid_from = Column(TIMESTAMP)
+    _valid_to = Column(TIMESTAMP)
     _is_current = Column(Boolean)

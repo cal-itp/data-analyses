@@ -1,5 +1,5 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import Boolean, Column, Date, DateTime, String
+from sqlalchemy import TIMESTAMP, Boolean, Column, Date, String
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
@@ -34,5 +34,5 @@ class DimGtfsDataset(Base):
     private_dataset = Column(Boolean)
     analysis_name = Column(String)
     _is_current = Column(Boolean)
-    _valid_from = Column(DateTime)
-    _valid_to = Column(DateTime)
+    _valid_from = Column(TIMESTAMP)
+    _valid_to = Column(TIMESTAMP)
