@@ -1,6 +1,7 @@
 """
 Generates
 """
+
 import enum
 import json
 import os
@@ -14,16 +15,14 @@ import humanize
 import papermill as pm
 import typer
 import yaml
+from axe_selenium_python import Axe
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from papermill import PapermillExecutionError
 from papermill.engines import NBClientEngine, papermill_engines
 from pydantic import BaseModel
 from pydantic.class_validators import validator
-from slugify import slugify
-
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from axe_selenium_python import Axe
+from slugify import slugify
 
 assert os.getcwd().endswith("data-analyses"), "this script must be run from the root of the data-analyses repo!"
 
@@ -31,10 +30,7 @@ GOOGLE_ANALYTICS_TAG_ID = "G-JCX3Z8JZJC"
 PORTFOLIO_DIR = Path("./portfolio/")
 SITES_DIR = PORTFOLIO_DIR / Path("sites")
 
-SiteChoices = enum.Enum('SiteChoices', {
-    f.replace(".yml", ""): f.replace(".yml", "")
-    for f in os.listdir(SITES_DIR)
-})
+SiteChoices = enum.Enum("SiteChoices", {f.replace(".yml", ""): f.replace(".yml", "") for f in os.listdir(SITES_DIR)})
 
 DEPLOY_OPTION = typer.Option(
     False,
@@ -57,6 +53,7 @@ RESOLVERS = [
 
 def slugify_params(params: Dict) -> str:
     return "__".join(f"{k}_{slugify(str(v))}" for k, v in params.items())
+
 
 def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
     assert old_path.suffix == ".ipynb"
@@ -87,7 +84,9 @@ class Chapter(BaseModel):
     def path(self):
         return self.part.site.output_dir / Path(self.slug)
 
-    def generate(self, execute_papermill=True, continue_on_error=False, **papermill_kwargs) -> List[PapermillExecutionError]:
+    def generate(
+        self, execute_papermill=True, continue_on_error=False, **papermill_kwargs
+    ) -> List[PapermillExecutionError]:
         errors = []
         self.path.mkdir(parents=True, exist_ok=True)
 
@@ -100,7 +99,7 @@ class Chapter(BaseModel):
             for i, section in enumerate(self.sections):
                 two_digit_i = str(i).format(width=2)
                 params = {**self.resolved_params, **section}
-                notebook = section.get('notebook') or self.resolved_notebook
+                notebook = section.get("notebook") or self.resolved_notebook
 
                 if not notebook:
                     raise ValueError("no notebook found at any level")
@@ -126,12 +125,15 @@ class Chapter(BaseModel):
                         )
                     except PapermillExecutionError as e:
                         if continue_on_error:
-                            typer.secho(f"error encountered during papermill execution", fg=typer.colors.RED)
+                            typer.secho("error encountered during papermill execution", fg=typer.colors.RED)
                             errors.append(e)
                         else:
                             raise
                 else:
-                    typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW)
+                    typer.secho(
+                        f"execute_papermill={execute_papermill} so we are skipping actual execution",
+                        fg=typer.colors.YELLOW,
+                    )
 
         else:
             notebook = self.resolved_notebook
@@ -142,7 +144,7 @@ class Chapter(BaseModel):
             if isinstance(notebook, str):
                 notebook = Path(notebook)
 
-            parameterized_path = self.path / Path(parameterize_filename('00', notebook, self.resolved_params))
+            parameterized_path = self.path / Path(parameterize_filename("00", notebook, self.resolved_params))
 
             typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
 
@@ -160,13 +162,14 @@ class Chapter(BaseModel):
                     )
                 except PapermillExecutionError as e:
                     if continue_on_error:
-                        typer.secho(f"error encountered during papermill execution", fg=typer.colors.RED)
+                        typer.secho("error encountered during papermill execution", fg=typer.colors.RED)
                         errors.append(e)
                     else:
                         raise
             else:
-                typer.secho(f"execute_papermill={execute_papermill} so we are skipping actual execution",
-                            fg=typer.colors.YELLOW)
+                typer.secho(
+                    f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW
+                )
 
         return errors
 
@@ -175,9 +178,11 @@ class Chapter(BaseModel):
         if self.sections:
             return {
                 "file": f"{self.slug}.md",
-                "sections": [{
-                    "glob": f"{self.slug}/*",
-                }],
+                "sections": [
+                    {
+                        "glob": f"{self.slug}/*",
+                    }
+                ],
             }
 
         folder = f"{self.slug}/" if self.slug else ""
@@ -205,17 +210,14 @@ class Part(BaseModel):
 
     @property
     def to_toc(self):
-        return {
-                "caption": self.caption,
-                "chapters": [chapter.toc for chapter in self.chapters]
-            }
+        return {"caption": self.caption, "chapters": [chapter.toc for chapter in self.chapters]}
 
 
 class Site(BaseModel):
     output_dir: Path
     name: str
     title: str
-    directory: Path 
+    directory: Path
     readme: Optional[Path] = "README.md"
     notebook: Optional[Path] = None
     parts: List[Part]
@@ -226,25 +228,24 @@ class Site(BaseModel):
 
         for part in self.parts:
             part.site = self
-    
-    @validator('readme', pre=True, always=True, check_fields=False)
+
+    @validator("readme", pre=True, always=True, check_fields=False)
     def default_readme(cls, v, *, values, **kwargs):
-        if "./" in v: 
+        if "./" in v:
             return Path(v)
         else:
-            return (values['directory'] / Path("README.md")) or (values['directory'] / Path(v))
-    
+            return (values["directory"] / Path("README.md")) or (values["directory"] / Path(v))
+
     @property
     def slug(self) -> str:
         return slugify(self.title)
 
     @property
     def toc_yaml(self) -> str:
-        return yaml.dump({
-            "format": "jb-book",
-            "root": "README",
-            "parts": [part.to_toc for part in self.parts if part.chapters]
-        }, indent=4)
+        return yaml.dump(
+            {"format": "jb-book", "root": "README", "parts": [part.to_toc for part in self.parts if part.chapters]},
+            indent=4,
+        )
 
 
 class PortfolioConfig(BaseModel):
@@ -280,24 +281,27 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             # hide input (i.e. code) for all cells
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove_input")
-                                
+
                 # Consider importing this name from calitp.magics
-                if '%%capture_parameters' in cell.source:
-                    params = {**params, **json.loads(cell.outputs[0]['text'])}
-                        
+                if "%%capture_parameters" in cell.source:
+                    params = {**params, **json.loads(cell.outputs[0]["text"])}
+
                 if "%%capture" in cell.source:
                     cell.outputs = []
-                    
+
                 if no_stderr:
-                    cell.outputs = [output for output in cell.outputs if 'name' not in output.keys() or output['name'] != 'stderr']
-                
-                # right side widget to add "tags" (it reverts to "tags": ["tags"]), 
-                if cell.metadata.get("tags"): 
-                    #"%%full_width" in cell.source doesn't pick up
-                    # when Jupyterbook builds, it says 
+                    cell.outputs = [
+                        output for output in cell.outputs if "name" not in output.keys() or output["name"] != "stderr"
+                    ]
+
+                # right side widget to add "tags" (it reverts to "tags": ["tags"]),
+                if cell.metadata.get("tags"):
+                    # "%%full_width" in cell.source doesn't pick up
+                    # when Jupyterbook builds, it says
                     # UsageError: Line magic function `%%full_width` not found.
                     cell.metadata.tags.append("full-width")
-                    
+
+
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
 papermill_engines.register_entry_points()
 
@@ -314,7 +318,7 @@ def index(
             name = site.replace(".yml", "")
             site_output_dir = PORTFOLIO_DIR / Path(name)
             sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
-            
+
     Path("./portfolio/index").mkdir(parents=True, exist_ok=True)
     for template in ["index.html"]:
         fname = f"./portfolio/index/{template}"
@@ -322,13 +326,7 @@ def index(
             typer.echo(f"writing out to {fname}")
             f.write(env.get_template(template).render(sites=sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
 
-    args = [
-        "gcloud",
-        "storage",
-        "cp",
-        "portfolio/index/index.html",
-        "gs://calitp-analysis/"
-    ]
+    args = ["gcloud", "storage", "cp", "portfolio/index/index.html", "gs://calitp-analysis/"]
 
     if deploy:
         typer.secho(f"deploying with args {args}", fg=typer.colors.GREEN)
@@ -379,7 +377,9 @@ def build(
     fname = site_output_dir / Path("_config.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing config to {fname}", fg=typer.colors.GREEN)
-        f.write(env.get_template("_config.yml").render(site=portfolio_site, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
+        f.write(
+            env.get_template("_config.yml").render(site=portfolio_site, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID)
+        )
     fname = site_output_dir / Path("_toc.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing toc to {fname}", fg=typer.colors.GREEN)
@@ -389,13 +389,14 @@ def build(
 
     for part in portfolio_site.parts:
         for chapter in part.chapters:
-            errors.extend(chapter.generate(
-                execute_papermill=execute_papermill,
-                continue_on_error=continue_on_error,
-                prepare_only=prepare_only,
-                no_stderr=no_stderr,
-            ))
-
+            errors.extend(
+                chapter.generate(
+                    execute_papermill=execute_papermill,
+                    continue_on_error=continue_on_error,
+                    prepare_only=prepare_only,
+                    no_stderr=no_stderr,
+                )
+            )
 
     subprocess.run(
         [
@@ -418,7 +419,8 @@ def build(
 
         if accessibilty_errors > 0:
             ans = input(f"{accessibilty_errors} serious accessibility errors: type 'ignore' to deploy anyway: ")
-            if ans != 'ignore': return
+            if ans != "ignore":
+                return
 
         args = [
             "gcloud",
@@ -426,7 +428,7 @@ def build(
             "cp",
             "--recursive",
             f"{site_output_dir}/_build/html/*",
-            f"gs://calitp-analysis/{site_yml_name}/"
+            f"gs://calitp-analysis/{site_yml_name}/",
         ]
 
         typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
@@ -436,10 +438,9 @@ def build(
         typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
         sys.exit(1)
 
+
 @app.command()
-def check_accessibility(
-    site: SiteChoices
-):
+def check_accessibility(site: SiteChoices):
     """
     Checks site for accessibility issues.
     """
@@ -453,7 +454,7 @@ def check_accessibility(
     driver = webdriver.Chrome(options=opts)
     axe = Axe(driver)
 
-    serious_count=0
+    serious_count = 0
 
     def find_key_recursive(obj, target_key):
         if isinstance(obj, dict):
@@ -470,20 +471,20 @@ def check_accessibility(
                     return result
         return None
 
-    html_files = list(Path(directory_path).rglob('*.html'))
+    html_files = list(Path(directory_path).rglob("*.html"))
     for file_path in html_files:
 
         driver.get(f"file:///{file_path}")
         axe.inject()
-        results = axe.run(options={'resultTypes': ['violations']})
+        results = axe.run(options={"resultTypes": ["violations"]})
 
         # print violations
         if results["violations"]:
             print(f"Accessibility violations found in {file_path}:")
             for violation in results["violations"]:
-                if violation['impact'] in ('serious', 'critical'):
+                if violation["impact"] in ("serious", "critical"):
                     serious_count += 1
-                impact = {'minor': '❔', 'moderate': '⚠️', 'serious': '🛑', 'critical': '🛑‼️'}.get(violation['impact'])
+                impact = {"minor": "❔", "moderate": "⚠️", "serious": "🛑", "critical": "🛑‼️"}.get(violation["impact"])
                 print(f"- {impact}  {violation['help']} ({violation['helpUrl']}):")
                 print(f"  {find_key_recursive(violation, 'failureSummary')}")
                 print(f"  {find_key_recursive(violation, 'html')}")
@@ -498,6 +499,7 @@ def check_accessibility(
 
     driver.quit()
     return serious_count
+
 
 if __name__ == "__main__":
     app()
