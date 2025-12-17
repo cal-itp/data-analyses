@@ -4,13 +4,14 @@ Download vehicle positions for a day.
 
 import datetime
 import os
+import sys
 
-os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)  # noqa: E402
-import sys  # noqa: E402
+import gcsfs
+import pandas as pd
+from loguru import logger
 
-import gcsfs  # noqa: E402
-import pandas as pd  # noqa: E402
-from loguru import logger  # noqa: E402
+#  CALITP_BQ_MAX_BYTES needs to be set before importing DBSession, which uses it via calitp_data_analysis.sql.get_engine
+os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 from shared_utils import DBSession, schedule_rt_utils  # noqa: E402
 from shared_utils.models.fct_vehicle_location import FctVehicleLocation  # noqa: E402
 from sqlalchemy import and_, select  # noqa: E402
