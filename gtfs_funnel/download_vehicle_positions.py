@@ -4,16 +4,17 @@ Download vehicle positions for a day.
 
 import datetime
 import os
-os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
-import sys
 
-import gcsfs
-import pandas as pd
-from loguru import logger
-from shared_utils import DBSession, schedule_rt_utils
-from shared_utils.models.fct_vehicle_location import FctVehicleLocation
-from sqlalchemy import and_, select
-from update_vars import SEGMENT_GCS
+os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)  # noqa: E402
+import sys  # noqa: E402
+
+import gcsfs  # noqa: E402
+import pandas as pd  # noqa: E402
+from loguru import logger  # noqa: E402
+from shared_utils import DBSession, schedule_rt_utils  # noqa: E402
+from shared_utils.models.fct_vehicle_location import FctVehicleLocation  # noqa: E402
+from sqlalchemy import and_, select  # noqa: E402
+from update_vars import SEGMENT_GCS  # noqa: E402
 
 os.environ["USE_PYGEOS"] = "0"
 
