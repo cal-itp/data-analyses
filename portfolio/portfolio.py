@@ -23,12 +23,15 @@ from pydantic import BaseModel
 from pydantic.class_validators import validator
 from selenium import webdriver
 from slugify import slugify
+from typing_extensions import Annotated
 
 assert os.getcwd().endswith("data-analyses"), "this script must be run from the root of the data-analyses repo!"
 
 GOOGLE_ANALYTICS_TAG_ID = "G-JCX3Z8JZJC"
 PORTFOLIO_DIR = Path("./portfolio/")
 SITES_DIR = PORTFOLIO_DIR / Path("sites")
+PORTFOLIO_PUBLISH_PRODUCTION = "gs://calitp-analysis"
+PORTFOLIO_PUBLISH_STAGING = "gs://calitp-analysis-staging"
 
 SiteChoices = enum.Enum("SiteChoices", {f.replace(".yml", ""): f.replace(".yml", "") for f in os.listdir(SITES_DIR)})
 
@@ -326,11 +329,8 @@ def index(
             typer.echo(f"writing out to {fname}")
             f.write(env.get_template(template).render(sites=sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
 
-    args = ["gcloud", "storage", "cp", "portfolio/index/index.html", "gs://calitp-analysis/"]
-
     if deploy:
-        typer.secho(f"deploying with args {args}", fg=typer.colors.GREEN)
-        subprocess.run(args).check_returncode()
+        deploy_index("staging")
 
 
 @app.command()
@@ -422,21 +422,51 @@ def build(
             if ans != "ignore":
                 return
 
-        args = [
-            "gcloud",
-            "storage",
-            "cp",
-            "--recursive",
-            f"{site_output_dir}/_build/html/*",
-            f"gs://calitp-analysis/{site_yml_name}/",
-        ]
-
-        typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
-        subprocess.run(args).check_returncode()
+        deploy_site(site, "production")
 
     if errors:
         typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
         sys.exit(1)
+
+
+@app.command()
+def deploy_index(target: Annotated[str, typer.Option(help="Where to deploy the site [staging|production]")]):
+    """
+    Deploys index page for analysis portfolio.
+    """
+    assert target in ["staging", "production"]
+    target_bucket = {"staging": PORTFOLIO_PUBLISH_STAGING, "production": PORTFOLIO_PUBLISH_PRODUCTION}[target]
+
+    args = ["gcloud", "storage", "cp", "portfolio/index/index.html", f"{target_bucket}/"]
+    typer.secho(f"Deploying portfolio index {args}", fg=typer.colors.GREEN)
+    subprocess.run(args).check_returncode()
+
+
+@app.command()
+def deploy_site(
+    site: SiteChoices, target: Annotated[str, typer.Option(help="Where to deploy the site [staging|production]")]
+):
+    """
+    Deploys site.
+    """
+    assert target in ["staging", "production"]
+    site_yml_name = site.value
+    site_output_dir = PORTFOLIO_DIR / Path(site_yml_name)
+    target_bucket = {"staging": PORTFOLIO_PUBLISH_STAGING, "production": PORTFOLIO_PUBLISH_PRODUCTION}[target]
+
+    args = [
+        "gcloud",
+        "storage",
+        "rsync",
+        f"{site_output_dir}/_build/html/",
+        f"{target_bucket}/{site_yml_name}/",
+        "--recursive",
+        "--delete-unmatched-destination-objects",
+        "--checksums-only",
+    ]
+
+    typer.secho(f"Running deploy:\n{' '.join(args)}", fg=typer.colors.GREEN)
+    subprocess.run(args).check_returncode()
 
 
 @app.command()

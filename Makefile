@@ -6,10 +6,10 @@ build_portfolio_site:
 	#need git rm because otherwise, just local removal, but git change is untracked
 	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
-	python portfolio/portfolio.py build $(site) 
+	python portfolio/portfolio.py build $(site)
 	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra
 	python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy
-	git add portfolio/sites/$(site).yml     
+	git add portfolio/sites/$(site).yml
 	#make production_portfolio
 
 git_check_sections:
@@ -21,11 +21,11 @@ git_check_no_sections:
 remove_portfolio_site:
 	python portfolio/portfolio.py clean $(site)
 	git rm portfolio/sites/$(site).yml
-	git rm portfolio/$(site)/ -rf 
-    
+	git rm portfolio/$(site)/ -rf
+
 build_ntd_report:
 	$(eval export site = ntd_monthly_ridership)
-	cd ntd/monthly_ridership_report/ && python deploy_portfolio_yaml.py && cd ..   
+	cd ntd/monthly_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
 	make build_portfolio_site
 
 build_ntd_annual_report:
@@ -41,24 +41,24 @@ build_new_transit_metrics_report:
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
 	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && make assemble_data && cd ..   
-	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..       
+	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && make assemble_data && cd ..
+	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..
 	make build_portfolio_site
-	make git_check_sections   
-    
+	make git_check_sections
+
 build_district_digest:
 	$(eval export site = district_digest)
 	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	cd portfolio/ && pip install -r requirements.txt && cd ../
-	cd gtfs_digest/ && python deploy_district_yaml.py district && cd .. 
-	make build_portfolio_site 
+	cd gtfs_digest/ && python deploy_district_yaml.py district && cd ..
+	make build_portfolio_site
 	make git_check_no_sections
-   
+
 build_legislative_district_digest:
 	$(eval export site = legislative_district_digest)
 	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd .. 
-	make build_portfolio_site 
+	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd ..
+	make build_portfolio_site
 	make git_check_no_sections
 
 build_fund_split:
@@ -68,8 +68,8 @@ build_fund_split:
 
 add_precommit:
 	pip install pre-commit
-	pre-commit install 
-	#pre-commit run --all-files 
+	pre-commit install
+	#pre-commit run --all-files
 
 # Add to _.bash_profile outside of data-analyses
 #alias go='cd ~/data-analyses/portfolio && pip install -r requirements.txt && cd #../_shared_utils && make setup_env && cd ..'
@@ -77,11 +77,18 @@ add_precommit:
 install_env:
 	cd ~/data-analyses/_shared_utils && make setup_env && cd ..
 	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	#cd rt_delay/ && make setup_rt_analysis && cd ..    
+	#cd rt_delay/ && make setup_rt_analysis && cd ..
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ..
 
 production_portfolio:
 	python portfolio/portfolio.py index --deploy
+
+# deploy site with:
+# make staging_portfolio site='MY_SITE_IDENTIFIER'
+staging_portfolio:
+	gcloud auth login --login-config=iac/login.json
+	python portfolio/portfolio.py deploy-index --target staging
+	python portfolio/portfolio.py deploy-site $(site) --target staging
 
 # Create .egg to upload to dask cloud cluster
 egg_modules:
