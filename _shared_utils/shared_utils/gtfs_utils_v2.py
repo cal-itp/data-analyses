@@ -215,7 +215,7 @@ def schedule_daily_feed_to_gtfs_dataset_name(
         for column in keep_cols:
             new_column = DimGtfsDataset.name if column == "name" else getattr(FctDailyScheduleFeed, column)
             columns.append(new_column)
-        statement = statement.with_only_columns(columns)
+        statement = statement.with_only_columns(*columns)
 
     if get_df:
         with DBSession() as session:
