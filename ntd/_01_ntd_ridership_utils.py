@@ -374,10 +374,10 @@ def produce_annual_ntd_ridership_data_by_rtpa(min_year: str, split_scag: bool) -
         "ntd_id",
         "year",
         "mode",
-        "service",
+        "type_of_service",
     ]  # got the order correct with ["period_month", "period_year"]! sorted years with grouped months
 
-    annual_group_cols = ["ntd_id", "mode", "service"]
+    annual_group_cols = ["ntd_id", "mode", "type_of_service"]
 
     annual_change_col = "previous_y_upt"
 
@@ -387,7 +387,7 @@ def produce_annual_ntd_ridership_data_by_rtpa(min_year: str, split_scag: bool) -
 
     print("map mode and tos desc.")
     ntd_data_by_rtpa = ntd_data_by_rtpa.assign(
-        mode_full=ntd_data_by_rtpa["mode"].map(NTD_MODES), service_full=ntd_data_by_rtpa["service"].map(NTD_TOS)
+        mode_full=ntd_data_by_rtpa["mode"].map(NTD_MODES), service_full=ntd_data_by_rtpa["type_of_service"].map(NTD_TOS)
     )
     print("complete")
     return ntd_data_by_rtpa
