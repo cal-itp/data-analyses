@@ -34,9 +34,9 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Install share_utils dependencies
+      - name: Install shared_utils dependencies
         working-directory: _shared_utils/
-        run: pip install -r requirements.txt
+        run: pip install -r requirements_non_jupyterhub.txt
 
       - name: Run shared_utils tests
         working-directory: _shared_utils/
