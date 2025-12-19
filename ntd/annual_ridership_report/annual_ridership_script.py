@@ -3,15 +3,13 @@ import importlib
 import os
 import sys
 
-# import _01_ntd_ridership_utils
 import gcsfs
-from update_vars import MONTH, YEAR
 
 sys.path.append(os.path.abspath("../monthly_ridership_report"))  # for update_var
 sys.path.append(os.path.abspath("../"))  # for module
-
 _01_ntd_ridership_utils = importlib.import_module("_01_ntd_ridership_utils")
 update_vars = importlib.import_module("update_vars")
+
 
 fs = gcsfs.GCSFileSystem()
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/ntd/"
@@ -23,7 +21,7 @@ if __name__ == "__main__":
 
     annual_cover_sheet_path = "annual_report_cover_sheet_template.xlsx"
     annual_index_col = "**NTD Annual Ridership by RTPA**"
-    annual_data_file_name = f"{YEAR}_{MONTH}_annual_report_data"
+    annual_data_file_name = f"{update_vars.YEAR}_{update_vars.MONTH}_annual_report_data"
 
     print("produce annual ntd ridership data")
     df = _01_ntd_ridership_utils.produce_annual_ntd_ridership_data_by_rtpa(min_year=min_year, split_scag=True)
@@ -31,13 +29,13 @@ if __name__ == "__main__":
 
     df.to_parquet(f"{GCS_FILE_PATH}annual_ridership_report_data.parquet")
 
-    os.makedirs(f"./{YEAR}_{MONTH}/")
+    os.makedirs(f"./{update_vars.YEAR}_{update_vars.MONTH}/")
 
     print("saving RTPA outputs")
     _01_ntd_ridership_utils.save_rtpa_outputs(
         df=df,
-        year=YEAR,
-        month=MONTH,
+        year=update_vars.YEAR,
+        month=update_vars.MONTH,
         col_dict=annual_col_dict,
         cover_sheet_path=annual_cover_sheet_path,
         cover_sheet_index_col=annual_index_col,
@@ -47,6 +45,6 @@ if __name__ == "__main__":
     )
 
     print("removing local folder")
-    _01_ntd_ridership_utils.remove_local_outputs(YEAR, MONTH)
+    _01_ntd_ridership_utils.remove_local_outputs(update_vars.YEAR, update_vars.MONTH)
 
     print("complete")
