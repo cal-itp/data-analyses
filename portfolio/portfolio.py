@@ -330,7 +330,7 @@ def index(
             f.write(env.get_template(template).render(sites=sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
 
     if deploy:
-        deploy_index("staging")
+        deploy_index("production")
 
 
 @app.command()
