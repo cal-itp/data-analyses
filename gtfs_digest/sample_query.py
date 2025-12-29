@@ -53,3 +53,36 @@ def download_gdf_pandas_gbq(
     #df.to_parquet(engine='pyarrow') must have engine!
     
     return df
+
+def download_pandas_gbq_no_dates(
+    project: Enum["cal-itp_data-infra", "cal-itp-data-infra-staging"] = "cal-itp-data-infra",
+    dataset_name: Enum["mart_transit_database", "tiffany_mart_transit_database"] = "mart_transit_database",
+    table_name: str = "",
+) -> pd.DataFrame:
+    """
+    Can only think of transit_database not necessarily needing the dates in pre-joined tables
+    """
+    sql_query_statement =  f"SELECT * FROM  `{project_name}`.`{dataset_name}`.`{table_name}`"
+
+    df = pandas_gbq.read_gbq(
+        f"{sql_query_statement} {where_condition}", 
+        project_id = project,
+        dialect = "standard",
+        credentials = credentials
+    )
+    return df
+
+if __name__ == "__main__":
+        stops = download_gdf_pandas_gbq(
+            project = "cal-itp-data-infra",
+            dataset_name = "mart_gtfs_rollup",
+            table_name = "fct_monthly_scheduled_stops"
+        )
+
+        # This crosswalk gives you gtfs_dataset_name to analysis_name to ntd_id with caltrans_district, RTPA, etc
+        # Should be able to go from this to dim_orgs, but may need to tweak to make this possible
+        crosswalk = download_pandas_gbq_no_dates(
+            project = "cal-itp-data-infra-staging",
+            dataset_name = "tiffany_mart_transit_database",
+            table_name = "bridge_gtfs_analysis_name_x_ntd"            
+        )
