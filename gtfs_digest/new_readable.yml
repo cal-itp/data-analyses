@@ -59,14 +59,14 @@ scheduled:
   subtitle: "Based on Weekday Data."
   tooltip: ["Date","Route", "Direction","Daily Trips All Day",]
   colors: ${color_palettes.four_colors}
-  ticks: [0, 50, 100, 150, 200]
+  ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 frequency:
   title: "Headway in Minutes"
   subtitle: "Based on Weekday Data."
   tooltip: ["Date","Route", "Direction", "Headway All Day",]
   colors: ${color_palettes.headway_scale}
-  ticks: [0, 30, 60, 90, 120, 150, 180, 210, 240]
+  ticks: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
 
 
 text: 

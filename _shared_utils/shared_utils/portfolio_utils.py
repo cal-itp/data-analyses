@@ -282,7 +282,7 @@ def standardize_portfolio_organization_names(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # drop the ones that were removed with duplicated feed info
-    m1 = m1.dropna(subset="analysis_name")
+    # m1 = m1.dropna(subset=["analysis_name"])
     return m1
 
 
