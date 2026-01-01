@@ -42,6 +42,7 @@ def create_text_table(df: pd.DataFrame) -> pd.DataFrame:
     text_table_df["Direction"] = text_table_df.Direction.astype(str)
 
     return text_table_df
+
     
 """
 Charts
@@ -143,7 +144,7 @@ def create_hourly_summary(df: pd.DataFrame, day_type: str):
         scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))
     )
 )
-    chart = _report_operator_visuals.configure_chart(
+    chart = _portfolio_charts.configure_chart(
     chart,
     width=400,
     height=250,
@@ -165,6 +166,7 @@ def create_route_dropdown(df: pd.DataFrame):
         fields=["Route"], value=routes_list[0], bind=route_dropdown
     )
     return xcol_param
+
 
 def create_scheduled_minutes(df: pd.DataFrame):
     df2 = df.loc[df["Day Type"] == "Weekday"]
@@ -219,6 +221,7 @@ def create_scheduled_minutes(df: pd.DataFrame):
     chart = alt.hconcat(dir_0_chart, dir_1_chart)
     return chart
 
+
 def create_scheduled_trips(df: pd.DataFrame):
     df2 = df.loc[df["Day Type"] == "Weekday"]
     chart_dict = readable_dict.scheduled
@@ -271,6 +274,7 @@ def create_scheduled_trips(df: pd.DataFrame):
     )
     chart = alt.hconcat(dir_0_chart, dir_1_chart)
     return chart
+
 
 def create_frequency(df: pd.DataFrame):
     df2 = df.loc[df["Day Type"] == "Weekday"]
@@ -325,6 +329,20 @@ def create_frequency(df: pd.DataFrame):
     chart = alt.hconcat(dir_0_chart, dir_1_chart)
     return chart
 
+
+def text_table(df: pd.DataFrame) -> alt.Chart:
+
+    # Create the chart
+    text_chart = (
+        alt.Chart(df)
+        .mark_text()
+        .encode(x=alt.X("Zero:Q", axis=None), y=alt.Y("combo_col", axis=None))
+    )
+
+    text_chart = text_chart.encode(text="combo_col:N")
+    return text_chart
+
+    
 def create_text_graph(df: pd.DataFrame):
     chart_dict = readable_dict.avg_scheduled_minutes
     
@@ -361,5 +379,5 @@ def create_text_graph(df: pd.DataFrame):
         .add_params(selection)
         .transform_filter(selection)
     )
-
     return chart
+    
