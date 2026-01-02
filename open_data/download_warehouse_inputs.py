@@ -10,12 +10,12 @@ import sys
 from calitp_data_analysis import utils
 from loguru import logger
 from shared_utils import bq_utils
+from update_vars import OPEN_DATA_GCS, analysis_month
 
 PROD_PROJECT = "cal-itp-data-infra"
 STG_PROJECT = "cal-itp-data-infra-staging"
 PROD_MART = "mart_gtfs_rollup"
 STG_MART = "tiffany_mart_gtfs_rollup"
-GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/open_data/"
 
 if __name__ == "__main__":
 
@@ -24,7 +24,6 @@ if __name__ == "__main__":
     logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
     MONTH_DATE_COL = "month_first_day"
-    ANALYSIS_MONTH = "2025-11-01"
     start = datetime.datetime.now()
 
     # Download stops
@@ -33,16 +32,16 @@ if __name__ == "__main__":
         dataset_name=STG_MART,
         table_name="fct_monthly_scheduled_stops",
         date_col=MONTH_DATE_COL,
-        start_date=ANALYSIS_MONTH,
-        end_date=ANALYSIS_MONTH,
+        start_date=analysis_month,
+        end_date=analysis_month,
         geom_col="pt_geom",
         geom_type="point",
     )
 
-    utils.geoparquet_gcs_export(monthly_stops, GCS_FILE_PATH, f"stops_{ANALYSIS_MONTH}")
+    utils.geoparquet_gcs_export(monthly_stops, OPEN_DATA_GCS, f"stops_{analysis_month}")
 
     t1 = datetime.datetime.now()
-    logger.info(f"stops: {ANALYSIS_MONTH}: {t1 - start}")
+    logger.info(f"stops: {analysis_month}: {t1 - start}")
 
     # Download shapes with route_info
     monthly_routes = bq_utils.download_table(
@@ -50,15 +49,15 @@ if __name__ == "__main__":
         dataset_name=STG_MART,
         table_name="fct_monthly_routes",
         date_col=MONTH_DATE_COL,
-        start_date=ANALYSIS_MONTH,
-        end_date=ANALYSIS_MONTH,
+        start_date=analysis_month,
+        end_date=analysis_month,
         geom_col="pt_array",
         geom_type="line",
     )
 
-    utils.geoparquet_gcs_export(monthly_routes, GCS_FILE_PATH, f"routes_{ANALYSIS_MONTH}")
+    utils.geoparquet_gcs_export(monthly_routes, OPEN_DATA_GCS, f"routes_{analysis_month}")
     t2 = datetime.datetime.now()
-    logger.info(f"routes: {ANALYSIS_MONTH}: {t2 - t1}")
+    logger.info(f"routes: {analysis_month}: {t2 - t1}")
 
     crosswalk = bq_utils.download_table(
         project_name=STG_PROJECT,
@@ -67,8 +66,8 @@ if __name__ == "__main__":
         date_col=None,
     )
 
-    crosswalk.to_parquet(f"{GCS_FILE_PATH}bridge_gtfs_analysis_name_x_ntd.parquet")
+    crosswalk.to_parquet(f"{OPEN_DATA_GCS}bridge_gtfs_analysis_name_x_ntd.parquet")
 
     end = datetime.datetime.now()
     logger.info(f"crosswalk: {end - t2}")
-    logger.info(f"execution time: {ANALYSIS_MONTH}: {end - start}")
+    logger.info(f"execution time: {analysis_month}: {end - start}")
