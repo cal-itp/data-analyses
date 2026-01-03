@@ -70,10 +70,14 @@ frequency:
   colors: ${color_palettes.headway_scale}
   ticks: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
 
-
 text: 
   title: "Route Statistics"
   subtitle: "Use the menus to filter for directions and routes."
   tooltip: []
   colors: []
   ticks: 
+
+route_typology:
+  title: "Total Routes by Typology"
+  tooltip: ["Route Type", "Total Routes"]
+  colors: ${color_palettes.full_color_scale} 
