@@ -15,6 +15,8 @@ hourly_summary:
     subtitle: "Use the legend to highlight a particular month and hover over the line for additional information."
     tooltip: ["Date", 'Departure Hour', "N Trips"] 
     colors: []
+background_graph:
+    colors: ${color_palettes.full_color_scale} 
     
 # fct_monthly_operator_summary
 trip_updates_minute:
@@ -59,15 +61,14 @@ scheduled:
   subtitle: "Based on Weekday Data."
   tooltip: ["Date","Route", "Direction","Daily Trips All Day",]
   colors: ${color_palettes.four_colors}
-  ticks: [0, 50, 100, 150, 200]
+  ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
 frequency:
   title: "Headway in Minutes"
   subtitle: "Based on Weekday Data."
   tooltip: ["Date","Route", "Direction", "Headway All Day",]
   colors: ${color_palettes.headway_scale}
-  ticks: [0, 30, 60, 90, 120, 150, 180, 210, 240]
-
+  ticks: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
 
 text: 
   title: "Route Statistics"
@@ -75,3 +76,8 @@ text:
   tooltip: []
   colors: []
   ticks: 
+
+route_typology:
+  title: "Total Routes by Typology"
+  tooltip: ["Route Type", "Total Routes"]
+  colors: ${color_palettes.full_color_scale} 
