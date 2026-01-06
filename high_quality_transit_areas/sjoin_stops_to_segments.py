@@ -54,7 +54,7 @@ def hqta_segment_to_stop(hqta_segments: gpd.GeoDataFrame, stops: gpd.GeoDataFram
     Spatially join hqta segments to stops.
     Which stops fall into which segments?
     """
-    segment_cols = ["hqta_segment_id", "segment_sequence"]
+    segment_cols = ["hqta_segment_id", "segment_sequence", "route_id"]
 
     segment_to_stop = (
         gpd.sjoin(stops[["stop_id", "geometry"]], hqta_segments, how="inner", predicate="intersects").drop(
@@ -79,7 +79,7 @@ def hqta_segment_keep_one_stop(hqta_segments: gpd.GeoDataFrame, stop_frequencies
     stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
 
     segment_to_stop_frequencies = pd.merge(hqta_segments, stop_frequencies, on=stop_cols)
-
+    # TODO check route_id here?
     # Can't sort by multiple columns in dask,
     # so, find the max, then inner merge
     max_trips_by_segment = max_trips_by_group(
@@ -163,7 +163,7 @@ def sjoin_stops_and_stop_frequencies_to_hqta_segments(
 
     # Join hqta segment to stops
     segment_to_stop = hqta_segment_to_stop(hqta_segments2, stops)
-
+    gcsgp.geo_data_frame_to_parquet(stops, f"{GCS_FILE_PATH}test_segment_to_stop.parquet")
     segment_to_stop_unique = hqta_segment_keep_one_stop(segment_to_stop, stop_frequencies)
 
     # Identify hq transit corridor or major stop precursor
@@ -231,9 +231,9 @@ if __name__ == "__main__":
     max_arrivals_by_stop = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
 
     hqta_corr = sjoin_stops_and_stop_frequencies_to_hqta_segments(
-        hqta_segments,
-        stops,
-        max_arrivals_by_stop,
+        hqta_segments=hqta_segments,
+        stops=stops,
+        stop_frequencies=max_arrivals_by_stop,
         buffer_size=SEGMENT_BUFFER_METERS,  # 50meters
         hq_transit_threshold=HQ_TRANSIT_THRESHOLD,
         ms_transit_threshold=MS_TRANSIT_THRESHOLD,
