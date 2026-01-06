@@ -69,7 +69,7 @@ def hqta_segment_to_stop(hqta_segments: gpd.GeoDataFrame, stops: gpd.GeoDataFram
     return segment_to_stop2
 
 
-def hqta_segment_keep_one_stop(hqta_segments: gpd.GeoDataFrame, stop_times: pd.DataFrame) -> gpd.GeoDataFrame:
+def hqta_segment_keep_one_stop(hqta_segments: gpd.GeoDataFrame, stop_frequencies: pd.DataFrame) -> gpd.GeoDataFrame:
     """
     Since multiple stops can fall into the same segment,
     keep the stop with the highest trips (sum across AM and PM).
@@ -78,11 +78,13 @@ def hqta_segment_keep_one_stop(hqta_segments: gpd.GeoDataFrame, stop_times: pd.D
     """
     stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
 
-    segment_to_stop_times = pd.merge(hqta_segments, stop_times, on=stop_cols)
+    segment_to_stop_frequencies = pd.merge(hqta_segments, stop_frequencies, on=stop_cols)
 
     # Can't sort by multiple columns in dask,
     # so, find the max, then inner merge
-    max_trips_by_segment = max_trips_by_group(segment_to_stop_times, group_cols=["hqta_segment_id"], max_col="n_trips")
+    max_trips_by_segment = max_trips_by_group(
+        segment_to_stop_frequencies, group_cols=["hqta_segment_id"], max_col="n_trips"
+    )
 
     # Merge in and keep max trips observation
     # Since there might be duplicates still, where multiple stops all
@@ -90,7 +92,7 @@ def hqta_segment_keep_one_stop(hqta_segments: gpd.GeoDataFrame, stop_times: pd.D
     max_trip_cols = ["hqta_segment_id", "am_max_trips_hr", "pm_max_trips_hr"]
 
     segment_to_stop_unique = pd.merge(
-        segment_to_stop_times, max_trips_by_segment, on=["hqta_segment_id", "n_trips"], how="inner"
+        segment_to_stop_frequencies, max_trips_by_segment, on=["hqta_segment_id", "n_trips"], how="inner"
     ).drop_duplicates(subset=max_trip_cols)
 
     # In the case of same number of trips overall, do a sort
@@ -128,10 +130,10 @@ def find_circuitous_segments(hqta_segments: gpd.GeoDataFrame) -> gpd.GeoDataFram
     return hqta_segments
 
 
-def sjoin_stops_and_stop_times_to_hqta_segments(
+def sjoin_stops_and_stop_frequencies_to_hqta_segments(
     hqta_segments: gpd.GeoDataFrame,
     stops: gpd.GeoDataFrame,
-    stop_times: pd.DataFrame,
+    stop_frequencies: pd.DataFrame,
     buffer_size: int,
     hq_transit_threshold: int = HQ_TRANSIT_THRESHOLD,
     ms_transit_threshold: int = MS_TRANSIT_THRESHOLD,
@@ -147,11 +149,11 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     """
     # Only keep segments for routes that have at least one stop meeting frequency threshold
     # About 50x smaller, so should both slash false positives and enhance speed
-    st_copy = stop_times.copy().drop_duplicates(subset=["schedule_gtfs_dataset_key", "route_id"])
+    st_copy = stop_frequencies.copy().drop_duplicates(subset=["schedule_gtfs_dataset_key", "route_id"])
     hqta_segments = hqta_segments.merge(
         st_copy[["schedule_gtfs_dataset_key", "route_id"]], on=["schedule_gtfs_dataset_key", "route_id"]
     )
-    stop_times = stop_times.drop(
+    stop_frequencies = stop_frequencies.drop(
         columns=["route_id"]
     ).drop_duplicates()  # prefer route_id from segments in future steps
     # Identify ambiguous direction segments to exclude from intersection steps
@@ -162,7 +164,7 @@ def sjoin_stops_and_stop_times_to_hqta_segments(
     # Join hqta segment to stops
     segment_to_stop = hqta_segment_to_stop(hqta_segments2, stops)
 
-    segment_to_stop_unique = hqta_segment_keep_one_stop(segment_to_stop, stop_times)
+    segment_to_stop_unique = hqta_segment_keep_one_stop(segment_to_stop, stop_frequencies)
 
     # Identify hq transit corridor or major stop precursor
     drop_cols = ["n_trips"]
@@ -228,7 +230,7 @@ if __name__ == "__main__":
     gcsgp.geo_data_frame_to_parquet(stops, f"{GCS_FILE_PATH}stops_with_lookback.parquet")
     max_arrivals_by_stop = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
 
-    hqta_corr = sjoin_stops_and_stop_times_to_hqta_segments(
+    hqta_corr = sjoin_stops_and_stop_frequencies_to_hqta_segments(
         hqta_segments,
         stops,
         max_arrivals_by_stop,
