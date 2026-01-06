@@ -54,17 +54,17 @@ def hqta_segment_to_stop(hqta_segments: gpd.GeoDataFrame, stops: gpd.GeoDataFram
     Spatially join hqta segments to stops.
     Which stops fall into which segments?
     """
-    segment_cols = ["hqta_segment_id", "segment_sequence", "route_id"]
+    segment_cols = ["hqta_segment_id", "segment_sequence"]
 
     segment_to_stop = (
         gpd.sjoin(stops[["stop_id", "geometry"]], hqta_segments, how="inner", predicate="intersects").drop(
             columns=["index_right"]
         )
-    )[segment_cols + ["stop_id"]]
+    )[segment_cols + ["stop_id", "route_id"]]
 
     # After sjoin, we don't want to keep stop's point geom
     # Merge on hqta_segment_id's polygon geom
-    segment_to_stop2 = pd.merge(hqta_segments, segment_to_stop, on=segment_cols)
+    segment_to_stop2 = pd.merge(hqta_segments, segment_to_stop, on=segment_cols, suffixes=("_seg", "_stop"))
 
     return segment_to_stop2
 
@@ -153,9 +153,9 @@ def sjoin_stops_and_stop_frequencies_to_hqta_segments(
     hqta_segments = hqta_segments.merge(
         st_copy[["schedule_gtfs_dataset_key", "route_id"]], on=["schedule_gtfs_dataset_key", "route_id"]
     )
-    stop_frequencies = stop_frequencies.drop(
-        columns=["route_id"]
-    ).drop_duplicates()  # prefer route_id from segments in future steps
+    # stop_frequencies = stop_frequencies.drop(
+    #     columns=["route_id"]
+    # ).drop_duplicates()  # prefer route_id from segments in future steps
     # Identify ambiguous direction segments to exclude from intersection steps
     hqta_segments = find_circuitous_segments(hqta_segments)
     # Draw buffer to capture stops around hqta segments
