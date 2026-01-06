@@ -79,5 +79,5 @@ text:
 
 route_typology:
   title: "Total Routes by Typology"
-  tooltip: ["Route Type", "Total Routes"]
+  tooltip: ["Route Typology", "Total Routes"]
   colors: ${color_palettes.full_color_scale} 

@@ -43,62 +43,14 @@ def create_text_table(df: pd.DataFrame) -> pd.DataFrame:
 
     return text_table_df
 
+def create_typology(df:pd.DataFrame)->pd.DataFrame:
+    df2 = df.groupby(['Route Typology']).agg({"Route":"nunique"}).reset_index()
+    df2 = df2.rename(columns = {"Route":"Total Routes"})
+    return df2
     
 """
 Charts
 """
-def create_bg_service_chart() -> alt.Chart:
-    """
-    Create a shaded background for the Service Hour Chart
-    to differentiate between time periods.
-    """
-    specific_chart_dict = readable_dict.background_graph
-    cutoff = pd.DataFrame(
-        {
-            "start": [0, 4, 7, 10, 15, 19],
-            "stop": [3.99, 6.99, 9.99, 14.99, 18.99, 24],
-            "Time Period": [
-                "Owl:12-3:59AM",
-                "Early AM:4-6:59AM",
-                "AM Peak:7-9:59AM",
-                "Midday:10AM-2:59PM",
-                "PM Peak:3-7:59PM",
-                "Evening:8-11:59PM",
-            ],
-        }
-    )
-
-    # Sort legend by time, 12am starting first.
-    chart = (
-        alt.Chart(cutoff.reset_index())
-        .mark_rect(opacity=0.15)
-        .encode(
-            x="start",
-            x2="stop",
-            y=alt.value(0),
-            y2=alt.value(250),
-            color=alt.Color(
-                "Time Period:N",
-                sort=(
-                    [
-                        "Owl:12-3:59AM",
-                        "Early AM:4-6:59AM",
-                        "AM Peak:7-9:59AM",
-                        "Midday:10AM-2:59PM",
-                        "PM Peak:3-7:59PM",
-                        "Evening:8-11:59PM",
-                    ]
-                ),
-                scale=alt.Scale(
-                    range=[*specific_chart_dict.colors]
-                ),
-            ),
-        )
-    )
-
-    return chart
-
-    
 def create_hourly_summary(df: pd.DataFrame, day_type: str):
     
     chart_dict = readable_dict.hourly_summary
@@ -137,7 +89,7 @@ def create_hourly_summary(df: pd.DataFrame, day_type: str):
         .transform_filter(xcol_param)
     )
     
-    bg = create_bg_service_chart()
+    bg = _portfolio_charts.create_bg_service_chart()
     
     chart = (chart + bg).properties(
     resolve=alt.Resolve(
@@ -378,6 +330,27 @@ def create_text_graph(df: pd.DataFrame):
         .transform_filter(xcol_param)
         .add_params(selection)
         .transform_filter(selection)
+    )
+    return chart
+
+def create_route_typology(df: pd.DataFrame):
+    typology_df = create_typology(df)
+    chart_dict = readable_dict.route_typology
+
+    chart = _portfolio_charts.pie_chart(df = typology_df,
+         color_col = 'Route Typology',
+         theta_col = 'Total Routes',
+         color_scheme = [*chart_dict.colors],
+         tooltip_cols = list(chart_dict.tooltip))
+    
+    chart = (
+        _portfolio_charts.configure_chart(
+            chart,
+            width=200,
+            height=250,
+            title=chart_dict.title,
+            subtitle="",
+        )
     )
     return chart
     
