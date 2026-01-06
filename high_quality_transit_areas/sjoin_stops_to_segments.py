@@ -83,6 +83,9 @@ def hqta_segment_keep_one_stop(hqta_segments: gpd.GeoDataFrame, stop_frequencies
     segment_to_stop_frequencies = segment_to_stop_frequencies[
         segment_to_stop_frequencies.route_id_seg == segment_to_stop_frequencies.route_id_stop_freq
     ]
+    segment_to_stop_frequencies = segment_to_stop_frequencies.drop(columns=["route_id_stop_freq"]).rename(
+        columns={"route_id_seg": "route_id"}
+    )
     # Can't sort by multiple columns in dask,
     # so, find the max, then inner merge
     max_trips_by_segment = max_trips_by_group(
