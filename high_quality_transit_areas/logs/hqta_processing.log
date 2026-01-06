@@ -387,3 +387,6 @@
 2026-01-06 10:30:51.434 | INFO     | __main__:<module>:248 - B3_sjoin_stops_to_segments 2025-11-05 execution time: 0:00:32.906134
 2026-01-06 10:34:05.517 | INFO     | __main__:<module>:248 - B3_sjoin_stops_to_segments 2025-11-05 execution time: 0:00:31.035270
 2026-01-06 10:36:20.578 | INFO     | __main__:<module>:248 - B3_sjoin_stops_to_segments 2025-11-05 execution time: 0:00:26.250675
+2026-01-06 10:39:18.002 | INFO     | __main__:<module>:248 - B3_sjoin_stops_to_segments 2025-11-05 execution time: 0:00:28.550168
+2026-01-06 10:44:49.316 | INFO     | __main__:<module>:247 - B3_sjoin_stops_to_segments 2025-11-05 execution time: 0:00:34.524726
+2026-01-06 10:47:41.149 | INFO     | __main__:<module>:247 - B3_sjoin_stops_to_segments 2025-11-05 execution time: 0:00:34.733456
