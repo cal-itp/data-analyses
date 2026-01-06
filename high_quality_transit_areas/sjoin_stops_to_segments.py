@@ -60,11 +60,11 @@ def hqta_segment_to_stop(hqta_segments: gpd.GeoDataFrame, stops: gpd.GeoDataFram
         gpd.sjoin(stops[["stop_id", "geometry"]], hqta_segments, how="inner", predicate="intersects").drop(
             columns=["index_right"]
         )
-    )[segment_cols + ["stop_id", "route_id"]]
+    )[segment_cols + ["stop_id"]]
 
     # After sjoin, we don't want to keep stop's point geom
     # Merge on hqta_segment_id's polygon geom
-    segment_to_stop2 = pd.merge(hqta_segments, segment_to_stop, on=segment_cols, suffixes=("_seg", "_stop"))
+    segment_to_stop2 = pd.merge(hqta_segments, segment_to_stop, on=segment_cols)
 
     return segment_to_stop2
 
@@ -79,7 +79,10 @@ def hqta_segment_keep_one_stop(hqta_segments: gpd.GeoDataFrame, stop_frequencies
     stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
 
     segment_to_stop_frequencies = pd.merge(hqta_segments, stop_frequencies, on=stop_cols)
-    # TODO check route_id here?
+    # Ensure that route segment is drawn from is one of the routes used for calculating stop frequency
+    segment_to_stop_frequencies = segment_to_stop_frequencies[
+        segment_to_stop_frequencies.route_id_seg == segment_to_stop_frequencies.route_id_stop_freq
+    ]
     # Can't sort by multiple columns in dask,
     # so, find the max, then inner merge
     max_trips_by_segment = max_trips_by_group(
@@ -152,10 +155,9 @@ def sjoin_stops_and_stop_frequencies_to_hqta_segments(
     st_copy = stop_frequencies.copy().drop_duplicates(subset=["schedule_gtfs_dataset_key", "route_id"])
     hqta_segments = hqta_segments.merge(
         st_copy[["schedule_gtfs_dataset_key", "route_id"]], on=["schedule_gtfs_dataset_key", "route_id"]
-    )
-    # stop_frequencies = stop_frequencies.drop(
-    #     columns=["route_id"]
-    # ).drop_duplicates()  # prefer route_id from segments in future steps
+    ).rename(columns={"route_id": "route_id_seg"})
+    stop_frequencies = stop_frequencies.rename(columns={"route_id": "route_id_stop_freq"})
+
     # Identify ambiguous direction segments to exclude from intersection steps
     hqta_segments = find_circuitous_segments(hqta_segments)
     # Draw buffer to capture stops around hqta segments
@@ -163,7 +165,7 @@ def sjoin_stops_and_stop_frequencies_to_hqta_segments(
 
     # Join hqta segment to stops
     segment_to_stop = hqta_segment_to_stop(hqta_segments2, stops)
-    gcsgp.geo_data_frame_to_parquet(stops, f"{GCS_FILE_PATH}test_segment_to_stop.parquet")
+    gcsgp.geo_data_frame_to_parquet(segment_to_stop, f"{GCS_FILE_PATH}test_segment_to_stop.parquet")
     segment_to_stop_unique = hqta_segment_keep_one_stop(segment_to_stop, stop_frequencies)
 
     # Identify hq transit corridor or major stop precursor
