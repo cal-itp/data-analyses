@@ -168,7 +168,6 @@ def sjoin_stops_and_stop_frequencies_to_hqta_segments(
 
     # Join hqta segment to stops
     segment_to_stop = hqta_segment_to_stop(hqta_segments2, stops)
-    gcsgp.geo_data_frame_to_parquet(segment_to_stop, f"{GCS_FILE_PATH}test_segment_to_stop.parquet")
     segment_to_stop_unique = hqta_segment_keep_one_stop(segment_to_stop, stop_frequencies)
 
     # Identify hq transit corridor or major stop precursor
