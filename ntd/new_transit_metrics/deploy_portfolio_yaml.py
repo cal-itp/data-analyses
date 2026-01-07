@@ -17,12 +17,13 @@ from pathlib import Path
 
 from shared_utils import portfolio_utils
 from update_vars import GCS_FILE_PATH
+from calitp_data_analysis.gcs_pandas import GCSPandas
 
 PORTFOLIO_SITE_YAML = Path("../../portfolio/sites/new_transit_metrics.yml")
 
 if __name__ == "__main__":
     
-    df = pd.read_parquet(
+    df = GCSPandas().read_parquet(
         #f"{GCS_FILE_PATH}ntd_id_rtpa_crosswalk_all_reporter_types.parquet",
         f"{GCS_FILE_PATH}raw_transit_performance_metrics_data.parquet",
         columns = ["RTPA"]

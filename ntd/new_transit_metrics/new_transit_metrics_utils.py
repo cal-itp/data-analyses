@@ -7,11 +7,13 @@ functions for the new transit metrics portfolio
 import pandas as pd
 import altair as alt
 from calitp_data_analysis.tables import tbls
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from siuba import _, collect, count, filter, show_query, select
 import sys
 sys.path.append("../monthly_ridership_report")  # up one level
 from update_vars import NTD_MODES, NTD_TOS
 
+gcs_pandas = GCSPandas()
 
 def make_new_transit_metrics_data(year_list):
     
@@ -155,7 +157,7 @@ def make_new_transit_metrics_data(year_list):
     # read in ntd id-to-RTPA xwalk
     xwalk_path = "ntd_id_rtpa_crosswalk_all_reporter_types.parquet"
 
-    rtpa_ntd_xwalk = pd.read_parquet(f"{GCS_FILE_PATH}{xwalk_path}")
+    rtpa_ntd_xwalk = gcs_pandas.read_parquet(f"{GCS_FILE_PATH}{xwalk_path}")
     
     # merge in xwalk
     merge_metrics_rtpa = merge_opex_upt_vrm_vrh.drop(columns="_merge").merge(
