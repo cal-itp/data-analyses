@@ -6,8 +6,15 @@ import pandas as pd
 from shared_utils import portfolio_utils, publish_utils
 from update_vars import GTFS_DATA_DICT
 
-SITE_YML = "../portfolio/sites/gtfs_digest.yml"
+import google.auth
+import pandas_gbq
+from calitp_data_analysis.sql import get_engine
+from calitp_data_analysis.tables import tbls
+db_engine = get_engine()
+credentials, project = google.auth.default()
 
+SITE_YML = "../portfolio/sites/gtfs_digest.yml"
+    
 def generate_operator_grain_yaml(filename: str) -> pd.DataFrame:
     """
     Generate the yaml for our Operator grain portfolio.
@@ -24,6 +31,7 @@ def generate_operator_grain_yaml(filename: str) -> pd.DataFrame:
          )
                      
     return df
+
 
 if __name__ == "__main__":
     
