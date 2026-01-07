@@ -7,31 +7,33 @@ we use, let's just generate the yaml.
 This Yaml structure is structured by RTPA names, instead of CT districts.
 RTPA names will become the navigation panel on the portfolio site
 """
+
 import sys
 
 sys.path.append("../")  # up one level
 sys.path.append("../monthly_ridership_report")
-import pandas as pd
-
 from pathlib import Path
 
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from shared_utils import portfolio_utils
 from update_vars import GCS_FILE_PATH
-from calitp_data_analysis.gcs_pandas import GCSPandas
 
 PORTFOLIO_SITE_YAML = Path("../../portfolio/sites/new_transit_metrics.yml")
 
 if __name__ == "__main__":
-    
-    df = GCSPandas().read_parquet(
-        #f"{GCS_FILE_PATH}ntd_id_rtpa_crosswalk_all_reporter_types.parquet",
-        f"{GCS_FILE_PATH}raw_transit_performance_metrics_data.parquet",
-        columns = ["RTPA"]
-    ).drop_duplicates().sort_values("RTPA").reset_index(drop=True)
-    
-    portfolio_utils.create_portfolio_yaml_chapters_no_sections(
-        PORTFOLIO_SITE_YAML, 
-        chapter_name = "rtpa",
-        chapter_values =list(df.RTPA)
+
+    df = (
+        GCSPandas()
+        .read_parquet(
+            # f"{GCS_FILE_PATH}ntd_id_rtpa_crosswalk_all_reporter_types.parquet",
+            f"{GCS_FILE_PATH}raw_transit_performance_metrics_data.parquet",
+            columns=["RTPA"],
+        )
+        .drop_duplicates()
+        .sort_values("RTPA")
+        .reset_index(drop=True)
     )
 
+    portfolio_utils.create_portfolio_yaml_chapters_no_sections(
+        PORTFOLIO_SITE_YAML, chapter_name="rtpa", chapter_values=list(df.RTPA)
+    )
