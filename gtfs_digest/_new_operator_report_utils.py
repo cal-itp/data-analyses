@@ -3,6 +3,7 @@ import deploy_portfolio_yaml
 import altair as alt
 import pandas as pd
 import pandas_gbq
+import numpy as np
 
 from omegaconf import OmegaConf
 readable_dict = OmegaConf.load("new_readable.yml")
@@ -56,10 +57,95 @@ def create_typology(df:pd.DataFrame)->pd.DataFrame:
     return df2
 
 
+def find_percentiles(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Bin 'Route Length Miles' into percentile categories and merge
+    human-readable group labels. Zeros are labeled 'Zero'.
+    """
+    col = 'Route Length Miles'
 
+    # Compute quartiles once
+    p25, p50, p75 = df[col].quantile([0.25, 0.50, 0.75])
+
+    # Build bins: (-inf, 0], (0, p25], (p25, p50], (p50, p75], (p75, inf)
+    bins = [-np.inf, 0, p25, p50, p75, np.inf]
+    labels = ['Zero', '25th percentile', '50th percentile', '< 75th percentile', '> 75th percentile']
+
+    out = df.copy()
+    out['percentile_cat'] = pd.cut(
+        out[col],
+        bins=bins,
+        labels=labels,
+        right=True,                # include upper bound in each interval
+        include_lowest=True        # include lowest value
+    )
+
+    # Build concise label text using the computed thresholds
+    percentile_df = pd.DataFrame({
+        'percentile_cat': labels[1:],  # exclude 'Zero' from the mapping table
+        'Route Length Miles Percentile Group': [
+            f"25 percentile (<= {p25:.1f} miles)",
+            f"26-50th percentile ({p25:.1f}-{p50:.1f} miles)",
+            f"51-75th percentile ({p50:.1f}-{p75:.1f} miles)",
+            f"76th percentile (>= {p75:.1f} miles)",
+        ],
+    })
+
+    # Merge and drop 'Geometry' if present
+    m1 = out.merge(percentile_df, on='percentile_cat', how='left')
+    if 'Geometry' in m1.columns:
+        m1 = m1.drop(columns=['Geometry'])
+
+    return m1
+
+
+def reshape_percentile_groups(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Total number of routes by each
+    the route_length_miles_percentile groups.
+    """
+    agg1 = (
+        df.groupby(["Route Length Miles Percentile Group",])
+        .agg({"Route Name": "nunique"})
+        .reset_index()
+    ).rename(
+        columns={"Route Name": "Total Routes"}
+    )
+    return agg1
+
+    
 """
 Route Typology
 """   
+def create_route_lengths(df: pd.DataFrame):
+    df2 = find_percentiles(df)
+    df3 = reshape_percentile_groups(df2)
+    
+    chart_dict = readable_dict.route_percentiles
+
+    chart = _portfolio_charts.bar_chart(
+    df = df3,
+    x_col = "Route Length Miles Percentile Group",
+    y_col = "Total Routes",
+    color_col = "Route Length Miles Percentile Group",
+    color_scheme = [*chart_dict.colors],
+    tooltip_cols = list(chart_dict.tooltip),
+    date_format = "",
+    y_ticks = chart_dict.ticks,
+)
+    
+    chart = (
+        _portfolio_charts.configure_chart(
+            chart,
+            width=400,
+            height=250,
+            title=chart_dict.title,
+            subtitle=chart_dict.subtitle,
+        )
+    )
+    return chart
+
+    
 def create_route_typology(df: pd.DataFrame):
     typology_df = create_typology(df)
     chart_dict = readable_dict.route_typology
