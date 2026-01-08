@@ -169,7 +169,8 @@ gtfs_digest_rollup:
   route_map: "fct_monthly_routes"
   operator_summary: "fct_monthly_operator_summary"
   hourly_day_type_summary: "fct_operator_hourly_summary"
-
+  ntd_profile: "ntd_profile"  
+  
 open_data_rollup:
   ca_transit_routes: "mart_gtfs_rollup.fct_monthly_routes"
   ca_transit_stops: "mart_gtfs_rollup.fct_monthly_scheduled_stops"

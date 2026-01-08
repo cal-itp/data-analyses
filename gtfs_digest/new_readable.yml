@@ -81,3 +81,10 @@ route_typology:
   title: "Total Routes by Typology"
   tooltip: ["Route Typology", "Total Routes"]
   colors: ${color_palettes.full_color_scale} 
+
+route_percentiles:
+  title: "Route Length Percentile Groups"
+  subtitle: "Count of routes by their percentile groups based on their length."
+  tooltip: ['Route Length Miles Percentile Group', 'Total Routes']
+  colors: ${color_palettes.four_colors} 
+  ticks: [0, 5, 10, 15, 20, 25, 30, 35]
