@@ -19,8 +19,8 @@ import numpy as np
 import pandas as pd
 from calitp_data_analysis import geography_utils, get_fs, utils
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.sql import query_sql
 from loguru import logger
-from segment_speed_utils import helpers
 from shared_utils import gtfs_utils_v2
 from update_vars import (
     EXPORT_PATH,
@@ -91,35 +91,24 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     return with_stops
 
 
-def get_agency_crosswalk(analysis_date: str) -> pd.DataFrame:
+def get_agency_crosswalk() -> pd.DataFrame:
     """
-    Import crosswalk for changing schedule_gtfs_dataset_key to
-    organization_name/source_record_id
-    """
-    agency_info = helpers.import_schedule_gtfs_key_organization_crosswalk(
-        analysis_date,
-        columns=["schedule_gtfs_dataset_key", "organization_name", "organization_source_record_id", "base64_url"],
-    ).rename(columns={"organization_name": "agency", "organization_source_record_id": "org_id"})
-
-    return agency_info
-
-
-def get_lookback_agency_crosswalk(published_operators_dict: dict, lookback_trips_ix: pd.DataFrame) -> pd.DataFrame:
-    """
-    Get agency crosswalk according to lookback published_operators_dict.
-    Return most recent record for each agency.
+    Simplified version using analysis_name from warehouse
     """
 
-    lookback_agency_info = []
-    for date in published_operators_dict.keys():
-        schedule_gtfs_dataset_keys = lookback_trips_ix.query(  # noqa: F841
-            "lookback_date == @date"
-        ).schedule_gtfs_dataset_key.unique()
-        agency_info = get_agency_crosswalk(analysis_date=date).query(
-            "schedule_gtfs_dataset_key.isin(@schedule_gtfs_dataset_keys)"
-        )
-        lookback_agency_info += [agency_info]
-    return pd.concat(lookback_agency_info)
+    query = """
+    SELECT
+    key AS schedule_gtfs_dataset_key,
+    analysis_name AS agency,
+    base64_url
+    FROM
+    cal-itp-data-infra.mart_transit_database.dim_gtfs_datasets
+    WHERE _is_current = TRUE
+    AND analysis_name IS NOT NULL
+    """
+
+    df = query_sql(query)
+    return df
 
 
 def add_route_agency_info(gdf: gpd.GeoDataFrame, analysis_date: str) -> gpd.GeoDataFrame:
@@ -132,7 +121,8 @@ def add_route_agency_info(gdf: gpd.GeoDataFrame, analysis_date: str) -> gpd.GeoD
     stop_with_route_crosswalk = catalog.stops_info_crosswalk().read()
 
     #  TODO lookback and concat
-    agency_info = get_agency_crosswalk(analysis_date)
+    # agency_info = get_agency_crosswalk(analysis_date)
+    agency_info = get_agency_crosswalk()
 
     # Make sure all the stops have route_id
     gdf2 = pd.merge(
