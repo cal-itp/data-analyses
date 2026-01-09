@@ -56,7 +56,7 @@ def buffer_hq_corridor_bus(
         hqta_type="hq_corridor_bus",
     ).pipe(_utils.primary_rename)
 
-    agency_info = get_agency_crosswalk(analysis_date)
+    agency_info = get_agency_crosswalk()
 
     # Make sure gtfs_dataset_name and organization columns are added
     corridors2 = pd.merge(
