@@ -4,10 +4,13 @@ Generates
 
 import enum
 import json
+import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -62,6 +65,42 @@ def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
     assert old_path.suffix == ".ipynb"
 
     return Path(str(i).zfill(2) + "__" + old_path.stem + "__" + slugify_params(params) + old_path.suffix)
+
+
+class TyperLoggerHandler(logging.Handler):
+    """A custom logger handler that use Typer echo."""
+
+    def emit(self, record: logging.LogRecord) -> None:
+        typer.secho(self.format(record))
+
+
+class TyperLoggerFormatter(logging.Formatter):
+    """
+    Log formatter that strips terminal colour escape codes from the log message.
+    """
+
+    PAPERMILL_FORMATTING_REGEX = re.compile(r"((\s{2,}|(-)+>\s+)[0-9]*)*\\x1b\[([0-9];?m?)*")
+
+    def format(self, record):
+        """Return message with terminal escapes removed."""
+        return "%s - %s - %s - %s" % (
+            time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+            record.levelname,
+            record.name,
+            re.sub(self.PAPERMILL_FORMATTING_REGEX, "", record.getMessage()),
+        )
+
+
+def configure_logging(verbose):
+    logger = logging.getLogger()
+    handler = TyperLoggerHandler()
+    formatter = TyperLoggerFormatter()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    log_level = logging.DEBUG if verbose else logging.WARNING
+    logger.setLevel(log_level)
+
+    return logger
 
 
 class Chapter(BaseModel):
@@ -360,10 +399,12 @@ def build(
         False,
         help="Pass-through flag to papermill; if true, papermill will not actually execute cells.",
     ),
+    verbose_logging: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging, DEBUG"),
 ) -> None:
     """
     Builds a static site from parameterized notebooks as defined in a site YAML file.
     """
+    configure_logging(verbose_logging)
     site_yml_name = site.value
     site_output_dir = PORTFOLIO_DIR / Path(site_yml_name)
     site_output_dir.mkdir(parents=True, exist_ok=True)
