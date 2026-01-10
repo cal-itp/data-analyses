@@ -1,0 +1,32 @@
+version: 1
+project:
+  title: SB125 Fund Split Analysis
+  authors: ['Cal-ITP']
+  copyright: '2026'
+  github: https://github.com/cal-itp/data-analyses/tree/main/sb125_analyses/sb125_fund_split_analysis
+  toc:
+    -   file: README.md
+    -   file: 00__sb125_fund_split_analysis__.ipynb
+
+  thebe:
+    binder:
+      repo: https://github.com/cal-itp/data-analyses/
+      provider: github
+      url: https://mybinder.org
+      ref: main
+  exports:
+    - format: pdf
+      template: plain_latex_book
+      output: exports/book.pdf
+site:
+  parts:
+    footer: ../templates/partials/footer.md
+    primary_sidebar_footer: '' # hide the Made with MyST footer
+  options:
+    analytics_google: 'G-JCX3Z8JZJC'
+    folders: true
+    favicon: ../templates/assets/favicon.ico
+    logo: ../templates/assets/DDS-Logo_FC-Black_Digital.png
+    logo_dark: ../templates/assets/DDS-Logo_FC-White_Digital.png
+    logo_url: '/'
+  template: book-theme
