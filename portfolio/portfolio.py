@@ -522,6 +522,9 @@ def check_accessibility(site: SiteChoices):
     opts.headless = True
     opts.add_argument("--headless")
     opts.add_argument("--no-sandbox")
+    # The /dev/shm partition is too small in certain VM environments, causing Chrome to fail or crash (see http://crbug.com/715363).
+    # Use this flag to work-around this issue (a temporary directory will always be used to create anonymous shared memory files).
+    opts.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(options=opts)
     axe = Axe(driver)
 
@@ -559,14 +562,9 @@ def check_accessibility(site: SiteChoices):
                 print(f"- {impact}  {violation['help']} ({violation['helpUrl']}):")
                 print(f"  {find_key_recursive(violation, 'failureSummary')}")
                 print(f"  {find_key_recursive(violation, 'html')}")
-                # print("-----")
-                # print(violation)
-                # print("-----")
                 print("\n")
         else:
             print(f"✅ {file_path}.\n")
-        # print("Press Enter to continue...")
-        # input()
 
     driver.quit()
     return serious_count
