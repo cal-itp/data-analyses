@@ -170,6 +170,7 @@ gtfs_digest_rollup:
   operator_summary: "fct_monthly_operator_summary"
   hourly_day_type_summary: "fct_operator_hourly_summary"
   ntd_profile: "ntd_profile"  
+  crosswalk: "crosswalk"
   
 open_data_rollup:
   ca_transit_routes: "mart_gtfs_rollup.fct_monthly_routes"
