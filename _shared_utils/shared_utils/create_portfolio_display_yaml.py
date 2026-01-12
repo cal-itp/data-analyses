@@ -2,8 +2,11 @@
 Reproduce the list of names to organizations
 """
 
+from functools import cache
+
 import pandas as pd
 import pyaml
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from shared_utils import rt_dates
 
 SCHED_GCS = "gs://calitp-analytics-data/data-analyses/gtfs_schedule/"
@@ -53,6 +56,11 @@ duplicated_feed_info = [
 ]
 
 
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+
 def operators_and_organization_df(date_list: list) -> pd.DataFrame:
     """
     Concatenate the crosswalk (from gtfs_funnel)
@@ -64,7 +72,7 @@ def operators_and_organization_df(date_list: list) -> pd.DataFrame:
     df = (
         pd.concat(
             [
-                pd.read_parquet(
+                gcs_pandas().read_parquet(
                     f"{SCHED_GCS}crosswalk/gtfs_key_organization_{date}.parquet", columns=["name", "organization_name"]
                 )
                 for date in date_list

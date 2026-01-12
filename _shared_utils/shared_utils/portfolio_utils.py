@@ -5,16 +5,23 @@ are displayed in portfolio.
 
 import base64
 import re
+from functools import cache
 from pathlib import Path
 from typing import Literal
 
 import pandas as pd
 import yaml
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.sql import get_engine
 from shared_utils import catalog_utils, gtfs_utils_v2
 
 db_engine = get_engine()
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
+
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
 
 
 def decode_base64_url(row):
@@ -299,7 +306,7 @@ def standardize_operator_info_for_exports(df: pd.DataFrame, date: str) -> pd.Dat
     public_feeds = gtfs_utils_v2.filter_to_public_schedule_gtfs_dataset_keys()
 
     # Get the crosswalk file
-    crosswalk = pd.read_parquet(
+    crosswalk = gcs_pandas().read_parquet(
         f"{SCHED_GCS}{CROSSWALK_FILE}_{date}.parquet",
         columns=[
             "schedule_gtfs_dataset_key",
