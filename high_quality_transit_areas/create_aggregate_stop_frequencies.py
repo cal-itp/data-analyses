@@ -1,11 +1,13 @@
 import datetime
 import itertools
 import sys
+from functools import cache
 
 import lookback_wrappers
 import numpy as np
 import pandas as pd
 from _utils import append_analysis_name
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from shared_utils import portfolio_utils
@@ -20,6 +22,12 @@ from update_vars import (
     SHARED_STOP_THRESHOLD,
     analysis_date,
 )
+
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
 
 am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
 pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
@@ -388,8 +396,8 @@ if __name__ == "__main__":
     max_arrivals_by_stop_single = st_prepped.pipe(
         stop_times_aggregation_max_by_stop, analysis_date, single_route_dir=True
     ).explode("route_dir")
-    max_arrivals_by_stop_single.to_parquet(
-        f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet"
+    gcs_pandas().data_frame_to_parquet(
+        max_arrivals_by_stop_single, f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet"
     )  # for branching_derived_intersections.py
     publish_export_single = portfolio_utils.standardize_operator_info_for_exports(
         max_arrivals_by_stop_single, analysis_date
@@ -425,7 +433,7 @@ if __name__ == "__main__":
         max_arrivals_by_stop_single,
         (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD),
     )
-    combined_export.to_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
+    gcs_pandas().data_frame_to_parquet(combined_export, f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
     publish_export = portfolio_utils.standardize_operator_info_for_exports(combined_export, analysis_date).drop(
         columns=["base64_url", "source_record_id"]
     )
