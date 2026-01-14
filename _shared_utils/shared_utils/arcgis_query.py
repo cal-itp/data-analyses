@@ -5,11 +5,18 @@ https://gis.stackexchange.com/questions/266897/how-to-get-around-the-1000-object
 """
 
 import urllib.parse
+from functools import cache
 
 import geopandas as gpd
 import numpy as np
 import pandas as pd
 import requests
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
 
 
 def query_arcgis_feature_server(url_feature_server=""):
@@ -101,7 +108,7 @@ def query_arcgis_feature_server(url_feature_server=""):
         if "error" in url_get.json():
             block_size = int(block_size / 2) + 1
         else:
-            geodata_part = gpd.read_file(url_get.text)
+            geodata_part = gcs_geopandas().read_file(url_get.text)
 
             geodata_parts.append(geodata_part.copy())
             worked = True
@@ -126,7 +133,7 @@ def query_arcgis_feature_server(url_feature_server=""):
 
         # Actually performing the query and storing its results in a
         # GeoDataFrame
-        geodata_part = gpd.read_file(url_comb, driver="GeoJSON")
+        geodata_part = gcs_geopandas().read_file(url_comb, driver="GeoJSON")
 
         # Appending the result to `geodata_parts`
         if geodata_part.shape[0] > 0:

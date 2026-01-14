@@ -2,22 +2,32 @@
 Utility functions for wrangling Dask data processing steps.
 """
 
+from functools import cache
 from typing import List, Literal, Union
 
 import dask.dataframe as dd
 import dask_geopandas as dg
 import gcsfs
 import geopandas as gpd
-import google.auth
 import pandas as pd
 from calitp_data_analysis import utils
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from dask import compute, delayed
 from dask.delayed import Delayed  # type hint
 from shared_utils import time_helpers
 
-credentials, project = google.auth.default()
-
 fs = gcsfs.GCSFileSystem()
+
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
 
 
 def concat_and_export(gcs_folder: str, file_name: str, filetype: Literal["df", "gdf"] = "df"):
@@ -102,10 +112,10 @@ def concatenate_list_of_files(
     assemble a concatenated pandas or geopandas dataframe.
     """
     if file_type == "df":
-        dfs = [delayed(pd.read_parquet)(f) for f in list_of_filepaths]
+        dfs = [delayed(gcs_pandas().read_parquet)(f) for f in list_of_filepaths]
 
     elif file_type == "gdf":
-        dfs = [delayed(gpd.read_parquet)(f) for f in list_of_filepaths]
+        dfs = [delayed(gcs_geopandas().read_parquet)(f) for f in list_of_filepaths]
 
     results = [compute(i)[0] for i in dfs]
     full_df = pd.concat(results, axis=0).reset_index(drop=True)
@@ -130,15 +140,17 @@ def import_df_func(
     https://blog.dask.org/2023/04/12/from-map
     """
     if data_type == "gdf":
-        df = gpd.read_parquet(
-            f"{path}_{one_date}.parquet", **kwargs, storage_options={"token": credentials.token}
-        ).drop_duplicates()
+        df = gcs_geopandas().read_parquet(f"{path}_{one_date}.parquet", **kwargs).drop_duplicates()
 
     else:
-        df = pd.read_parquet(
-            f"{path}_{one_date}.parquet",
-            **kwargs,
-        ).drop_duplicates()
+        df = (
+            gcs_pandas()
+            .read_parquet(
+                f"{path}_{one_date}.parquet",
+                **kwargs,
+            )
+            .drop_duplicates()
+        )
 
     if add_date:
         df = time_helpers.add_service_date(df, one_date)
