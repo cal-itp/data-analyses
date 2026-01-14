@@ -15,7 +15,7 @@ import typer
 from pathlib import Path
 
 from shared_utils import portfolio_utils
-from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS, SHARED_GCS
+from update_vars import GTFS_DATA_DICT, file_name
 
 DISTRICT_SITE = Path("../portfolio/sites/district_digest.yml")
 LEG_DISTRICT_SITE = Path("../portfolio/sites/legislative_district_digest.yml")
@@ -35,19 +35,14 @@ def overwrite_yaml(
     
     elif name == "district":
         
-        OPERATOR_FILE = GTFS_DATA_DICT.digest_tables.operator_profiles_report
+        FILEPATH_URL = f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet"
 
-        df = pd.read_parquet(
-            f"{RT_SCHED_GCS}{OPERATOR_FILE}.parquet",
-            columns = ["caltrans_district"]
-        ).dropna(subset="caltrans_district").drop_duplicates()
-        
-        # We have several values for Caltrans District as the names slightly 
-        # change (ex: D7 Los Angeles is now Los Angeles / Ventura).
-        #df = df.assign(
-        #    caltrans_district = df.caltrans_district.map(
-        #        portfolio_utils.CALTRANS_DISTRICT_DICT)
-       # )
+        df = (pd.read_parquet(
+        FILEPATH_URL, columns = ["caltrans_district",]
+    )
+    .sort_values(["caltrans_district"]).reset_index(drop=True)
+    .drop_duplicates()
+         )
         
         portfolio_utils.create_portfolio_yaml_chapters_no_sections(
             DISTRICT_SITE, 
