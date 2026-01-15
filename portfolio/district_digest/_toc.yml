@@ -2,16 +2,7 @@ format: jb-book
 parts:
 -   caption: null
     chapters:
-    -   file: district_01-eureka/00__district_report__district_01-eureka.ipynb
-    -   file: district_02-redding/00__district_report__district_02-redding.ipynb
-    -   file: district_03-marysville-sacramento/00__district_report__district_03-marysville-sacramento.ipynb
-    -   file: district_04-bay-area-oakland/00__district_report__district_04-bay-area-oakland.ipynb
-    -   file: district_05-san-luis-obispo-santa-barbara/00__district_report__district_05-san-luis-obispo-santa-barbara.ipynb
-    -   file: district_06-fresno-bakersfield/00__district_report__district_06-fresno-bakersfield.ipynb
-    -   file: district_07-los-angeles-ventura/00__district_report__district_07-los-angeles-ventura.ipynb
-    -   file: district_08-san-bernardino-riverside/00__district_report__district_08-san-bernardino-riverside.ipynb
-    -   file: district_09-bishop/00__district_report__district_09-bishop.ipynb
-    -   file: district_10-stockton/00__district_report__district_10-stockton.ipynb
-    -   file: district_11-san-diego/00__district_report__district_11-san-diego.ipynb
-    -   file: district_12-santa-ana/00__district_report__district_12-santa-ana.ipynb
+    -   file: district_01-eureka/00__report_new_caltrans_district__district_01-eureka.ipynb
+    -   file: district_02-redding/00__report_new_caltrans_district__district_02-redding.ipynb
+    -   file: district_03-marysville-sacramento/00__report_new_caltrans_district__district_03-marysville-sacramento.ipynb
 root: README
