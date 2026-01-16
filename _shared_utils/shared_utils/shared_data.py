@@ -2,19 +2,28 @@
 One-off functions, run once, save datasets for shared use.
 """
 
-import gcsfs
+from functools import cache
+
 import geopandas as gpd
-import google.auth
 import numpy as np
 import pandas as pd
 import shapely
 from calitp_data_analysis import geography_utils, utils
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.sql import to_snakecase
 from shared_utils import arcgis_query, catalog_utils
 
-credentials, project = google.auth.default()
 
-fs = gcsfs.GCSFileSystem()
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/shared_data/"
 COMPILED_CACHED_GCS = "gs://calitp-analytics-data/data-analyses/rt_delay/compiled_cached_views/"
@@ -26,7 +35,7 @@ def make_county_centroids():
     """
     URL = "https://opendata.arcgis.com/datasets/" "8713ced9b78a4abb97dc130a691a8695_0.geojson"
 
-    gdf = gpd.read_file(URL).to_crs(geography_utils.CA_NAD83Albers_ft)
+    gdf = gcs_geopandas().read_file(URL).to_crs(geography_utils.CA_NAD83Albers_ft)
     gdf.columns = gdf.columns.str.lower()
 
     gdf = (
@@ -60,7 +69,7 @@ def make_county_centroids():
     gdf2 = gdf.append(ca_row2).reset_index(drop=True)
 
     # Save as parquet, because lat/lon held in list, not point geometry anymore
-    gdf2.to_parquet(f"{GCS_FILE_PATH}ca_county_centroids.parquet")
+    gcs_geopandas().geo_data_frame_to_parquet(gdf2, f"{GCS_FILE_PATH}ca_county_centroids.parquet")
 
     print("County centroids exported to GCS")
 
@@ -73,7 +82,7 @@ def make_clean_state_highway_network():
     """
     URL = "https://opendata.arcgis.com/datasets/" "77f2d7ba94e040a78bfbe36feb6279da_0.geojson"
 
-    gdf = gpd.read_file(URL)
+    gdf = gcs_geopandas().read_file(URL)
 
     # Save a raw, undissolved version
     utils.geoparquet_gcs_export(
@@ -205,7 +214,8 @@ def create_postmile_segments(
     # We need multilinestrings to become linestrings (use gdf.explode)
     # and the columns we select do uniquely tag lines (multilinestrings are 1 item)
     hwy_lines = (
-        gpd.read_parquet(
+        gcs_geopandas()
+        .read_parquet(
             f"{GCS_FILE_PATH}state_highway_network_raw.parquet",
             columns=group_cols + ["bodometer", "eodometer", "geometry"],
         )
@@ -225,7 +235,8 @@ def create_postmile_segments(
     )
 
     hwy_postmiles = (
-        gpd.read_parquet(
+        gcs_geopandas()
+        .read_parquet(
             f"{GCS_FILE_PATH}state_highway_network_postmiles.parquet", columns=group_cols + ["odometer", "geometry"]
         )
         .pipe(round_odometer_values, ["odometer"], num_decimals=3)
@@ -281,8 +292,8 @@ def export_combined_legislative_districts() -> gpd.GeoDataFrame:
     ASSEMBLY_DISTRICTS = f"{BASE_URL}0/{SUFFIX}"
     SENATE_DISTRICTS = f"{BASE_URL}1/{SUFFIX}"
 
-    ad = gpd.read_file(ASSEMBLY_DISTRICTS)
-    sd = gpd.read_file(SENATE_DISTRICTS)
+    ad = gcs_geopandas().read_file(ASSEMBLY_DISTRICTS)
+    sd = gcs_geopandas().read_file(SENATE_DISTRICTS)
 
     gdf = pd.concat(
         [
@@ -307,15 +318,19 @@ def sjoin_shapes_legislative_districts(analysis_date: str) -> pd.DataFrame:
     # keeping gtfs_dataset_key gets us duplicate rows by name,
     # and by the time we're filtering in GTFS digest, we already have name attached
 
-    operator_shapes = pd.read_parquet(
-        f"{COMPILED_CACHED_GCS}trips_{analysis_date}.parquet", columns=operator_cols + ["shape_array_key"]
-    ).drop_duplicates()
+    operator_shapes = (
+        gcs_pandas()
+        .read_parquet(
+            f"{COMPILED_CACHED_GCS}trips_{analysis_date}.parquet", columns=operator_cols + ["shape_array_key"]
+        )
+        .drop_duplicates()
+    )
 
-    shapes = gpd.read_parquet(
+    shapes = gcs_geopandas().read_parquet(
         f"{COMPILED_CACHED_GCS}routelines_{analysis_date}.parquet", columns=["shape_array_key", "geometry"]
     )
 
-    legislative_districts = gpd.read_parquet(f"{GCS_FILE_PATH}legislative_districts.parquet")
+    legislative_districts = gcs_geopandas().read_parquet(f"{GCS_FILE_PATH}legislative_districts.parquet")
 
     gdf = pd.merge(shapes, operator_shapes, on="shape_array_key", how="inner").drop(columns="shape_array_key")
 
@@ -339,7 +354,9 @@ def make_transit_operators_to_legislative_district_crosswalk(date_list: list) ->
         .reset_index(drop=True)
     )
 
-    gdf.to_parquet(f"{GCS_FILE_PATH}" "crosswalk_transit_operators_legislative_districts.parquet")
+    gcs_geopandas().geo_data_frame_to_parquet(
+        gdf, f"{GCS_FILE_PATH}" "crosswalk_transit_operators_legislative_districts.parquet"
+    )
 
     return
 
@@ -353,10 +370,7 @@ def dissolve_shn_district() -> gpd.GeoDataFrame:
     # Read in the dataset and change the CRS to one to feet.
     SHN_FILE = catalog_utils.get_catalog("shared_data_catalog").state_highway_network.urlpath
 
-    shn = gpd.read_parquet(
-        SHN_FILE,
-        storage_options={"token": credentials.token},
-    ).to_crs(geography_utils.CA_NAD83Albers_ft)
+    shn = gcs_geopandas().read_parquet(SHN_FILE).to_crs(geography_utils.CA_NAD83Albers_ft)
 
     # Dissolve by route which represents the the route's name and drop the other columns
     # because they are no longer relevant.
@@ -373,9 +387,8 @@ def dissolve_shn_district() -> gpd.GeoDataFrame:
     )
 
     # Save this out so I don't have to dissolve it each time.
-    shn_dissolved.to_parquet(
-        f"{GCS_FILE_PATH}shn_dissolved_by_ct_district_route.parquet",
-        filesystem=fs,
+    gcs_geopandas().geo_data_frame_to_parquet(
+        shn_dissolved, f"{GCS_FILE_PATH}shn_dissolved_by_ct_district_route.parquet"
     )
     return shn_dissolved
 
@@ -388,10 +401,7 @@ def buffer_shn(buffer_amount: int, file_name: str) -> gpd.GeoDataFrame:
     # GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/state_highway_network/"
 
     # Read in the dissolved SHN file
-    shn_df = gpd.read_parquet(
-        f"{GCS_FILE_PATH}{file_name}.parquet",
-        storage_options={"token": credentials.token},
-    )
+    shn_df = gcs_geopandas().read_parquet(f"{GCS_FILE_PATH}{file_name}.parquet")
 
     # Buffer the state highway.
     shn_df_buffered = shn_df.assign(
@@ -400,9 +410,8 @@ def buffer_shn(buffer_amount: int, file_name: str) -> gpd.GeoDataFrame:
 
     # Save it out so we won't have to buffer over again and
     # can just read it in.
-    shn_df_buffered.to_parquet(
-        f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_{file_name}.parquet",
-        filesystem=fs,
+    gcs_geopandas().geo_data_frame_to_parquet(
+        shn_df_buffered, f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_{file_name}.parquet"
     )
 
     return shn_df_buffered
