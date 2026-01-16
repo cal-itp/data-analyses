@@ -15,6 +15,10 @@ GTFS_MART_TABLES = [
     "fct_daily_scheduled_stops",  # partitioned by service_date, clustered by feed_key
     "fct_daily_scheduled_shapes",  # partitioned by service_date
     "fct_observed_trips",  # partitioned by service_date; clustered by service_date, schedule_base64_url
+    # "int_gtfs_rt__vehicle_positions_trip_day_map_grouping" # use this to help filter fct_vehicle_locations, it has dt and service_date
+]
+
+VP_TABLES = [
     "fct_vehicle_locations",  # partitioned by dt; clustered by dt, base64_url
     "fct_vehicle_locations_path",  # partitioned by service_date; clustered by base64_url, schedule_base64_url
 ]
@@ -23,13 +27,13 @@ HERMOSA_BEACH_DATES = ["2025-10-15", "2025-11-12", "2025-12-17", "2026-01-14"]
 
 SUBSET_OF_OPERATORS = [
     "Beach Cities GMV Schedule",
-    "Beach Cities VehiclePositions",
+    # "Beach Cities VehiclePositions",
     "Torrance Schedule",
-    "Torrance Vehicle Positions",
+    # "Torrance Vehicle Positions",
     "LA DOT Schedule",
-    "LA DOT VehiclePositions",
+    # "LA DOT VehiclePositions",
     "LA Metro Bus Schedule",
-    "LA Metro Bus Vehicle Positions",
+    # "LA Metro Bus Vehicle Positions",
     "LA Metro Rail Schedule",
-    "LA Metro Rail Vehicle Positions",
+    # "LA Metro Rail Vehicle Positions",
 ]
