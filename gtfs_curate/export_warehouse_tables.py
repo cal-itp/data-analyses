@@ -15,7 +15,7 @@ from google.cloud import bigquery
 from shared_utils import geo_utils
 
 credentials, project = google.auth.default()
-
+fs = gcsfs.GCSFileSystem()
 PUBLIC_GCS = "gs://calitp-publish-data-analysis/"
 HERMOSA_BEACH_GCS = f"{PUBLIC_GCS}hermosa_beach/"
 
@@ -181,3 +181,6 @@ if __name__ == "main":
 
     for one_table in hb.VP_TABLES:
         download_vp_tables(one_table, hb.HERMOSA_BEACH_DATES, hb.SUBSET_OF_OPERATORS, HERMOSA_BEACH_GCS)
+
+    README_FILE_PATH = "hermosa_beach_README.md"
+    fs.put(README_FILE_PATH, f"{HERMOSA_BEACH_GCS}README.md")
