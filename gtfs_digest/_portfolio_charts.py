@@ -28,6 +28,7 @@ def circle_chart(
     color_scheme: list,
     tooltip_cols: list,
     date_format: str = "%b %Y",
+    y_ticks: list = [0,1,2,3]
 ) -> alt.Chart:
 
     chart = (
@@ -42,6 +43,8 @@ def circle_chart(
             y=alt.Y(
                 y_col,
                 title=(y_col),
+                scale=alt.Scale(domain=[0, y_ticks[-1]], nice=False),
+                axis=alt.Axis(values=y_ticks)
             ),
             color=alt.Color(
                 color_col,

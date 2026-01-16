@@ -31,6 +31,7 @@ parts:
     - analysis_name: City of Roseville
     - analysis_name: El Dorado County Transit Authority
     - analysis_name: Glenn County
+    - analysis_name: Nevada County
     - analysis_name: Placer County
     - analysis_name: Sacramento County
     - analysis_name: Sacramento Regional Transit District
@@ -91,6 +92,7 @@ parts:
     - analysis_name: Kern County
     - analysis_name: Kings County Area Public Transit Agency
     - analysis_name: Madera County
+    - analysis_name: Tulare County Regional Transit Agency
   - caption: District 07-Los Angeles / Ventura
     params:
       district: 07-Los Angeles / Ventura
@@ -102,6 +104,7 @@ parts:
     - analysis_name: City of Baldwin Park
     - analysis_name: City of Bell
     - analysis_name: City of Bell Gardens
+    - analysis_name: City of Bellflower
     - analysis_name: City of Burbank
     - analysis_name: City of Calabasas
     - analysis_name: City of Carson
@@ -166,6 +169,7 @@ parts:
     sections:
     - analysis_name: Amador Regional Transit System
     - analysis_name: Calaveras Transit Agency
+    - analysis_name: City of Escalon
     - analysis_name: City of Lodi
     - analysis_name: City of Manteca
     - analysis_name: City of Tracy

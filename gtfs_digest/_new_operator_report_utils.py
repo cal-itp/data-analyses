@@ -1,5 +1,4 @@
 import _portfolio_charts
-import deploy_portfolio_yaml
 import altair as alt
 import pandas as pd
 import pandas_gbq
@@ -452,3 +451,106 @@ def create_text_graph(df: pd.DataFrame):
     )
     return chart
 
+
+def create_tu_minute(df: pd.DataFrame):
+
+    chart_dict = readable_dict.trip_updates_minute
+
+    chart = _portfolio_charts.circle_chart(
+        df=df,
+        x_col="Date",
+        y_col="TU Messages Per Minute",
+        color_col="TU Messages Per Minute",
+        color_scheme=[*chart_dict.colors],
+        tooltip_cols=list(chart_dict.tooltip),
+        date_format="%b %Y",
+        y_ticks=chart_dict.ticks,
+    )
+
+    chart = _portfolio_charts.configure_chart(
+        chart,
+        width=400,
+        height=250,
+        title=f"{chart_dict.title}",
+        subtitle=chart_dict.subtitle,
+    )
+
+    return chart
+
+
+def create_vp_minute(df: pd.DataFrame):
+
+    chart_dict = readable_dict.vehicle_positions_minute
+
+    chart = _portfolio_charts.circle_chart(
+        df=df,
+        x_col="Date",
+        y_col="VP Messages Per Minute",
+        color_col="VP Messages Per Minute",
+        color_scheme=[*chart_dict.colors],
+        tooltip_cols=list(chart_dict.tooltip),
+        date_format="%b %Y",
+        y_ticks=chart_dict.ticks,
+    )
+
+    chart = _portfolio_charts.configure_chart(
+        chart,
+        width=400,
+        height=250,
+        title=f"{chart_dict.title}",
+        subtitle=chart_dict.subtitle,
+    )
+
+    return chart
+
+
+def create_tu_pct(df: pd.DataFrame):
+
+    chart_dict = readable_dict.trip_update_pct
+
+    chart = _portfolio_charts.bar_chart(
+        df=df,
+        x_col="Date",
+        y_col="Percent of Trips with Trip Updates",
+        color_col="Percent of Trips with Trip Updates",
+        color_scheme=[*chart_dict.colors],
+        tooltip_cols=list(chart_dict.tooltip),
+        date_format="%b %Y",
+        y_ticks=chart_dict.ticks,
+    )
+
+    chart = _portfolio_charts.configure_chart(
+        chart,
+        width=400,
+        height=250,
+        title=f"{chart_dict.title}",
+        subtitle=chart_dict.subtitle,
+    )
+
+    return chart  
+
+
+def create_vp_pct(df: pd.DataFrame):
+
+    chart_dict = readable_dict.vehicle_positions_pct
+
+    chart = _portfolio_charts.bar_chart(
+        df=df,
+        x_col="Date",
+        y_col="Percent of Trips with Vehicle Positions",
+        color_col="Percent of Trips with Vehicle Positions",
+        color_scheme=[*chart_dict.colors],
+        tooltip_cols=list(chart_dict.tooltip),
+        date_format="%b %Y",
+        y_ticks=chart_dict.ticks,
+    )
+
+    chart = _portfolio_charts.configure_chart(
+        chart,
+        width=400,
+        height=250,
+        title=f"{chart_dict.title}",
+        subtitle=chart_dict.subtitle,
+    )
+
+    return chart

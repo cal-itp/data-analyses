@@ -9,6 +9,13 @@ credentials, project = google.auth.default()
 import gcsfs
 fs = gcsfs.GCSFileSystem()
 
+from functools import cache
+from calitp_data_analysis.gcs_pandas import GCSPandas
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
+    
 """
 Column Names
 """
@@ -193,7 +200,7 @@ def final_transit_route_shs_outputs(
     district: the Caltrans district we are interested in.
     """
     GCS_PATH = "gs://calitp-analytics-data/data-analyses/state_highway_network/"
-    open_data_df = pd.read_parquet(
+    open_data_df = gcs_pandas().read_parquet(
     f"{GCS_PATH}transit_route_shn_open_data_portal_50.parquet")
 
     intersecting_gdf = gpd.read_parquet(
@@ -202,7 +209,7 @@ def final_transit_route_shs_outputs(
 
     FILEPATH_URL = f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet"
 
-    crosswalk_df = (pd.read_parquet(
+    crosswalk_df = (gcs_pandas().read_parquet(
         FILEPATH_URL
     )[["caltrans_district","caltrans_district_int"]]
     .drop_duplicates()

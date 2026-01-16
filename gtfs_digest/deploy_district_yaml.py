@@ -17,6 +17,13 @@ from pathlib import Path
 from shared_utils import portfolio_utils
 from update_vars import GTFS_DATA_DICT, file_name
 
+from functools import cache
+from calitp_data_analysis.gcs_pandas import GCSPandas
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
+    
 DISTRICT_SITE = Path("../portfolio/sites/district_digest.yml")
 LEG_DISTRICT_SITE = Path("../portfolio/sites/legislative_district_digest.yml")
 
@@ -37,7 +44,7 @@ def overwrite_yaml(
         
         FILEPATH_URL = f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet"
 
-        df = (pd.read_parquet(
+        df = (gcs_pandas().read_parquet(
         FILEPATH_URL, columns = ["caltrans_district",]
     )
     .sort_values(["caltrans_district"]).reset_index(drop=True)
