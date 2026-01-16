@@ -28,6 +28,7 @@ def circle_chart(
     color_scheme: list,
     tooltip_cols: list,
     date_format: str = "%b %Y",
+    y_ticks: list = [0,1,2,3]
 ) -> alt.Chart:
 
     chart = (
@@ -42,6 +43,8 @@ def circle_chart(
             y=alt.Y(
                 y_col,
                 title=(y_col),
+                scale=alt.Scale(domain=[0, y_ticks[-1]], nice=False),
+                axis=alt.Axis(values=y_ticks)
             ),
             color=alt.Color(
                 color_col,
@@ -187,56 +190,21 @@ def create_bg_service_chart() -> alt.Chart:
     return chart
 
 
-def create_hourly_summary(df: pd.DataFrame, day_type: str):
-    
-    chart_dict = readable_dict.hourly_summary
-    df2 = df.loc[df["Day Type"] == "Saturday"]
-    df2["Date"] = df["Date"].astype(str)
-    
-    date_list = list(df2["Date"].unique())
-    
-    date_dropdown = alt.binding_select(
-        options=date_list,
-        name="Dates: ",
-    )
-    xcol_param = alt.selection_point(
-        fields=["Date"], value=date_list[0], bind=date_dropdown
+def pie_chart(
+    df: pd.DataFrame, color_col: str, theta_col: str, color_scheme: list, tooltip_cols:list
+) -> alt.Chart:
+    chart = (
+        alt.Chart(df)
+        .mark_arc()
+        .encode(
+            theta=theta_col,
+            color=alt.Color(
+                color_col,
+                title=(color_col),
+                scale=alt.Scale(range=color_scheme),
+            ),
+            tooltip=tooltip_cols,
+        )
     )
 
-    chart = (
-        (
-            alt.Chart(df2)
-            .mark_line(size=3)
-            .encode(
-                x=alt.X(
-                    "Departure Hour",
-                    title="Departure Hour",
-                    axis=alt.Axis(
-                        labelAngle=-45,
-                    ),
-                ),
-                y=alt.Y(
-                    "N Trips",
-                    title="N Trips",
-                ),
-            )
-        )
-        .add_params(xcol_param)
-        .transform_filter(xcol_param)
-    )
-    
-    bg = create_bg_service_chart()
-    
-    chart = (chart + bg).properties(
-    resolve=alt.Resolve(
-        scale=alt.LegendResolveMap(color=alt.ResolveMode("independent"))
-    )
-)
-    chart = _report_operator_visuals.configure_chart(
-    chart,
-    width=400,
-    height=250,
-    title=f"{chart_dict.title} {day_type}",
-    subtitle=chart_dict.subtitle)
-    
     return chart

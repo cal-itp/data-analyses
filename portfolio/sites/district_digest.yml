@@ -1,31 +1,31 @@
 directory: ./gtfs_digest/
-notebook: ./gtfs_digest/report_caltrans_district.ipynb
+notebook: ./gtfs_digest/report_new_caltrans_district.ipynb
 parts:
 - caption: Introduction
 - chapters:
   - params:
-      district: 01 - Eureka
+      district: 01-Eureka
   - params:
-      district: 02 - Redding
+      district: 02-Redding
   - params:
-      district: 03 - Marysville / Sacramento
+      district: 03-Marysville / Sacramento
   - params:
-      district: 04 - Bay Area / Oakland
+      district: 04-Bay Area / Oakland
   - params:
-      district: 05 - San Luis Obispo / Santa Barbara
+      district: 05-San Luis Obispo / Santa Barbara
   - params:
-      district: 06 - Fresno / Bakersfield
+      district: 06-Fresno / Bakersfield
   - params:
-      district: 07 - Los Angeles / Ventura
+      district: 07-Los Angeles / Ventura
   - params:
-      district: 08 - San Bernardino / Riverside
+      district: 08-San Bernardino / Riverside
   - params:
-      district: 09 - Bishop
+      district: 09-Bishop
   - params:
-      district: 10 - Stockton
+      district: 10-Stockton
   - params:
-      district: 11 - San Diego
+      district: 11-San Diego
   - params:
-      district: 12 - Santa Ana
+      district: 12-Orange County
 readme: ./gtfs_digest/README.md
 title: District GTFS Digest

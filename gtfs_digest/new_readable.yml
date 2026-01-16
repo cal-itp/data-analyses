@@ -2,11 +2,12 @@
 # This color palette is good for categorizing nominal values.
 # The colors do not represent "good" or "bad", they merely differentiate the values.
 color_palettes:
-  two_colors: ["#dd217d","#fcb40e"]
-  tri_color: ["#ccbb44","#5b8efd","#dd217d"]
-  four_colors: ["#dd217d","#fcb40e","#ccbb44","#5b8efd"]
-  full_color_scale: ["#5b8efd", "#765fec", "#fcb40e", "#fc5c04", "#dd217d", "#ccbb44", "#c5c5c4"]
-  headway_scale: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d","#dd217d","#dd217d"] 
+  two_colors: ["#b1e4e3","#4b4f54"]
+  two_colors2: ["#ffb81c","#00b2a9"]
+  tri_color: ["#00b2a9","#ffb81c","#b1e4e3"]
+  four_colors: ["#00b2a9","#ffb81c","#b1e4e3","#d9d9d6"]
+  full_color_scale: ["#00b2a9","#ffb81c","#b1e4e3","#d9d9d6", "#4b4f54", "#d86018"]
+  headway_scale: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d",] 
   vp_tu_scale: ["#dd217d","#fc5c04","#fcb40e","#ccbb44"]
   
 # Scheduled Service Hours
@@ -21,39 +22,39 @@ background_graph:
 # fct_monthly_operator_summary
 trip_updates_minute:
     title: "Trip Update Messages per Minute"
-    subtitle: "Based on Weekday Data"
+    subtitle: "Based on Weekday Data, across all routes."
     tooltip: ["Date", "TU Messages Per Minute"]
-    colors: ["#dd217d","#fc5c04","#fcb40e","#ccbb44"]
-    ticks: []
+    colors: ${color_palettes.two_colors2} 
+    ticks: [0, 1, 2, 3]
   
 vehicle_positions_minute:
    title: "Vehicle Positions per Minute"
-   subtitle: "Based on Weekday Data"
+   subtitle: "Based on Weekday Data, across all routes."
    tooltip: ["Date", "VP Messages Per Minute"]
-   colors: ${color_palettes.vp_tu_scale} 
-   ticks: []
+   colors: ${color_palettes.two_colors} 
+   ticks: [0, 1, 2, 3]
   
 vehicle_positions_pct:
   title: "Percentage of Trips with Vehicle Positions"
-  subtitle: ""
+  subtitle: "Based on Weekday Data, across all routes."
   tooltip: ["Date", "Percent of Trips with Vehicle Positions"]
-  colors: ${color_palettes.vp_tu_scale} 
-  ticks: []
+  colors: ${color_palettes.four_colors} 
+  ticks: [0,10,20,30,40,50,60,70,80,90,100]
   
 trip_update_pct:
   title: "Percentage of Trips with Trip Updates"
-  subtitle: ""
+  subtitle: "Based on Weekday Data, across all routes."
   tooltip: ["Date", "Percent of Trips with Trip Updates",]
-  colors: []
-  ticks: []
+  colors: ${color_palettes.tri_color} 
+  ticks: [0,10,20,30,40,50,60,70,80,90,100]
 
   
 # fct_monthly_schedule_route_direction_summary
 avg_scheduled_minutes:
   title: "Average Scheduled Minutes"
-  subtitle: "The average minutes a trip is scheduled to run in each direction for weekdays."
+  subtitle: "Based on Weekday Data."
   tooltip: ["Date", "Route", "Direction", "Average Scheduled Minutes"]
-  colors: ${color_palettes.four_colors} 
+  colors: ${color_palettes.two_colors2} 
   ticks: [0, 15, 30, 45, 60, 75, 90]
 
 scheduled:
@@ -67,7 +68,7 @@ frequency:
   title: "Headway in Minutes"
   subtitle: "Based on Weekday Data."
   tooltip: ["Date","Route", "Direction", "Headway All Day",]
-  colors: ${color_palettes.headway_scale}
+  colors: ${color_palettes.two_colors2}
   ticks: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
 
 text: 
@@ -79,5 +80,12 @@ text:
 
 route_typology:
   title: "Total Routes by Typology"
-  tooltip: ["Route Type", "Total Routes"]
+  tooltip: ["Route Typology", "Total Routes"]
   colors: ${color_palettes.full_color_scale} 
+
+route_percentiles:
+  title: "Route Length Percentile Groups"
+  subtitle: "Count of routes by their percentile groups based on their length."
+  tooltip: ['Route Length Miles Percentile Group', 'Total Routes']
+  colors: ${color_palettes.four_colors} 
+  ticks: [0, 5, 10, 15, 20, 25, 30, 35]

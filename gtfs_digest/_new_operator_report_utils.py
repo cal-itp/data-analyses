@@ -1,9 +1,16 @@
 import _portfolio_charts
 import altair as alt
 import pandas as pd
+import pandas_gbq
+import numpy as np
 
 from omegaconf import OmegaConf
 readable_dict = OmegaConf.load("new_readable.yml")
+
+import google.auth
+import pandas_gbq
+
+
 """
 Prep Data
 """
@@ -43,62 +50,125 @@ def create_text_table(df: pd.DataFrame) -> pd.DataFrame:
 
     return text_table_df
 
+def create_typology(df:pd.DataFrame)->pd.DataFrame:
+    df2 = df.groupby(['Route Typology']).agg({"Route":"nunique"}).reset_index()
+    df2 = df2.rename(columns = {"Route":"Total Routes"})
+    return df2
+
+
+def find_percentiles(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Bin 'Route Length Miles' into percentile categories and merge
+    human-readable group labels. Zeros are labeled 'Zero'.
+    """
+    col = 'Route Length Miles'
+
+    # Compute quartiles once
+    p25, p50, p75 = df[col].quantile([0.25, 0.50, 0.75])
+
+    # Build bins: (-inf, 0], (0, p25], (p25, p50], (p50, p75], (p75, inf)
+    bins = [-np.inf, 0, p25, p50, p75, np.inf]
+    labels = ['Zero', '25th percentile', '50th percentile', '< 75th percentile', '> 75th percentile']
+
+    out = df.copy()
+    out['percentile_cat'] = pd.cut(
+        out[col],
+        bins=bins,
+        labels=labels,
+        right=True,                # include upper bound in each interval
+        include_lowest=True        # include lowest value
+    )
+
+    # Build concise label text using the computed thresholds
+    percentile_df = pd.DataFrame({
+        'percentile_cat': labels[1:],  # exclude 'Zero' from the mapping table
+        'Route Length Miles Percentile Group': [
+            f"25 percentile (<= {p25:.1f} miles)",
+            f"26-50th percentile ({p25:.1f}-{p50:.1f} miles)",
+            f"51-75th percentile ({p50:.1f}-{p75:.1f} miles)",
+            f"76th percentile (>= {p75:.1f} miles)",
+        ],
+    })
+
+    # Merge and drop 'Geometry' if present
+    m1 = out.merge(percentile_df, on='percentile_cat', how='left')
+    if 'Geometry' in m1.columns:
+        m1 = m1.drop(columns=['Geometry'])
+
+    return m1
+
+
+def reshape_percentile_groups(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Total number of routes by each
+    the route_length_miles_percentile groups.
+    """
+    agg1 = (
+        df.groupby(["Route Length Miles Percentile Group",])
+        .agg({"Route Name": "nunique"})
+        .reset_index()
+    ).rename(
+        columns={"Route Name": "Total Routes"}
+    )
+    return agg1
+
     
 """
-Charts
-"""
-def create_bg_service_chart() -> alt.Chart:
-    """
-    Create a shaded background for the Service Hour Chart
-    to differentiate between time periods.
-    """
-    specific_chart_dict = readable_dict.background_graph
-    cutoff = pd.DataFrame(
-        {
-            "start": [0, 4, 7, 10, 15, 19],
-            "stop": [3.99, 6.99, 9.99, 14.99, 18.99, 24],
-            "Time Period": [
-                "Owl:12-3:59AM",
-                "Early AM:4-6:59AM",
-                "AM Peak:7-9:59AM",
-                "Midday:10AM-2:59PM",
-                "PM Peak:3-7:59PM",
-                "Evening:8-11:59PM",
-            ],
-        }
-    )
+Route Typology
+"""   
+def create_route_lengths(df: pd.DataFrame):
+    df2 = find_percentiles(df)
+    df3 = reshape_percentile_groups(df2)
+    
+    chart_dict = readable_dict.route_percentiles
 
-    # Sort legend by time, 12am starting first.
+    chart = _portfolio_charts.bar_chart(
+    df = df3,
+    x_col = "Route Length Miles Percentile Group",
+    y_col = "Total Routes",
+    color_col = "Route Length Miles Percentile Group",
+    color_scheme = [*chart_dict.colors],
+    tooltip_cols = list(chart_dict.tooltip),
+    date_format = "",
+    y_ticks = chart_dict.ticks,
+)
+    
     chart = (
-        alt.Chart(cutoff.reset_index())
-        .mark_rect(opacity=0.15)
-        .encode(
-            x="start",
-            x2="stop",
-            y=alt.value(0),
-            y2=alt.value(250),
-            color=alt.Color(
-                "Time Period:N",
-                sort=(
-                    [
-                        "Owl:12-3:59AM",
-                        "Early AM:4-6:59AM",
-                        "AM Peak:7-9:59AM",
-                        "Midday:10AM-2:59PM",
-                        "PM Peak:3-7:59PM",
-                        "Evening:8-11:59PM",
-                    ]
-                ),
-                scale=alt.Scale(
-                    range=[*specific_chart_dict.colors]
-                ),
-            ),
+        _portfolio_charts.configure_chart(
+            chart,
+            width=400,
+            height=250,
+            title=chart_dict.title,
+            subtitle=chart_dict.subtitle,
         )
     )
-
     return chart
 
     
+def create_route_typology(df: pd.DataFrame):
+    typology_df = create_typology(df)
+    chart_dict = readable_dict.route_typology
+
+    chart = _portfolio_charts.pie_chart(df = typology_df,
+         color_col = 'Route Typology',
+         theta_col = 'Total Routes',
+         color_scheme = [*chart_dict.colors],
+         tooltip_cols = list(chart_dict.tooltip))
+    
+    chart = (
+        _portfolio_charts.configure_chart(
+            chart,
+            width=200,
+            height=250,
+            title=chart_dict.title,
+            subtitle="",
+        )
+    )
+    return chart
+
+"""
+RT Data Charts
+"""
 def create_hourly_summary(df: pd.DataFrame, day_type: str):
     
     chart_dict = readable_dict.hourly_summary
@@ -137,7 +207,7 @@ def create_hourly_summary(df: pd.DataFrame, day_type: str):
         .transform_filter(xcol_param)
     )
     
-    bg = create_bg_service_chart()
+    bg = _portfolio_charts.create_bg_service_chart()
     
     chart = (chart + bg).properties(
     resolve=alt.Resolve(
@@ -380,4 +450,107 @@ def create_text_graph(df: pd.DataFrame):
         .transform_filter(selection)
     )
     return chart
-    
+
+
+def create_tu_minute(df: pd.DataFrame):
+
+    chart_dict = readable_dict.trip_updates_minute
+
+    chart = _portfolio_charts.circle_chart(
+        df=df,
+        x_col="Date",
+        y_col="TU Messages Per Minute",
+        color_col="TU Messages Per Minute",
+        color_scheme=[*chart_dict.colors],
+        tooltip_cols=list(chart_dict.tooltip),
+        date_format="%b %Y",
+        y_ticks=chart_dict.ticks,
+    )
+
+    chart = _portfolio_charts.configure_chart(
+        chart,
+        width=400,
+        height=250,
+        title=f"{chart_dict.title}",
+        subtitle=chart_dict.subtitle,
+    )
+
+    return chart
+
+
+def create_vp_minute(df: pd.DataFrame):
+
+    chart_dict = readable_dict.vehicle_positions_minute
+
+    chart = _portfolio_charts.circle_chart(
+        df=df,
+        x_col="Date",
+        y_col="VP Messages Per Minute",
+        color_col="VP Messages Per Minute",
+        color_scheme=[*chart_dict.colors],
+        tooltip_cols=list(chart_dict.tooltip),
+        date_format="%b %Y",
+        y_ticks=chart_dict.ticks,
+    )
+
+    chart = _portfolio_charts.configure_chart(
+        chart,
+        width=400,
+        height=250,
+        title=f"{chart_dict.title}",
+        subtitle=chart_dict.subtitle,
+    )
+
+    return chart
+
+
+def create_tu_pct(df: pd.DataFrame):
+
+    chart_dict = readable_dict.trip_update_pct
+
+    chart = _portfolio_charts.bar_chart(
+        df=df,
+        x_col="Date",
+        y_col="Percent of Trips with Trip Updates",
+        color_col="Percent of Trips with Trip Updates",
+        color_scheme=[*chart_dict.colors],
+        tooltip_cols=list(chart_dict.tooltip),
+        date_format="%b %Y",
+        y_ticks=chart_dict.ticks,
+    )
+
+    chart = _portfolio_charts.configure_chart(
+        chart,
+        width=400,
+        height=250,
+        title=f"{chart_dict.title}",
+        subtitle=chart_dict.subtitle,
+    )
+
+    return chart  
+
+
+def create_vp_pct(df: pd.DataFrame):
+
+    chart_dict = readable_dict.vehicle_positions_pct
+
+    chart = _portfolio_charts.bar_chart(
+        df=df,
+        x_col="Date",
+        y_col="Percent of Trips with Vehicle Positions",
+        color_col="Percent of Trips with Vehicle Positions",
+        color_scheme=[*chart_dict.colors],
+        tooltip_cols=list(chart_dict.tooltip),
+        date_format="%b %Y",
+        y_ticks=chart_dict.ticks,
+    )
+
+    chart = _portfolio_charts.configure_chart(
+        chart,
+        width=400,
+        height=250,
+        title=f"{chart_dict.title}",
+        subtitle=chart_dict.subtitle,
+    )
+
+    return chart

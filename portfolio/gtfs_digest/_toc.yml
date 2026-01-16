@@ -35,7 +35,7 @@ parts:
     -   file: district_11-san-diego.md
         sections:
         -   glob: district_11-san-diego/*
-    -   file: district_12-santa-ana.md
+    -   file: district_12-orange-county.md
         sections:
-        -   glob: district_12-santa-ana/*
+        -   glob: district_12-orange-county/*
 root: README
