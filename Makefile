@@ -79,6 +79,7 @@ install_env:
 	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	#cd rt_delay/ && make setup_rt_analysis && cd ..
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ..
+	make add_precommit
 
 production_portfolio:
 	python portfolio/portfolio.py index --deploy
