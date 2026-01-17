@@ -54,7 +54,7 @@ def filter_by_operator_list(gtfs_name_col: str, operator_list: str) -> str:
     Use schedule_gtfs_dataset_name, which can show up as schedule_name or name too in
     various tables.
     """
-    where_condition = f"{gtfs_name_col} IN  { tuple(operator_list)} "
+    where_condition = f"{gtfs_name_col} IN  {tuple(operator_list)} "
 
     return where_condition
 
