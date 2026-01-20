@@ -22,6 +22,8 @@ def create_region_gdf(regions: BoundingBoxDict) -> gpd.GeoDataFrame:
 
 def get_stops_dates(feeds_on_target: pd.DataFrame, feed_key_column_name: str = "feed_key", date_column_name: str = "date"): # check type
     """Get stops for the feeds in feeds_on_target based on their date"""
+    print("SAVING feeds_on_target")
+    feeds_on_target.to_csv("FEEDS_ON_TARGET.csv")
     all_stops = feeds_on_target.groupby(date_column_name)[feed_key_column_name].apply(
         lambda feed_key_column: gtfs_utils_v2.get_stops(
             selected_date=feed_key_column.name,
@@ -30,8 +32,13 @@ def get_stops_dates(feeds_on_target: pd.DataFrame, feed_key_column_name: str = "
     )
     return all_stops
 
-def join_stops_regions(region_gdf: gpd.GeoDataFrame, feeds_on_target: pd.DataFrame) -> gpd.GeoDataFrame: 
+def join_stops_regions(region_gdf: gpd.GeoDataFrame, feeds_on_target: pd.DataFrame, region_name=None) -> gpd.GeoDataFrame: 
     all_stops = get_stops_dates(feeds_on_target).to_crs(geography_utils.CA_NAD83Albers_m)
     region_join = gpd.sjoin(region_gdf, all_stops)
-    regions_and_feeds = region_join[["region", "feed_key"]].drop_duplicates()
+    # Want to keep one row per feed and region
+    # Region may not be present
+    feed_key_columns = ["feed_key"]
+    if region_name is not None:
+        feed_key_columns.append(region_name)
+    regions_and_feeds = region_join[feed_key_columns].drop_duplicates()
     return regions_and_feeds

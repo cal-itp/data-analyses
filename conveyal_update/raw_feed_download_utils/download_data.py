@@ -25,10 +25,12 @@ def download_feed(row):
             print(f"More than one file found at {uri}")
             return
         # Download the zip file if there is only one possoble option
+        output_path = os.path.join(row.path, f'{row.gtfs_dataset_name.replace(" ", "_")}_{row.feed_key}_gtfs.zip')
         fs.get_file(
             glob_result[0],
-            os.path.join(row.path, f'{row.gtfs_dataset_name.replace(" ", "_")}_{row.feed_key}_gtfs.zip')
+            output_path
         )
+        return output_path
     except Exception as e:
         print("Could not download feed. Traceback below:")
         print(traceback.format_exception(e))
@@ -38,7 +40,8 @@ def download_feeds(feeds_df: pd.DataFrame, output_path: os.PathLike):
         os.mkdir(output_path)
     path_series = pd.Series(output_path, index=feeds_df.index, name="path")
     feeds_with_path = pd.concat([feeds_df, path_series], axis=1)
-    feeds_with_path.apply(download_feed, axis=1)  
+    full_output_path = feeds_with_path.progress_apply(download_feed, axis=1)
+    return full_output_path
 
 def download_region(feeds_df, region_name: str):
     path = f'./feeds_{feeds_df.date.iloc[0].strftime("%Y-%m-%d")}/{region_name}'

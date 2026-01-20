@@ -2,7 +2,6 @@ import os
 os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 
 from shared_utils import gtfs_utils_v2
-from calitp_data_analysis.tables import tbls
 from calitp_data_analysis.sql import query_sql
 import pandas as pd
 import datetime as dt

@@ -22,6 +22,19 @@ from calitp_data_analysis import utils
 import google.auth
 credentials, project = google.auth.default()
 
+from calitp_data_analysis.gcs_pandas import GCSPandas
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from functools import cache
+
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
 def import_scheduled_trips(
     analysis_date: str, 
     filters: tuple = None,
@@ -45,7 +58,7 @@ def import_scheduled_trips(
     }
     
     if get_pandas:
-        trips = pd.read_parquet(FILE, filters = filters, columns = columns)
+        trips = gcs_pandas().read_parquet(FILE, filters = filters, columns = columns)
     else:
         trips = dd.read_parquet(FILE, filters = filters, columns = columns)
     
@@ -67,8 +80,8 @@ def import_scheduled_shapes(
     FILE = f"{COMPILED_CACHED_VIEWS}{TABLE}_{analysis_date}.parquet"
     
     if get_pandas: 
-        shapes = gpd.read_parquet(
-            FILE, filters = filters, columns = columns, storage_options = {"token": credentials.token}
+        shapes = gcs_geopandas().read_parquet(
+            FILE, filters = filters, columns = columns,
         )
     else:
         shapes = dg.read_parquet(
@@ -97,11 +110,11 @@ def import_scheduled_stop_times(
         
         if get_pandas:
             if columns is None or "geometry" in columns:
-                stop_times = gpd.read_parquet(
-                    FILE, filters = filters, columns = columns, storage_options = {"token": credentials.token}
+                stop_times = gcs_geopandas.read_parquet(
+                    FILE, filters = filters, columns = columns
                 ).to_crs(crs)
             else:
-                stop_times = pd.read_parquet(
+                stop_times = gcs_pandas().read_parquet(
                     FILE, filters = filters, columns = columns
                 )
         else:
@@ -114,7 +127,7 @@ def import_scheduled_stop_times(
         FILE = f"{COMPILED_CACHED_VIEWS}{TABLE}_{analysis_date}.parquet"
         
         if get_pandas:
-            stop_times = pd.read_parquet(
+            stop_times = gcs_pandas().read_parquet(
                 FILE, filters = filters, columns = columns
             )
         else:
@@ -140,12 +153,12 @@ def import_scheduled_stops(
     
     if get_pandas:
         if columns is None or "geometry" in columns:
-            stops = gpd.read_parquet(
-                FILE, filters = filters, columns = columns, storage_options = {"token": credentials.token}
+            stops = gcs_geopandas().read_parquet(
+                FILE, filters = filters, columns = columns
             ).to_crs(crs)
 
         else:
-            stops = pd.read_parquet(
+            stops = gcs_pandas().read_parquet(
                 FILE, filters = filters, columns = columns
             )
     
@@ -174,7 +187,7 @@ def import_schedule_gtfs_key_organization_crosswalk(
     TABLE = GTFS_DATA_DICT.schedule_tables.gtfs_key_crosswalk
     FILE = f"{SCHED_GCS}{TABLE}_{analysis_date}.parquet"
     
-    crosswalk = pd.read_parquet(
+    crosswalk = gcs_pandas().read_parquet(
         FILE, filters = filters, columns = columns
     )
     
@@ -189,7 +202,7 @@ def import_unique_vp_trips(analysis_date: str) -> list:
     TABLE = GTFS_DATA_DICT.speeds_tables.usable_vp
     FILE = f"{SEGMENT_GCS}{TABLE}_{analysis_date}"
     
-    rt_trips = pd.read_parquet(
+    rt_trips = gcs_pandas().read_parquet(
         FILE,
         columns = ["trip_instance_key"]
     ).trip_instance_key.unique().tolist()
