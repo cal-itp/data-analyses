@@ -223,6 +223,8 @@ full_results as (
   organization_name,
   service_name,
   gtfs_dataset_name,
+  gtfs_dataset_key,
+  schedule_feed_key,
   holiday_website_condition,
 
   -- Thanksgiving analysis
@@ -373,6 +375,8 @@ output_base as (
       organization_name,
       service_name,
       gtfs_dataset_name,
+      gtfs_dataset_key,
+      schedule_feed_key,
       holiday_website_condition,
 
       _2025_11_11,
@@ -469,6 +473,8 @@ SELECT
     organization_name as `Organization Name`,
     service_name as `Service Name`,
     gtfs_dataset_name as `GTFS Dataset Name`,
+    gtfs_dataset_key,
+    schedule_feed_key, -- add to output to track feed for post-analysis
     holiday_website_condition `Holiday Website Condition`,
 
     -- Reference reduced service and regular service trips for Thanksgiving analysis
