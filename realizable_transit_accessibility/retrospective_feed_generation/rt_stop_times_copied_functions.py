@@ -1,9 +1,11 @@
 from segment_speed_utils import helpers, segment_calcs
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from .constants import GTFS_DATA_DICT
 import pandas as pd
 
 SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
 RT_SCHED_GCS = GTFS_DATA_DICT.gcs_paths.RT_SCHED_GCS
+p = GCSPandas()
 
 # Unchanged from rt_scheduled_v_ran, but isn't in a package so we have to copy paste for now
 def prep_scheduled_stop_times(
@@ -52,7 +54,7 @@ def prep_rt_stop_times(
     """
     STOP_ARRIVALS = GTFS_DATA_DICT.rt_stop_times.stage3
     
-    df = pd.read_parquet(
+    df = p.read_parquet(
         f"{SEGMENT_GCS}{STOP_ARRIVALS}_{analysis_date}.parquet",
         columns = trip_stop_cols + ["arrival_time"]
     ).rename(columns = {"arrival_time": "rt_arrival"})

@@ -17,8 +17,8 @@ def get_feed_info(
     Params: 
     - target_date: the date to search for feeds on. Should be formatted as a string in YYYY-MM-DD.
     - lookback_period: the time before the period to look for feeds in, if no feed is valid on `target_date`.
-    - `filter_geometry`: a GDF containing geometry to spatially filter by. If this is not `None`.
-    - `filter_geometry_id`: a column of `filter_geometry_id` to tag rows by. if this is not `None`, the output DF will have an additional column `region`.
+    - `filter_geometry`: a GDF containing geometry to spatially filter by. If this is `None`, no filter will be added.
+    - `filter_geometry_id`: a column of `filter_geometry` to tag rows by. if this is not `None`, the output DF will have an additional column `region`.
     - `report_unavailable`: whether a report of feeds that were not foudn on target_date should be created and saved to "./no_apparent_service.csv" 
 
     Returns: A DataFrame with at least the following columns
@@ -51,7 +51,7 @@ def get_feed_info(
             )
         else:
             filter_geometry_dropped_columns = filter_geometry[[filter_geometry.geometry.name]].copy()
-        regions_and_feeds = join_stops_regions(filter_geometry_dropped_columns, feeds_merged)
+        regions_and_feeds = join_stops_regions(filter_geometry_dropped_columns, feeds_merged, region_name=filter_geometry_id)
         regions_and_feeds_merged = regions_and_feeds.merge(
             feeds_merged[["feed_key", "gtfs_dataset_name", "base64_url", "date"]],
             how="inner",

@@ -3,6 +3,7 @@ import pandas as pd
 import datetime as dt
 from .constants import ARBITRARY_SERVICE_ID, GTFS_DATE_STRFTIME
 import copy
+import numpy as np
 
 def subset_schedule_feed_to_one_date(feed: GTFS, service_date: dt.datetime) -> GTFS:
     """Update a gtfslite feed object to only contain service on a specified service date"""
@@ -41,7 +42,7 @@ def time_string_to_time_since_midnight(time_str_series: pd.Series) -> pd.Series:
     Will give incorrect results on days where a DST transition occurs.
     """
     return time_str_series.str.split(":").map(
-        lambda s: int(s[0]) * 3600 + int(s[1]) * 60 + int(s[2])
+        lambda s: int(s[0]) * 3600 + int(s[1]) * 60 + int(s[2]) if len(s) == 3 else np.nan
     )
     
 def seconds_to_gtfs_format_time(time_column: pd.Series) -> pd.Series:
