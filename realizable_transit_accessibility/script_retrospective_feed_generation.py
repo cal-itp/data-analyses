@@ -55,11 +55,8 @@ def process_all_feeds(
             schedule_rt_table["schedule_gtfs_dataset_key"] == gtfs_dataset_key
         ]
         rt_times_present = schedule_rt_table_one_feed["rt_arrival_sec"].notna().any()
-        print(schedule_rt_table_one_feed["rt_arrival_sec"].head(10))
         success_status.append(rt_times_present)
         # Generate a feed
-        print(schedule_name)
-        print(rt_times_present)
         if rt_times_present:
             process_individual_feed(
                 schedule_rt_table_one_feed,
@@ -93,10 +90,11 @@ def process_individual_feed(
             max_gap_length=max_stop_gap,
         )
     )
+    schedule_rt_stop_times_single_agency.to_csv(f"{output_local_path}.csv")
+    
 
     # Load the schedule feed using gtfs-lite and filter it
     feed = GTFS.load_zip(schedule_local_path, ignore_optional_files="keep_shapes")
-    print(rt_date)
     feed_filtered = subset_schedule_feed_to_one_date(
         feed, rt_date
     )
@@ -108,7 +106,8 @@ def process_individual_feed(
         stop_times_desired_columns=[
             "trip_id",
             "arrival_time",
-            "departure_time" "drop_off_type",
+            "departure_time",
+            "drop_off_type",
             "pickup_type",
             "stop_headsign",
             "stop_id",
@@ -128,7 +127,7 @@ def process_individual_feed(
 
 if __name__ == "__main__":
 
-    TARGET_DATE = "2025-07-16"
+    TARGET_DATE = "2025-11-05"
     GEOMETRY_PATH = "west_la.geojson"
     DOWNLOADED_FEEDS_FODLER = "downloaded_schedule_feeds/"
     OUTPUT_FOLDER = "./generated_rt_feeds/"
@@ -141,7 +140,8 @@ if __name__ == "__main__":
         filter_geometry=analysis_geometry,
         report_unavailable=True
     ).drop_duplicates()
-
+    print(feed_info)
+    
     # Download feeds
     feed_info["schedule_local_path"] = download_feeds(feed_info, DOWNLOADED_FEEDS_FODLER)
     feed_info["output_local_path"] = feed_info["schedule_local_path"].map(
