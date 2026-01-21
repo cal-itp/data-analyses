@@ -57,6 +57,7 @@ def _filter_na_stop_times(
     """Filter out all stop times that do not have rt times"""
     return rt_stop_times.dropna(subset=[columns[RT_ARRIVAL_SEC]])
 
+#def fix_negative_times(time_series)
 
 def impute_first_last(
     rt_schedule_stop_times_sorted: pd.DataFrame,
@@ -383,7 +384,7 @@ def make_retrospective_feed_single_date(
     rt_trip_ids = filtered_stop_times_table[
         stop_times_table_columns[TRIP_ID]
     ].drop_duplicates(keep="first")
-    schedule_trips_in_rt = schedule_trips_original.loc[rt_trip_ids]
+    schedule_trips_in_rt = schedule_trips_original.loc[np.intersect1d(rt_trip_ids.values, schedule_trips_original.index)]
     stop_times_merged = schedule_stop_times_original.merge(
         filtered_stop_times_table.rename(
             columns={
@@ -430,7 +431,8 @@ def make_retrospective_feed_single_date(
         ~stop_times_merged[stop_times_table_columns[SCHEDULE_GTFS_DATASET_KEY]].isna()
     ].reset_index(drop=True)
     stop_times_merged_filtered["rt_arrival_gtfs_time"] = seconds_to_gtfs_format_time(
-        stop_times_merged_filtered[stop_times_table_columns[RT_ARRIVAL_SEC]]
+        stop_times_merged_filtered[stop_times_table_columns[RT_ARRIVAL_SEC]],
+        stop_times_merged_filtered[stop_times_table_columns[TRIP_INSTANCE_KEY]]
     )
     stop_times_gtfs_format_with_rt_times = (
         stop_times_merged_filtered.drop(["arrival_time", "departure_time"], axis=1)
