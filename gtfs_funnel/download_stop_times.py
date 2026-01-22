@@ -10,7 +10,6 @@ import datetime as dt  # noqa: E402
 import sys  # noqa: E402
 from functools import cache  # noqa: E402
 
-import pandas as pd  # noqa: E402
 from calitp_data_analysis.gcs_pandas import GCSPandas  # noqa: E402
 from loguru import logger  # noqa: E402
 from shared_utils import gtfs_utils_v2  # noqa: E402
@@ -29,7 +28,7 @@ def download_one_day(analysis_date: str):
     logger.info(f"Analysis date: {analysis_date}")
     start = dt.datetime.now()
 
-    full_trips = pd.read_parquet(
+    full_trips = gcs_pandas().read_parquet(
         f"{COMPILED_CACHED_VIEWS}trips_{analysis_date}.parquet",
     )
 

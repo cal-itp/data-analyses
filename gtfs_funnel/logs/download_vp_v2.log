@@ -376,3 +376,21 @@
 2025-12-17 12:14:37.563 | INFO     | __main__:<module>:114 - export concatenated vp: 0:02:37.070317
 2025-12-17 12:16:25.481 | INFO     | __main__:<module>:136 - remove batched parquets
 2025-12-17 12:16:25.484 | INFO     | __main__:<module>:139 - execution time: 0:04:32.255847
+2026-01-21 16:57:05.378 | INFO     | __main__:<module>:132 - Analysis date: 2025-12-17
+2026-01-21 16:57:53.287 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 0 to GCS: 0:00:47.908959
+2026-01-21 16:58:25.517 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 1 to GCS: 0:00:32.228971
+2026-01-21 17:00:39.480 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 2 to GCS: 0:02:13.963279
+2026-01-21 17:01:15.596 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 3 to GCS: 0:00:36.113622
+2026-01-21 17:01:15.596 | INFO     | __main__:<module>:139 - execution time: 0:04:10.217448
+2026-01-21 17:01:20.762 | INFO     | __main__:<module>:101 - Analysis date: 2025-12-17
+2026-01-21 17:01:27.361 | INFO     | __main__:<module>:109 - concat and filter batched data: 0:00:06.598507
+2026-01-21 17:03:41.950 | INFO     | __main__:<module>:116 - export concatenated vp: 0:02:14.588867
+2026-01-21 17:12:24.691 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-21 17:13:46.322 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-21 17:14:43.935 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-21 17:15:45.067 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-21 17:16:27.450 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-21 17:17:51.599 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-21 17:18:50.620 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-21 17:19:13.458 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-21 17:20:57.723 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/

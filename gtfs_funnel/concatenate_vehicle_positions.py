@@ -120,7 +120,11 @@ if __name__ == "__main__":
         del concatenated_vp_df
 
         # Import concatenated tabular vp and make it a gdf
-        vp = delayed(gcs_pandas().read_parquet)(f"{SEGMENT_GCS}{RAW_VP}_{analysis_date}_concat/").reset_index(drop=True)
+        logger.info(f"path: {SEGMENT_GCS}{RAW_VP}_{analysis_date}_concat/")
+        gcs_pandas().read_parquet(f"{SEGMENT_GCS}{RAW_VP}_{analysis_date}_concat/").head()
+        vp = delayed(pd.read_parquet)(
+            f"{SEGMENT_GCS}{RAW_VP}_{analysis_date}_concat/", filesystem=fs, engine="fastparquet"
+        ).reset_index(drop=True)
 
         vp_gdf = delayed(vp_into_gdf)(vp)
 

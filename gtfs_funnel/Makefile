@@ -1,8 +1,8 @@
 download_gtfs_data:
 # make sure to update gtfs_funnel/update_vars.py for dates to download
-	python download_trips.py
-	python download_stops.py
-	python download_shapes.py
+#	python download_trips.py
+#	python download_stops.py
+#	python download_shapes.py
 	python download_stop_times.py
 	python download_vehicle_positions.py
 	python concatenate_vehicle_positions.py
