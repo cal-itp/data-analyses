@@ -5,7 +5,7 @@ download_gtfs_data:
 	python download_shapes.py
 	python download_stop_times.py
 	python download_vehicle_positions.py
-	python concatenate_vehicle_positions.py
+#	python concatenate_vehicle_positions.py
 
 preprocess_schedule_vp_dependency:
 	python stop_times_with_direction.py
