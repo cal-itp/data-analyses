@@ -120,9 +120,11 @@ if __name__ == "__main__":
         del concatenated_vp_df
 
         # Import concatenated tabular vp and make it a gdf
-        # logger.info(f"path: {SEGMENT_GCS}{RAW_VP}_{analysis_date}_concat/")
-        # gcs_pandas().read_parquet(f"{SEGMENT_GCS}{RAW_VP}_{analysis_date}_concat/").head()
-        vp = delayed(gcs_pandas().read_parquet)(f"{SEGMENT_GCS}{RAW_VP}_{analysis_date}_concat/").reset_index(drop=True)
+        # Stripping gs:// from the supplied path avoids a pyarrow error?
+        logger.info(f"path: {SEGMENT_GCS[5:]}{RAW_VP}_{analysis_date}_concat/")
+        vp = delayed(gcs_pandas().read_parquet)(f"{SEGMENT_GCS[5:]}{RAW_VP}_{analysis_date}_concat/").reset_index(
+            drop=True
+        )
 
         vp_gdf = delayed(vp_into_gdf)(vp)
 

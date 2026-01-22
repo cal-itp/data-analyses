@@ -401,3 +401,11 @@
 2026-01-22 09:55:44.662 | INFO     | __main__:<module>:101 - Analysis date: 2025-12-17
 2026-01-22 09:55:51.113 | INFO     | __main__:<module>:109 - concat and filter batched data: 0:00:06.450953
 2026-01-22 09:57:40.902 | INFO     | __main__:<module>:119 - export concatenated vp: 0:01:49.788751
+2026-01-22 18:18:30.596 | INFO     | __main__:<module>:101 - Analysis date: 2025-12-17
+2026-01-22 18:18:30.597 | INFO     | __main__:<module>:123 - path: gs://calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-22 18:20:20.274 | INFO     | __main__:<module>:101 - Analysis date: 2025-12-17
+2026-01-22 18:20:20.279 | INFO     | __main__:<module>:123 - path: //calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-22 18:20:49.025 | INFO     | __main__:<module>:101 - Analysis date: 2025-12-17
+2026-01-22 18:20:49.027 | INFO     | __main__:<module>:123 - path: calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2025-12-17_concat/
+2026-01-22 18:25:34.791 | INFO     | __main__:<module>:134 - remove batched parquets
+2026-01-22 18:25:34.792 | INFO     | __main__:<module>:137 - execution time: 0:04:45.765145
