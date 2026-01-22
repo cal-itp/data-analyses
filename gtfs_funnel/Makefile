@@ -1,14 +1,14 @@
 download_gtfs_data:
 # make sure to update gtfs_funnel/update_vars.py for dates to download
-#	python download_trips.py
-#	python download_stops.py
-#	python download_shapes.py
+	python download_trips.py
+	python download_stops.py
+	python download_shapes.py
 	python download_stop_times.py
 	python download_vehicle_positions.py
 	python concatenate_vehicle_positions.py
 
 preprocess_schedule_vp_dependency:
-#	python stop_times_with_direction.py
+	python stop_times_with_direction.py
 	python crosswalk_gtfs_dataset_key_to_organization.py
 
 preprocess_vp:

@@ -32,7 +32,7 @@ def condense_vp_to_linestring(analysis_date: str, dict_inputs: dict):
     EXPORT_FILE = dict_inputs.speeds_tables.vp_condensed_line
 
     vp = delayed(gcs_pandas().read_parquet)(
-        f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}/",
+        f"{SEGMENT_GCS[5:]}{USABLE_VP}_{analysis_date}/",
         columns=[
             "trip_instance_key",
             "x",

@@ -27,7 +27,7 @@ def import_vp(analysis_date: str, **kwargs) -> pd.DataFrame:
     """
     USABLE_VP = GTFS_DATA_DICT.speeds_tables.usable_vp
 
-    df = gcs_pandas().read_parquet(f"{SEGMENT_GCS}{USABLE_VP}_{analysis_date}/", **kwargs)
+    df = gcs_pandas().read_parquet(f"{SEGMENT_GCS[5:]}{USABLE_VP}_{analysis_date}/", **kwargs)
 
     return df
 
