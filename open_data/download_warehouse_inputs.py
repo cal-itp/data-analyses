@@ -21,7 +21,7 @@ if __name__ == "__main__":
     LOG_FILE = "./logs/open_data.log"
     logger.add(LOG_FILE, retention="2 months")
     logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
-    
+
     MONTH_DATE_COL = "month_first_day"
     start = datetime.datetime.now()
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(monthly_routes, OPEN_DATA_GCS, f"routes_{analysis_month}")
     t2 = datetime.datetime.now()
     logger.info(f"routes: {analysis_month}: {t2 - t1}")
-    
+
     crosswalk = bq_utils.download_table(
         project_name=PROD_PROJECT,
         dataset_name="mart_transit_database",
