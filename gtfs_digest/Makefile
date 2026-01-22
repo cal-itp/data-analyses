@@ -12,3 +12,4 @@ gtfs_digest_data:
 	python _load_gtfs_data.py
 	python _prep_gtfs_data.py
 	python _publish_public_data.py
+    

@@ -139,9 +139,16 @@ def load_fct_operator_hourly_summary(
         end_date=end_date,
     )
 
-    gcs_pandas().data_frame_to_parquet(df, f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}raw/{GTFS_DATA_DICT.gtfs_digest_rollup.hourly_day_type_summary}_{file_name}.parquet")
+    # Merge with crosswalk
+    crosswalk_url = f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet"
+
+    crosswalk_df = gcs_pandas().read_parquet(crosswalk_url)[["name", "analysis_name",]]
+
+    m1 = pd.merge(df, crosswalk_df, on="name", how="inner").drop_duplicates().reset_index()
+    
+    gcs_pandas().data_frame_to_parquet(m1, f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}raw/{GTFS_DATA_DICT.gtfs_digest_rollup.hourly_day_type_summary}_{file_name}.parquet")
    
-    return df
+    return m1
 
     
 if __name__ == "__main__":
