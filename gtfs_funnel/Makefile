@@ -8,7 +8,7 @@ download_gtfs_data:
 	python concatenate_vehicle_positions.py
 
 preprocess_schedule_vp_dependency:
-	python stop_times_with_direction.py
+#	python stop_times_with_direction.py
 	python crosswalk_gtfs_dataset_key_to_organization.py
 
 preprocess_vp:
@@ -20,7 +20,7 @@ preprocess_vp:
 	python vp_condenser.py
 
 funnel_gtfs_single_day:
-	make download_gtfs_data
+#	make download_gtfs_data
 	make preprocess_schedule_vp_dependency
 	make preprocess_vp
 
