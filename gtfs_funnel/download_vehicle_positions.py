@@ -5,8 +5,8 @@ Download vehicle positions for a day.
 import datetime
 import os
 import sys
+from functools import cache
 
-import gcsfs
 import pandas as pd
 from loguru import logger
 
@@ -19,7 +19,12 @@ from update_vars import SEGMENT_GCS  # noqa: E402
 
 os.environ["USE_PYGEOS"] = "0"
 
-fs = gcsfs.GCSFileSystem()
+from calitp_data_analysis.gcs_pandas import GCSPandas  # noqa: E402s
+
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
 
 
 def determine_batches(rt_names: list) -> dict:
@@ -85,7 +90,7 @@ def loop_through_batches_and_download_vp(batches: dict, analysis_date: str):
 
         df = download_vehicle_positions(analysis_date, subset_operators)
 
-        df.to_parquet(f"{SEGMENT_GCS}vp_raw_{analysis_date}_batch{i}.parquet")
+        gcs_pandas().data_frame_to_parquet(df, f"{SEGMENT_GCS}vp_raw_{analysis_date}_batch{i}.parquet")
 
         del df
 

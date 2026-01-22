@@ -533,3 +533,10 @@
 2025-12-05 01:58:35.966 | INFO     | __main__:download_one_day:30 - # operators to run: 225
 2025-12-05 01:58:35.966 | INFO     | __main__:download_one_day:34 - *********** Download stops data ***********
 2025-12-05 01:58:46.277 | INFO     | __main__:download_one_day:69 - execution time: 0:00:10.985812
+2026-01-21 16:13:04.653 | INFO     | __main__:download_one_day:45 - Analysis date: 2025-12-17
+2026-01-21 16:14:15.439 | INFO     | __main__:download_one_day:45 - Analysis date: 2025-12-17
+2026-01-21 16:14:16.770 | INFO     | __main__:download_one_day:52 - # operators to run: 224
+2026-01-21 16:14:16.771 | INFO     | __main__:download_one_day:56 - *********** Download trips data ***********
+2026-01-21 16:14:54.177 | INFO     | __main__:download_one_day:45 - Analysis date: 2025-12-17
+2026-01-21 16:14:55.472 | INFO     | __main__:download_one_day:52 - # operators to run: 224
+2026-01-21 16:14:55.473 | INFO     | __main__:download_one_day:56 - *********** Download trips data ***********

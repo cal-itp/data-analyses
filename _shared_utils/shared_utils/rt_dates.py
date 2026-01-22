@@ -89,6 +89,8 @@ DATES = {
     "oct2025": "2025-10-15",
     "oct2025b": "2025-10-16",
     "nov2025": "2025-11-05",
+    "dec2025": "2025-12-17",
+    "jan2026": "2026-01-14",
 }
 
 years_available = list(range(2023, datetime.datetime.now().year + 1))
