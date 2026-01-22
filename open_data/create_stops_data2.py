@@ -138,7 +138,6 @@ def publish_stops(analysis_month: str) -> gpd.GeoDataFrame:
         )
         .pipe(prep_stops)
         .pipe(add_distance_to_state_highway)
-        .pipe(rename_stop_columns)
     )
 
     crosswalk = pd.read_parquet(
@@ -152,12 +151,17 @@ def publish_stops(analysis_month: str) -> gpd.GeoDataFrame:
 
     # this is unique on ["name", "stop_id", "stop_name"]
     # there are dupes where same stop_id has slightly different stop_names
+    stops3 = rename_stop_columns(stops2)
 
-    return stops2
+    return stops3
 
 
 if __name__ == "__main__":
-
+    
+    LOG_FILE = "./logs/open_data.log"
+    logger.add(LOG_FILE, retention="2 months")
+    logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
+    
     start = datetime.datetime.now()
 
     stops = publish_stops(analysis_month)
