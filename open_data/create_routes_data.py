@@ -4,15 +4,16 @@ route_id, route_name, operator name.
 """
 
 import datetime
+from functools import cache
 
 import gcsfs
 import geopandas as gpd
-import google.auth
 import numpy as np
 import open_data_utils
 import pandas as pd
 import yaml
 from calitp_data_analysis import geography_utils, utils
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from segment_speed_utils import helpers
 from shared_utils import (
     dask_utils,
@@ -23,7 +24,11 @@ from shared_utils import (
 )
 from update_vars import GTFS_DATA_DICT, SCHED_GCS, TRAFFIC_OPS_GCS, analysis_date
 
-credentials, project = google.auth.default()
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
 
 fs = gcsfs.GCSFileSystem()
 
@@ -216,7 +221,7 @@ def routes_shn_intersection(routes_gdf: gpd.GeoDataFrame, buffer_amount: int) ->
     HWY_FILE = f"{GCS_FILE_PATH}shn_buffered_{buffer_amount}_ft_shn_dissolved_by_ct_district_route.parquet"
 
     if fs.exists(HWY_FILE):
-        shn_routes_gdf = gpd.read_parquet(HWY_FILE, storage_options={"token": credentials.token})
+        shn_routes_gdf = gcs_geopandas().read_parquet(HWY_FILE)
     else:
         shn_routes_gdf = shared_data.buffer_shn(buffer_amount)
 

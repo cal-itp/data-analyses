@@ -102,6 +102,8 @@ y2023_dates = [
 
 y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["oct2024g"]]
 y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
+y2026_dates = [v for k, v in DATES.items() if k.endswith("2026")]
+
 
 DATES_BY_YEAR_DICT = {
     2023: y2023_dates,
