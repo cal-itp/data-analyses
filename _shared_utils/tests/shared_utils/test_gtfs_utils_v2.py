@@ -47,7 +47,10 @@ class TestGtfsUtilsV2:
 
         assert len(result) == 1
         assert result.to_dict(orient="records") == [
-            {"feed_key": "0b0ebeff0c1f7ff681e6a06d6218ecd6", "name": "Metrolink Schedule"}
+            {
+                "feed_key": "0b0ebeff0c1f7ff681e6a06d6218ecd6",
+                "name": "Metrolink Schedule",
+            }
         ]
 
     @pytest.mark.vcr
@@ -82,10 +85,14 @@ class TestGtfsUtilsV2:
             ]
         )
 
-    @pytest.mark.default_cassette("TestGtfsUtilsV2.test_schedule_daily_feed_to_gtfs_dataset_name.yaml")
+    @pytest.mark.default_cassette(
+        "TestGtfsUtilsV2.test_schedule_daily_feed_to_gtfs_dataset_name.yaml"
+    )
     @pytest.mark.vcr
     def test_schedule_daily_feed_to_gtfs_dataset_name_get_df_false(self):
-        result = schedule_daily_feed_to_gtfs_dataset_name(selected_date="2025-09-01", get_df=False)
+        result = schedule_daily_feed_to_gtfs_dataset_name(
+            selected_date="2025-09-01", get_df=False
+        )
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
 
@@ -194,7 +201,9 @@ class TestGtfsUtilsV2:
         )
 
     @pytest.mark.vcr
-    def test_schedule_daily_feed_to_gtfs_dataset_name_feed_option_include_precursor(self):
+    def test_schedule_daily_feed_to_gtfs_dataset_name_feed_option_include_precursor(
+        self,
+    ):
         result = schedule_daily_feed_to_gtfs_dataset_name(
             selected_date="2025-09-01",
             feed_option="include_precursor",
@@ -252,7 +261,10 @@ class TestGtfsUtilsV2:
 
     @pytest.mark.vcr
     def test_get_trips(self):
-        result = get_trips(selected_date="2025-09-01", operator_feeds=["c86f88ad0b15f5185d073f91f2130285"])
+        result = get_trips(
+            selected_date="2025-09-01",
+            operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
+        )
 
         assert len(result) == 3
         assert result.to_dict(orient="records") == unordered(
@@ -300,8 +312,12 @@ class TestGtfsUtilsV2:
                     "flex_service_hours": None,
                     "contains_warning_duplicate_stop_times_primary_key": False,
                     "contains_warning_missing_foreign_key_stop_id": False,
-                    "trip_first_departure_ts": Timestamp("2025-09-01 16:51:00+0000", tz="UTC"),
-                    "trip_last_arrival_ts": Timestamp("2025-09-01 17:26:00+0000", tz="UTC"),
+                    "trip_first_departure_ts": Timestamp(
+                        "2025-09-01 16:51:00+0000", tz="UTC"
+                    ),
+                    "trip_last_arrival_ts": Timestamp(
+                        "2025-09-01 17:26:00+0000", tz="UTC"
+                    ),
                     "first_start_pickup_drop_off_window_sec": None,
                     "last_end_pickup_drop_off_window_sec": None,
                     "is_gtfs_flex_trip": False,
@@ -314,11 +330,19 @@ class TestGtfsUtilsV2:
                     "trip_first_start_pickup_drop_off_window_ts": None,
                     "trip_last_end_pickup_drop_off_window_ts": None,
                     "trip_start_date_pacific": datetime.date(2025, 9, 1),
-                    "trip_first_departure_datetime_pacific": Timestamp("2025-09-01 09:51:00"),
-                    "trip_last_arrival_datetime_pacific": Timestamp("2025-09-01 10:26:00"),
+                    "trip_first_departure_datetime_pacific": Timestamp(
+                        "2025-09-01 09:51:00"
+                    ),
+                    "trip_last_arrival_datetime_pacific": Timestamp(
+                        "2025-09-01 10:26:00"
+                    ),
                     "trip_start_date_local_tz": datetime.date(2025, 9, 1),
-                    "trip_first_departure_datetime_local_tz": Timestamp("2025-09-01 09:51:00"),
-                    "trip_last_arrival_datetime_local_tz": Timestamp("2025-09-01 10:26:00"),
+                    "trip_first_departure_datetime_local_tz": Timestamp(
+                        "2025-09-01 09:51:00"
+                    ),
+                    "trip_last_arrival_datetime_local_tz": Timestamp(
+                        "2025-09-01 10:26:00"
+                    ),
                     "trip_first_start_pickup_drop_off_window_date_pacific": None,
                     "trip_first_start_pickup_drop_off_window_datetime_pacific": None,
                     "trip_last_end_pickup_drop_off_window_pacific": None,
@@ -370,8 +394,12 @@ class TestGtfsUtilsV2:
                     "flex_service_hours": None,
                     "contains_warning_duplicate_stop_times_primary_key": False,
                     "contains_warning_missing_foreign_key_stop_id": False,
-                    "trip_first_departure_ts": Timestamp("2025-09-01 18:51:00+0000", tz="UTC"),
-                    "trip_last_arrival_ts": Timestamp("2025-09-01 19:26:00+0000", tz="UTC"),
+                    "trip_first_departure_ts": Timestamp(
+                        "2025-09-01 18:51:00+0000", tz="UTC"
+                    ),
+                    "trip_last_arrival_ts": Timestamp(
+                        "2025-09-01 19:26:00+0000", tz="UTC"
+                    ),
                     "first_start_pickup_drop_off_window_sec": None,
                     "last_end_pickup_drop_off_window_sec": None,
                     "is_gtfs_flex_trip": False,
@@ -384,11 +412,19 @@ class TestGtfsUtilsV2:
                     "trip_first_start_pickup_drop_off_window_ts": None,
                     "trip_last_end_pickup_drop_off_window_ts": None,
                     "trip_start_date_pacific": datetime.date(2025, 9, 1),
-                    "trip_first_departure_datetime_pacific": Timestamp("2025-09-01 11:51:00"),
-                    "trip_last_arrival_datetime_pacific": Timestamp("2025-09-01 12:26:00"),
+                    "trip_first_departure_datetime_pacific": Timestamp(
+                        "2025-09-01 11:51:00"
+                    ),
+                    "trip_last_arrival_datetime_pacific": Timestamp(
+                        "2025-09-01 12:26:00"
+                    ),
                     "trip_start_date_local_tz": datetime.date(2025, 9, 1),
-                    "trip_first_departure_datetime_local_tz": Timestamp("2025-09-01 11:51:00"),
-                    "trip_last_arrival_datetime_local_tz": Timestamp("2025-09-01 12:26:00"),
+                    "trip_first_departure_datetime_local_tz": Timestamp(
+                        "2025-09-01 11:51:00"
+                    ),
+                    "trip_last_arrival_datetime_local_tz": Timestamp(
+                        "2025-09-01 12:26:00"
+                    ),
                     "trip_first_start_pickup_drop_off_window_date_pacific": None,
                     "trip_first_start_pickup_drop_off_window_datetime_pacific": None,
                     "trip_last_end_pickup_drop_off_window_pacific": None,
@@ -440,8 +476,12 @@ class TestGtfsUtilsV2:
                     "flex_service_hours": None,
                     "contains_warning_duplicate_stop_times_primary_key": False,
                     "contains_warning_missing_foreign_key_stop_id": False,
-                    "trip_first_departure_ts": Timestamp("2025-09-01 17:51:00+0000", tz="UTC"),
-                    "trip_last_arrival_ts": Timestamp("2025-09-01 18:26:00+0000", tz="UTC"),
+                    "trip_first_departure_ts": Timestamp(
+                        "2025-09-01 17:51:00+0000", tz="UTC"
+                    ),
+                    "trip_last_arrival_ts": Timestamp(
+                        "2025-09-01 18:26:00+0000", tz="UTC"
+                    ),
                     "first_start_pickup_drop_off_window_sec": None,
                     "last_end_pickup_drop_off_window_sec": None,
                     "is_gtfs_flex_trip": False,
@@ -454,11 +494,19 @@ class TestGtfsUtilsV2:
                     "trip_first_start_pickup_drop_off_window_ts": None,
                     "trip_last_end_pickup_drop_off_window_ts": None,
                     "trip_start_date_pacific": datetime.date(2025, 9, 1),
-                    "trip_first_departure_datetime_pacific": Timestamp("2025-09-01 10:51:00"),
-                    "trip_last_arrival_datetime_pacific": Timestamp("2025-09-01 11:26:00"),
+                    "trip_first_departure_datetime_pacific": Timestamp(
+                        "2025-09-01 10:51:00"
+                    ),
+                    "trip_last_arrival_datetime_pacific": Timestamp(
+                        "2025-09-01 11:26:00"
+                    ),
                     "trip_start_date_local_tz": datetime.date(2025, 9, 1),
-                    "trip_first_departure_datetime_local_tz": Timestamp("2025-09-01 10:51:00"),
-                    "trip_last_arrival_datetime_local_tz": Timestamp("2025-09-01 11:26:00"),
+                    "trip_first_departure_datetime_local_tz": Timestamp(
+                        "2025-09-01 10:51:00"
+                    ),
+                    "trip_last_arrival_datetime_local_tz": Timestamp(
+                        "2025-09-01 11:26:00"
+                    ),
                     "trip_first_start_pickup_drop_off_window_date_pacific": None,
                     "trip_first_start_pickup_drop_off_window_datetime_pacific": None,
                     "trip_last_end_pickup_drop_off_window_pacific": None,
@@ -473,16 +521,23 @@ class TestGtfsUtilsV2:
     @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_trips.yaml")
     @pytest.mark.vcr
     def test_get_trips_no_metrolink_feed(self, capfd):
-        get_trips(selected_date="2025-09-01", operator_feeds=["c86f88ad0b15f5185d073f91f2130285"])
+        get_trips(
+            selected_date="2025-09-01",
+            operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
+        )
         out, err = capfd.readouterr()
 
-        assert re.search("could not get metrolink feed on 2025-09-01!", out), "The expected text was not printed."
+        assert re.search(
+            "could not get metrolink feed on 2025-09-01!", out
+        ), "The expected text was not printed."
 
     @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_trips.yaml")
     @pytest.mark.vcr
     def test_get_trips_get_df_false(self):
         result = get_trips(
-            selected_date="2025-09-01", operator_feeds=["c86f88ad0b15f5185d073f91f2130285"], get_df=False
+            selected_date="2025-09-01",
+            operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
+            get_df=False,
         )
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
@@ -492,7 +547,14 @@ class TestGtfsUtilsV2:
         result = get_trips(
             selected_date="2025-09-01",
             operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
-            trip_cols=["name", "gtfs_dataset_key", "feed_key", "trip_id", "route_id", "route_type"],
+            trip_cols=[
+                "name",
+                "gtfs_dataset_key",
+                "feed_key",
+                "trip_id",
+                "route_id",
+                "route_type",
+            ],
         )
 
         assert len(result) == 3
@@ -530,8 +592,16 @@ class TestGtfsUtilsV2:
         result = get_trips(
             selected_date="2025-09-01",
             operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
-            trip_cols=["name", "gtfs_dataset_key", "feed_key", "trip_id", "trip_instance_key"],
-            custom_filtering={"trip_instance_key": ["d7d7502d292a35c41ee5a6c3c43f2fd5"]},
+            trip_cols=[
+                "name",
+                "gtfs_dataset_key",
+                "feed_key",
+                "trip_id",
+                "trip_instance_key",
+            ],
+            custom_filtering={
+                "trip_instance_key": ["d7d7502d292a35c41ee5a6c3c43f2fd5"]
+            },
         )
 
         assert len(result) == 1
@@ -547,12 +617,17 @@ class TestGtfsUtilsV2:
 
     @pytest.mark.vcr
     def test_get_trips_metrolink_feed_present(self, capfd):
-        result = get_trips(selected_date="2025-11-24", operator_feeds=["4321a7e3901b2275805494a746ec1c6a"])
+        result = get_trips(
+            selected_date="2025-11-24",
+            operator_feeds=["4321a7e3901b2275805494a746ec1c6a"],
+        )
 
         assert len(result) == 1
         out, err = capfd.readouterr()
 
-        assert re.search("metrolink", out, re.IGNORECASE) is None, "Should not have printed about metrolink feed."
+        assert (
+            re.search("metrolink", out, re.IGNORECASE) is None
+        ), "Should not have printed about metrolink feed."
 
     @pytest.mark.vcr
     def test_get_trips_fill_in_metrolink_shape_id(self, capfd):
@@ -565,18 +640,27 @@ class TestGtfsUtilsV2:
         assert len(result) == 1
         # TODO shape_id was already VTin in the DB. It's not clear when fill_in_metrolink_trips_df_with_shape_id is needed.
         assert result.to_dict(orient="records") == [
-            {"name": "Metrolink Schedule", "feed_key": "918ed58c79d05e956cf6f0c15e2a9902", "shape_id": "VTin"}
+            {
+                "name": "Metrolink Schedule",
+                "feed_key": "918ed58c79d05e956cf6f0c15e2a9902",
+                "shape_id": "VTin",
+            }
         ]
 
     def test_get_trips_no_operator_feeds(self):
-        with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
+        with pytest.raises(
+            ValueError, match="Supply list of feed keys or operator names!"
+        ):
             get_trips(selected_date="2025-08-23")
 
     @pytest.mark.vcr
     def test_get_shapes(self):
         result = get_shapes(
             selected_date="2025-10-01",
-            operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d", "ebeaafe0a365384015dfe01dd80b683d"],
+            operator_feeds=[
+                "3ea60aa240ddc543da5415ccc759fd6d",
+                "ebeaafe0a365384015dfe01dd80b683d",
+            ],
         )
 
         assert len(result) == 2
@@ -640,7 +724,9 @@ class TestGtfsUtilsV2:
                 "feed_key": "3ea60aa240ddc543da5415ccc759fd6d",
                 "feed_timezone": "America/Los_Angeles",
                 "service_date": datetime.date(2025, 10, 1),
-                "shape_first_departure_datetime_pacific": Timestamp("2025-10-01 09:45:00"),
+                "shape_first_departure_datetime_pacific": Timestamp(
+                    "2025-10-01 09:45:00"
+                ),
                 "shape_last_arrival_datetime_pacific": Timestamp("2025-10-01 11:35:00"),
                 "shape_id": "2m8h",
                 "shape_array_key": "a023425d1b44b2af7ffa58e220b7da8b",
@@ -723,7 +809,10 @@ class TestGtfsUtilsV2:
         result = get_shapes(
             selected_date="2025-10-01",
             operator_feeds=["89c9390b2669927a67a4594f119986d6"],
-            custom_filtering={"shape_array_key": ["166d1656656c24bb26a66f0df49edf1c"], "n_trips": [39]},
+            custom_filtering={
+                "shape_array_key": ["166d1656656c24bb26a66f0df49edf1c"],
+                "n_trips": [39],
+            },
         )
 
         assert len(result) == 1
@@ -747,210 +836,324 @@ class TestGtfsUtilsV2:
         ]
 
     def test_get_shapes_no_operator_feeds(self):
-        with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
+        with pytest.raises(
+            ValueError, match="Supply list of feed keys or operator names!"
+        ):
             get_shapes(selected_date="2025-09-19")
 
     def test_get_shapes_get_df_false(self):
         result = get_shapes(
-            selected_date="2025-09-01", operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d"], get_df=False
+            selected_date="2025-09-01",
+            operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d"],
+            get_df=False,
         )
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
         statement = str(result)
-        assert re.search(r"SELECT\s.*pt_array.*\sFROM", statement), "The statement did not include pt_array column."
+        assert re.search(
+            r"SELECT\s.*pt_array.*\sFROM", statement
+        ), "The statement did not include pt_array column."
 
     @pytest.mark.vcr
     def test_get_stops(self):
-        result = get_stops(selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"])
+        result = get_stops(
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
+        )
 
-        assert len(result) == 2
+        assert len(result) == 3
         assert isinstance(result, gpd.GeoDataFrame)
-        assert result.drop(columns=["geometry", "_feed_valid_from"]).to_dict(orient="records") == unordered(
+        assert result.drop(
+            columns=[
+                "geometry",
+                "_feed_valid_from",
+                "first_stop_arrival_datetime_pacific",
+                "last_stop_departure_datetime_pacific",
+            ]
+        ).to_dict(orient="records") == unordered(
             [
                 {
-                    "key": "32f3ba416f67b9c5e0e08ca63d611acb",
-                    "service_date": datetime.date(2025, 11, 2),
-                    "feed_key": "de3b4f439f8542021168b5ca6f64cc9c",
-                    "stop_id": "0117",
+                    "key": "36e9a190be944c957bc0d73fb291466e",
+                    "service_date": datetime.date(2024, 7, 5),
+                    "feed_key": "0007cf02f9eee5014e8dbab1bac07f5b",
+                    "stop_id": "20501",
                     "feed_timezone": "America/Los_Angeles",
-                    "stop_event_count": 11,
-                    "first_stop_arrival_datetime_pacific": Timestamp("2025-11-02 05:15:09"),
-                    "last_stop_departure_datetime_pacific": Timestamp("2025-11-02 22:47:09"),
-                    "route_type_0": None,
-                    "route_type_1": None,
-                    "route_type_2": None,
-                    "route_type_3": 11,
-                    "route_type_4": None,
-                    "route_type_5": None,
-                    "route_type_6": None,
-                    "route_type_7": None,
-                    "route_type_11": None,
-                    "route_type_12": None,
-                    "missing_route_type": None,
+                    "daily_arrivals": 6,
+                    "n_hours_in_service": 5,
+                    "arrivals_per_hour_owl": 0.0,
+                    "arrivals_per_hour_early_am": 0.0,
+                    "arrivals_per_hour_am_peak": 2.0,
+                    "arrivals_per_hour_midday": 0.8,
+                    "arrivals_per_hour_pm_peak": 0.4,
+                    "arrivals_per_hour_evening": 0.0,
+                    "arrivals_owl": 0,
+                    "arrivals_early_am": 0,
+                    "arrivals_am_peak": 6,
+                    "arrivals_midday": 4,
+                    "arrivals_pm_peak": 2,
+                    "arrivals_evening": 0,
+                    "route_type_0": 0,
+                    "route_type_1": 0,
+                    "route_type_2": 0,
+                    "route_type_3": 12,
+                    "route_type_4": 0,
+                    "route_type_5": 0,
+                    "route_type_6": 0,
+                    "route_type_7": 0,
+                    "route_type_11": 0,
+                    "route_type_12": 0,
+                    "missing_route_type": 0,
                     "contains_warning_duplicate_stop_times_primary_key": False,
                     "contains_warning_duplicate_trip_primary_key": False,
+                    "route_id_array": ["562", "564"],
                     "route_type_array": [3],
-                    "transit_mode_array": ["bus"],
-                    "n_transit_modes": 1,
+                    "n_route_types": 1,
                     "contains_warning_duplicate_stop_primary_key": False,
-                    "stop_key": "1284349c884cb8ff0e0ed39bc0cd6ce6",
+                    "stop_key": "1407791f42a01acfc040496be069673e",
                     "tts_stop_name": None,
                     "parent_station": None,
-                    "stop_code": "0117",
-                    "stop_name": "Garfield & Jefferson SW",
+                    "stop_code": None,
+                    "stop_name": "Aberdeen - 150 Tinemaha Road",
                     "stop_desc": None,
                     "location_type": 0,
                     "stop_timezone_coalesced": "America/Los_Angeles",
-                    "wheelchair_boarding": None,
+                    "wheelchair_boarding": 1,
                 },
                 {
-                    "key": "6f8f617b300e48402c060c94a5e507c7",
-                    "service_date": datetime.date(2025, 11, 2),
-                    "feed_key": "de3b4f439f8542021168b5ca6f64cc9c",
-                    "stop_id": "0119",
+                    "key": "d3b1b52ff685a00becb0d486cd209cd2",
+                    "service_date": datetime.date(2024, 7, 5),
+                    "feed_key": "0007cf02f9eee5014e8dbab1bac07f5b",
+                    "stop_id": "20409",
                     "feed_timezone": "America/Los_Angeles",
-                    "stop_event_count": 11,
-                    "first_stop_arrival_datetime_pacific": Timestamp("2025-11-02 05:14:28"),
-                    "last_stop_departure_datetime_pacific": Timestamp("2025-11-02 22:46:28"),
-                    "route_type_0": None,
-                    "route_type_1": None,
-                    "route_type_2": None,
-                    "route_type_3": 11,
-                    "route_type_4": None,
-                    "route_type_5": None,
-                    "route_type_6": None,
-                    "route_type_7": None,
-                    "route_type_11": None,
-                    "route_type_12": None,
-                    "missing_route_type": None,
+                    "daily_arrivals": 53,
+                    "n_hours_in_service": 12,
+                    "arrivals_per_hour_owl": 0.0,
+                    "arrivals_per_hour_early_am": 0.0,
+                    "arrivals_per_hour_am_peak": 2.3,
+                    "arrivals_per_hour_midday": 3.0,
+                    "arrivals_per_hour_pm_peak": 3.0,
+                    "arrivals_per_hour_evening": 0.8,
+                    "arrivals_owl": 0,
+                    "arrivals_early_am": 0,
+                    "arrivals_am_peak": 7,
+                    "arrivals_midday": 15,
+                    "arrivals_pm_peak": 15,
+                    "arrivals_evening": 3,
+                    "route_type_0": 0,
+                    "route_type_1": 0,
+                    "route_type_2": 0,
+                    "route_type_3": 40,
+                    "route_type_4": 0,
+                    "route_type_5": 0,
+                    "route_type_6": 0,
+                    "route_type_7": 0,
+                    "route_type_11": 0,
+                    "route_type_12": 0,
+                    "missing_route_type": 0,
                     "contains_warning_duplicate_stop_times_primary_key": False,
                     "contains_warning_duplicate_trip_primary_key": False,
+                    "route_id_array": ["5014"],
                     "route_type_array": [3],
-                    "transit_mode_array": ["bus"],
-                    "n_transit_modes": 1,
+                    "n_route_types": 1,
                     "contains_warning_duplicate_stop_primary_key": False,
-                    "stop_key": "23aefd38535a5ec8dec23f02765c8421",
+                    "stop_key": "41bc1507a378f41c622a18dfde1ceff6",
                     "tts_stop_name": None,
                     "parent_station": None,
-                    "stop_code": "0119",
-                    "stop_name": "Garfield & Somerset SW",
+                    "stop_code": "AC",
+                    "stop_name": "Adventure Center",
                     "stop_desc": None,
                     "location_type": 0,
                     "stop_timezone_coalesced": "America/Los_Angeles",
-                    "wheelchair_boarding": None,
+                    "wheelchair_boarding": 1,
+                },
+                {
+                    "key": "6a9b406f1e940f2f98b40cd9af8e0bdc",
+                    "service_date": datetime.date(2024, 7, 5),
+                    "feed_key": "0007cf02f9eee5014e8dbab1bac07f5b",
+                    "stop_id": "20399",
+                    "feed_timezone": "America/Los_Angeles",
+                    "daily_arrivals": 52,
+                    "n_hours_in_service": 0,
+                    "arrivals_per_hour_owl": 0.0,
+                    "arrivals_per_hour_early_am": 0.0,
+                    "arrivals_per_hour_am_peak": 0.0,
+                    "arrivals_per_hour_midday": 0.0,
+                    "arrivals_per_hour_pm_peak": 0.0,
+                    "arrivals_per_hour_evening": 0.0,
+                    "arrivals_owl": 0,
+                    "arrivals_early_am": 0,
+                    "arrivals_am_peak": 0,
+                    "arrivals_midday": 0,
+                    "arrivals_pm_peak": 0,
+                    "arrivals_evening": 0,
+                    "route_type_0": 0,
+                    "route_type_1": 0,
+                    "route_type_2": 0,
+                    "route_type_3": 3,
+                    "route_type_4": 0,
+                    "route_type_5": 0,
+                    "route_type_6": 0,
+                    "route_type_7": 0,
+                    "route_type_11": 0,
+                    "route_type_12": 0,
+                    "missing_route_type": 0,
+                    "contains_warning_duplicate_stop_times_primary_key": False,
+                    "contains_warning_duplicate_trip_primary_key": False,
+                    "route_id_array": ["5014"],
+                    "route_type_array": [3],
+                    "n_route_types": 1,
+                    "contains_warning_duplicate_stop_primary_key": False,
+                    "stop_key": "acf76129b0b6f4fb964d6f12058373f7",
+                    "tts_stop_name": None,
+                    "parent_station": None,
+                    "stop_code": "R1",
+                    "stop_name": "Agnew Meadows",
+                    "stop_desc": None,
+                    "location_type": 0,
+                    "stop_timezone_coalesced": "America/Los_Angeles",
+                    "wheelchair_boarding": 1,
                 },
             ]
         )
 
         assert (
-            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
-            .equals_exact(Point(-118.169, 33.893), tolerance=0.001)
+            .equals_exact(Point(-118.254, 36.977), tolerance=0.001)
         )
         assert (
-            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
             .item()
-            .equals_exact(Point(-118.169, 33.896), tolerance=0.001)
+            .equals_exact(Point(-119.037, 37.651), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(-119.081, 37.681), tolerance=0.001)
         )
 
     @pytest.mark.vcr
     def test_get_stops_stop_cols(self):
         result = get_stops(
-            selected_date="2025-11-02",
-            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
             stop_cols=["key", "stop_id"],
         )
 
-        assert len(result) == 2
+        assert len(result) == 3
         assert isinstance(result, gpd.GeoDataFrame)
         assert result.drop(columns=["geometry"]).to_dict(orient="records") == unordered(
             [
                 {
-                    "key": "32f3ba416f67b9c5e0e08ca63d611acb",
-                    "stop_id": "0117",
+                    "key": "36e9a190be944c957bc0d73fb291466e",
+                    "stop_id": "20501",
                 },
                 {
-                    "key": "6f8f617b300e48402c060c94a5e507c7",
-                    "stop_id": "0119",
+                    "key": "d3b1b52ff685a00becb0d486cd209cd2",
+                    "stop_id": "20409",
+                },
+                {
+                    "key": "6a9b406f1e940f2f98b40cd9af8e0bdc",
+                    "stop_id": "20399",
                 },
             ]
         )
 
         assert (
-            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
-            .equals_exact(Point(-118.169, 33.893), tolerance=0.001)
+            .equals_exact(Point(-118.254, 36.977), tolerance=0.001)
         )
         assert (
-            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
             .item()
-            .equals_exact(Point(-118.169, 33.896), tolerance=0.001)
+            .equals_exact(Point(-119.037, 37.651), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(-119.081, 37.681), tolerance=0.001)
         )
 
     @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_stops.yaml")
     @pytest.mark.vcr
     def test_get_stops_crs_esri(self):
         result = get_stops(
-            selected_date="2025-11-02",
-            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
             crs=geography_utils.CA_NAD83Albers_ft,
         )
+        print(result.geometry)
 
-        assert len(result) == 2
+        assert len(result) == 3
         assert isinstance(result, gpd.GeoDataFrame)
         assert (
-            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
-            .equals_exact(Point(555734.413, 7625849.975), tolerance=0.001)
+            .equals_exact(Point(509159.348, 8749097.078), tolerance=0.001)
         )
         assert (
-            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
             .item()
-            .equals_exact(Point(555702.09, 7627130.429), tolerance=0.001)
+            .equals_exact(Point(278278.993, 8991636.925), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(265634.545, 9002361.211), tolerance=0.001)
         )
 
     @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_stops.yaml")
     @pytest.mark.vcr
     def test_get_stops_crs_epsg(self):
         result = get_stops(
-            selected_date="2025-11-02",
-            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
             crs=geography_utils.CA_NAD83Albers_m,
         )
 
-        assert len(result) == 2
+        assert len(result) == 3
         assert isinstance(result, gpd.GeoDataFrame)
         assert (
-            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
-            .equals_exact(Point(169388.188, -456433.84), tolerance=0.001)
+            .equals_exact(Point(155192.080, -114067.439), tolerance=0.001)
         )
         assert (
-            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
             .item()
-            .equals_exact(Point(169378.336, -456043.557), tolerance=0.001)
+            .equals_exact(Point(84819.607, -40141.145), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(80965.571, -36872.377), tolerance=0.001)
         )
 
     @pytest.mark.vcr
     def test_get_stops_custom_filtering(self):
         result = get_stops(
-            selected_date="2025-11-02",
-            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
-            custom_filtering={"stop_id": ["0119"]},
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
+            custom_filtering={"stop_id": ["20501"]},
         )
 
         assert len(result) == 1
         assert isinstance(result, gpd.GeoDataFrame)
-        assert result.key.values[0] == "6f8f617b300e48402c060c94a5e507c7"
-        assert result.stop_id.values[0] == "0119"
+        assert result.key.values[0] == "36e9a190be944c957bc0d73fb291466e"
+        assert result.stop_id.values[0] == "20501"
 
     def test_get_stops_no_operator_feeds(self):
-        with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
-            get_stops(selected_date="2025-11-01")
+        with pytest.raises(
+            ValueError, match="Supply list of feed keys or operator names!"
+        ):
+            get_stops(selected_date="2024-07-05")
 
     def test_get_stops_get_df_false(self):
         result = get_stops(
-            selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"], get_df=False
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
+            get_df=False,
         )
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
@@ -964,7 +1167,9 @@ class TestGtfsUtilsV2:
         )
 
         assert len(result) == 2
-        assert result.drop(columns=["_feed_valid_from"]).to_dict(orient="records") == unordered(
+        assert result.drop(columns=["_feed_valid_from"]).to_dict(
+            orient="records"
+        ) == unordered(
             [
                 {
                     "key": "0a66e67b36bcc42197f05beaed08e373",
@@ -1062,23 +1267,40 @@ class TestGtfsUtilsV2:
         assert len(result) == 2
         assert result.to_dict(orient="records") == unordered(
             [
-                {"feed_key": "4321a7e3901b2275805494a746ec1c6a", "arrival_hour": 11, "departure_hour": 11},
-                {"feed_key": "4321a7e3901b2275805494a746ec1c6a", "arrival_hour": 11, "departure_hour": 11},
+                {
+                    "feed_key": "4321a7e3901b2275805494a746ec1c6a",
+                    "arrival_hour": 11,
+                    "departure_hour": 11,
+                },
+                {
+                    "feed_key": "4321a7e3901b2275805494a746ec1c6a",
+                    "arrival_hour": 11,
+                    "departure_hour": 11,
+                },
             ]
         )
 
     @pytest.mark.vcr
     def test_get_stop_times_get_df_false(self, trip):
-        result = get_stop_times(trip_df=trip, operator_feeds=["4321a7e3901b2275805494a746ec1c6a"], get_df=False)
+        result = get_stop_times(
+            trip_df=trip,
+            operator_feeds=["4321a7e3901b2275805494a746ec1c6a"],
+            get_df=False,
+        )
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
 
     @pytest.mark.vcr
     def test_get_stop_times_no_trip_df(self):
-        result = get_stop_times(selected_date="2025-11-24", operator_feeds=["918ed58c79d05e956cf6f0c15e2a9902"])
+        result = get_stop_times(
+            selected_date="2025-11-24",
+            operator_feeds=["918ed58c79d05e956cf6f0c15e2a9902"],
+        )
 
         assert len(result) == 1
-        assert result.drop(columns=["_feed_valid_from"]).to_dict(orient="records") == unordered(
+        assert result.drop(columns=["_feed_valid_from"]).to_dict(
+            orient="records"
+        ) == unordered(
             [
                 {
                     "key": "af69a8e874fd726f64bcc1a9992ae8ce",
@@ -1133,7 +1355,9 @@ class TestGtfsUtilsV2:
         )
 
         assert len(result) == 1
-        assert result[["key", "feed_key", "trip_id", "stop_id"]].to_dict(orient="records") == [
+        assert result[["key", "feed_key", "trip_id", "stop_id"]].to_dict(
+            orient="records"
+        ) == [
             {
                 "key": "952a6434038bef86c05f25a2d13f6dda",
                 "feed_key": "4321a7e3901b2275805494a746ec1c6a",
@@ -1143,7 +1367,9 @@ class TestGtfsUtilsV2:
         ]
 
     def test_get_stop_times_no_operator_feeds(self):
-        with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
+        with pytest.raises(
+            ValueError, match="Supply list of feed keys or operator names!"
+        ):
             get_stop_times(selected_date="2025-11-01")
 
     @pytest.mark.vcr
@@ -1162,7 +1388,9 @@ class TestGtfsUtilsV2:
             "2f506f822a5f9b2afa48bda762a5e81d",
         )
 
-    @pytest.mark.default_cassette("TestGtfsUtilsV2.test_filter_to_public_schedule_gtfs_dataset_keys.yaml")
+    @pytest.mark.default_cassette(
+        "TestGtfsUtilsV2.test_filter_to_public_schedule_gtfs_dataset_keys.yaml"
+    )
     @pytest.mark.vcr
     def test_filter_to_public_schedule_gtfs_dataset_keys_get_df(self):
         result = filter_to_public_schedule_gtfs_dataset_keys(get_df=True)
