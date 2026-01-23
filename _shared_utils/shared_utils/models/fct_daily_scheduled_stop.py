@@ -1,5 +1,14 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import TIMESTAMP, Boolean, Column, Date, DateTime, Integer, String, Float
+from sqlalchemy import (
+    TIMESTAMP,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
