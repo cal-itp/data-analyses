@@ -1,5 +1,5 @@
 directory: ./gtfs_digest/
-notebook: ./gtfs_digest/report_new_operator.ipynb
+notebook: ./gtfs_digest/report_operator.ipynb
 parts:
 - chapters:
   - caption: District 01-Eureka

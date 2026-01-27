@@ -55,7 +55,7 @@ avg_scheduled_minutes:
   subtitle: "Based on Weekday Data."
   tooltip: ["Date", "Route", "Direction", "Average Scheduled Minutes"]
   colors: ${color_palettes.two_colors2} 
-  ticks: [0, 15, 30, 45, 60, 75, 90]
+  ticks: [0, 30, 60, 90, 120, 150, 180, 210, 240]
 
 scheduled:
   title: "Total Scheduled Trips"
