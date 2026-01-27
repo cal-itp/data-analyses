@@ -157,11 +157,11 @@ def publish_stops(analysis_month: str) -> gpd.GeoDataFrame:
 
 
 if __name__ == "__main__":
-    
+
     LOG_FILE = "./logs/open_data.log"
     logger.add(LOG_FILE, retention="2 months")
     logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
-    
+
     start = datetime.datetime.now()
 
     stops = publish_stops(analysis_month)
