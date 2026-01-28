@@ -2,6 +2,7 @@ import datetime
 import re
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pytest
 import sqlalchemy
@@ -759,7 +760,6 @@ class TestGtfsUtilsV2:
         statement = str(result)
         assert re.search(r"SELECT\s.*pt_array.*\sFROM", statement), "The statement did not include pt_array column."
 
-
     @pytest.mark.vcr
     def test_get_stops(self):
         result = get_stops(
@@ -939,6 +939,32 @@ class TestGtfsUtilsV2:
             .equals_exact(Point(-119.081, 37.681), tolerance=0.001)
         )
 
+        # Check first_stop_arrival_datetime_pacific
+        assert result.loc[
+            result.key == "36e9a190be944c957bc0d73fb291466e", "first_stop_arrival_datetime_pacific"
+        ].item() == Timestamp("2024-07-05 07:40:00")
+        assert result.loc[
+            result.key == "d3b1b52ff685a00becb0d486cd209cd2", "first_stop_arrival_datetime_pacific"
+        ].item() == Timestamp("2024-07-05 09:00:00")
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "first_stop_arrival_datetime_pacific"]
+            .isna()
+            .item()
+        )
+
+        # Check last_stop_arrival_datetime_pacific
+        assert result.loc[
+            result.key == "36e9a190be944c957bc0d73fb291466e", "last_stop_departure_datetime_pacific"
+        ].item() == Timestamp("2024-07-05 17:30:00")
+        assert result.loc[
+            result.key == "d3b1b52ff685a00becb0d486cd209cd2", "last_stop_departure_datetime_pacific"
+        ].item() == Timestamp("2024-07-05 20:25:00")
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "last_stop_departure_datetime_pacific"]
+            .isna()
+            .item()
+        )
+
     @pytest.mark.vcr
     def test_get_stops_stop_cols(self):
         result = get_stops(
@@ -966,6 +992,24 @@ class TestGtfsUtilsV2:
             ]
         )
 
+        # Check geometry column
+        assert (
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
+            .item()
+            .equals_exact(Point(-118.254, 36.977), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
+            .item()
+            .equals_exact(Point(-119.037, 37.651), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(-119.081, 37.681), tolerance=0.001)
+        )
+
+        # Check first/last arrival time columns
         assert (
             result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
@@ -1063,7 +1107,6 @@ class TestGtfsUtilsV2:
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
 
-    
     @pytest.mark.vcr
     def test_get_stop_times(self, trip):
         result = get_stop_times(
