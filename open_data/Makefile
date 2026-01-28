@@ -1,8 +1,8 @@
 create_gtfs_schedule_geospatial_open_data:
 # make sure to update update_vars.py
 	python download_warehouse_inputs.py
-	python create_routes_data2.py
-	python create_stops_data2.py
+	python create_routes_data.py
+	python create_stops_data.py
 
 
 compile_open_data_portal:

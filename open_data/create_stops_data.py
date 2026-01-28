@@ -1,56 +1,90 @@
 """
-Create stops file with identifiers including
-route_id, route_name, agency_id, agency_name.
+Create `ca_transit_stops` to publish to Geoportal.
 """
+
 import datetime
+import sys
+
+import gcsfs
 import geopandas as gpd
+import google.auth
 import intake
 import pandas as pd
-import yaml
-
-import open_data_utils
 from calitp_data_analysis import geography_utils, utils
-from shared_utils import publish_utils, portfolio_utils
-from update_vars import (analysis_date, 
-                         GTFS_DATA_DICT,
-                         TRAFFIC_OPS_GCS, 
-                         RT_SCHED_GCS, SCHED_GCS,
-                         AH_TEST
-                        )
+from loguru import logger
+from update_vars import OPEN_DATA_GCS, analysis_month
 
-import google.auth
 credentials, _ = google.auth.default()
-
 catalog = intake.open_catalog("../_shared_utils/shared_utils/shared_data_catalog.yml")
 
-def create_stops_file_for_export(
-    date: str,
-) -> gpd.GeoDataFrame:
-    """
-    Read in scheduled stop metrics table and attach crosswalk 
-    info related to organization for Geoportal.
-    """
-    time0 = datetime.datetime.now()
+MONTHLY_STOPS_COLS = [
+    # stop by day_type, use these to aggregate metrics
+    "name",
+    "stop_id",
+    "stop_name",
+    "n_days",
+    "day_type",
+    # stop metrics
+    "total_stop_arrivals",
+    "geometry",
+    "route_type_array",  # renamed to routetypes
+    "route_id_array",  # renamed to route_ids_served, use this to calculate n_routes
+    "n_hours_in_service",
+]
 
-    # Read in parquets
-    STOP_FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_stop_metrics
 
-    stops = gpd.read_parquet(
-        f"{RT_SCHED_GCS}{STOP_FILE}_{date}.parquet",
-        storage_options={"token": credentials.token}
+def prep_stops(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Aggregate day_type (weekday/Sat/Sun) to all stops that month.
+    """
+    stop_group_cols = ["name", "stop_id", "stop_name"]
+    # Group across day_types
+    stop_geom = gdf[stop_group_cols + ["geometry"]].drop_duplicates()
+
+    gdf2 = (
+        gdf.sort_values(stop_group_cols + ["total_stop_arrivals"], ascending=[True for c in stop_group_cols] + [False])
+        .groupby(stop_group_cols)
+        .agg(
+            {
+                "total_stop_arrivals": "sum",
+                "n_days": "sum",
+                "route_type_array": "first",
+                "route_id_array": "first",
+                "n_hours_in_service": "max",  # if these differ, choose the one that's the highest (weekday)
+            }
+        )
+        .reset_index()
     )
-    
-    stops2 = portfolio_utils.standardize_operator_info_for_exports(stops, date)
 
-    time1 = datetime.datetime.now()
-    print(f"get stops for date: {time1 - time0}")
-    
-    return stops2
+    gdf3 = pd.merge(stop_geom, gdf2, on=stop_group_cols, how="inner")
+
+    gdf3 = gdf3.assign(
+        # round daily arrivals to nearest integer
+        # calculate this again because we aggregated and weekdays are 5x and weekends are 2x
+        n_arrivals=gdf3.total_stop_arrivals.divide(gdf3.n_days).round(0).astype(int),
+        n_routes=gdf3.apply(lambda x: len(list(x.route_id_array)), axis=1),
+    ).drop(columns=["n_days"])
+
+    return gdf3
 
 
-def add_distance_to_state_highway(
-    stops: gpd.GeoDataFrame
-) -> gpd.GeoDataFrame:
+def rename_stop_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    """
+    Put all the renaming here.
+    """
+    gdf = gdf.rename(
+        columns={
+            "daily_arrivals": "n_arrivals",
+            "route_type_array": "routetypes",
+            "route_id_array": "route_ids_served",
+            "caltrans_district_full": "district_name",
+        }
+    )
+
+    return gdf
+
+
+def add_distance_to_state_highway(stops: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     """
     Bring in State Highway Network gdf and add a column that tells us
     distance (in meters) between stop and SHN.
@@ -58,150 +92,81 @@ def add_distance_to_state_highway(
     Using a dissolve takes a long time. Instead, opt for gpd.sjoin_nearest,
     which allows us to return a distance column, and if there are multiple
     rows, we'll keep the closest distance.
-    
+
     See discussion in:
     https://github.com/cal-itp/data-analyses/issues/1182
     https://github.com/cal-itp/data-analyses/issues/1321
     https://github.com/cal-itp/data-analyses/issues/1397
     """
     orig_crs = stops.crs
-    
-    shn = catalog.state_highway_network.read()[
-        ["District", "geometry"]].to_crs(geography_utils.CA_NAD83Albers_m)   
 
-    stop_cols = ["schedule_gtfs_dataset_key", "stop_id"]
+    shn = catalog.state_highway_network.read()[["District", "geometry"]].to_crs(geography_utils.CA_NAD83Albers_m)
 
-    nearest_shn_result = gpd.sjoin_nearest(
-        stops[stop_cols + ["geometry"]].to_crs(geography_utils.CA_NAD83Albers_m), 
-        shn, 
-        distance_col = "meters_to_shn"
-    ).sort_values(
-        stop_cols + ["meters_to_shn"]
-    ).drop_duplicates(subset = stop_cols).reset_index(drop=True)
+    stop_cols = ["name", "stop_id", "stop_name"]
 
-    stops2 = pd.merge(
-        stops,
-        nearest_shn_result[stop_cols + ["meters_to_shn"]],
-        on = stop_cols,
-        how = "inner"
+    nearest_shn_result = (
+        gpd.sjoin_nearest(
+            stops[stop_cols + ["geometry"]].to_crs(geography_utils.CA_NAD83Albers_m),
+            shn,
+            distance_col="meters_to_ca_state_highway",
+        )
+        .sort_values(stop_cols + ["meters_to_ca_state_highway"])
+        .drop_duplicates(subset=stop_cols)
+        .reset_index(drop=True)
     )
-  
-    stops2 = stops2.assign(
-        meters_to_shn = stops2.meters_to_shn.round(1)
-    )
-    
+
+    stops2 = pd.merge(stops, nearest_shn_result[stop_cols + ["meters_to_ca_state_highway"]], on=stop_cols, how="inner")
+
+    stops2 = stops2.assign(meters_to_ca_state_highway=stops2.meters_to_ca_state_highway.round(1))
+
     return stops2.to_crs(orig_crs)
 
 
-def patch_previous_dates(
-    current_stops: gpd.GeoDataFrame,
-    current_date: str,
-    published_operators_yaml: str = "../gtfs_funnel/published_operators.yml"
-) -> gpd.GeoDataFrame:
+def publish_stops(analysis_month: str) -> gpd.GeoDataFrame:
     """
-    Compare to the yaml for what operators we want, and
-    patch in previous dates for the 10 or so operators
-    that do not have data for this current date.
+    Import downloaded mart_gtfs_rollup.fct_monthly_scheduled_stops,
+    aggregate across day_type,
+    add state highway network derived columns,
+    rename for publishing,
+    and merge in bridge table to exclude feeds we don't want to publish.
     """
-    with open(published_operators_yaml) as f:
-        published_operators_dict = yaml.safe_load(f)
-    
-    patch_operators_dict = {
-        str(date): operator_list for 
-        date, operator_list in published_operators_dict.items() 
-        if str(date) != current_date
-    }
-    
-    partial_dfs = []
-
-    STOP_FILE = GTFS_DATA_DICT.rt_vs_schedule_tables.sched_stop_metrics
-
-    for one_date, operator_list in patch_operators_dict.items():
-        df_to_add = publish_utils.subset_table_from_previous_date(
-            gcs_bucket = RT_SCHED_GCS,
-            filename = STOP_FILE,
-            operator_and_dates_dict = patch_operators_dict,
-            date = one_date, 
-            crosswalk_col = "schedule_gtfs_dataset_key",
-            data_type = "gdf"
+    stops = (
+        gpd.read_parquet(
+            f"{OPEN_DATA_GCS}stops_{analysis_month}.parquet",
+            storage_options={"token": credentials.token},
+            columns=MONTHLY_STOPS_COLS,
         )
-        
-        partial_dfs.append(df_to_add)
-
-    patch_stops = pd.concat(partial_dfs, axis=0, ignore_index=True)
-
-    published_stops = pd.concat(
-        [current_stops, patch_stops], 
-        axis=0, ignore_index=True
-    ).pipe(add_distance_to_state_highway)
-    
-    
-    return published_stops
-    
-
-def finalize_export_df(df: gpd.GeoDataFrame) -> gpd.GeoDataFrame: 
-    """
-    Suppress certain columns used in our internal modeling for export.
-    """
-    # Change column order
-    route_cols = [
-        'analysis_name',
-    ]       
-    stop_cols = [
-        'stop_id', 'stop_name', 
-        # add GTFS stop-related metrics
-        'n_routes', 'route_ids_served', 'route_types_served', 
-        'n_arrivals', 'n_hours_in_service',
-        # this is derived column
-        'meters_to_shn'
-    ]
-    agency_ids = ['base64_url', 'caltrans_district']
-    
-    col_order = route_cols + stop_cols + agency_ids + ['geometry']
-    
-    df2 = (df[col_order]
-           .reindex(columns = col_order)
-           .rename(columns = open_data_utils.STANDARDIZED_COLUMNS_DICT)
-           .reset_index(drop=True)
+        .pipe(prep_stops)
+        .pipe(add_distance_to_state_highway)
     )
-    
-    return df2
+
+    crosswalk = pd.read_parquet(
+        f"{OPEN_DATA_GCS}bridge_gtfs_analysis_name_x_ntd.parquet",
+        columns=["schedule_gtfs_dataset_name", "analysis_name", "caltrans_district_full"],
+        filesystem=gcsfs.GCSFileSystem(),
+    ).drop_duplicates()  # need this because we might have dupes that differ on other columns in bridge, like organization_source_record_id
+
+    # Merge in crosswalk, which will filter out the feeds we don't want to publish
+    stops2 = pd.merge(stops, crosswalk.rename(columns={"schedule_gtfs_dataset_name": "name"}), on=["name"], how="inner")
+
+    # this is unique on ["name", "stop_id", "stop_name"]
+    # there are dupes where same stop_id has slightly different stop_names
+    stops3 = rename_stop_columns(stops2)
+
+    return stops3
 
 
 if __name__ == "__main__":
-        
-    time0 = datetime.datetime.now()
 
-    stops = create_stops_file_for_export(analysis_date)  
-    """
-    published_stops = patch_previous_dates(
-        stops, 
-        analysis_date,
-    ).pipe(finalize_export_df)
+    LOG_FILE = "./logs/open_data.log"
+    logger.add(LOG_FILE, retention="2 months")
+    logger.add(sys.stderr, format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}", level="INFO")
 
-    
-    AH: work for later
-    """
-    published_stops = (
-    patch_previous_dates(
-        stops,
-        analysis_date,
-    )
-    
-    .pipe(portfolio_utils.standardize_operator_info_for_exports, analysis_date)
-    .pipe(finalize_export_df)
-    )
-    utils.geoparquet_gcs_export(
-        published_stops,
-        TRAFFIC_OPS_GCS,
-        f"export/ca_transit_stops_{analysis_date}"
-    )
-    
-    utils.geoparquet_gcs_export(
-        published_stops, 
-        TRAFFIC_OPS_GCS, 
-        "ca_transit_stops"
-    )
-    
-    time1 = datetime.datetime.now()
-    print(f"Execution time for stops script: {time1 - time0}")
+    start = datetime.datetime.now()
+
+    stops = publish_stops(analysis_month)
+
+    utils.geoparquet_gcs_export(stops, OPEN_DATA_GCS, f"export/ca_transit_stops_{analysis_month}")
+
+    end = datetime.datetime.now()
+    logger.info(f"{analysis_month}: export stops: {end - start}")
