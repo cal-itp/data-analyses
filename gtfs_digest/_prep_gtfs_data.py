@@ -62,19 +62,22 @@ def prep_operator_summary(file_name: str) -> pd.DataFrame:
             "month_first_day", "analysis_name", "caltrans_district", "vp_name", "tu_name",
             "n_trips", "day_type", "daily_trips", "ttl_service_hours", "n_routes", "n_days",
             "n_shapes", "n_stops", "vp_messages_per_minute", "n_vp_trips", "daily_vp_trips",
-            "pct_vp_trips", "n_vp_routes", "pct_vp_service_hours", "tu_messages_per_minute",
-            "n_tu_trips", "daily_tu_trips", "pct_tu_trips", "n_tu_routes", "pct_tu_service_hours",
+            "pct_vp_trips", "pct_vp_service_hours", "tu_messages_per_minute",
+            "n_tu_trips", "daily_tu_trips", "pct_tu_trips", "pct_tu_service_hours",
         ]
     ]
 
+    
+    # Multiply percetnage columns by 100. Clip any values above 100.
+    df2.pct_tu_trips = df2.pct_tu_trips * 100
+    df2.pct_vp_trips = df2.pct_vp_trips * 100
+    df2.pct_tu_trips = df2.pct_tu_trips.clip(upper=100.0)
+    df2.pct_vp_trips = df2.pct_vp_trips.clip(upper=100.0)
+    
     # Clean columns
     df2.columns = df2.columns.str.replace("_", " ").str.title()
     df2 = df2.rename(columns={"Month First Day": "Date"})
     df2.columns = df2.columns.str.replace("Vp", "VP").str.replace("Tu", "TU")
-
-    # Add calculated columns
-    df2["Percent of Trips with Trip Updates"] = (df2["N TU Trips"] / df2["N Trips"]) * 100
-    df2["Percent of Trips with Vehicle Positions"] = (df2["N VP Trips"] / df2["N Trips"]) * 100
 
     # Save processed file
     gcs_pandas().data_frame_to_parquet(

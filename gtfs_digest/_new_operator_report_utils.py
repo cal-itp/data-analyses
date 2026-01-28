@@ -414,7 +414,7 @@ def text_table(df: pd.DataFrame) -> alt.Chart:
 
     
 def create_text_graph(df: pd.DataFrame):
-    chart_dict = readable_dict.avg_scheduled_minutes
+    chart_dict = readable_dict.text
     
     df2 = create_text_table(df)
 
@@ -511,8 +511,8 @@ def create_tu_pct(df: pd.DataFrame):
     chart = _portfolio_charts.bar_chart(
         df=df,
         x_col="Date",
-        y_col="Percent of Trips with Trip Updates",
-        color_col="Percent of Trips with Trip Updates",
+        y_col='Pct TU Trips',
+        color_col='Pct TU Trips',
         color_scheme=[*chart_dict.colors],
         tooltip_cols=list(chart_dict.tooltip),
         date_format="%b %Y",
@@ -537,8 +537,8 @@ def create_vp_pct(df: pd.DataFrame):
     chart = _portfolio_charts.bar_chart(
         df=df,
         x_col="Date",
-        y_col="Percent of Trips with Vehicle Positions",
-        color_col="Percent of Trips with Vehicle Positions",
+        y_col='Pct VP Trips',
+        color_col='Pct VP Trips',
         color_scheme=[*chart_dict.colors],
         tooltip_cols=list(chart_dict.tooltip),
         date_format="%b %Y",

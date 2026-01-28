@@ -75,9 +75,9 @@ def load_operator_summary(
 
     crosswalk_url = f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet"
 
-    crosswalk_df = gcs_pandas().read_parquet(crosswalk_url)[["analysis_name", "caltrans_district"]]
+    crosswalk_df = gcs_pandas().read_parquet(crosswalk_url)[["name","analysis_name","caltrans_district"]]
     
-    m1 = pd.merge(df, crosswalk_df, on="analysis_name", how="inner").drop_duplicates().reset_index()
+    m1 = pd.merge(df, crosswalk_df, left_on = ["schedule_name"], right_on = ["name"], how="inner")
 
     gcs_pandas().data_frame_to_parquet(
         m1,

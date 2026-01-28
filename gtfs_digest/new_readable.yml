@@ -10,9 +10,9 @@ color_palettes:
   headway_scale: ["#ccbb44", "#e9d868", "#fcb40e","#ff9c42",  "#fc5c04", "#dd217d",] 
   vp_tu_scale: ["#dd217d","#fc5c04","#fcb40e","#ccbb44"]
   
-# Scheduled Service Hours
+# Scheduled Trips
 hourly_summary:
-    title: "Daily Scheduled Service Hours for "
+    title: "Daily Scheduled Trips for "
     subtitle: "Use the legend to highlight a particular month and hover over the line for additional information."
     tooltip: ["Date", 'Departure Hour', "N Trips"] 
     colors: []
@@ -37,18 +37,17 @@ vehicle_positions_minute:
 vehicle_positions_pct:
   title: "Percentage of Trips with Vehicle Positions"
   subtitle: "Based on Weekday Data, across all routes."
-  tooltip: ["Date", "Percent of Trips with Vehicle Positions"]
+  tooltip: ["Date", 'Pct VP Trips']
   colors: ${color_palettes.four_colors} 
   ticks: [0,10,20,30,40,50,60,70,80,90,100]
   
 trip_update_pct:
   title: "Percentage of Trips with Trip Updates"
   subtitle: "Based on Weekday Data, across all routes."
-  tooltip: ["Date", "Percent of Trips with Trip Updates",]
+  tooltip: ["Date", 'Pct TU Trips',]
   colors: ${color_palettes.tri_color} 
   ticks: [0,10,20,30,40,50,60,70,80,90,100]
 
-  
 # fct_monthly_schedule_route_direction_summary
 avg_scheduled_minutes:
   title: "Average Scheduled Minutes"
