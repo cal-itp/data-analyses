@@ -7,15 +7,14 @@ see if we need fct_monthly_scheduled_trips.
 import datetime
 import sys
 
+import gcsfs
 from calitp_data_analysis import utils
 from loguru import logger
 from shared_utils import bq_utils
 from update_vars import OPEN_DATA_GCS, analysis_month
 
 PROD_PROJECT = "cal-itp-data-infra"
-STG_PROJECT = "cal-itp-data-infra-staging"
 PROD_MART = "mart_gtfs_rollup"
-STG_MART = "tiffany_mart_gtfs_rollup"
 
 if __name__ == "__main__":
 
@@ -28,8 +27,8 @@ if __name__ == "__main__":
 
     # Download stops
     monthly_stops = bq_utils.download_table(
-        project_name=STG_PROJECT,
-        dataset_name=STG_MART,
+        project_name=PROD_PROJECT,
+        dataset_name=PROD_MART,
         table_name="fct_monthly_scheduled_stops",
         date_col=MONTH_DATE_COL,
         start_date=analysis_month,
@@ -45,8 +44,8 @@ if __name__ == "__main__":
 
     # Download shapes with route_info
     monthly_routes = bq_utils.download_table(
-        project_name=STG_PROJECT,
-        dataset_name=STG_MART,
+        project_name=PROD_PROJECT,
+        dataset_name=PROD_MART,
         table_name="fct_monthly_routes",
         date_col=MONTH_DATE_COL,
         start_date=analysis_month,
@@ -60,13 +59,13 @@ if __name__ == "__main__":
     logger.info(f"routes: {analysis_month}: {t2 - t1}")
 
     crosswalk = bq_utils.download_table(
-        project_name=STG_PROJECT,
-        dataset_name="tiffany_mart_transit_database",
+        project_name=PROD_PROJECT,
+        dataset_name="mart_transit_database",
         table_name="bridge_gtfs_analysis_name_x_ntd",
         date_col=None,
     )
 
-    crosswalk.to_parquet(f"{OPEN_DATA_GCS}bridge_gtfs_analysis_name_x_ntd.parquet")
+    crosswalk.to_parquet(f"{OPEN_DATA_GCS}bridge_gtfs_analysis_name_x_ntd.parquet", filesystem=gcsfs.GCSFileSystem())
 
     end = datetime.datetime.now()
     logger.info(f"crosswalk: {end - t2}")
