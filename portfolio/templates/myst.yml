@@ -23,7 +23,7 @@ site:
     analytics_google: '{{ google_analytics_id }}'
     folders: true
     favicon: ../templates/assets/favicon.ico
-    logo: ../templates/assets/DDS-Logo_FC-Black_Digital.png
-    logo_dark: ../templates/assets/DDS-Logo_FC-White_Digital.png
+    logo: ../templates/assets/CT+DDS-Logo_FC-Black_Horizontal_Digital.png
+    logo_dark: ../templates/assets/CT+DDS-Logo_FC-White_Horizontal_Digital.png
     logo_url: '/'
   template: book-theme
