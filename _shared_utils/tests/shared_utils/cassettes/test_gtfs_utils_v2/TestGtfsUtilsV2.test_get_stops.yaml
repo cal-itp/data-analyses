@@ -1,25 +1,32 @@
 interactions:
 - request:
     body: '{"maximumBytesBilled": "5000000000", "queryParameters": [{"parameterType":
-      {"type": "STRING"}, "parameterValue": {"value": "2025-11-02"}, "name": "service_date_1"},
+      {"type": "STRING"}, "parameterValue": {"value": "2024-07-05"}, "name": "service_date_1"},
       {"parameterType": {"type": "ARRAY", "arrayType": {"type": "STRING"}}, "parameterValue":
-      {"arrayValues": [{"value": "de3b4f439f8542021168b5ca6f64cc9c"}]}, "name": "feed_key_1"}],
+      {"arrayValues": [{"value": "0007cf02f9eee5014e8dbab1bac07f5b"}]}, "name": "feed_key_1"}],
       "parameterMode": "NAMED", "useLegacySql": false, "formatOptions": {"useInt64Timestamp":
       true}, "location": "us-west2", "query": "SELECT `test_shared_utils.fct_daily_scheduled_stops`.`key`,
       `test_shared_utils.fct_daily_scheduled_stops`.`service_date`, `test_shared_utils.fct_daily_scheduled_stops`.`feed_key`,
       `test_shared_utils.fct_daily_scheduled_stops`.`stop_id`, `test_shared_utils.fct_daily_scheduled_stops`.`feed_timezone`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`stop_event_count`, `test_shared_utils.fct_daily_scheduled_stops`.`first_stop_arrival_datetime_pacific`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`daily_arrivals`, `test_shared_utils.fct_daily_scheduled_stops`.`first_stop_arrival_datetime_pacific`,
       `test_shared_utils.fct_daily_scheduled_stops`.`last_stop_departure_datetime_pacific`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`_feed_valid_from`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_0`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_1`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_2`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_3`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_4`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_5`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_6`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_7`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_11`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_12`, `test_shared_utils.fct_daily_scheduled_stops`.`missing_route_type`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`contains_warning_duplicate_stop_times_primary_key`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`_feed_valid_from`, `test_shared_utils.fct_daily_scheduled_stops`.`n_hours_in_service`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`n_route_types`, `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_per_hour_owl`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_per_hour_early_am`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_per_hour_am_peak`, `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_per_hour_midday`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_per_hour_pm_peak`, `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_per_hour_evening`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_owl`, `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_early_am`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_am_peak`, `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_midday`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_pm_peak`, `test_shared_utils.fct_daily_scheduled_stops`.`arrivals_evening`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_0`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_1`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_2`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_3`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_4`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_5`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_6`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_7`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_11`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_12`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`missing_route_type`, `test_shared_utils.fct_daily_scheduled_stops`.`contains_warning_duplicate_stop_times_primary_key`,
       `test_shared_utils.fct_daily_scheduled_stops`.`contains_warning_duplicate_trip_primary_key`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`route_type_array`, `test_shared_utils.fct_daily_scheduled_stops`.`transit_mode_array`,
-      `test_shared_utils.fct_daily_scheduled_stops`.`n_transit_modes`, `test_shared_utils.fct_daily_scheduled_stops`.`contains_warning_duplicate_stop_primary_key`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`route_id_array`, `test_shared_utils.fct_daily_scheduled_stops`.`route_type_array`,
+      `test_shared_utils.fct_daily_scheduled_stops`.`contains_warning_duplicate_stop_primary_key`,
       `test_shared_utils.fct_daily_scheduled_stops`.`stop_key`, `test_shared_utils.fct_daily_scheduled_stops`.`tts_stop_name`,
       `test_shared_utils.fct_daily_scheduled_stops`.`pt_geom`, `test_shared_utils.fct_daily_scheduled_stops`.`parent_station`,
       `test_shared_utils.fct_daily_scheduled_stops`.`stop_code`, `test_shared_utils.fct_daily_scheduled_stops`.`stop_name`,
@@ -27,7 +34,7 @@ interactions:
       `test_shared_utils.fct_daily_scheduled_stops`.`stop_timezone_coalesced`, `test_shared_utils.fct_daily_scheduled_stops`.`wheelchair_boarding`
       \nFROM `test_shared_utils.fct_daily_scheduled_stops` \nWHERE `test_shared_utils.fct_daily_scheduled_stops`.`service_date`
       = @`service_date_1` AND `test_shared_utils.fct_daily_scheduled_stops`.`feed_key`
-      IN UNNEST(@`feed_key_1`)", "maxResults": 5000, "requestId": "603236e8-1340-4617-a2ee-8762682c3455"}'
+      IN UNNEST(@`feed_key_1`)", "maxResults": 5000, "requestId": "dbf7ad6f-fd2d-48b0-8e61-3ea37d2b6e16"}'
     headers:
       Accept:
       - '*/*'
@@ -38,31 +45,30 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '3174'
+      - '4072'
       Content-Type:
       - application/json
       User-Agent:
-      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      - sqlalchemy/2.0.45 gl-python/3.11.10 grpc/1.74.0 gax/2.25.1 gapic/3.36.0 gccl/3.36.0
       X-Goog-API-Client:
-      - sqlalchemy/1.4.46 gl-python/3.11.13 grpc/1.76.0 gax/2.28.1 gapic/3.38.0 gccl/3.38.0
+      - sqlalchemy/2.0.45 gl-python/3.11.10 grpc/1.74.0 gax/2.25.1 gapic/3.36.0 gccl/3.36.0
       x-goog-user-project:
-      - cal-itp-data-infra-staging
+      - cal-itp-data-infra
     method: POST
     uri: https://bigquery.googleapis.com/bigquery/v2/projects/cal-itp-data-infra-staging/queries?prettyPrint=false
   response:
     body:
-      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"key","type":"STRING","mode":"NULLABLE"},{"name":"service_date","type":"DATE","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"},{"name":"stop_id","type":"STRING","mode":"NULLABLE"},{"name":"feed_timezone","type":"STRING","mode":"NULLABLE"},{"name":"stop_event_count","type":"INTEGER","mode":"NULLABLE"},{"name":"first_stop_arrival_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"last_stop_departure_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"_feed_valid_from","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"route_type_0","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_1","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_2","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_3","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_4","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_5","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_6","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_7","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_11","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_12","type":"INTEGER","mode":"NULLABLE"},{"name":"missing_route_type","type":"INTEGER","mode":"NULLABLE"},{"name":"contains_warning_duplicate_stop_times_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"contains_warning_duplicate_trip_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"route_type_array","type":"INTEGER","mode":"REPEATED"},{"name":"transit_mode_array","type":"STRING","mode":"REPEATED"},{"name":"n_transit_modes","type":"INTEGER","mode":"NULLABLE"},{"name":"contains_warning_duplicate_stop_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"stop_key","type":"STRING","mode":"NULLABLE"},{"name":"tts_stop_name","type":"STRING","mode":"NULLABLE"},{"name":"pt_geom","type":"GEOGRAPHY","mode":"NULLABLE"},{"name":"parent_station","type":"STRING","mode":"NULLABLE"},{"name":"stop_code","type":"STRING","mode":"NULLABLE"},{"name":"stop_name","type":"STRING","mode":"NULLABLE"},{"name":"stop_desc","type":"STRING","mode":"NULLABLE"},{"name":"location_type","type":"INTEGER","mode":"NULLABLE"},{"name":"stop_timezone_coalesced","type":"STRING","mode":"NULLABLE"},{"name":"wheelchair_boarding","type":"INTEGER","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_O1v7qm8hnehE6c9UeRlTSVL3cw3F","location":"us-west2"},"totalRows":"2","rows":[{"f":[{"v":"32f3ba416f67b9c5e0e08ca63d611acb"},{"v":"2025-11-02"},{"v":"de3b4f439f8542021168b5ca6f64cc9c"},{"v":"0117"},{"v":"America/Los_Angeles"},{"v":"11"},{"v":"2025-11-02T05:15:09"},{"v":"2025-11-02T22:47:09"},{"v":"1755831690152012"},{"v":null},{"v":null},{"v":null},{"v":"11"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"false"},{"v":"false"},{"v":[{"v":"3"}]},{"v":[{"v":"bus"}]},{"v":"1"},{"v":"false"},{"v":"1284349c884cb8ff0e0ed39bc0cd6ce6"},{"v":null},{"v":"POINT(-118.168867
-        33.892687)"},{"v":null},{"v":"0117"},{"v":"Garfield & Jefferson SW"},{"v":null},{"v":"0"},{"v":"America/Los_Angeles"},{"v":null}]},{"f":[{"v":"6f8f617b300e48402c060c94a5e507c7"},{"v":"2025-11-02"},{"v":"de3b4f439f8542021168b5ca6f64cc9c"},{"v":"0119"},{"v":"America/Los_Angeles"},{"v":"11"},{"v":"2025-11-02T05:14:28"},{"v":"2025-11-02T22:46:28"},{"v":"1755831690152012"},{"v":null},{"v":null},{"v":null},{"v":"11"},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":null},{"v":"false"},{"v":"false"},{"v":[{"v":"3"}]},{"v":[{"v":"bus"}]},{"v":"1"},{"v":"false"},{"v":"23aefd38535a5ec8dec23f02765c8421"},{"v":null},{"v":"POINT(-118.168892
-        33.896207)"},{"v":null},{"v":"0119"},{"v":"Garfield & Somerset SW"},{"v":null},{"v":"0"},{"v":"America/Los_Angeles"},{"v":null}]}],"totalBytesProcessed":"1512","jobComplete":true,"cacheHit":false,"queryId":"job_O1v7qm8hnehE6c9UeRlTSVL3cw3F","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"10485760","totalSlotMs":"59","location":"us-west2","creationTime":"1764962419143","startTime":"1764962419235","endTime":"1764962419413"}'
+      string: '{"kind":"bigquery#queryResponse","schema":{"fields":[{"name":"key","type":"STRING","mode":"NULLABLE"},{"name":"service_date","type":"DATE","mode":"NULLABLE"},{"name":"feed_key","type":"STRING","mode":"NULLABLE"},{"name":"stop_id","type":"STRING","mode":"NULLABLE"},{"name":"feed_timezone","type":"STRING","mode":"NULLABLE"},{"name":"daily_arrivals","type":"INTEGER","mode":"NULLABLE"},{"name":"first_stop_arrival_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"last_stop_departure_datetime_pacific","type":"DATETIME","mode":"NULLABLE"},{"name":"_feed_valid_from","type":"TIMESTAMP","mode":"NULLABLE"},{"name":"n_hours_in_service","type":"INTEGER","mode":"NULLABLE"},{"name":"n_route_types","type":"INTEGER","mode":"NULLABLE"},{"name":"arrivals_per_hour_owl","type":"FLOAT","mode":"NULLABLE"},{"name":"arrivals_per_hour_early_am","type":"FLOAT","mode":"NULLABLE"},{"name":"arrivals_per_hour_am_peak","type":"FLOAT","mode":"NULLABLE"},{"name":"arrivals_per_hour_midday","type":"FLOAT","mode":"NULLABLE"},{"name":"arrivals_per_hour_pm_peak","type":"FLOAT","mode":"NULLABLE"},{"name":"arrivals_per_hour_evening","type":"FLOAT","mode":"NULLABLE"},{"name":"arrivals_owl","type":"INTEGER","mode":"NULLABLE"},{"name":"arrivals_early_am","type":"INTEGER","mode":"NULLABLE"},{"name":"arrivals_am_peak","type":"INTEGER","mode":"NULLABLE"},{"name":"arrivals_midday","type":"INTEGER","mode":"NULLABLE"},{"name":"arrivals_pm_peak","type":"INTEGER","mode":"NULLABLE"},{"name":"arrivals_evening","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_0","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_1","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_2","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_3","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_4","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_5","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_6","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_7","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_11","type":"INTEGER","mode":"NULLABLE"},{"name":"route_type_12","type":"INTEGER","mode":"NULLABLE"},{"name":"missing_route_type","type":"INTEGER","mode":"NULLABLE"},{"name":"contains_warning_duplicate_stop_times_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"contains_warning_duplicate_trip_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"route_id_array","type":"STRING","mode":"REPEATED"},{"name":"route_type_array","type":"INTEGER","mode":"REPEATED"},{"name":"contains_warning_duplicate_stop_primary_key","type":"BOOLEAN","mode":"NULLABLE"},{"name":"stop_key","type":"STRING","mode":"NULLABLE"},{"name":"tts_stop_name","type":"STRING","mode":"NULLABLE"},{"name":"pt_geom","type":"GEOGRAPHY","mode":"NULLABLE"},{"name":"parent_station","type":"STRING","mode":"NULLABLE"},{"name":"stop_code","type":"STRING","mode":"NULLABLE"},{"name":"stop_name","type":"STRING","mode":"NULLABLE"},{"name":"stop_desc","type":"STRING","mode":"NULLABLE"},{"name":"location_type","type":"INTEGER","mode":"NULLABLE"},{"name":"stop_timezone_coalesced","type":"STRING","mode":"NULLABLE"},{"name":"wheelchair_boarding","type":"INTEGER","mode":"NULLABLE"}]},"jobReference":{"projectId":"cal-itp-data-infra-staging","jobId":"job_asmL-lQ_1e0fildPXs01-QA2YiYW","location":"us-west2"},"totalRows":"3","rows":[{"f":[{"v":"36e9a190be944c957bc0d73fb291466e"},{"v":"2024-07-05"},{"v":"0007cf02f9eee5014e8dbab1bac07f5b"},{"v":"20501"},{"v":"America/Los_Angeles"},{"v":"6"},{"v":"2024-07-05T07:40:00"},{"v":"2024-07-05T17:30:00"},{"v":"1720148416611382"},{"v":"5"},{"v":"1"},{"v":"0.0"},{"v":"0.0"},{"v":"2.0"},{"v":"0.8"},{"v":"0.4"},{"v":"0.0"},{"v":"0"},{"v":"0"},{"v":"6"},{"v":"4"},{"v":"2"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"12"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"false"},{"v":"false"},{"v":[{"v":"562"},{"v":"564"}]},{"v":[{"v":"3"}]},{"v":"false"},{"v":"1407791f42a01acfc040496be069673e"},{"v":null},{"v":"POINT(-118.25415
+        36.977383)"},{"v":null},{"v":null},{"v":"Aberdeen - 150 Tinemaha Road"},{"v":null},{"v":"0"},{"v":"America/Los_Angeles"},{"v":"1"}]},{"f":[{"v":"d3b1b52ff685a00becb0d486cd209cd2"},{"v":"2024-07-05"},{"v":"0007cf02f9eee5014e8dbab1bac07f5b"},{"v":"20409"},{"v":"America/Los_Angeles"},{"v":"53"},{"v":"2024-07-05T09:00:00"},{"v":"2024-07-05T20:25:00"},{"v":"1720148416611382"},{"v":"12"},{"v":"1"},{"v":"0.0"},{"v":"0.0"},{"v":"2.3"},{"v":"3.0"},{"v":"3.0"},{"v":"0.8"},{"v":"0"},{"v":"0"},{"v":"7"},{"v":"15"},{"v":"15"},{"v":"3"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"40"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"false"},{"v":"false"},{"v":[{"v":"5014"}]},{"v":[{"v":"3"}]},{"v":"false"},{"v":"41bc1507a378f41c622a18dfde1ceff6"},{"v":null},{"v":"POINT(-119.037292
+        37.651402)"},{"v":null},{"v":"AC"},{"v":"Adventure Center"},{"v":null},{"v":"0"},{"v":"America/Los_Angeles"},{"v":"1"}]},{"f":[{"v":"6a9b406f1e940f2f98b40cd9af8e0bdc"},{"v":"2024-07-05"},{"v":"0007cf02f9eee5014e8dbab1bac07f5b"},{"v":"20399"},{"v":"America/Los_Angeles"},{"v":"52"},{"v":null},{"v":null},{"v":"1720148416611382"},{"v":"0"},{"v":"1"},{"v":"0.0"},{"v":"0.0"},{"v":"0.0"},{"v":"0.0"},{"v":"0.0"},{"v":"0.0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"3"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"0"},{"v":"false"},{"v":"false"},{"v":[{"v":"5014"}]},{"v":[{"v":"3"}]},{"v":"false"},{"v":"acf76129b0b6f4fb964d6f12058373f7"},{"v":null},{"v":"POINT(-119.080673
+        37.681149)"},{"v":null},{"v":"R1"},{"v":"Agnew Meadows"},{"v":null},{"v":"0"},{"v":"America/Los_Angeles"},{"v":"1"}]}],"totalBytesProcessed":"0","jobComplete":true,"cacheHit":true,"queryId":"job_asmL-lQ_1e0fildPXs01-QA2YiYW","jobCreationReason":{"code":"REQUESTED"},"totalBytesBilled":"0","location":"us-west2","creationTime":"1769202886913","startTime":"1769202887004","endTime":"1769202887096"}'
     headers:
-      Alt-Svc:
-      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
       Content-Encoding:
       - gzip
       Content-Type:
       - application/json; charset=UTF-8
       Date:
-      - Fri, 05 Dec 2025 19:20:19 GMT
+      - Fri, 23 Jan 2026 21:14:47 GMT
       Server:
       - ESF
       Transfer-Encoding:

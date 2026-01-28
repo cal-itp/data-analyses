@@ -761,196 +761,347 @@ class TestGtfsUtilsV2:
 
     @pytest.mark.vcr
     def test_get_stops(self):
-        result = get_stops(selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"])
+        result = get_stops(
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
+        )
 
-        assert len(result) == 2
+        assert len(result) == 3
         assert isinstance(result, gpd.GeoDataFrame)
-        assert result.drop(columns=["geometry", "_feed_valid_from"]).to_dict(orient="records") == unordered(
+        assert result.drop(
+            columns=[
+                "geometry",
+                "_feed_valid_from",
+                "first_stop_arrival_datetime_pacific",
+                "last_stop_departure_datetime_pacific",
+            ]
+        ).to_dict(orient="records") == unordered(
             [
                 {
-                    "key": "32f3ba416f67b9c5e0e08ca63d611acb",
-                    "service_date": datetime.date(2025, 11, 2),
-                    "feed_key": "de3b4f439f8542021168b5ca6f64cc9c",
-                    "stop_id": "0117",
+                    "key": "36e9a190be944c957bc0d73fb291466e",
+                    "service_date": datetime.date(2024, 7, 5),
+                    "feed_key": "0007cf02f9eee5014e8dbab1bac07f5b",
+                    "stop_id": "20501",
                     "feed_timezone": "America/Los_Angeles",
-                    "stop_event_count": 11,
-                    "first_stop_arrival_datetime_pacific": Timestamp("2025-11-02 05:15:09"),
-                    "last_stop_departure_datetime_pacific": Timestamp("2025-11-02 22:47:09"),
-                    "route_type_0": None,
-                    "route_type_1": None,
-                    "route_type_2": None,
-                    "route_type_3": 11,
-                    "route_type_4": None,
-                    "route_type_5": None,
-                    "route_type_6": None,
-                    "route_type_7": None,
-                    "route_type_11": None,
-                    "route_type_12": None,
-                    "missing_route_type": None,
+                    "daily_arrivals": 6,
+                    "n_hours_in_service": 5,
+                    "arrivals_per_hour_owl": 0.0,
+                    "arrivals_per_hour_early_am": 0.0,
+                    "arrivals_per_hour_am_peak": 2.0,
+                    "arrivals_per_hour_midday": 0.8,
+                    "arrivals_per_hour_pm_peak": 0.4,
+                    "arrivals_per_hour_evening": 0.0,
+                    "arrivals_owl": 0,
+                    "arrivals_early_am": 0,
+                    "arrivals_am_peak": 6,
+                    "arrivals_midday": 4,
+                    "arrivals_pm_peak": 2,
+                    "arrivals_evening": 0,
+                    "route_type_0": 0,
+                    "route_type_1": 0,
+                    "route_type_2": 0,
+                    "route_type_3": 12,
+                    "route_type_4": 0,
+                    "route_type_5": 0,
+                    "route_type_6": 0,
+                    "route_type_7": 0,
+                    "route_type_11": 0,
+                    "route_type_12": 0,
+                    "missing_route_type": 0,
                     "contains_warning_duplicate_stop_times_primary_key": False,
                     "contains_warning_duplicate_trip_primary_key": False,
+                    "route_id_array": ["562", "564"],
                     "route_type_array": [3],
-                    "transit_mode_array": ["bus"],
-                    "n_transit_modes": 1,
+                    "n_route_types": 1,
                     "contains_warning_duplicate_stop_primary_key": False,
-                    "stop_key": "1284349c884cb8ff0e0ed39bc0cd6ce6",
+                    "stop_key": "1407791f42a01acfc040496be069673e",
                     "tts_stop_name": None,
                     "parent_station": None,
-                    "stop_code": "0117",
-                    "stop_name": "Garfield & Jefferson SW",
+                    "stop_code": None,
+                    "stop_name": "Aberdeen - 150 Tinemaha Road",
                     "stop_desc": None,
                     "location_type": 0,
                     "stop_timezone_coalesced": "America/Los_Angeles",
-                    "wheelchair_boarding": None,
+                    "wheelchair_boarding": 1,
                 },
                 {
-                    "key": "6f8f617b300e48402c060c94a5e507c7",
-                    "service_date": datetime.date(2025, 11, 2),
-                    "feed_key": "de3b4f439f8542021168b5ca6f64cc9c",
-                    "stop_id": "0119",
+                    "key": "d3b1b52ff685a00becb0d486cd209cd2",
+                    "service_date": datetime.date(2024, 7, 5),
+                    "feed_key": "0007cf02f9eee5014e8dbab1bac07f5b",
+                    "stop_id": "20409",
                     "feed_timezone": "America/Los_Angeles",
-                    "stop_event_count": 11,
-                    "first_stop_arrival_datetime_pacific": Timestamp("2025-11-02 05:14:28"),
-                    "last_stop_departure_datetime_pacific": Timestamp("2025-11-02 22:46:28"),
-                    "route_type_0": None,
-                    "route_type_1": None,
-                    "route_type_2": None,
-                    "route_type_3": 11,
-                    "route_type_4": None,
-                    "route_type_5": None,
-                    "route_type_6": None,
-                    "route_type_7": None,
-                    "route_type_11": None,
-                    "route_type_12": None,
-                    "missing_route_type": None,
+                    "daily_arrivals": 53,
+                    "n_hours_in_service": 12,
+                    "arrivals_per_hour_owl": 0.0,
+                    "arrivals_per_hour_early_am": 0.0,
+                    "arrivals_per_hour_am_peak": 2.3,
+                    "arrivals_per_hour_midday": 3.0,
+                    "arrivals_per_hour_pm_peak": 3.0,
+                    "arrivals_per_hour_evening": 0.8,
+                    "arrivals_owl": 0,
+                    "arrivals_early_am": 0,
+                    "arrivals_am_peak": 7,
+                    "arrivals_midday": 15,
+                    "arrivals_pm_peak": 15,
+                    "arrivals_evening": 3,
+                    "route_type_0": 0,
+                    "route_type_1": 0,
+                    "route_type_2": 0,
+                    "route_type_3": 40,
+                    "route_type_4": 0,
+                    "route_type_5": 0,
+                    "route_type_6": 0,
+                    "route_type_7": 0,
+                    "route_type_11": 0,
+                    "route_type_12": 0,
+                    "missing_route_type": 0,
                     "contains_warning_duplicate_stop_times_primary_key": False,
                     "contains_warning_duplicate_trip_primary_key": False,
+                    "route_id_array": ["5014"],
                     "route_type_array": [3],
-                    "transit_mode_array": ["bus"],
-                    "n_transit_modes": 1,
+                    "n_route_types": 1,
                     "contains_warning_duplicate_stop_primary_key": False,
-                    "stop_key": "23aefd38535a5ec8dec23f02765c8421",
+                    "stop_key": "41bc1507a378f41c622a18dfde1ceff6",
                     "tts_stop_name": None,
                     "parent_station": None,
-                    "stop_code": "0119",
-                    "stop_name": "Garfield & Somerset SW",
+                    "stop_code": "AC",
+                    "stop_name": "Adventure Center",
                     "stop_desc": None,
                     "location_type": 0,
                     "stop_timezone_coalesced": "America/Los_Angeles",
-                    "wheelchair_boarding": None,
+                    "wheelchair_boarding": 1,
+                },
+                {
+                    "key": "6a9b406f1e940f2f98b40cd9af8e0bdc",
+                    "service_date": datetime.date(2024, 7, 5),
+                    "feed_key": "0007cf02f9eee5014e8dbab1bac07f5b",
+                    "stop_id": "20399",
+                    "feed_timezone": "America/Los_Angeles",
+                    "daily_arrivals": 52,
+                    "n_hours_in_service": 0,
+                    "arrivals_per_hour_owl": 0.0,
+                    "arrivals_per_hour_early_am": 0.0,
+                    "arrivals_per_hour_am_peak": 0.0,
+                    "arrivals_per_hour_midday": 0.0,
+                    "arrivals_per_hour_pm_peak": 0.0,
+                    "arrivals_per_hour_evening": 0.0,
+                    "arrivals_owl": 0,
+                    "arrivals_early_am": 0,
+                    "arrivals_am_peak": 0,
+                    "arrivals_midday": 0,
+                    "arrivals_pm_peak": 0,
+                    "arrivals_evening": 0,
+                    "route_type_0": 0,
+                    "route_type_1": 0,
+                    "route_type_2": 0,
+                    "route_type_3": 3,
+                    "route_type_4": 0,
+                    "route_type_5": 0,
+                    "route_type_6": 0,
+                    "route_type_7": 0,
+                    "route_type_11": 0,
+                    "route_type_12": 0,
+                    "missing_route_type": 0,
+                    "contains_warning_duplicate_stop_times_primary_key": False,
+                    "contains_warning_duplicate_trip_primary_key": False,
+                    "route_id_array": ["5014"],
+                    "route_type_array": [3],
+                    "n_route_types": 1,
+                    "contains_warning_duplicate_stop_primary_key": False,
+                    "stop_key": "acf76129b0b6f4fb964d6f12058373f7",
+                    "tts_stop_name": None,
+                    "parent_station": None,
+                    "stop_code": "R1",
+                    "stop_name": "Agnew Meadows",
+                    "stop_desc": None,
+                    "location_type": 0,
+                    "stop_timezone_coalesced": "America/Los_Angeles",
+                    "wheelchair_boarding": 1,
                 },
             ]
         )
 
+        # Check geometry functions
         assert (
-            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
-            .equals_exact(Point(-118.169, 33.893), tolerance=0.001)
+            .equals_exact(Point(-118.254, 36.977), tolerance=0.001)
         )
         assert (
-            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
             .item()
-            .equals_exact(Point(-118.169, 33.896), tolerance=0.001)
+            .equals_exact(Point(-119.037, 37.651), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(-119.081, 37.681), tolerance=0.001)
+        )
+
+        # Check first_stop_arrival_datetime_pacific
+        assert result.loc[
+            result.key == "36e9a190be944c957bc0d73fb291466e", "first_stop_arrival_datetime_pacific"
+        ].item() == Timestamp("2024-07-05 07:40:00")
+        assert result.loc[
+            result.key == "d3b1b52ff685a00becb0d486cd209cd2", "first_stop_arrival_datetime_pacific"
+        ].item() == Timestamp("2024-07-05 09:00:00")
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "first_stop_arrival_datetime_pacific"]
+            .isna()
+            .item()
+        )
+
+        # Check last_stop_arrival_datetime_pacific
+        assert result.loc[
+            result.key == "36e9a190be944c957bc0d73fb291466e", "last_stop_departure_datetime_pacific"
+        ].item() == Timestamp("2024-07-05 17:30:00")
+        assert result.loc[
+            result.key == "d3b1b52ff685a00becb0d486cd209cd2", "last_stop_departure_datetime_pacific"
+        ].item() == Timestamp("2024-07-05 20:25:00")
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "last_stop_departure_datetime_pacific"]
+            .isna()
+            .item()
         )
 
     @pytest.mark.vcr
     def test_get_stops_stop_cols(self):
         result = get_stops(
-            selected_date="2025-11-02",
-            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
             stop_cols=["key", "stop_id"],
         )
 
-        assert len(result) == 2
+        assert len(result) == 3
         assert isinstance(result, gpd.GeoDataFrame)
         assert result.drop(columns=["geometry"]).to_dict(orient="records") == unordered(
             [
                 {
-                    "key": "32f3ba416f67b9c5e0e08ca63d611acb",
-                    "stop_id": "0117",
+                    "key": "36e9a190be944c957bc0d73fb291466e",
+                    "stop_id": "20501",
                 },
                 {
-                    "key": "6f8f617b300e48402c060c94a5e507c7",
-                    "stop_id": "0119",
+                    "key": "d3b1b52ff685a00becb0d486cd209cd2",
+                    "stop_id": "20409",
+                },
+                {
+                    "key": "6a9b406f1e940f2f98b40cd9af8e0bdc",
+                    "stop_id": "20399",
                 },
             ]
         )
 
+        # Check geometry column
         assert (
-            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
-            .equals_exact(Point(-118.169, 33.893), tolerance=0.001)
+            .equals_exact(Point(-118.254, 36.977), tolerance=0.001)
         )
         assert (
-            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
             .item()
-            .equals_exact(Point(-118.169, 33.896), tolerance=0.001)
+            .equals_exact(Point(-119.037, 37.651), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(-119.081, 37.681), tolerance=0.001)
+        )
+
+        # Check first/last arrival time columns
+        assert (
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
+            .item()
+            .equals_exact(Point(-118.254, 36.977), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
+            .item()
+            .equals_exact(Point(-119.037, 37.651), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(-119.081, 37.681), tolerance=0.001)
         )
 
     @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_stops.yaml")
     @pytest.mark.vcr
     def test_get_stops_crs_esri(self):
         result = get_stops(
-            selected_date="2025-11-02",
-            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
             crs=geography_utils.CA_NAD83Albers_ft,
         )
+        print(result.geometry)
 
-        assert len(result) == 2
+        assert len(result) == 3
         assert isinstance(result, gpd.GeoDataFrame)
         assert (
-            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
-            .equals_exact(Point(555734.413, 7625849.975), tolerance=0.001)
+            .equals_exact(Point(509159.348, 8749097.078), tolerance=0.001)
         )
         assert (
-            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
             .item()
-            .equals_exact(Point(555702.09, 7627130.429), tolerance=0.001)
+            .equals_exact(Point(278278.993, 8991636.925), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(265634.545, 9002361.211), tolerance=0.001)
         )
 
     @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_stops.yaml")
     @pytest.mark.vcr
     def test_get_stops_crs_epsg(self):
         result = get_stops(
-            selected_date="2025-11-02",
-            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
             crs=geography_utils.CA_NAD83Albers_m,
         )
 
-        assert len(result) == 2
+        assert len(result) == 3
         assert isinstance(result, gpd.GeoDataFrame)
         assert (
-            result.loc[result.key == "32f3ba416f67b9c5e0e08ca63d611acb", "geometry"]
+            result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
-            .equals_exact(Point(169388.188, -456433.84), tolerance=0.001)
+            .equals_exact(Point(155192.080, -114067.439), tolerance=0.001)
         )
         assert (
-            result.loc[result.key == "6f8f617b300e48402c060c94a5e507c7", "geometry"]
+            result.loc[result.key == "d3b1b52ff685a00becb0d486cd209cd2", "geometry"]
             .item()
-            .equals_exact(Point(169378.336, -456043.557), tolerance=0.001)
+            .equals_exact(Point(84819.607, -40141.145), tolerance=0.001)
+        )
+        assert (
+            result.loc[result.key == "6a9b406f1e940f2f98b40cd9af8e0bdc", "geometry"]
+            .item()
+            .equals_exact(Point(80965.571, -36872.377), tolerance=0.001)
         )
 
     @pytest.mark.vcr
     def test_get_stops_custom_filtering(self):
         result = get_stops(
-            selected_date="2025-11-02",
-            operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"],
-            custom_filtering={"stop_id": ["0119"]},
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
+            custom_filtering={"stop_id": ["20501"]},
         )
 
         assert len(result) == 1
         assert isinstance(result, gpd.GeoDataFrame)
-        assert result.key.values[0] == "6f8f617b300e48402c060c94a5e507c7"
-        assert result.stop_id.values[0] == "0119"
+        assert result.key.values[0] == "36e9a190be944c957bc0d73fb291466e"
+        assert result.stop_id.values[0] == "20501"
 
     def test_get_stops_no_operator_feeds(self):
         with pytest.raises(ValueError, match="Supply list of feed keys or operator names!"):
-            get_stops(selected_date="2025-11-01")
+            get_stops(selected_date="2024-07-05")
 
     def test_get_stops_get_df_false(self):
         result = get_stops(
-            selected_date="2025-11-02", operator_feeds=["de3b4f439f8542021168b5ca6f64cc9c"], get_df=False
+            selected_date="2024-07-05",
+            operator_feeds=["0007cf02f9eee5014e8dbab1bac07f5b"],
+            get_df=False,
         )
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
