@@ -47,10 +47,7 @@ class TestGtfsUtilsV2:
 
         assert len(result) == 1
         assert result.to_dict(orient="records") == [
-            {
-                "feed_key": "0b0ebeff0c1f7ff681e6a06d6218ecd6",
-                "name": "Metrolink Schedule",
-            }
+            {"feed_key": "0b0ebeff0c1f7ff681e6a06d6218ecd6", "name": "Metrolink Schedule"}
         ]
 
     @pytest.mark.vcr
@@ -197,9 +194,7 @@ class TestGtfsUtilsV2:
         )
 
     @pytest.mark.vcr
-    def test_schedule_daily_feed_to_gtfs_dataset_name_feed_option_include_precursor(
-        self,
-    ):
+    def test_schedule_daily_feed_to_gtfs_dataset_name_feed_option_include_precursor(self):
         result = schedule_daily_feed_to_gtfs_dataset_name(
             selected_date="2025-09-01",
             feed_option="include_precursor",
@@ -257,10 +252,7 @@ class TestGtfsUtilsV2:
 
     @pytest.mark.vcr
     def test_get_trips(self):
-        result = get_trips(
-            selected_date="2025-09-01",
-            operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
-        )
+        result = get_trips(selected_date="2025-09-01", operator_feeds=["c86f88ad0b15f5185d073f91f2130285"])
 
         assert len(result) == 3
         assert result.to_dict(orient="records") == unordered(
@@ -481,10 +473,7 @@ class TestGtfsUtilsV2:
     @pytest.mark.default_cassette("TestGtfsUtilsV2.test_get_trips.yaml")
     @pytest.mark.vcr
     def test_get_trips_no_metrolink_feed(self, capfd):
-        get_trips(
-            selected_date="2025-09-01",
-            operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
-        )
+        get_trips(selected_date="2025-09-01", operator_feeds=["c86f88ad0b15f5185d073f91f2130285"])
         out, err = capfd.readouterr()
 
         assert re.search("could not get metrolink feed on 2025-09-01!", out), "The expected text was not printed."
@@ -493,9 +482,7 @@ class TestGtfsUtilsV2:
     @pytest.mark.vcr
     def test_get_trips_get_df_false(self):
         result = get_trips(
-            selected_date="2025-09-01",
-            operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
-            get_df=False,
+            selected_date="2025-09-01", operator_feeds=["c86f88ad0b15f5185d073f91f2130285"], get_df=False
         )
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
@@ -505,14 +492,7 @@ class TestGtfsUtilsV2:
         result = get_trips(
             selected_date="2025-09-01",
             operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
-            trip_cols=[
-                "name",
-                "gtfs_dataset_key",
-                "feed_key",
-                "trip_id",
-                "route_id",
-                "route_type",
-            ],
+            trip_cols=["name", "gtfs_dataset_key", "feed_key", "trip_id", "route_id", "route_type"],
         )
 
         assert len(result) == 3
@@ -550,13 +530,7 @@ class TestGtfsUtilsV2:
         result = get_trips(
             selected_date="2025-09-01",
             operator_feeds=["c86f88ad0b15f5185d073f91f2130285"],
-            trip_cols=[
-                "name",
-                "gtfs_dataset_key",
-                "feed_key",
-                "trip_id",
-                "trip_instance_key",
-            ],
+            trip_cols=["name", "gtfs_dataset_key", "feed_key", "trip_id", "trip_instance_key"],
             custom_filtering={"trip_instance_key": ["d7d7502d292a35c41ee5a6c3c43f2fd5"]},
         )
 
@@ -573,10 +547,7 @@ class TestGtfsUtilsV2:
 
     @pytest.mark.vcr
     def test_get_trips_metrolink_feed_present(self, capfd):
-        result = get_trips(
-            selected_date="2025-11-24",
-            operator_feeds=["4321a7e3901b2275805494a746ec1c6a"],
-        )
+        result = get_trips(selected_date="2025-11-24", operator_feeds=["4321a7e3901b2275805494a746ec1c6a"])
 
         assert len(result) == 1
         out, err = capfd.readouterr()
@@ -594,11 +565,7 @@ class TestGtfsUtilsV2:
         assert len(result) == 1
         # TODO shape_id was already VTin in the DB. It's not clear when fill_in_metrolink_trips_df_with_shape_id is needed.
         assert result.to_dict(orient="records") == [
-            {
-                "name": "Metrolink Schedule",
-                "feed_key": "918ed58c79d05e956cf6f0c15e2a9902",
-                "shape_id": "VTin",
-            }
+            {"name": "Metrolink Schedule", "feed_key": "918ed58c79d05e956cf6f0c15e2a9902", "shape_id": "VTin"}
         ]
 
     def test_get_trips_no_operator_feeds(self):
@@ -609,10 +576,7 @@ class TestGtfsUtilsV2:
     def test_get_shapes(self):
         result = get_shapes(
             selected_date="2025-10-01",
-            operator_feeds=[
-                "3ea60aa240ddc543da5415ccc759fd6d",
-                "ebeaafe0a365384015dfe01dd80b683d",
-            ],
+            operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d", "ebeaafe0a365384015dfe01dd80b683d"],
         )
 
         assert len(result) == 2
@@ -759,10 +723,7 @@ class TestGtfsUtilsV2:
         result = get_shapes(
             selected_date="2025-10-01",
             operator_feeds=["89c9390b2669927a67a4594f119986d6"],
-            custom_filtering={
-                "shape_array_key": ["166d1656656c24bb26a66f0df49edf1c"],
-                "n_trips": [39],
-            },
+            custom_filtering={"shape_array_key": ["166d1656656c24bb26a66f0df49edf1c"], "n_trips": [39]},
         )
 
         assert len(result) == 1
@@ -791,14 +752,13 @@ class TestGtfsUtilsV2:
 
     def test_get_shapes_get_df_false(self):
         result = get_shapes(
-            selected_date="2025-09-01",
-            operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d"],
-            get_df=False,
+            selected_date="2025-09-01", operator_feeds=["3ea60aa240ddc543da5415ccc759fd6d"], get_df=False
         )
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
         statement = str(result)
         assert re.search(r"SELECT\s.*pt_array.*\sFROM", statement), "The statement did not include pt_array column."
+
 
     @pytest.mark.vcr
     def test_get_stops(self):
@@ -962,6 +922,7 @@ class TestGtfsUtilsV2:
             ]
         )
 
+        # Check geometry functions
         assert (
             result.loc[result.key == "36e9a190be944c957bc0d73fb291466e", "geometry"]
             .item()
@@ -1102,6 +1063,7 @@ class TestGtfsUtilsV2:
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
 
+    
     @pytest.mark.vcr
     def test_get_stop_times(self, trip):
         result = get_stop_times(
@@ -1209,35 +1171,20 @@ class TestGtfsUtilsV2:
         assert len(result) == 2
         assert result.to_dict(orient="records") == unordered(
             [
-                {
-                    "feed_key": "4321a7e3901b2275805494a746ec1c6a",
-                    "arrival_hour": 11,
-                    "departure_hour": 11,
-                },
-                {
-                    "feed_key": "4321a7e3901b2275805494a746ec1c6a",
-                    "arrival_hour": 11,
-                    "departure_hour": 11,
-                },
+                {"feed_key": "4321a7e3901b2275805494a746ec1c6a", "arrival_hour": 11, "departure_hour": 11},
+                {"feed_key": "4321a7e3901b2275805494a746ec1c6a", "arrival_hour": 11, "departure_hour": 11},
             ]
         )
 
     @pytest.mark.vcr
     def test_get_stop_times_get_df_false(self, trip):
-        result = get_stop_times(
-            trip_df=trip,
-            operator_feeds=["4321a7e3901b2275805494a746ec1c6a"],
-            get_df=False,
-        )
+        result = get_stop_times(trip_df=trip, operator_feeds=["4321a7e3901b2275805494a746ec1c6a"], get_df=False)
 
         assert isinstance(result, sqlalchemy.sql.selectable.Select)
 
     @pytest.mark.vcr
     def test_get_stop_times_no_trip_df(self):
-        result = get_stop_times(
-            selected_date="2025-11-24",
-            operator_feeds=["918ed58c79d05e956cf6f0c15e2a9902"],
-        )
+        result = get_stop_times(selected_date="2025-11-24", operator_feeds=["918ed58c79d05e956cf6f0c15e2a9902"])
 
         assert len(result) == 1
         assert result.drop(columns=["_feed_valid_from"]).to_dict(orient="records") == unordered(
