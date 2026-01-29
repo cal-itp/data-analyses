@@ -4,6 +4,7 @@ project:
   authors: ['Cal-ITP']
   copyright: '2026'
   github: https://github.com/cal-itp/data-analyses/tree/main/{{ site.directory }}
+  edit_url: null # hide Edit This Page link unless edit_url specifically set in page frontmatter
   {{ toc }}
   thebe:
     binder:
