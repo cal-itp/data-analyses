@@ -1,8 +1,0 @@
-{% for site in sites -%}
-    {% if site.name != 'ahsc'-%}
-    /{{ site.name }}/* https://{{ site.name }}--cal-itp-data-analyses.netlify.app//:splat  301
-    {%- endif %}
-    {% if site.name == 'ahsc'-%}
-    /{{ site.name }}/* https://{{ site.name }}--cal-itp-data-analyses.netlify.app//:splat 200
-    {%- endif %}
-{% endfor %}
