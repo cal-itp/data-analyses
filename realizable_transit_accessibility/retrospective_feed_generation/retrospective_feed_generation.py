@@ -76,6 +76,7 @@ def impute_first_last(
         .cumsum()
     )
     # Get the first & last stop_sequence and rt_arrival_time in each trip
+    #TODO: this doesn't make sense? we need the first arrival time and the frist rt arrival times, this does something completely different
     stop_time_grouped = rt_schedule_stop_times_sorted_copy.groupby(
         columns[TRIP_INSTANCE_KEY]
     )
@@ -119,10 +120,10 @@ def impute_first_last(
             stop_times_na_dropped[columns[STOP_SEQUENCE]]
             > stop_times_na_dropped["first_stop_sequence"]
         )
-        & (
-            stop_times_na_dropped[columns[SCHEDULE_ARRIVAL_SEC]]
-            > stop_times_na_dropped["first_stop_time_value"]
-        )
+#        & (
+#            stop_times_na_dropped[columns[SCHEDULE_ARRIVAL_SEC]]
+#            > stop_times_na_dropped["first_stop_time_value"]
+#        )
     ]
     second_stop_time = second_candidates.groupby(columns[TRIP_INSTANCE_KEY]).first()
     # Get the "penultimate" stop time
@@ -131,10 +132,10 @@ def impute_first_last(
             stop_times_na_dropped[columns[STOP_SEQUENCE]]
             < stop_times_na_dropped["last_stop_sequence"]
         )
-        & (
-            stop_times_na_dropped[columns[SCHEDULE_ARRIVAL_SEC]]
-            < stop_times_na_dropped["last_stop_time_value"]
-        )
+#        & (
+#            stop_times_na_dropped[columns[SCHEDULE_ARRIVAL_SEC]]
+#            < stop_times_na_dropped["last_stop_time_value"]
+#        )
     ]
     penultimate_stop_time = penultimate_candidates.groupby(
         columns[TRIP_INSTANCE_KEY]
@@ -150,11 +151,11 @@ def impute_first_last(
     )
     assert (
         scheduled_first_second_difference.isna()
-        | (scheduled_first_second_difference > 0)
+        | (scheduled_first_second_difference >= 0)
     ).all()
     assert (
         scheduled_penultimate_last_difference.isna()
-        | (scheduled_penultimate_last_difference > 0)
+        | (scheduled_penultimate_last_difference >= 0)
     ).all()
     rt_first_imputed = (
         second_stop_time[columns[RT_ARRIVAL_SEC]] - scheduled_first_second_difference
@@ -347,7 +348,6 @@ def impute_unrealistic_rt_times(
         columns[RT_ARRIVAL_SEC]
     )
 
-
 def make_retrospective_feed_single_date(
     filtered_input_feed: GTFS,
     stop_times_table: pd.DataFrame,
@@ -446,11 +446,16 @@ def make_retrospective_feed_single_date(
     stop_times_gtfs_format_with_rt_times["departure_time"] = (
         stop_times_gtfs_format_with_rt_times["arrival_time"].copy()
     )
-
+    # TODO: time filtering, probably delete
+    stop_times_gtfs_format_with_rt_times = stop_times_gtfs_format_with_rt_times.loc[
+        (stop_times_gtfs_format_with_rt_times["arrival_time"].str.split(":").map(lambda x: int(x[0])) > 4)
+        & (stop_times_gtfs_format_with_rt_times["arrival_time"].str.split(":").map(lambda x: int(x[0])) < 18)
+    ]
+    # Save the set the series of gtfs dataset keys, and save them in a dict keyed by date
     # Output a new synthetic feed!
     # Alter the feed with the new trips and stop times
     altered_feed = copy.deepcopy(filtered_input_feed)
-    altered_feed.trips = schedule_trips_in_rt.reset_index()
+    altered_feed.trips = schedule_trips_in_rt.reset_index().drop("block_id", axis=1, errors="ignore")
     stop_times_keep_columns = [
         column
         for column in stop_times_desired_columns

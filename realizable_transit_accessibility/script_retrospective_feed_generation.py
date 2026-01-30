@@ -90,7 +90,6 @@ def process_individual_feed(
             max_gap_length=max_stop_gap,
         )
     )
-    schedule_rt_stop_times_single_agency.to_csv(f"{output_local_path}.csv")
     
 
     # Load the schedule feed using gtfs-lite and filter it
@@ -140,7 +139,6 @@ if __name__ == "__main__":
         filter_geometry=analysis_geometry,
         report_unavailable=True
     ).drop_duplicates()
-    print(feed_info)
     
     # Download feeds
     feed_info["schedule_local_path"] = download_feeds(feed_info, DOWNLOADED_FEEDS_FODLER)
