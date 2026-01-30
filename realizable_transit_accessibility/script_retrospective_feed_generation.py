@@ -123,25 +123,28 @@ def process_individual_feed(
     output_feed.write_zip(output_local_path)
     return output_local_path
 
+DOWNLOADED_FEEDS_FOLDER = "downloaded_schedule_feeds/"
+OUTPUT_FOLDER = "./generated_rt_feeds/"
 
 if __name__ == "__main__":
 
-    TARGET_DATE = "2025-11-05"
-    GEOMETRY_PATH = "sfish.geojson"
-    DOWNLOADED_FEEDS_FODLER = "downloaded_schedule_feeds/"
-    OUTPUT_FOLDER = "./generated_rt_feeds/"
+    # Read command line args
+    parser = argparse.ArgumentParser()
+    parser.add_argument("target_date", type=str) # The target date, in "2025-11-05"
+    parser.add_argument("geometry_path", type=str)  # The table with input information
+    args = parser.parse_args()
 
     # Get feed info
-    analysis_geometry = gpd.read_file(GEOMETRY_PATH).to_crs(CA_NAD83Albers_m)
+    analysis_geometry = gpd.read_file(args.geometry_path).to_crs(CA_NAD83Albers_m)
     feed_info = get_feed_info(
-        target_date=TARGET_DATE,
+        target_date=args.target_date,
         lookback_period=dt.timedelta(days=60),
         filter_geometry=analysis_geometry,
         report_unavailable=True
     ).drop_duplicates()
     
     # Download feeds
-    feed_info["schedule_local_path"] = download_feeds(feed_info, DOWNLOADED_FEEDS_FODLER)
+    feed_info["schedule_local_path"] = download_feeds(feed_info, DOWNLOADED_FEEDS_FOLDER)
     feed_info["output_local_path"] = feed_info["schedule_local_path"].map(
         lambda x: str(pathlib.Path(OUTPUT_FOLDER).joinpath(f"rt_{pathlib.Path(x).name}"))
     )
@@ -155,12 +158,7 @@ if __name__ == "__main__":
     )
     feed_info.to_csv("test_feed_info.csv")
     
-    # Read command line args
-    #parser = argparse.ArgumentParser()
-    #parser.add_argument("input_table", type=str)  # The table with input information
-    #args = parser.parse_args()
-    # Read the input table
-    #input_table = pd.read_csv(args.input_table)
+
 
     # Run process_table_row on the input table
     #process_all_feeds(
