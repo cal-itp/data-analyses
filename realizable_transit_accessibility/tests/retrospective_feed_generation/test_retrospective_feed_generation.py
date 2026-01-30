@@ -135,26 +135,27 @@ def test_feed_tables_same(
             schedule_table
         ), f"{table} is not identical in the input and output"
 
+# Removed this test, since this assertion seems to come up with normal data.
+# If a switch is made to use only warehouse data, a similar test may be useful.
+# def test_trips_present_in_rt_only_leads_to_exception(
+#     schedule_feed_minimal: GTFS, two_trip_rt_table_schedule_rt_different: pd.DataFrame
+# ):
+#     """Test that, if there are trips in `stop_times_table` that are not in the schedule, a key error is raised"""
+#     # Check setup conditions
+#     assert (
+#         schedule_feed_minimal.trips.trip_id == 1
+#     ).all(), "Missing or extraneous trip ID in schedule feed (indicates bad test setup)"
+#     assert two_trip_rt_table_schedule_rt_different.trip_id.isin(
+#         [1, 2]
+#     ).all(), "Missing or extraneous trip ID in RT table (indicates bad test setup)"
 
-def test_trips_present_in_rt_only_leads_to_exception(
-    schedule_feed_minimal: GTFS, two_trip_rt_table_schedule_rt_different: pd.DataFrame
-):
-    """Test that, if there are trips in `stop_times_table` that are not in the schedule, a key error is raised"""
-    # Check setup conditions
-    assert (
-        schedule_feed_minimal.trips.trip_id == 1
-    ).all(), "Missing or extraneous trip ID in schedule feed (indicates bad test setup)"
-    assert two_trip_rt_table_schedule_rt_different.trip_id.isin(
-        [1, 2]
-    ).all(), "Missing or extraneous trip ID in RT table (indicates bad test setup)"
-
-    # Run feed generation
-    with pytest.raises(KeyError):
-        output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
-            filtered_input_feed=schedule_feed_minimal,
-            stop_times_table=two_trip_rt_table_schedule_rt_different,
-            **DEFAULT_TEST_FEED_GENERATION_KWARGS,
-        )
+#     # Run feed generation
+#     with pytest.raises(KeyError):
+#         output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
+#             filtered_input_feed=schedule_feed_minimal,
+#             stop_times_table=two_trip_rt_table_schedule_rt_different,
+#             **DEFAULT_TEST_FEED_GENERATION_KWARGS,
+#         )
 
 
 def test_trips_in_schedule_only_are_dropped_from_trips(
