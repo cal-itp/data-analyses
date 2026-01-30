@@ -127,7 +127,7 @@ def process_individual_feed(
 if __name__ == "__main__":
 
     TARGET_DATE = "2025-11-05"
-    GEOMETRY_PATH = "west_la.geojson"
+    GEOMETRY_PATH = "sfish.geojson"
     DOWNLOADED_FEEDS_FODLER = "downloaded_schedule_feeds/"
     OUTPUT_FOLDER = "./generated_rt_feeds/"
 

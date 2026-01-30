@@ -26,5 +26,5 @@ def get_schedule_rt_stop_times_table(gtfs_dataset_keys: Iterable[str], service_d
         schedule_rt_stop_times["schedule_gtfs_dataset_key"].isin(gtfs_dataset_keys)
     ].sort_values(
         ["schedule_gtfs_dataset_key", "trip_instance_key", "stop_sequence"]
-    )
+    ).dropna(subset=["scheduled_arrival_sec"])
     return schedule_rt_stop_times_single_agency
