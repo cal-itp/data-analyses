@@ -1,7 +1,7 @@
 import geopandas as gpd
 import pandas as pd
 from shared_utils import catalog_utils, webmap_utils
-from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS, file_name
+from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS, file_name, analysis_month
 from calitp_data_analysis import geography_utils
 
 import google.auth
@@ -113,35 +113,6 @@ def create_summary_table(df:pd.DataFrame)->pd.DataFrame:
 """
 State Highway Network 
 """
-def group_route_district(df: pd.DataFrame, pct_route_on_hwy_agg: str) -> pd.DataFrame:
-
-    # Aggregate by adding all the districts and SHN to a single row, rather than
-    # multiple and sum up the total % of SHN a transit route intersects with
-    agg1 = (
-        df.groupby(
-            [
-                "analysis_name",
-                "recent_combined_name",
-            ],
-            as_index=False,
-        )[["shn_route", "district", "pct_route_on_hwy_across_districts"]]
-        .agg(
-            {
-                "shn_route": lambda x: ", ".join(set(x.astype(str))),
-                "district": lambda x: ", ".join(set(x.astype(str))),
-                "pct_route_on_hwy_across_districts": pct_route_on_hwy_agg,
-            }
-        )
-        .reset_index(drop=True)
-    )
-
-    # Clean up
-    agg1.pct_route_on_hwy_across_districts = (
-        agg1.pct_route_on_hwy_across_districts.astype(float).round(2)
-    )
-    return agg1
-
-    
 def load_ct_district(district:int)->gpd.GeoDataFrame:
     """
     Load in Caltrans Shape.
@@ -186,105 +157,34 @@ def load_buffered_shn_map(district:int) -> gpd.GeoDataFrame:
     return gdf2
 
 
-def final_transit_route_shs_outputs(
-    pct_route_intersection: int,
-    district: str,
-):
-    """
-    Take the dataframes from prep_open_data_portal and routes_shn_intersection.
-    Prepare them for display on the GTFS Caltrans District Digest.
+def load_shn_transit_routes(district:str, pct: int)->gpd.GeoDataFrame:
+    OPEN_DATA_GCS = "gs://calitp-analytics-data/data-analyses/open_data/"
+    gdf = gpd.read_parquet(f"{OPEN_DATA_GCS}export/ca_transit_routes_{analysis_month}.parquet",
+                             storage_options={"token": credentials.token})
 
-    intersecting_gdf: geodataframe created by
-    open_data_df: dataframe created by
-    pct_route_intersection: cutoff of the % of the transit route intersecting with the SHN
-    district: the Caltrans district we are interested in.
-    """
-    GCS_PATH = "gs://calitp-analytics-data/data-analyses/state_highway_network/"
-    open_data_df = gcs_pandas().read_parquet(
-    f"{GCS_PATH}transit_route_shn_open_data_portal_50.parquet")
+    # Clean district name because there are some extra spaces
+    gdf.district_name = gdf.district_name.str.lstrip().str.replace(r'\s*-\s*', '-', regex=True)
 
-    intersecting_gdf = gpd.read_parquet(
-    f"{GCS_PATH}transit_route_intersect_shn_50_gtfs_digest.parquet",
-    storage_options={"token": credentials.token})
+    # Filter
+    gdf2 = gdf.loc[
+        (gdf.district_name == district) &
+        (gdf.shn_route != "not_50ft_from_shn") &
+        (gdf.pct_route_on_hwy >= pct)
+    ].reset_index(drop=True)
 
-    FILEPATH_URL = f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet"
+    # Clean the dataframe
+    gdf2 = gdf2[[
+    "route_name",
+    "analysis_name",
+    "pct_route_on_hwy",
+    "shn_route",
+    "geometry"
+    ]]
 
-    crosswalk_df = (gcs_pandas().read_parquet(
-        FILEPATH_URL
-    )[["caltrans_district","caltrans_district_int"]]
-    .drop_duplicates()
-         )
-    crosswalk_df.caltrans_district_int = crosswalk_df.caltrans_district_int.astype(int)
-    intersecting_gdf.district = intersecting_gdf.district.fillna(0).astype(int)
-    # Filter out for any pct_route_on_hwy that we deem too low & for the relevant district.
-    open_data_df = open_data_df.loc[
-        (open_data_df.pct_route_on_hwy_across_districts >= pct_route_intersection)
-    ]
-    # TEMP
-    intersecting_gdf = pd.merge(intersecting_gdf, crosswalk_df, left_on = ["district"],
-                               right_on = ["caltrans_district_int"])
-    intersecting_gdf = intersecting_gdf.loc[
-        intersecting_gdf.caltrans_district == district
-    ]
-
-    
-    intersecting_gdf = intersecting_gdf.rename(columns = {"portfolio_organization_name":"analysis_name"})
-    open_data_df = open_data_df.rename(columns = {"portfolio_organization_name":"analysis_name"})
-    # Join back to get the long gdf with the transit route geometries and the names of the
-    # state highways these routes intersect with. This gdf will be used to
-    # display a map.
-    map_gdf = pd.merge(
-        intersecting_gdf[
-            ["analysis_name", "recent_combined_name", "geometry"]
-        ].drop_duplicates(),
-        open_data_df,
-        on=["analysis_name", "recent_combined_name"],
-    )
-    
-    # Buffer so we can see stuff and change the CRS
-    map_gdf = map_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
-    map_gdf.geometry = map_gdf.geometry.buffer(35)
-    
-    # We want a text table to display.
-    # Have to rejoin and to find only the SHN routes that are in the district
-    # we are interested in.
-    text_table_df = pd.merge(
-        intersecting_gdf[
-            [
-                "analysis_name",
-                "recent_combined_name",
-                "shn_route",
-               "district",
-            ]
-        ],
-        open_data_df[
-            [
-                "analysis_name",
-                "recent_combined_name",
-                "pct_route_on_hwy_across_districts",
-            ]
-        ],
-        on=["analysis_name", "recent_combined_name"],
-    )
-
-    # Now we have to aggregate again so each route will only have one row with the
-    # district and SHN route info delinated by commas if there are multiple values.
-    text_table = group_route_district(text_table_df, "max").drop(columns = ["district"])
-
-    # Rename for clarity
-    text_table = text_table.rename(
-        columns={
-            "shn_route": f"State Highway Network Routes in District {district}",
-        }
-    )
-
-    text_table = text_table.rename(columns = transit_shn_map_columns)
-    map_gdf = map_gdf.rename(columns = transit_shn_map_columns).drop(columns = ["on_shs"])
-    map_gdf = map_gdf.reset_index(drop=False)
-    map_gdf = map_gdf.rename(columns={"index": "Number"})
-    #map_gdf = map_gdf[['Analysis Name', 'Route', 'geometry',
-    #   'State Highway Network Route', "Number"]]
-
-    # Temp district number
-    district_int = intersecting_gdf.caltrans_district_int.iloc[0]
-    return map_gdf, text_table, district_int
+    gdf2 = gdf2.rename(columns = {
+    "pct_route_on_hwy":"Percentage of Transit Route on SHN Across All Districts", 
+    "shn_route": "State Highway Network Route",
+    "analysis_name": "Analysis Name",
+    "route_name": "Route Name"
+    })
+    return gdf2
