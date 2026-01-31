@@ -8,5 +8,5 @@ INT_TO_GTFS_WEEKDAY = {
     3: "thursday",
     4: "friday",
     5: "saturday",
-    6: "sunday"
+    6: "sunday",
 }
