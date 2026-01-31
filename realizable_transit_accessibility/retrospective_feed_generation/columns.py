@@ -1,5 +1,5 @@
 # Rename these values if column names change in the schedule/rt dataset
-# Scheduled arrival time, in seconds after twelve hours before noon 
+# Scheduled arrival time, in seconds after twelve hours before noon
 SCHEDULE_ARRIVAL_SEC_NAME = "scheduled_arrival_sec"
 # RT arrival time, in seconds after twelve hours before noon
 RT_ARRIVAL_SEC_NAME = "rt_arrival_sec"
@@ -22,7 +22,7 @@ COLUMN_NAMES = [
     TRIP_INSTANCE_KEY_NAME,
     TRIP_ID_NAME,
     STOP_ID_NAME,
-    SCHEDULE_GTFS_DATASET_KEY_NAME
+    SCHEDULE_GTFS_DATASET_KEY_NAME,
 ]
 
 RT_ARRIVAL_SEC = "rt_arrival_sec"
@@ -50,5 +50,5 @@ DEFAULT_COLUMN_MAP = {
     TRIP_INSTANCE_KEY: TRIP_INSTANCE_KEY_NAME,
     TRIP_ID: TRIP_ID_NAME,
     STOP_ID: STOP_ID_NAME,
-    SCHEDULE_GTFS_DATASET_KEY: SCHEDULE_GTFS_DATASET_KEY_NAME
+    SCHEDULE_GTFS_DATASET_KEY: SCHEDULE_GTFS_DATASET_KEY_NAME,
 }

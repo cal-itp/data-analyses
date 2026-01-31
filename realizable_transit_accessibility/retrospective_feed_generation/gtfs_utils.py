@@ -1,16 +1,16 @@
-from gtfslite import GTFS
-import pandas as pd
-import datetime as dt
-from .constants import ARBITRARY_SERVICE_ID, GTFS_DATE_STRFTIME
 import copy
+import datetime as dt
+
 import numpy as np
+import pandas as pd
+from gtfslite import GTFS
+
+from .constants import ARBITRARY_SERVICE_ID, GTFS_DATE_STRFTIME
 
 
 def subset_schedule_feed_to_one_date(feed: GTFS, service_date: dt.datetime) -> GTFS:
     """Update a gtfslite feed object to only contain service on a specified service date"""
-    assert feed.valid_date(
-        service_date
-    ), f"Feed not valid on {service_date.isoformat()}"
+    assert feed.valid_date(service_date), f"Feed not valid on {service_date.isoformat()}"
     # Define a new calendar dates, since the synthetic feed will only be valid on the service date
     new_calendar_dates = pd.DataFrame(
         {
@@ -25,9 +25,7 @@ def subset_schedule_feed_to_one_date(feed: GTFS, service_date: dt.datetime) -> G
     trips_on_service_date["service_id"] = ARBITRARY_SERVICE_ID
     # Get only stop_times on the calendar date
     stop_times_on_service_date = feed.stop_times.loc[
-        feed.stop_times["trip_id"].isin(
-            trips_on_service_date["trip_id"]
-        )  # check if this is slow
+        feed.stop_times["trip_id"].isin(trips_on_service_date["trip_id"])  # check if this is slow
     ].reset_index(drop=True)
     # TODO: evaluate whether it is necessary to remove stops, shapes, and transfers that do not have service
     # TODO: add any additional behavior for feeds with frequencies.txt
@@ -48,18 +46,14 @@ def time_string_to_time_since_midnight(time_str_series: pd.Series) -> pd.Series:
     Will give incorrect results on days where a DST transition occurs.
     """
     return time_str_series.str.split(":").map(
-        lambda s: (
-            int(s[0]) * 3600 + int(s[1]) * 60 + int(s[2]) if len(s) == 3 else np.nan
-        )
+        lambda s: (int(s[0]) * 3600 + int(s[1]) * 60 + int(s[2]) if len(s) == 3 else np.nan)
     )
 
 
 DEFAULT_SERVICE_DAY_START_SECONDS = 86400
 
 
-def seconds_to_gtfs_format_time(
-    time_column: pd.Series, trip_id_column: pd.Series
-) -> pd.Series:
+def seconds_to_gtfs_format_time(time_column: pd.Series, trip_id_column: pd.Series) -> pd.Series:
     """Convert time in seconds since midnight (from the warehouse) to gtfs format time"""
     # TODO: this will not handle dst correctly
     # Get all times as positive times since midnight
@@ -67,11 +61,7 @@ def seconds_to_gtfs_format_time(
         time_column > 0, DEFAULT_SERVICE_DAY_START_SECONDS + time_column
     )
     # Get the first time of each trip
-    first_time = (
-        absolute_time_relative_to_midnight.groupby(trip_id_column)
-        .first()
-        .rename("first_time")
-    )
+    first_time = absolute_time_relative_to_midnight.groupby(trip_id_column).first().rename("first_time")
     # Merge trips with the last times
     trips_merged_with_first_times = pd.concat(
         [
@@ -87,13 +77,9 @@ def seconds_to_gtfs_format_time(
         validate="many_to_one",
     )
     # Get the "GTFS Time" seconds by allowing
-    trips_merged_with_first_times["gtfs_time_seconds"] = trips_merged_with_first_times[
-        "midnight_time"
-    ].where(
-        trips_merged_with_first_times["midnight_time"]
-        >= trips_merged_with_first_times["first_time"],
-        trips_merged_with_first_times["midnight_time"]
-        + DEFAULT_SERVICE_DAY_START_SECONDS,
+    trips_merged_with_first_times["gtfs_time_seconds"] = trips_merged_with_first_times["midnight_time"].where(
+        trips_merged_with_first_times["midnight_time"] >= trips_merged_with_first_times["first_time"],
+        trips_merged_with_first_times["midnight_time"] + DEFAULT_SERVICE_DAY_START_SECONDS,
     )
 
     trips_merged_with_first_times["hours"] = (

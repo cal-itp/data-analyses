@@ -1,33 +1,30 @@
-from gtfslite import GTFS
-from .gtfs_utils import (
-    time_string_to_time_since_midnight,
-    seconds_to_gtfs_format_time,
-)
-import pandas as pd
-import numpy as np
+import copy
 import typing
+
+import numpy as np
+import pandas as pd
+from gtfslite import GTFS
+
 from .columns import (
     COLUMN_IDS,
     COLUMN_NAMES,
+    DEFAULT_COLUMN_MAP,
     RT_ARRIVAL_SEC,
-    SCHEDULE_GTFS_DATASET_KEY,
-    TRIP_INSTANCE_KEY,
     SCHEDULE_ARRIVAL_SEC,
+    SCHEDULE_GTFS_DATASET_KEY,
+    STOP_ID,
     STOP_SEQUENCE,
     TRIP_ID,
-    STOP_ID,
-    DEFAULT_COLUMN_MAP,
+    TRIP_INSTANCE_KEY,
 )
-import copy
+from .gtfs_utils import seconds_to_gtfs_format_time, time_string_to_time_since_midnight
 
 ColumnId = typing.Literal[COLUMN_IDS]
 ColumnName = typing.Literal[COLUMN_NAMES]
 ColumnMap = dict[ColumnId, ColumnName]
 
 
-def filter_non_rt_trips(
-    rt_schedule_stop_times: pd.DataFrame, columns: ColumnMap = DEFAULT_COLUMN_MAP
-) -> pd.DataFrame:
+def filter_non_rt_trips(rt_schedule_stop_times: pd.DataFrame, columns: ColumnMap = DEFAULT_COLUMN_MAP) -> pd.DataFrame:
     """
     Filter out all trips in the rt table that do not have any stop times associated
 
@@ -51,13 +48,13 @@ def filter_non_rt_trips(
     return filtered_stop_times
 
 
-def _filter_na_stop_times(
-    rt_stop_times: pd.DataFrame, columns: ColumnMap
-) -> pd.DataFrame:
+def _filter_na_stop_times(rt_stop_times: pd.DataFrame, columns: ColumnMap) -> pd.DataFrame:
     """Filter out all stop times that do not have rt times"""
     return rt_stop_times.dropna(subset=[columns[RT_ARRIVAL_SEC]])
 
-#def fix_negative_times(time_series)
+
+# def fix_negative_times(time_series)
+
 
 def impute_first_last(
     rt_schedule_stop_times_sorted: pd.DataFrame,
@@ -69,31 +66,19 @@ def impute_first_last(
     rt_schedule_stop_times_sorted_copy = rt_schedule_stop_times_sorted.copy()
     # Get a uniformly increasing stop sequence, so we can see whether our imputation is looking too far ahead
     rt_schedule_stop_times_sorted_copy["uniform_stop_sequence"] = (
-        pd.Series(
-            1, index=rt_schedule_stop_times_sorted_copy.index, name="uniform_stop_sequence"
-        )
+        pd.Series(1, index=rt_schedule_stop_times_sorted_copy.index, name="uniform_stop_sequence")
         .groupby(rt_schedule_stop_times_sorted_copy[columns[TRIP_INSTANCE_KEY]])
         .cumsum()
     )
     # Get the first & last stop_sequence and rt_arrival_time in each trip
-    #TODO: this doesn't make sense? we need the first arrival time and the frist rt arrival times, this does something completely different
-    stop_time_grouped = rt_schedule_stop_times_sorted_copy.groupby(
-        columns[TRIP_INSTANCE_KEY]
-    )
+    # TODO: this doesn't make sense? we need the first arrival time and the frist rt arrival times, this does something completely different
+    stop_time_grouped = rt_schedule_stop_times_sorted_copy.groupby(columns[TRIP_INSTANCE_KEY])
     first_stop_time = stop_time_grouped.first()
-    first_stop_sequence = first_stop_time[columns[STOP_SEQUENCE]].rename(
-        "first_stop_sequence"
-    )
-    first_stop_time_value = first_stop_time[columns[SCHEDULE_ARRIVAL_SEC]].rename(
-        "first_stop_time_value"
-    )
+    first_stop_sequence = first_stop_time[columns[STOP_SEQUENCE]].rename("first_stop_sequence")
+    first_stop_time_value = first_stop_time[columns[SCHEDULE_ARRIVAL_SEC]].rename("first_stop_time_value")
     last_stop_time = stop_time_grouped.last()
-    last_stop_sequence = last_stop_time[columns[STOP_SEQUENCE]].rename(
-        "last_stop_sequence"
-    )
-    last_stop_time_value = last_stop_time[columns[SCHEDULE_ARRIVAL_SEC]].rename(
-        "last_stop_time_value"
-    )
+    last_stop_sequence = last_stop_time[columns[STOP_SEQUENCE]].rename("last_stop_sequence")
+    last_stop_time_value = last_stop_time[columns[SCHEDULE_ARRIVAL_SEC]].rename("last_stop_time_value")
     # Get the first / last stop time with RT data that is not the first/last stop time overall (resp.)
     # We need this to have a baseline to impute the first/last stop times
     stop_times_with_first_last_sequence = rt_schedule_stop_times_sorted_copy.merge(
@@ -116,54 +101,41 @@ def impute_first_last(
     ]
     # Get the "second" stop time - a stop time that is after the stop sequence and that is stopped at a point in time after the "first" stop
     second_candidates = stop_times_na_dropped[
-        (
-            stop_times_na_dropped[columns[STOP_SEQUENCE]]
-            > stop_times_na_dropped["first_stop_sequence"]
-        )
-#        & (
-#            stop_times_na_dropped[columns[SCHEDULE_ARRIVAL_SEC]]
-#            > stop_times_na_dropped["first_stop_time_value"]
-#        )
+        (stop_times_na_dropped[columns[STOP_SEQUENCE]] > stop_times_na_dropped["first_stop_sequence"])
+        #        & (
+        #            stop_times_na_dropped[columns[SCHEDULE_ARRIVAL_SEC]]
+        #            > stop_times_na_dropped["first_stop_time_value"]
+        #        )
     ]
     second_stop_time = second_candidates.groupby(columns[TRIP_INSTANCE_KEY]).first()
     # Get the "penultimate" stop time
     penultimate_candidates = stop_times_na_dropped[
-        (
-            stop_times_na_dropped[columns[STOP_SEQUENCE]]
-            < stop_times_na_dropped["last_stop_sequence"]
-        )
-#        & (
-#            stop_times_na_dropped[columns[SCHEDULE_ARRIVAL_SEC]]
-#            < stop_times_na_dropped["last_stop_time_value"]
-#        )
+        (stop_times_na_dropped[columns[STOP_SEQUENCE]] < stop_times_na_dropped["last_stop_sequence"])
+        #        & (
+        #            stop_times_na_dropped[columns[SCHEDULE_ARRIVAL_SEC]]
+        #            < stop_times_na_dropped["last_stop_time_value"]
+        #        )
     ]
-    penultimate_stop_time = penultimate_candidates.groupby(
-        columns[TRIP_INSTANCE_KEY]
-    ).last()
+    penultimate_stop_time = penultimate_candidates.groupby(columns[TRIP_INSTANCE_KEY]).last()
     # Get the scheduled time between first & "second" and "penultimate" & last stop. If there is a gap of more than 5 stops, add an na value instead.
     scheduled_first_second_difference = (
-        second_stop_time[columns[SCHEDULE_ARRIVAL_SEC]]
-        - first_stop_time[columns[SCHEDULE_ARRIVAL_SEC]]
+        second_stop_time[columns[SCHEDULE_ARRIVAL_SEC]] - first_stop_time[columns[SCHEDULE_ARRIVAL_SEC]]
     )
     scheduled_penultimate_last_difference = (
-        last_stop_time[columns[SCHEDULE_ARRIVAL_SEC]]
-        - penultimate_stop_time[columns[SCHEDULE_ARRIVAL_SEC]]
+        last_stop_time[columns[SCHEDULE_ARRIVAL_SEC]] - penultimate_stop_time[columns[SCHEDULE_ARRIVAL_SEC]]
     )
-    assert (
-        scheduled_first_second_difference.isna()
-        | (scheduled_first_second_difference >= 0)
-    ).all()
-    assert (
-        scheduled_penultimate_last_difference.isna()
-        | (scheduled_penultimate_last_difference >= 0)
-    ).all()
+    assert (scheduled_first_second_difference.isna() | (scheduled_first_second_difference >= 0)).all()
+    assert (scheduled_penultimate_last_difference.isna() | (scheduled_penultimate_last_difference >= 0)).all()
     rt_first_imputed = (
-        second_stop_time[columns[RT_ARRIVAL_SEC]] - scheduled_first_second_difference
-    ).where(second_stop_time["uniform_stop_sequence"] <= 5, np.nan).rename("first_arrival_sec_imputed")
+        (second_stop_time[columns[RT_ARRIVAL_SEC]] - scheduled_first_second_difference)
+        .where(second_stop_time["uniform_stop_sequence"] <= 5, np.nan)
+        .rename("first_arrival_sec_imputed")
+    )
     rt_last_imputed = (
-        penultimate_stop_time[columns[RT_ARRIVAL_SEC]]
-        + scheduled_penultimate_last_difference
-    ).where(last_stop_time["uniform_stop_sequence"] - penultimate_stop_time["uniform_stop_sequence"] < 5, np.nan).rename("last_arrival_sec_imputed")
+        (penultimate_stop_time[columns[RT_ARRIVAL_SEC]] + scheduled_penultimate_last_difference)
+        .where(last_stop_time["uniform_stop_sequence"] - penultimate_stop_time["uniform_stop_sequence"] < 5, np.nan)
+        .rename("last_arrival_sec_imputed")
+    )
     # Merge in imputed first times
     stop_times_imputed_merged = stop_times_with_first_last_sequence.merge(
         pd.concat([rt_first_imputed, rt_last_imputed], axis=1),
@@ -176,10 +148,7 @@ def impute_first_last(
     stop_times_imputed_merged["imputed_arrival_sec"] = (
         stop_times_imputed_merged[columns[RT_ARRIVAL_SEC]]
         .where(
-            (
-                stop_times_imputed_merged["first_stop_sequence"]
-                != stop_times_imputed_merged[columns[STOP_SEQUENCE]]
-            ),
+            (stop_times_imputed_merged["first_stop_sequence"] != stop_times_imputed_merged[columns[STOP_SEQUENCE]]),
             stop_times_imputed_merged["first_arrival_sec_imputed"],
         )
         .where(
@@ -190,9 +159,7 @@ def impute_first_last(
             stop_times_imputed_merged["last_arrival_sec_imputed"],
         )
     )
-    return stop_times_imputed_merged["imputed_arrival_sec"].rename(
-        columns[RT_ARRIVAL_SEC]
-    )
+    return stop_times_imputed_merged["imputed_arrival_sec"].rename(columns[RT_ARRIVAL_SEC])
 
 
 def impute_labeled_times(
@@ -201,39 +168,30 @@ def impute_labeled_times(
     columns: ColumnMap = DEFAULT_COLUMN_MAP,
 ) -> pd.Series:
     """Impute stop times based on schedule for all stop times where the column referred to by impute_flag_column is True"""
-    grouped_flag = rt_schedule_stop_times_sorted.groupby(columns[TRIP_INSTANCE_KEY])[
-        impute_flag_column
-    ]
-    before_impute_group = (
-        grouped_flag.shift(-1) & ~rt_schedule_stop_times_sorted[impute_flag_column]
-    )
-    after_impute_group = (
-        grouped_flag.shift(1) & ~rt_schedule_stop_times_sorted[impute_flag_column]
-    )
+    grouped_flag = rt_schedule_stop_times_sorted.groupby(columns[TRIP_INSTANCE_KEY])[impute_flag_column]
+    before_impute_group = grouped_flag.shift(-1) & ~rt_schedule_stop_times_sorted[impute_flag_column]
+    after_impute_group = grouped_flag.shift(1) & ~rt_schedule_stop_times_sorted[impute_flag_column]
     # Get the schedule time at the last instance of before_impute_group and the first instance of after_impute_group
     before_time_schedule = rt_schedule_stop_times_sorted.loc[
         before_impute_group, columns[SCHEDULE_ARRIVAL_SEC]
     ].reindex(rt_schedule_stop_times_sorted.index, method="ffill")
-    after_time_schedule = rt_schedule_stop_times_sorted.loc[
-        after_impute_group, columns[SCHEDULE_ARRIVAL_SEC]
-    ].reindex(rt_schedule_stop_times_sorted.index, method="bfill")
+    after_time_schedule = rt_schedule_stop_times_sorted.loc[after_impute_group, columns[SCHEDULE_ARRIVAL_SEC]].reindex(
+        rt_schedule_stop_times_sorted.index, method="bfill"
+    )
     # Get the rt time at the last instance of before_impute_group and the first instance of after_impute_group
-    before_time_rt = rt_schedule_stop_times_sorted.loc[
-        before_impute_group, columns[RT_ARRIVAL_SEC]
-    ].reindex(rt_schedule_stop_times_sorted.index, method="ffill")
-    after_time_rt = rt_schedule_stop_times_sorted.loc[
-        after_impute_group, columns[RT_ARRIVAL_SEC]
-    ].reindex(rt_schedule_stop_times_sorted.index, method="bfill")
+    before_time_rt = rt_schedule_stop_times_sorted.loc[before_impute_group, columns[RT_ARRIVAL_SEC]].reindex(
+        rt_schedule_stop_times_sorted.index, method="ffill"
+    )
+    after_time_rt = rt_schedule_stop_times_sorted.loc[after_impute_group, columns[RT_ARRIVAL_SEC]].reindex(
+        rt_schedule_stop_times_sorted.index, method="bfill"
+    )
     # Get the time passed in the schedule and rt feeds before and after impute sections
     before_after_schedule_difference = after_time_schedule - before_time_schedule
     before_after_rt_difference = after_time_rt - before_time_rt
-    rt_schedule_proportion = (
-        before_after_rt_difference / before_after_schedule_difference
-    )
+    rt_schedule_proportion = before_after_rt_difference / before_after_schedule_difference
     # Get the difference between the current schedule time and the next scheduled time
     imputed_difference = (
-        rt_schedule_stop_times_sorted[columns[SCHEDULE_ARRIVAL_SEC]]
-        - before_time_schedule
+        rt_schedule_stop_times_sorted[columns[SCHEDULE_ARRIVAL_SEC]] - before_time_schedule
     ) * rt_schedule_proportion
     # Add the time difference
     imputed_time = imputed_difference + before_time_rt
@@ -252,17 +210,14 @@ def flag_non_monotonic_sections(
     assert not rt_schedule_stop_times_sorted.index.duplicated().any()
     rt_sec_reverse_cummin = (
         # Sort in reverse order
-        rt_schedule_stop_times_sorted.sort_values(
-            columns[STOP_SEQUENCE], ascending=False
-        )
+        rt_schedule_stop_times_sorted.sort_values(columns[STOP_SEQUENCE], ascending=False)
         # Get the minimum stop time in reverse order
         .groupby(columns[TRIP_INSTANCE_KEY])[columns[RT_ARRIVAL_SEC]].cummin()
         # Reindex to undo the sort
         .reindex(rt_schedule_stop_times_sorted.index)
     )
     non_monotonic_flag = (
-        rt_sec_reverse_cummin
-        != rt_schedule_stop_times_sorted[columns[RT_ARRIVAL_SEC]]
+        rt_sec_reverse_cummin != rt_schedule_stop_times_sorted[columns[RT_ARRIVAL_SEC]]
     ) & rt_schedule_stop_times_sorted[columns[RT_ARRIVAL_SEC]].notna()
     return non_monotonic_flag
 
@@ -276,10 +231,12 @@ def flag_short_gaps(
     # Tag sections where there is a gap
     gap_present = rt_schedule_stop_times_sorted[columns[RT_ARRIVAL_SEC]].isna()
     gap_length = gap_present.groupby((~gap_present).cumsum()).transform("sum")
-    
+
     # Need to exclude any entries that are before the first non-na value or after the last non-na value
     # repetitive to impute first_last
-    non_na_group = rt_schedule_stop_times_sorted.dropna(subset=[columns[RT_ARRIVAL_SEC]]).groupby(columns[TRIP_INSTANCE_KEY])
+    non_na_group = rt_schedule_stop_times_sorted.dropna(subset=[columns[RT_ARRIVAL_SEC]]).groupby(
+        columns[TRIP_INSTANCE_KEY]
+    )
     first_valid_stop_sequence = non_na_group[columns[STOP_SEQUENCE]].first().rename("first_valid_stop_sequence")
     last_valid_stop_sequence = non_na_group[columns[STOP_SEQUENCE]].last().rename("last_valid_stop_sequence")
     rt_schedule_stop_times_merged = rt_schedule_stop_times_sorted.merge(
@@ -287,10 +244,16 @@ def flag_short_gaps(
         how="left",
         left_on=columns[TRIP_INSTANCE_KEY],
         right_index=True,
-        validate="many_to_one"
+        validate="many_to_one",
     )
-    before_first_valid = rt_schedule_stop_times_sorted[columns[STOP_SEQUENCE]] < rt_schedule_stop_times_merged["first_valid_stop_sequence"]
-    after_last_valid = rt_schedule_stop_times_sorted[columns[STOP_SEQUENCE]] > rt_schedule_stop_times_merged["last_valid_stop_sequence"]
+    before_first_valid = (
+        rt_schedule_stop_times_sorted[columns[STOP_SEQUENCE]]
+        < rt_schedule_stop_times_merged["first_valid_stop_sequence"]
+    )
+    after_last_valid = (
+        rt_schedule_stop_times_sorted[columns[STOP_SEQUENCE]]
+        > rt_schedule_stop_times_merged["last_valid_stop_sequence"]
+    )
 
     # Tag sections where there is a gap of appropriate length
     imputable_gap_present = gap_present & (gap_length <= max_gap_length) & ~before_first_valid & ~after_last_valid
@@ -307,29 +270,23 @@ def impute_unrealistic_rt_times(
         not rt_schedule_stop_times_sorted.index.duplicated().any()
     ), "rt_schedule_stop_times_sorted index must be unique"
     # Some imputing functions require a unique index, so reset index
-    stop_times_with_imputed_values = filter_non_rt_trips(
-        rt_schedule_stop_times_sorted, columns
-    )
+    stop_times_with_imputed_values = filter_non_rt_trips(rt_schedule_stop_times_sorted, columns)
     # Get imputed values
     stop_times_with_imputed_values["non_monotonic"] = flag_non_monotonic_sections(
         stop_times_with_imputed_values, columns
     )
-    stop_times_with_imputed_values["first_last_imputed_rt_arrival_sec"] = (
-        impute_first_last(
-            stop_times_with_imputed_values,
-            non_monotonic_column="non_monotonic",
-            columns=columns,
-        )
+    stop_times_with_imputed_values["first_last_imputed_rt_arrival_sec"] = impute_first_last(
+        stop_times_with_imputed_values,
+        non_monotonic_column="non_monotonic",
+        columns=columns,
     )
-    stop_times_with_imputed_values["monotonic_imputed_rt_arrival_sec"] = (
-        impute_labeled_times(
-            stop_times_with_imputed_values,
-            impute_flag_column="non_monotonic",
-            columns={
-                **columns,
-                RT_ARRIVAL_SEC: "first_last_imputed_rt_arrival_sec",
-            },
-        )
+    stop_times_with_imputed_values["monotonic_imputed_rt_arrival_sec"] = impute_labeled_times(
+        stop_times_with_imputed_values,
+        impute_flag_column="non_monotonic",
+        columns={
+            **columns,
+            RT_ARRIVAL_SEC: "first_last_imputed_rt_arrival_sec",
+        },
     )
     stop_times_with_imputed_values["imputable_gap"] = flag_short_gaps(
         stop_times_with_imputed_values,
@@ -344,9 +301,8 @@ def impute_unrealistic_rt_times(
             RT_ARRIVAL_SEC: "monotonic_imputed_rt_arrival_sec",
         },
     )
-    return stop_times_with_imputed_values["_final_imputed_time"].rename(
-        columns[RT_ARRIVAL_SEC]
-    )
+    return stop_times_with_imputed_values["_final_imputed_time"].rename(columns[RT_ARRIVAL_SEC])
+
 
 def make_retrospective_feed_single_date(
     filtered_input_feed: GTFS,
@@ -372,26 +328,22 @@ def make_retrospective_feed_single_date(
     # Process the input feed
     schedule_trips_original = filtered_input_feed.trips.set_index("trip_id")
     schedule_stop_times_original = filtered_input_feed.stop_times.copy()
-    schedule_stop_times_original["feed_arrival_sec"] = (
-        time_string_to_time_since_midnight(schedule_stop_times_original["arrival_time"])
+    schedule_stop_times_original["feed_arrival_sec"] = time_string_to_time_since_midnight(
+        schedule_stop_times_original["arrival_time"]
     )
     # Process the rt stop times
-    filtered_stop_times_table = _filter_na_stop_times(
-        stop_times_table, stop_times_table_columns
-    )
+    filtered_stop_times_table = _filter_na_stop_times(stop_times_table, stop_times_table_columns)
 
     # Merge the schedule and rt stop time tables
-    rt_trip_ids = filtered_stop_times_table[
-        stop_times_table_columns[TRIP_ID]
-    ].drop_duplicates(keep="first")
-    schedule_trips_in_rt = schedule_trips_original.loc[np.intersect1d(rt_trip_ids.values, schedule_trips_original.index)]
+    rt_trip_ids = filtered_stop_times_table[stop_times_table_columns[TRIP_ID]].drop_duplicates(keep="first")
+    schedule_trips_in_rt = schedule_trips_original.loc[
+        np.intersect1d(rt_trip_ids.values, schedule_trips_original.index)
+    ]
     stop_times_merged = schedule_stop_times_original.merge(
         filtered_stop_times_table.rename(
             columns={
                 stop_times_table_columns[STOP_ID]: "warehouse_stop_id",
-                stop_times_table_columns[
-                    SCHEDULE_ARRIVAL_SEC
-                ]: "warehouse_scheduled_arrival_sec",
+                stop_times_table_columns[SCHEDULE_ARRIVAL_SEC]: "warehouse_scheduled_arrival_sec",
             }
         ),
         left_on=["trip_id", "stop_sequence"],
@@ -412,19 +364,14 @@ def make_retrospective_feed_single_date(
         ).all()
         # Departure / arrival times match or are na
         assert (
-            (
-                stop_times_merged["feed_arrival_sec"]
-                == stop_times_merged["warehouse_scheduled_arrival_sec"]
-            )
+            (stop_times_merged["feed_arrival_sec"] == stop_times_merged["warehouse_scheduled_arrival_sec"])
             | stop_times_merged["feed_arrival_sec"].isna()
             | stop_times_merged["warehouse_scheduled_arrival_sec"].isna()
         ).all()
         # All schedule feed stop times have an arrival second
         assert (
             ~stop_times_merged["feed_arrival_sec"].isna()
-            | stop_times_merged[
-                stop_times_table_columns[SCHEDULE_GTFS_DATASET_KEY]
-            ].isna()
+            | stop_times_merged[stop_times_table_columns[SCHEDULE_GTFS_DATASET_KEY]].isna()
         ).all()
 
     stop_times_merged_filtered = stop_times_merged.loc[
@@ -432,7 +379,7 @@ def make_retrospective_feed_single_date(
     ].reset_index(drop=True)
     stop_times_merged_filtered["rt_arrival_gtfs_time"] = seconds_to_gtfs_format_time(
         stop_times_merged_filtered[stop_times_table_columns[RT_ARRIVAL_SEC]],
-        stop_times_merged_filtered[stop_times_table_columns[TRIP_INSTANCE_KEY]]
+        stop_times_merged_filtered[stop_times_table_columns[TRIP_INSTANCE_KEY]],
     )
     stop_times_gtfs_format_with_rt_times = (
         stop_times_merged_filtered.drop(["arrival_time", "departure_time"], axis=1)
@@ -443,9 +390,7 @@ def make_retrospective_feed_single_date(
         )
         .copy()
     )
-    stop_times_gtfs_format_with_rt_times["departure_time"] = (
-        stop_times_gtfs_format_with_rt_times["arrival_time"].copy()
-    )
+    stop_times_gtfs_format_with_rt_times["departure_time"] = stop_times_gtfs_format_with_rt_times["arrival_time"].copy()
     # TODO: time filtering, probably delete
     stop_times_gtfs_format_with_rt_times = stop_times_gtfs_format_with_rt_times.loc[
         (stop_times_gtfs_format_with_rt_times["arrival_time"].str.split(":").map(lambda x: int(x[0])) > 4)
@@ -457,13 +402,9 @@ def make_retrospective_feed_single_date(
     altered_feed = copy.deepcopy(filtered_input_feed)
     altered_feed.trips = schedule_trips_in_rt.reset_index().drop("block_id", axis=1, errors="ignore")
     stop_times_keep_columns = [
-        column
-        for column in stop_times_desired_columns
-        if column in stop_times_gtfs_format_with_rt_times.columns
+        column for column in stop_times_desired_columns if column in stop_times_gtfs_format_with_rt_times.columns
     ]
-    altered_feed.stop_times = stop_times_gtfs_format_with_rt_times[
-        stop_times_keep_columns
-    ]
+    altered_feed.stop_times = stop_times_gtfs_format_with_rt_times[stop_times_keep_columns]
     # Not sure if this is appropriate or not, since we're altering. Leaving commented out for now
     # Possibly should go in subset_schedule_feed_to_one_date
     """
