@@ -1,5 +1,4 @@
 import pandas as pd
-import pytest
 from retrospective_feed_generation.gtfs_utils import seconds_to_gtfs_format_time
 
 

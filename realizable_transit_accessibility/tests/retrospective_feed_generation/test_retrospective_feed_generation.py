@@ -283,7 +283,7 @@ def test_validation_stop_ids(
 ):
     """Test that if `validate=True` and `filtered_input_feed` and `stop_times_table` do not have matching stop ids at the same value of trip_id and stop_sequence, an `AssertionError` is raised"""
     with pytest.raises(AssertionError):
-        output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
+        retrospective_feed_generation.make_retrospective_feed_single_date(
             filtered_input_feed=schedule_feed_minimal,
             stop_times_table=minimal_rt_table_schedule_rt_different_stop_id_altered,
             validate=True,
@@ -297,7 +297,7 @@ def test_validation_schedule_times(
 ):
     """Test that if `validate=True` and `filtered_input_feed` and `stop_times_table` do not have matching schedule arrival times at the same value of trip_id and stop_sequence, an `AssertionError` is raised"""
     with pytest.raises(AssertionError):
-        output_feed = retrospective_feed_generation.make_retrospective_feed_single_date(
+        retrospective_feed_generation.make_retrospective_feed_single_date(
             filtered_input_feed=schedule_feed_minimal,
             stop_times_table=minimal_rt_table_schedule_rt_different_schedule_arrival_altered,
             validate=True,
