@@ -2,24 +2,11 @@ import datetime as dt
 from typing import Iterable
 
 import pandas as pd
-from shared_utils import gtfs_utils_v2
 
-from .constants import GTFS_DATA_DICT, WAREHOUSE_DATE_STRFTIME
+from .constants import GTFS_DATA_DICT
 from .rt_stop_times_copied_functions import (
     assemble_scheduled_rt_stop_times_keep_all_scheduled,
 )
-
-
-def schedule_feed_name_to_gtfs_dataset_key(feed_name: str) -> str:
-    """Utilize gtfs_utils to convert the name of a schedule feed to the corresponding feed key"""
-    feed_key = (
-        gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(
-            selected_date=SAMPLE_DATE_STR, keep_cols=["name", "gtfs_dataset_key"]
-        )
-        .set_index("name")
-        .at[feed_name, "gtfs_dataset_key"]
-    )
-    return feed_key
 
 
 def get_schedule_rt_stop_times_table(gtfs_dataset_keys: Iterable[str], service_date: dt.date | str) -> pd.DataFrame:

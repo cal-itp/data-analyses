@@ -227,7 +227,6 @@ def flag_short_gaps(
     max_gap_length: int,
     columns: ColumnMap = DEFAULT_COLUMN_MAP,
 ) -> pd.Series:
-    trip_id_grouped = rt_schedule_stop_times_sorted.groupby(columns[TRIP_INSTANCE_KEY])
     # Tag sections where there is a gap
     gap_present = rt_schedule_stop_times_sorted[columns[RT_ARRIVAL_SEC]].isna()
     gap_length = gap_present.groupby((~gap_present).cumsum()).transform("sum")

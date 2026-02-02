@@ -1,7 +1,5 @@
 import os
 
-os.environ["USE_PYGEOS"] = "0"
-os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 import geopandas as gpd
 import pandas as pd
 import shapely
@@ -10,11 +8,16 @@ from shared_utils import gtfs_utils_v2
 
 from .entities import BoundingBoxDict
 
+os.environ["USE_PYGEOS"] = "0"
+os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
+
 
 def create_region_gdf(regions: BoundingBoxDict) -> gpd.GeoDataFrame:
     # https://shapely.readthedocs.io/en/stable/reference/shapely.box.html#shapely.box
     # xmin, ymin, xmax, ymax
-    to_bbox = lambda x: [x["west"], x["south"], x["east"], x["north"]]
+    def to_bbox(region_series: pd.Series) -> list:
+        return [region_series["west"], region_series["south"], region_series["east"], region_series["north"]]
+
     df = pd.DataFrame(regions).transpose().reset_index().rename(columns={"index": "region"})
     df["bbox"] = df.apply(to_bbox, axis=1)
     df["geometry"] = df.apply(lambda x: shapely.geometry.box(*x.bbox), axis=1)

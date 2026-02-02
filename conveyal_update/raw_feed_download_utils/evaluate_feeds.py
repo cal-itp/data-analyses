@@ -1,8 +1,5 @@
-import os
-
-os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
-
 import datetime as dt
+import os
 
 import pandas as pd
 from calitp_data_analysis.sql import query_sql
@@ -10,9 +7,11 @@ from shared_utils import gtfs_utils_v2
 
 from .constants import INT_TO_GTFS_WEEKDAY, REGIONAL_SUBFEED_NAME
 
+os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
 
-def _stringify_iterable(l) -> str:
-    return "('" + "', '".join(l) + "')"
+
+def _stringify_iterable(iterable) -> str:
+    return "('" + "', '".join(iterable) + "')"
 
 
 def get_feeds_check_service(target_date: str):  # TODO: support dt objects as well
@@ -110,7 +109,6 @@ def get_old_feeds(
     base_64_urls_str = "('" + "', '".join(undefined_feeds_base64_urls) + "')"
     day_of_the_week = INT_TO_GTFS_WEEKDAY[target_date.weekday()]
     max_lookback_date = target_date - max_lookback_timedelta
-    target_date_iso = target_date.strftime(ISO_DATE_ONLY_FORMAT)
     # Query feeds for the newest feed where service is defined on the target_date,
     # that have service on the day of the week of the target date, and
     # that are valid before (inclusive) the target date and after (inclusive) the max look back date,

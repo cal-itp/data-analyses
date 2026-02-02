@@ -14,8 +14,7 @@ from raw_feed_download_utils.get_feed_info import get_feed_info
 from retrospective_feed_generation.gtfs_utils import *
 from retrospective_feed_generation.retrospective_feed_generation import *
 from retrospective_feed_generation.warehouse_utils import *
-from shared_utils import catalog_utils, gtfs_utils_v2, rt_dates
-from tqdm import tqdm
+from shared_utils import gtfs_utils_v2
 
 
 def process_all_feeds(

@@ -5,13 +5,11 @@ import pandas as pd
 from calitp_data_analysis import get_fs
 from tqdm import tqdm
 
+from .entities import BoundingBoxDict
+
 tqdm.pandas()
 
 fs = get_fs()
-
-import shutil
-
-from .entities import BoundingBoxDict
 
 
 def download_feed(row):
@@ -63,13 +61,3 @@ def generate_script(regions: BoundingBoxDict):
         f.write("#!/bin/bash\n")
         f.write("wget http://download.geofabrik.de/north-america/us-west-latest.osm.pbf\n")
         f.write("\n".join(cmds))
-
-
-if __name__ == "__main__":
-    regions_and_feeds = pd.read_parquet(f"{conveyal_vars.GCS_PATH}regions_feeds_{TARGET_DATE}.parquet")
-
-    for region in tqdm(regions.keys()):
-        download_region(regions_and_feeds, region)
-    shutil.make_archive(f"feeds_{TARGET_DATE}", "zip", f"./feeds_{TARGET_DATE}/")
-    fs.put(f"feeds_{TARGET_DATE}.zip", f"{conveyal_vars.GCS_PATH}feeds_{TARGET_DATE}.zip")
-    generate_script(regions)
