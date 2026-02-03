@@ -56,7 +56,7 @@ def concatenate_speedmap_proxy_arrivals_with_remaining(analysis_date: str, confi
         .reset_index(drop=True)
     )
 
-    gcs_pandas.data_frame_to_parquet(df, f"{SEGMENT_GCS}{SPEEDMAP_STOP_ARRIVALS}_{analysis_date}.parquet")
+    gcs_pandas().data_frame_to_parquet(df, f"{SEGMENT_GCS}{SPEEDMAP_STOP_ARRIVALS}_{analysis_date}.parquet")
 
     del df, proxy_arrivals, other_arrivals
 

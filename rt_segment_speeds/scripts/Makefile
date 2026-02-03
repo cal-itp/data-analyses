@@ -5,7 +5,7 @@ segmentize:
 	python cut_speedmap_segments.py
 
 rt_stop_times_pipeline:
-#	make segmentize
+	make segmentize
 	python pipeline_rt_stop_times.py
 	python average_summary_speeds.py
 	#python average_segment_speeds.py  # Now multi-day averages

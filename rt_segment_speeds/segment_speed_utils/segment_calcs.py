@@ -37,7 +37,7 @@ def derive_speed(
 
     df = df.assign(meters_elapsed=(df[max_dist] - df[min_dist]).abs())
 
-    if np.issubdtype(df[min_time].dtype, np.numeric):
+    if np.issubdtype(df[min_time].dtype, np.number):
         # If 2 time cols are already converted to seconds, just take difference
         df = df.assign(sec_elapsed=(df[max_time] - df[min_time]).abs())
     else:

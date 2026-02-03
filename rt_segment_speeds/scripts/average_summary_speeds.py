@@ -92,7 +92,7 @@ def trip_summary_speeds_by_time_of_day(
     )
 
     trip_avg = compute(df)[0]
-    trip_avg.to_parquet(f"{SEGMENT_GCS}{TRIP_FILE}_{analysis_date}.parquet")
+    gcs_pandas().data_frame_to_parquet(trip_avg, f"{SEGMENT_GCS}{TRIP_FILE}_{analysis_date}.parquet")
 
     end = datetime.datetime.now()
 
