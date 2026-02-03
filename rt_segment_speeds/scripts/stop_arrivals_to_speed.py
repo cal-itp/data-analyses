@@ -110,18 +110,11 @@ def calculate_speed_from_stop_arrivals(
         subseq_stop_meters=(df.groupby(trip_cols, observed=True, group_keys=False).stop_meters.shift(-1)),
     )
 
-    speed = (
-        df.assign(
-            meters_elapsed=df.subseq_stop_meters - df.stop_meters,
-            sec_elapsed=df.subseq_arrival_time_sec - df.arrival_time_sec,
-        )
-        .pipe(
-            segment_calcs.derive_speed,
-            ("stop_meters", "subseq_stop_meters"),
-            ("arrival_time_sec", "subseq_arrival_time_sec"),
-        )
-        .pipe(attach_operator_natural_identifiers, analysis_date, segment_type)
-    )
+    speed = df.pipe(
+        segment_calcs.derive_speed,
+        ("stop_meters", "subseq_stop_meters"),
+        ("arrival_time_sec", "subseq_arrival_time_sec"),
+    ).pipe(attach_operator_natural_identifiers, analysis_date, segment_type)
 
     gcs_pandas().data_frame_to_parquet(speed, f"{SEGMENT_GCS}{SPEED_FILE}.parquet")
 
