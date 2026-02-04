@@ -6,5 +6,5 @@ python-slugify==6.1.1
 pyaml==21.10.1
 humanize~=4.6
 pydantic>=2.0
-calitp_data_analysis==2026.1.5
+calitp_data_analysis==2026.1.30
 axe-selenium-python
