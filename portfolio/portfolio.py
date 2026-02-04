@@ -22,8 +22,7 @@ from axe_selenium_python import Axe
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from papermill import PapermillExecutionError
 from papermill.engines import NBClientEngine, papermill_engines
-from pydantic import BaseModel
-from pydantic.class_validators import validator
+from pydantic import BaseModel, field_validator
 from selenium import webdriver
 from slugify import slugify
 from typing_extensions import Annotated
@@ -285,12 +284,14 @@ class Site(BaseModel):
         for child in content:
             child.site = self
 
-    @validator("readme", pre=True, always=True, check_fields=False)
-    def default_readme(cls, v, *, values, **kwargs):
+    @field_validator("readme", mode="before", check_fields=False)
+    @classmethod
+    def default_readme(cls, v, info):
         if "./" in v:
             return Path(v)
         else:
-            return (values["directory"] / Path("README.md")) or (values["directory"] / Path(v))
+            directory = info.data["directory"]
+            return (directory / Path("README.md")) or (directory / Path(v))
 
     @property
     def slug(self) -> str:
