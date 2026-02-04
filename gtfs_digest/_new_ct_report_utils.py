@@ -1,7 +1,7 @@
 import geopandas as gpd
 import pandas as pd
 from shared_utils import catalog_utils, webmap_utils
-from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS, file_name, analysis_month
+from update_vars import GTFS_DATA_DICT, RT_SCHED_GCS, file_name, analysis_month, previous_month
 from calitp_data_analysis import geography_utils
 
 import google.auth
@@ -159,7 +159,7 @@ def load_buffered_shn_map(district:int) -> gpd.GeoDataFrame:
 
 def load_shn_transit_routes(district:str, pct: int)->gpd.GeoDataFrame:
     OPEN_DATA_GCS = "gs://calitp-analytics-data/data-analyses/open_data/"
-    gdf = gpd.read_parquet(f"{OPEN_DATA_GCS}export/ca_transit_routes_{analysis_month}.parquet",
+    gdf = gpd.read_parquet(f"{OPEN_DATA_GCS}export/ca_transit_routes_{previous_month}.parquet",
                              storage_options={"token": credentials.token})
 
     # Clean district name because there are some extra spaces

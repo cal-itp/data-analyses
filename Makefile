@@ -41,7 +41,7 @@ build_new_transit_metrics_report:
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	#cd gtfs_digest/ && make digest_report && cd ..
+	cd gtfs_digest/ && make digest_report && cd ..
 	make build_portfolio_site
 	make git_check_sections
 
