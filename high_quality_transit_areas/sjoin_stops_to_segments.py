@@ -8,6 +8,7 @@ Takes <1 min to run.
 
 import datetime
 import sys
+from functools import cache
 
 import geopandas as gpd
 import lookback_wrappers
@@ -17,6 +18,7 @@ import shapely
 from _utils import append_analysis_name
 from calitp_data_analysis import get_fs, utils
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from loguru import logger
 from segment_speed_utils import helpers
 from update_vars import (
@@ -30,12 +32,21 @@ from update_vars import (
     analysis_date,
 )
 
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
+
 am_peak_hrs = list(range(AM_PEAK[0].hour, AM_PEAK[1].hour))
 pm_peak_hrs = list(range(PM_PEAK[0].hour, PM_PEAK[1].hour))
 both_peaks_hrs = am_peak_hrs + pm_peak_hrs
 peaks_dict = {key: "am_peak" for key in am_peak_hrs} | {key: "pm_peak" for key in pm_peak_hrs}
-
-gcsgp = GCSGeoPandas()
 
 
 def max_trips_by_group(df: pd.DataFrame, group_cols: list, max_col: str = "n_trips") -> pd.DataFrame:
@@ -206,7 +217,7 @@ if __name__ == "__main__":
 
     # (1) Spatial join stops and stop times to hqta segments
     # this takes < 2 min
-    hqta_segments = gcsgp.read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
+    hqta_segments = gcs_geopandas().read_parquet(f"{GCS_FILE_PATH}hqta_segments.parquet")
     stops_cols = ["feed_key", "stop_id", "stop_name", "geometry"]
     stops = helpers.import_scheduled_stops(analysis_date, get_pandas=True, crs=PROJECT_CRS, columns=stops_cols).assign(
         analysis_date=analysis_date
@@ -231,8 +242,8 @@ if __name__ == "__main__":
         .pipe(append_analysis_name)
     )
 
-    gcsgp.geo_data_frame_to_parquet(stops, f"{GCS_FILE_PATH}stops_with_lookback.parquet")
-    max_arrivals_by_stop = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
+    gcs_geopandas().geo_data_frame_to_parquet(stops, f"{GCS_FILE_PATH}stops_with_lookback.parquet")
+    max_arrivals_by_stop = gcs_pandas().read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet")
 
     hqta_corr = sjoin_stops_and_stop_frequencies_to_hqta_segments(
         hqta_segments=hqta_segments,

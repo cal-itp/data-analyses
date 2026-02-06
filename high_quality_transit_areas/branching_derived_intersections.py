@@ -1,3 +1,5 @@
+from functools import cache
+
 import create_aggregate_stop_frequencies
 import geopandas as gpd
 import lookback_wrappers
@@ -5,6 +7,7 @@ import numpy as np
 import pandas as pd
 from _utils import append_analysis_name
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.geography_utils import CA_NAD83Albers_m
 from IPython.display import Markdown, display
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
@@ -18,9 +21,18 @@ from update_vars import (
     analysis_date,
 )
 
-tqdm.pandas()
 
-gcsgp = GCSGeoPandas()
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
+
+tqdm.pandas()
 
 
 def get_filter_singles(single_route_aggregation: pd.DataFrame, ms_precursor_threshold: int | float) -> pd.DataFrame:
@@ -210,7 +222,7 @@ if __name__ == "__main__":
 
     shapes = get_shapes_with_lookback(analysis_date, published_operators_dict, lookback_trips_ix)
 
-    max_arrivals_by_stop_single = pd.read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet")
+    max_arrivals_by_stop_single = gcs_pandas().read_parquet(f"{GCS_FILE_PATH}max_arrivals_by_stop_single_route.parquet")
     single_qualify = get_filter_singles(max_arrivals_by_stop_single, MS_TRANSIT_THRESHOLD)
 
     share_counts = {}
@@ -231,4 +243,4 @@ if __name__ == "__main__":
         this_feed_stops = find_stops_this_feed(gtfs_dataset_key, max_arrivals_by_stop_single, unique_qualify_pairs)
         hcd_branching_stops += [this_feed_stops]
     hcd_branching_stops = pd.concat(hcd_branching_stops).pipe(match_spatial_format)
-    gcsgp.geo_data_frame_to_parquet(hcd_branching_stops, f"{GCS_FILE_PATH}branching_major_stops.parquet")
+    gcs_geopandas().geo_data_frame_to_parquet(hcd_branching_stops, f"{GCS_FILE_PATH}branching_major_stops.parquet")

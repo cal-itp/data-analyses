@@ -3,7 +3,7 @@ import datetime as dt
 from calitp_data_analysis import geography_utils
 from shared_utils import rt_dates
 
-analysis_date = rt_dates.DATES["nov2025"]
+analysis_date = rt_dates.DATES["jan2026"]
 
 GCS_FILE_PATH = "gs://calitp-analytics-data/data-analyses/" "high_quality_transit_areas/"
 PUBLIC_FILE_PATH = "gs://calitp-publish-data-analysis/" "hqta_explorer/"

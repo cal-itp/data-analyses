@@ -12,6 +12,7 @@ the highest trip count
 
 import datetime
 import sys
+from functools import cache
 
 import _utils
 import geopandas as gpd
@@ -20,6 +21,7 @@ import pandas as pd
 from _utils import append_analysis_name
 from calitp_data_analysis import utils
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from loguru import logger
 from prep_pairwise_intersections import prep_bus_corridors
 from segment_speed_utils import helpers
@@ -30,7 +32,15 @@ from update_vars import (
     analysis_date,
 )
 
-gcsgp = GCSGeoPandas()
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
 
 
 def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame:
@@ -38,7 +48,7 @@ def buffer_around_intersections(buffer_size: int) -> gpd.GeoDataFrame:
     Draw 500 ft buffers around intersections to better catch stops
     that might fall within it.
     """
-    gdf = gcsgp.read_parquet(f"{GCS_FILE_PATH}all_intersections.parquet")
+    gdf = gcs_geopandas().read_parquet(f"{GCS_FILE_PATH}all_intersections.parquet")
 
     gdf = gdf.assign(geometry=gdf.geometry.buffer(buffer_size))
 
@@ -150,13 +160,13 @@ if __name__ == "__main__":
     print(all_stops.head(3))
 
     # add geometry to branching major stops
-    major_stop_bus_branching = pd.read_parquet(f"{GCS_FILE_PATH}branching_major_stops.parquet")
+    major_stop_bus_branching = gcs_pandas().read_parquet(f"{GCS_FILE_PATH}branching_major_stops.parquet")
     major_stop_bus_branching = all_stops.merge(
         major_stop_bus_branching,
         left_on=["schedule_gtfs_dataset_key", "stop_id"],
         right_on=["schedule_gtfs_dataset_key_primary", "stop_id"],
     ).drop(columns=["schedule_gtfs_dataset_key", "analysis_date"])
-    gcsgp.geo_data_frame_to_parquet(major_stop_bus_branching, f"{GCS_FILE_PATH}branching_major_stops.parquet")
+    gcs_geopandas().geo_data_frame_to_parquet(major_stop_bus_branching, f"{GCS_FILE_PATH}branching_major_stops.parquet")
 
     # Create hqta_type == major_stop_bus
     major_stop_bus = create_major_stop_bus(all_stops, bus_intersections)
