@@ -3,11 +3,8 @@ Common functions for standardizing how outputs
 are displayed in portfolio.
 """
 
-import base64
-import re
 from functools import cache
 from pathlib import Path
-from typing import Literal
 
 import pandas as pd
 import yaml
@@ -22,91 +19,6 @@ GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 @cache
 def gcs_pandas():
     return GCSPandas()
-
-
-def decode_base64_url(row):
-    """
-    Provide decoded version of URL as ASCII.
-    WeHo gets an incorrect padding, but urlsafe_b64decode works.
-    Just in case, return uri truncated.
-    """
-    try:
-        decoded = base64.urlsafe_b64decode(row.base64_url).decode("ascii")
-    except base64.binascii.Error:
-        decoded = row.uri.split("?")[0]
-
-    return decoded
-
-
-def exclude_desc(desc: str) -> bool:
-    """
-    match descriptions that duplicate route names, like Route 602 or Route 51B
-    also match descriptions that are not route-specific
-    """
-    exclude_texts = [
-        " *Route *[0-9]*[a-z]{0,1}$",
-        " *Metro.*(Local|Rapid|Limited).*Line",
-        " *(Redwood Transit serves the communities of|is operated by Eureka Transit and serves)",
-        " *service within the Stockton Metropolitan Area",
-        " *Hopper bus can deviate",
-        " *RTD's Interregional Commuter Service is a limited-capacity service",
-    ]
-    desc_eval = [re.search(text, desc, flags=re.IGNORECASE) for text in exclude_texts]
-
-    return any(desc_eval)
-
-
-def which_route_name(row, target: Literal["name", "description"] = "name") -> str:
-    """
-    Previous function in rt_utils was designed to add descriptions after route_short_name,
-    it would not return route_short_name in any case. Since we're using it to match names in this
-    script, move here and make flexible for either matching a name or a description as desired.
-    """
-    long_name_valid = row.route_long_name and not exclude_desc(row.route_long_name)
-    route_desc_valid = row.route_desc and not exclude_desc(row.route_desc)
-
-    if target == "name":  # finds most common name for route
-        if row.route_short_name:
-            return row.route_short_name
-        elif long_name_valid:
-            return row.route_long_name
-        elif route_desc_valid:
-            return row.route_desc
-    elif target == "description":  # augments a short or long name
-        if route_desc_valid:
-            return row.route_desc
-        elif long_name_valid:
-            return row.route_long_name
-    return ""  # empty string if no matches
-
-
-def add_route_name(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Input a df that has route_id and route_short_name, route_long_name, route_desc, and this will pick.
-    """
-    route_cols = ["route_id", "route_short_name", "route_long_name", "route_desc"]
-
-    if not (set(route_cols).issubset(set(list(df.columns)))):
-        raise ValueError(f"Input a df that contains {route_cols}")
-
-    df = df.assign(route_name_used=df.apply(lambda x: which_route_name(x), axis=1))
-
-    return df
-
-
-def label_visualization(word: str, labeling_dict: dict = {}) -> str:
-    """
-    Supply a labeling dictionary where
-    keys are existing column names and
-    values are what's to be displayed on visualization.
-
-    If not in dict, replace underscores with spaces and Title Case.
-    """
-    if word in labeling_dict.keys():
-        word = labeling_dict[word]
-    else:
-        word = word.replace("_", " ").title()
-    return word
 
 
 def create_portfolio_yaml_chapters_no_sections(portfolio_site_yaml: Path, chapter_name: str, chapter_values: list):

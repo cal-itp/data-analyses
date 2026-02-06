@@ -41,14 +41,13 @@ build_new_transit_metrics_report:
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	#cd gtfs_digest/ && python deploy_portfolio_yaml.py && make assemble_data && cd ..
-	cd gtfs_digest/ && python deploy_portfolio_yaml.py && cd ..
+	cd gtfs_digest/ && make digest_report && cd ..
 	make build_portfolio_site
 	make git_check_sections
 
 build_district_digest:
 	$(eval export site = district_digest)
-	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
+	cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	cd portfolio/ && pip install -r requirements.txt && cd ../
 	cd gtfs_digest/ && python deploy_district_yaml.py district && cd ..
 	make build_portfolio_site
@@ -56,7 +55,7 @@ build_district_digest:
 
 build_legislative_district_digest:
 	$(eval export site = legislative_district_digest)
-	#cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
+	cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd ..
 	make build_portfolio_site
 	make git_check_no_sections

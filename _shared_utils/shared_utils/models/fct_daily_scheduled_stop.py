@@ -1,5 +1,14 @@
 from shared_utils.models.base import get_table_name
-from sqlalchemy import TIMESTAMP, Boolean, Column, Date, DateTime, Integer, String
+from sqlalchemy import (
+    TIMESTAMP,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import declarative_base, declared_attr
 
 Base = declarative_base()
@@ -22,6 +31,20 @@ class FctDailyScheduledStop(Base):
     first_stop_arrival_datetime_pacific = Column(DateTime)
     last_stop_departure_datetime_pacific = Column(DateTime)
     _feed_valid_from = Column(TIMESTAMP)
+    n_hours_in_service = Column(Integer)
+    n_route_types = Column(Integer)
+    arrivals_per_hour_owl = Column(Float)
+    arrivals_per_hour_early_am = Column(Float)
+    arrivals_per_hour_am_peak = Column(Float)
+    arrivals_per_hour_midday = Column(Float)
+    arrivals_per_hour_pm_peak = Column(Float)
+    arrivals_per_hour_evening = Column(Float)
+    arrivals_owl = Column(Integer)
+    arrivals_early_am = Column(Integer)
+    arrivals_am_peak = Column(Integer)
+    arrivals_midday = Column(Integer)
+    arrivals_pm_peak = Column(Integer)
+    arrivals_evening = Column(Integer)
     route_type_0 = Column(Integer)
     route_type_1 = Column(Integer)
     route_type_2 = Column(Integer)
@@ -35,6 +58,7 @@ class FctDailyScheduledStop(Base):
     missing_route_type = Column(Integer)
     contains_warning_duplicate_stop_times_primary_key = Column(Boolean)
     contains_warning_duplicate_trip_primary_key = Column(Boolean)
+    route_id_array = Column(Integer)
     route_type_array = Column(Integer)
     contains_warning_duplicate_stop_primary_key = Column(Boolean)
     stop_key = Column(String)
