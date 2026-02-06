@@ -5,6 +5,7 @@ Download tables for creating RT stop, route, operator report.
 import datetime
 import sys
 
+import gcsfs
 import google.auth
 from calitp_data_analysis import utils
 from loguru import logger
@@ -38,4 +39,18 @@ if __name__ == "__main__":
     )
 
     utils.geoparquet_gcs_export(monthly_stops, PREDICTIONS_GCS, "monthly_schedule_rt_stops")
+
+    stop_order = bq_utils.download_table(
+        project_name="cal-itp-data-infra-staging",
+        dataset_name="tiffany_staging",
+        table_name="test_int_gtfs_schedule__stop_order_by_route",
+        date_col="_valid_from_service_date",
+        start_date="2025-12-01",
+        end_date="2026-03-01",
+    )
+
+    stop_order.to_parquet(
+        f"{PREDICTIONS_GCS}int_gtfs_schedule__stop_order_by_route.parquet", filesystem=gcsfs.GCSFileSystem()
+    )
+
     end = datetime.datetime.now()
