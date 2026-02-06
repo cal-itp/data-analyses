@@ -1,14 +1,19 @@
 import datetime
-import numpy as np
-import pandas as pd
 import sys
+from functools import cache
 
+import pandas as pd
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from loguru import logger
-
 from segment_speed_utils.project_vars import SEGMENT_GCS
 from shared_utils import publish_utils
 from update_vars import GTFS_DATA_DICT
 from vp_dwell_time import import_vp
+
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
 
 
 def merge_vp_usable_dwell(vp_with_dwell: pd.DataFrame) -> pd.DataFrame:
@@ -22,9 +27,7 @@ def merge_vp_usable_dwell(vp_with_dwell: pd.DataFrame) -> pd.DataFrame:
     print(vp_with_dwell.head())
 
     vp_usable_with_dwell = (
-        pd.merge(vp_usable, vp_with_dwell, on="vp_idx", how="inner")
-        .sort_values("vp_idx")
-        .reset_index(drop=True)
+        pd.merge(vp_usable, vp_with_dwell, on="vp_idx", how="inner").sort_values("vp_idx").reset_index(drop=True)
     )
     return vp_usable_with_dwell
 
@@ -44,16 +47,15 @@ if __name__ == "__main__":
 
     start = datetime.datetime.now()
     for analysis_date in analysis_date_list:
-        vp_with_dwell = pd.read_parquet(
+        vp_with_dwell = gcs_pandas().read_parquet(
             f"{SEGMENT_GCS}{UNMERGED_VP_DWELL}_{analysis_date}.parquet",
         )
 
         vp_usable_with_dwell = merge_vp_usable_dwell(vp_with_dwell)
-        publish_utils.if_exists_then_delete(
-            f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}"
-        )
+        publish_utils.if_exists_then_delete(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}")
 
-        vp_usable_with_dwell.to_parquet(
+        gcs_pandas().data_frame_to_parquet(
+            vp_usable_with_dwell,
             f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}",
             partition_cols="gtfs_dataset_key",
         )

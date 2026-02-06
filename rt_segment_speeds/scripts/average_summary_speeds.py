@@ -4,17 +4,24 @@ Quick aggregation for summary speeds.
 
 import datetime
 import sys
+from functools import cache
 from typing import Literal
 
 import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis import utils
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.geography_utils import WGS84
 from dask import compute, delayed
 from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling, metrics
 from shared_utils import portfolio_utils
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
+
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
 
 
 def merge_in_common_shape_geometry(
@@ -77,7 +84,7 @@ def trip_summary_speeds_by_time_of_day(
     ]
 
     df = (
-        delayed(pd.read_parquet)(
+        delayed(gcs_pandas().read_parquet)(
             f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
         )
         .dropna(subset="speed_mph")
@@ -85,7 +92,7 @@ def trip_summary_speeds_by_time_of_day(
     )
 
     trip_avg = compute(df)[0]
-    trip_avg.to_parquet(f"{SEGMENT_GCS}{TRIP_FILE}_{analysis_date}.parquet")
+    gcs_pandas().data_frame_to_parquet(trip_avg, f"{SEGMENT_GCS}{TRIP_FILE}_{analysis_date}.parquet")
 
     end = datetime.datetime.now()
 
@@ -120,16 +127,20 @@ def summary_speeds_by_peak_offpeak(
 
     # Import trips that meet minimum thresholds for trip length
     # in distance traveled and seconds elapsed
-    df = pd.read_parquet(
-        f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
-        filters=[
-            [
-                ("meters_elapsed", ">=", METERS_CUTOFF),
-                ("sec_elapsed", ">=", MIN_TRIP_SECONDS),
-                ("sec_elapsed", "<=", MAX_TRIP_SECONDS),
-            ]
-        ],
-    ).pipe(gtfs_schedule_wrangling.add_peak_offpeak_column)
+    df = (
+        gcs_pandas()
+        .read_parquet(
+            f"{SEGMENT_GCS}{INPUT_FILE}_{analysis_date}.parquet",
+            filters=[
+                [
+                    ("meters_elapsed", ">=", METERS_CUTOFF),
+                    ("sec_elapsed", ">=", MIN_TRIP_SECONDS),
+                    ("sec_elapsed", "<=", MAX_TRIP_SECONDS),
+                ]
+            ],
+        )
+        .pipe(gtfs_schedule_wrangling.add_peak_offpeak_column)
+    )
 
     avg_speeds = (
         delayed(metrics.concatenate_peak_offpeak_allday_averages)(

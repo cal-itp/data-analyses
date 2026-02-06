@@ -1,15 +1,24 @@
 import datetime
-import geopandas as gpd
-import pandas as pd
-import numpy as np
-from calitp_data_analysis.geography_utils import WGS84
-from shared_utils import publish_utils, rt_utils
-from update_vars import SEGMENT_GCS, GTFS_DATA_DICT
-from segment_speed_utils.project_vars import PROJECT_CRS
-from segment_speed_utils import vp_transform
-from loguru import logger
 import sys
+from functools import cache
+
+import geopandas as gpd
 import google.auth
+import numpy as np
+import pandas as pd
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.geography_utils import WGS84
+from loguru import logger
+from segment_speed_utils import vp_transform
+from segment_speed_utils.project_vars import PROJECT_CRS
+from shared_utils import publish_utils, rt_utils
+from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
 
 credentials, _ = google.auth.default()
 
@@ -52,11 +61,9 @@ def get_vp_direction_column(analysis_date: str, dict_inputs: dict = {}) -> pd.Da
 
     keep_cols = ["vp_idx", "vp_primary_direction"]
 
-    vp_condensed = vp_condensed.assign(vp_primary_direction=vp_direction_series)[
-        keep_cols
-    ].explode(column=keep_cols)
+    vp_condensed = vp_condensed.assign(vp_primary_direction=vp_direction_series)[keep_cols].explode(column=keep_cols)
 
-    vp_condensed.to_parquet(f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet")
+    gcs_geopandas().geo_data_frame_to_parquet(vp_condensed, f"{SEGMENT_GCS}vp_direction_{analysis_date}.parquet")
 
     time1 = datetime.datetime.now()
     logger.info(f"export vp direction: {time1 - time0}")
@@ -96,7 +103,8 @@ def merge_in_vp_direction(analysis_date: str, dict_inputs: dict = {}):
 
     publish_utils.if_exists_then_delete(export_path)
 
-    vp.to_parquet(
+    gcs_geopandas().geo_data_frame_to_parquet(
+        vp,
         export_path,
         partition_cols="gtfs_dataset_key",
         # if we don't delete the entire folder of partitioned parquets, this
@@ -128,7 +136,4 @@ if __name__ == "__main__":
 
         merge_in_vp_direction(analysis_date, GTFS_DATA_DICT)
         end = datetime.datetime.now()
-        logger.info(
-            f"{analysis_date}: pare down vp, add direction execution time: "
-            f"{end - start}"
-        )
+        logger.info(f"{analysis_date}: pare down vp, add direction execution time: " f"{end - start}")

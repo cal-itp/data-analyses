@@ -9,6 +9,7 @@ import gcsfs
 import geopandas as gpd
 import google.auth
 import intake
+import open_data_utils
 import pandas as pd
 from calitp_data_analysis import geography_utils, utils
 from loguru import logger

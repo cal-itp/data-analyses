@@ -11,6 +11,7 @@ Now included MPO-provided planned major transit stops.
 
 import datetime
 import sys
+from functools import cache
 
 import _utils
 import geopandas as gpd
@@ -19,6 +20,7 @@ import numpy as np
 import pandas as pd
 from calitp_data_analysis import geography_utils, get_fs, utils
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.sql import query_sql
 from loguru import logger
 from shared_utils import gtfs_utils_v2
@@ -30,7 +32,17 @@ from update_vars import (
     analysis_date,
 )
 
-gcsgp = GCSGeoPandas()
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
+
 fs = get_fs()
 catalog = intake.open_catalog("*.yml")
 
@@ -48,10 +60,14 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
 
     trip_count_cols = ["am_max_trips_hr", "pm_max_trips_hr"]
 
-    max_arrivals = pd.read_parquet(
-        f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet",
-        columns=["schedule_gtfs_dataset_key", "stop_id"] + trip_count_cols,
-    ).pipe(_utils.primary_rename)
+    max_arrivals = (
+        gcs_pandas()
+        .read_parquet(
+            f"{GCS_FILE_PATH}max_arrivals_by_stop.parquet",
+            columns=["schedule_gtfs_dataset_key", "stop_id"] + trip_count_cols,
+        )
+        .pipe(_utils.primary_rename)
+    )
 
     # Combine AM max and PM max into 1 column
     # if am_max_trips = 4 and pm_max_trips = 5, we'll choose 4.
@@ -188,15 +204,19 @@ def final_processing_gtfs(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf3
 
 
-def read_standardize_mpo_input(mpo_data_path=MPO_DATA_PATH, gcsgp=gcsgp, fs=fs) -> gpd.GeoDataFrame:
+def read_standardize_mpo_input(mpo_data_path=MPO_DATA_PATH, fs=fs) -> gpd.GeoDataFrame:
     """
     Read in mpo-provided planned major transit stops and enforce schema.
     """
-    mpo_names = [x.split("/")[-1].split(".")[0] for x in fs.ls(MPO_DATA_PATH) if x.split("/")[-1] != "mpo_input"]
+    mpo_names = [
+        x.split("/")[-1].split(".")[0]
+        for x in fs.ls(MPO_DATA_PATH)
+        if x.split("/")[-1] and x.split("/")[-1] != "mpo_input"
+    ]
 
     mpo_gdfs = []
     for mpo_name in mpo_names:
-        mpo_gdf = gcsgp.read_file(f"{MPO_DATA_PATH}{mpo_name}.geojson")
+        mpo_gdf = gcs_geopandas().read_file(f"{MPO_DATA_PATH}{mpo_name}.geojson")
         required_cols = ["mpo", "hqta_type", "plan_name"]
         optional_cols = ["stop_id", "avg_trips_per_peak_hr", "agency_primary"]
         all_cols = required_cols + optional_cols + ["geometry"]

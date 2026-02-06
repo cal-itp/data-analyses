@@ -89,6 +89,8 @@ DATES = {
     "oct2025": "2025-10-15",
     "oct2025b": "2025-10-16",
     "nov2025": "2025-11-05",
+    "dec2025": "2025-12-17",
+    "jan2026": "2026-01-14",
 }
 
 years_available = list(range(2023, datetime.datetime.now().year + 1))
@@ -100,6 +102,8 @@ y2023_dates = [
 
 y2024_dates = [v for k, v in DATES.items() if k.endswith("2024") and k not in ["oct2024g"]]
 y2025_dates = [v for k, v in DATES.items() if k.endswith("2025")]
+y2026_dates = [v for k, v in DATES.items() if k.endswith("2026")]
+
 
 DATES_BY_YEAR_DICT = {
     2023: y2023_dates,

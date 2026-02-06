@@ -176,7 +176,7 @@ def import_unique_vp_trips(analysis_date: str) -> list:
     TABLE = GTFS_DATA_DICT.speeds_tables.usable_vp
     FILE = f"{SEGMENT_GCS}{TABLE}_{analysis_date}"
 
-    rt_trips = gcs_pandas().read_parquet(FILE, columns=["trip_instance_key"]).trip_instance_key.unique().tolist()
+    rt_trips = gcs_pandas().read_parquet(FILE[5:], columns=["trip_instance_key"]).trip_instance_key.unique().tolist()
 
     return rt_trips
 

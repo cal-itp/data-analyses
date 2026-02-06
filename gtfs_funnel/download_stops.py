@@ -47,7 +47,7 @@ def download_one_day(analysis_date: str):
             "stop_id",
             "stop_key",
             "stop_name",
-            "stop_event_count",
+            "daily_arrivals",
             "parent_station",
             "location_type",
         ]

@@ -5,16 +5,23 @@ for multiday.
 """
 
 import datetime
+from functools import cache
 from typing import Literal, Optional
 
 import pandas as pd
 from calitp_data_analysis import utils
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from dask import compute, delayed
 from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling, helpers, segment_calcs
 from segment_speed_utils.project_vars import SEGMENT_TYPES
 from shared_utils import portfolio_utils, time_helpers
 from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
+
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
 
 
 def merge_schedule_columns_for_speedmaps(df: pd.DataFrame, analysis_date: str):
@@ -75,7 +82,7 @@ def aggregate_by_time_of_day(
     group_cols = OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["stop_pair_name", "time_of_day"]
 
     df = (
-        delayed(pd.read_parquet)(
+        delayed(gcs_pandas().read_parquet)(
             f"{SEGMENT_GCS}{SPEED_FILE}_{analysis_date}.parquet",
             columns=OPERATOR_COLS
             + SEGMENT_COLS_NO_GEOM
