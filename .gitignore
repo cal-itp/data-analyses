@@ -138,5 +138,13 @@ dmypy.json
 # Macos
 .DS_Store
 
-# Local Netlify folder
-.netlify
+# Portfolio sites
+portfolio/*
+!portfolio/sites
+!portfolio/templates
+!portfolio/*.gif
+!portfolio/*.md
+!portfolio/*.png
+!portfolio/*.py
+!portfolio/*.txt
+!portfolio/*.yml
