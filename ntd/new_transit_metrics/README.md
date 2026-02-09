@@ -6,9 +6,9 @@ UCLA concluded that current transit performance metrics like "farebox recovery r
 
 >a cost-effectiveness metric currently applied as “one size fits all” in the TDA.
 >
->As transit has two divergent and context-sensitive goals 
->    1. Efficiency in transit-oriented markets and 
->    2. Effectiveness in transit-dependent ones 
+>As transit has two divergent and context-sensitive goals
+>    1. Efficiency in transit-oriented markets and
+>    2. Effectiveness in transit-dependent ones
 >
 > tailoring metrics to match these market opportunities would likely result in managerial actions that would eventually increase ridership.
 
@@ -39,7 +39,7 @@ This report intends to explores these metrics with data submitted to the NTD for
 
 **UCLA Institute of Transportation Studies**: serves as the transportation research arm of the state with branches at UC Berkeley, UCLA, UC Davis, and UC Irvine.
 
-**Unlined Passenger Trips (UPT)**: The number of passengers who board public transportation vehicles. Passengers are counted each time they board vehicles no matter how many vehicles they use to travel from their origin to their destination. 
+**Unlined Passenger Trips (UPT)**: The number of passengers who board public transportation vehicles. Passengers are counted each time they board vehicles no matter how many vehicles they use to travel from their origin to their destination.
 
 **Vehicle Revenue Hours (VRH)**: The hours that vehicles are scheduled to or actually travel while in revenue service.
 
@@ -47,13 +47,13 @@ This report intends to explores these metrics with data submitted to the NTD for
 
 ## Methodology
 UPT, VRM, VRH and operating expense data was extracted from the [NTD Service Data and Operating Expenses Time Series](https://www.transit.dot.gov/ntd/data-product/ts22-service-data-and-operating-expenses-time-series-system-0) dataset. Rows were aggregated by Agency, mode, TOS, and report year. RTPA data was added.
- 
+
 
 ## Who We Are
- 
+
 
 This website was created by the [California Department of Transportation](https://dot.ca.gov/)'s Division of Data and Digital Services. We are a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. For more of our work, visit our [portfolio](https://analysis.calitp.org/).
 
-<img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/CT_logo_Wht_outline.gif" alt="Alt text" width="129" height="100">
+<img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/templates/assets/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/templates/assets/CT_logo_Wht_outline.gif" alt="Alt text" width="129" height="100">
 
 <br>Caltrans®, the California Department of Transportation® and the Caltrans logo are registered service marks of the California Department of Transportation and may not be copied, distributed, displayed, reproduced or transmitted in any form without prior written permission from the California Department of Transportation.
