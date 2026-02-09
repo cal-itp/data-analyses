@@ -5,21 +5,25 @@ requires-python = ">=3.11.0, <3.12.0"
 description = "Code for downloading GTFS feeds from the calitp warehouse"
 authors = [{"name" = "Eric Dasmalchi"}, {"name" = "Anna Paten"}]
 dependencies = [
+    "dask (>=2024.5.0, <2024.6.0)",
+    "dask-geopandas (>=0.2.0, <0.3.0)",
     "intake==0.6.4",
-    "pandas-gbq (>= 0.19.1, <2.0.0)",
-    "pandas < 2",
-    "numpy < 2",
+    "pandas (>=2.0.0, <3.0.0)",
+    "pandas-gbq (>=0.19.1, <0.20.0)",
+#    "numpy < 2",
+    "numpy (>=1.26.4, <2.0.0)",
     "shared_utils",
-    "calitp-data-analysis==2025.6.24",
-    "sqlalchemy-bigquery (>=1.4.4, <2.0.0)", # shared_utils dep
-    "siuba>=0.4.0", # shared_utils dep
+    "calitp-data-analysis==2026.1.5",
     "altair-transform==0.2.0",
     "great_tables==0.16.1",
+    "numba (>=0.62.1, <0.63.0)",
     "omegaconf==2.3.0", # better yaml configuration
     "polars==1.22.0",
-    "quarto-cli==1.6.40",
     "quarto==0.1.0",
-    "ydata-profiling[notebook] (>=4.9.0, <5.0.0)",
+    "vegafusion==2.0.2",
+    "vl-convert-python>=1.6.0",
+    "movingpandas==0.22.4",
+    "stonesoup==1.8",
 ]
 
 [tool.poetry]

@@ -1,5 +1,3 @@
-import datetime as dt
-
 REGIONAL_SUBFEED_NAME = "Regional Subfeed"
 INT_TO_GTFS_WEEKDAY = {
     0: "monday",
@@ -8,5 +6,5 @@ INT_TO_GTFS_WEEKDAY = {
     3: "thursday",
     4: "friday",
     5: "saturday",
-    6: "sunday"
+    6: "sunday",
 }

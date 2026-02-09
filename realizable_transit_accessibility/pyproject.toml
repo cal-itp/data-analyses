@@ -4,23 +4,27 @@ requires-python = ">=3.11.0, <3.12.0"
 description = "Code for retrospective feed generation"
 authors = [{"name" = "Anna Paten"}, {"name" = "Rae Bonifanti"}]
 dependencies = [
-    "gtfs-lite==0.2.1",
+    "gtfs-lite @ git+https://github.com/wklumpen/gtfs-lite.git@acb40a0f7f36954bf213c9615cd3eaca188ee6e1",
     "intake==0.6.4",
-    "pandas-gbq (>= 0.19.1, <2.0.0)",
-    "pandas < 2",
-    "numpy < 2",
+    #"pandas-gbq (>= 0.19.1, <2.0.0)",
+    "pandas (>=2.0.0, <3.0.0)",
+    "numpy (>=1.26.4, <2.0.0)",
     "shared_utils",
     "segment_speed_utils",
-    "calitp-data-analysis==2025.6.24",
-    "sqlalchemy-bigquery (>=1.4.4, <2.0.0)", # shared_utils dep
-    "siuba>=0.4.0", # shared_utils dep
+    "raw_feed_download_utils",
+    "calitp-data-analysis==2026.1.5",
     "altair-transform==0.2.0",
     "great_tables==0.16.1",
+    "numba (>=0.62.1, <0.63.0)",
     "omegaconf==2.3.0", # better yaml configuration
     "polars==1.22.0",
-    "quarto-cli==1.6.40",
     "quarto==0.1.0",
-    "ydata-profiling[notebook] (>=4.9.0, <5.0.0)",
+    "quarto-cli==1.6.40",
+    "vegafusion==2.0.2",
+    "vl-convert-python>=1.6.0",
+    "movingpandas==0.22.4",
+    "stonesoup==1.8",
+    "tqdm (>=4.67.2,<5.0.0)",
 ]
 
 [tool.poetry]
@@ -30,6 +34,7 @@ package-mode = false
 [tool.poetry.dependencies]
 shared_utils = {path = "../_shared_utils"}
 segment_speed_utils = {path = "../rt_segment_speeds"}
+raw_feed_download_utils = {path = "../conveyal_update"}
 
 [tool.black]
 line-length = 120
