@@ -3,12 +3,20 @@ import uuid
 from functools import cache
 
 import geopandas as gpd
+import google.auth
 import pandas as pd
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from calitp_data_analysis.gcs_pandas import GCSPandas
 from segment_speed_utils import helpers
-from update_vars import ANALYSIS_DATE, BORDER_BUFFER_METERS, GCS_PATH, GEOM_SUBFOLDER
-from utils import read_uzas
+from update_vars import (
+    ANALYSIS_DATE,
+    BORDER_BUFFER_METERS,
+    GCS_PATH,
+    GEOM_INPUT_PATH,
+    GEOM_SUBFOLDER,
+)
+
+credentials, _ = google.auth.default()
 
 
 @cache
@@ -19,6 +27,15 @@ def gcs_pandas():
 @cache
 def gcs_geopandas():
     return GCSGeoPandas()
+
+
+# def read_census_tracts(crs: str = geography_utils.CA_NAD83Albers_m) -> gpd.GeoDataFrame:
+#     census_tracts = (
+#         catalog.calenviroscreen_lehd_by_tract(geopandas_kwargs={"storage_options": {"token": credentials}})
+#         .read()
+#         .to_crs(crs)[["Tract", "pop_sq_mi", "Population", "geometry"]]
+#     ).rename(columns={"Tract": "tract", "Population": "population"})
+#     return census_tracts
 
 
 def intersection_hash(row, id_col="tract"):
@@ -69,9 +86,9 @@ if __name__ == "__main__":
 
     print(f"prepare_areas_borders {ANALYSIS_DATE}")
     # areas = read_census_tracts(ANALYSIS_DATE)
-    areas = read_uzas()
+    analysis_geoms = gcs_geopandas().read_parquet(GEOM_INPUT_PATH)
     shapes = helpers.import_scheduled_shapes(ANALYSIS_DATE)
-    borders = find_borders(areas_gdf=areas, id_col="uace20")
+    borders = find_borders(areas_gdf=analysis_geoms, id_col="uace20")
     st = helpers.import_scheduled_stop_times(
         analysis_date=ANALYSIS_DATE, columns=["feed_key", "trip_id", "stop_id"], get_pandas=True
     )
@@ -86,7 +103,7 @@ if __name__ == "__main__":
     )
 
     gcs_geopandas().geo_data_frame_to_parquet(borders, f"{GCS_PATH}{GEOM_SUBFOLDER}borders_{ANALYSIS_DATE}.parquet")
-    shape_stops_areas_borders = find_shapes_in_areas_borders(shape_stops, areas, borders, id_col="uace20")
+    shape_stops_areas_borders = find_shapes_in_areas_borders(shape_stops, analysis_geoms, borders, id_col="uace20")
     gcs_geopandas().geo_data_frame_to_parquet(
         shape_stops_areas_borders, f"{GCS_PATH}{GEOM_SUBFOLDER}shape_stops_areas_borders_{ANALYSIS_DATE}.parquet"
     )
