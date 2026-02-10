@@ -355,13 +355,6 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
                         output for output in cell.outputs if "name" not in output.keys() or output["name"] != "stderr"
                     ]
 
-                # right side widget to add "tags" (it reverts to "tags": ["tags"]),
-                if cell.metadata.get("tags"):
-                    # "%%full_width" in cell.source doesn't pick up
-                    # when Jupyterbook builds, it says
-                    # UsageError: Line magic function `%%full_width` not found.
-                    cell.metadata.tags.append("full-width")
-
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
 papermill_engines.register_entry_points()
