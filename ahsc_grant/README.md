@@ -80,7 +80,7 @@ This stop-level dataset is expanded by the number of routes that go by a given s
 This website was created by the [California Department of Transportation](https://dot.ca.gov/)'s Division of Data and Digital Services. We are a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. For more of our work, visit our [portfolio](https://analysis.calitp.org/).
 
 <div style="display:flex">
-    
+
 ```{image} https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/templates/assets/Calitp_logo_MAIN.png
 :alt: CalITP Logo
 :width: 200px
