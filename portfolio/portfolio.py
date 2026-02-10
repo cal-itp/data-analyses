@@ -404,7 +404,7 @@ def build(
         help="If false, will skip calls to papermill.",
     ),
     no_stderr: bool = typer.Option(
-        False,
+        True,
         help="If true, will clear stderr stream for cell outputs",
     ),
     prepare_only: bool = typer.Option(
