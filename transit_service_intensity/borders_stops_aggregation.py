@@ -39,7 +39,7 @@ def locate_stopping_segments(row, df):
     else:
         id_before = None
         id_after = None
-        print(row.name)
+        # print(row.name)
         stop_before = df.loc[: (row.name - 1)].query("has_stop")
         if not stop_before.empty:
             id_before = stop_before.query("start_meters == start_meters.max()").tsi_segment_id.iloc[0]
@@ -69,11 +69,12 @@ def assign_stopping_sequences(joined_df):
     stopping_sequences_df = simple_sequence_df.groupby(["shape_array_key"], group_keys=False).progress_apply(fn)
     #  scrub nones from tuples for accurate count:
     stopping_sequences_df.stopping_segments = stopping_sequences_df.stopping_segments.map(
-        lambda y: y if not type(y).isinstance(tuple) else tuple(x for x in y if x)
+        lambda y: y if not isinstance(y, tuple) else tuple(x for x in y if x)
     )
     stopping_sequences_df["n_stopping_segments"] = stopping_sequences_df.stopping_segments.map(
-        lambda y: y if not type(y).isinstance(tuple) else len(y)
+        lambda y: y if not isinstance(y, tuple) else len(y)
     ).fillna(1)
+
     unassigned = stopping_sequences_df.query("n_stopping_segments == 0")
     print(f"{unassigned.shape[0]} segments out of {stopping_sequences_df.shape[0]} can not be matched to a stop")
     stopping_sequences_df = stopping_sequences_df.query("n_stopping_segments >= 1")
