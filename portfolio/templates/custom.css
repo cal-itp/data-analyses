@@ -1,0 +1,17 @@
+.chart-wrapper {
+    select {
+        border: 1px solid black;
+        border-radius: 0.3rem;
+        margin-left: 0.5rem;
+        height: 1.5rem;
+    }
+    
+    canvas {
+        margin-top: 1rem;
+    }
+}
+
+.myst-jp-nb-block {
+    max-width: 136%;
+    width: 136%;
+}
