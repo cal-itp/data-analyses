@@ -9,7 +9,7 @@ from _utils import append_analysis_name
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.geography_utils import CA_NAD83Albers_m
-from IPython.display import Markdown, display
+from IPython.display import HTML, display
 from segment_speed_utils import gtfs_schedule_wrangling, helpers
 from tqdm import tqdm
 from update_vars import (
@@ -139,8 +139,8 @@ def evaluate_overlaps(
             m = these_shapes.explore(color="gray", tiles="CartoDB Positron")
             if show_map:
                 display(
-                    Markdown(
-                        f"### {these_shapes.analysis_name.iloc[0]} {pair} passed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target"
+                    HTML(
+                        f"<h3>{these_shapes.analysis_name.iloc[0]} {pair} passed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target</h3>"
                     )
                 )
                 display(sym_diff.explore(column="route_dir", m=m, tiles="CartoDB Positron"))
@@ -156,8 +156,8 @@ def evaluate_overlaps(
         else:
             if show_map:
                 display(
-                    Markdown(
-                        f"### {these_shapes.analysis_name.iloc[0]} {pair} failed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target"
+                    HTML(
+                        f"<h3>{these_shapes.analysis_name.iloc[0]} {pair} failed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target</h3>"
                     )
                 )
                 display(these_shapes.explore(column="route_dir", tiles="CartoDB Positron"))
