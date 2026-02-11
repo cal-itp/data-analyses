@@ -7,6 +7,7 @@ import google.auth
 import pandas as pd
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from calitp_data_analysis.gcs_pandas import GCSPandas
+from calitp_data_analysis.geography_utils import CA_NAD83Albers_m
 from segment_speed_utils import helpers
 from update_vars import (
     ANALYSIS_DATE,
@@ -85,8 +86,9 @@ def find_shapes_in_areas_borders(shape_stops, areas, borders, id_col="tract"):
 if __name__ == "__main__":
 
     print(f"prepare_areas_borders {ANALYSIS_DATE}")
-    # areas = read_census_tracts(ANALYSIS_DATE)
+    # analysis_geoms = read_census_tracts(ANALYSIS_DATE)
     analysis_geoms = gcs_geopandas().read_parquet(GEOM_INPUT_PATH)
+    assert analysis_geoms.crs == CA_NAD83Albers_m
     shapes = helpers.import_scheduled_shapes(ANALYSIS_DATE)
     borders = find_borders(areas_gdf=analysis_geoms, id_col="uace20")
     st = helpers.import_scheduled_stop_times(
@@ -104,6 +106,8 @@ if __name__ == "__main__":
 
     gcs_geopandas().geo_data_frame_to_parquet(borders, f"{GCS_PATH}{GEOM_SUBFOLDER}borders_{ANALYSIS_DATE}.parquet")
     shape_stops_areas_borders = find_shapes_in_areas_borders(shape_stops, analysis_geoms, borders, id_col="uace20")
-    gcs_geopandas().geo_data_frame_to_parquet(
+    keep_cols = ["shape_array_key", "tsi_segment_id"]
+    shape_stops_areas_borders = shape_stops_areas_borders[keep_cols].drop_duplicates()
+    gcs_pandas().data_frame_to_parquet(
         shape_stops_areas_borders, f"{GCS_PATH}{GEOM_SUBFOLDER}shape_stops_areas_borders_{ANALYSIS_DATE}.parquet"
     )

@@ -1,10 +1,25 @@
+from functools import cache
+
 import geopandas as gpd
 import pandas as pd
 import shapely
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from segment_speed_utils import helpers
 from tqdm import tqdm
-from update_vars import ANALYSIS_DATE, BORDER_BUFFER_METERS
-from utils import read_census_tracts
+from update_vars import (
+    ANALYSIS_DATE,
+    BORDER_BUFFER_METERS,
+    GCS_PATH,
+    GEOM_ID_COL,
+    GEOM_INPUT_PATH,
+    GEOM_SUBFOLDER,
+)
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
 
 tqdm.pandas(desc=f"TSI Segments Progress {ANALYSIS_DATE}")
 
@@ -19,7 +34,7 @@ def overlay_to_borders(
     return overlaid
 
 
-def overlay_to_areas(shape_gdf_no_border: gpd.GeoDataFrame, areas_gdf: gpd.GeoDataFrame, id_col: str = "tract"):
+def overlay_to_areas(shape_gdf_no_border: gpd.GeoDataFrame, areas_gdf: gpd.GeoDataFrame, id_col: str = GEOM_ID_COL):
     """ """
     areas_gdf = areas_gdf[[id_col, "geometry"]]
     return shape_gdf_no_border.overlay(areas_gdf, how="intersection")
@@ -30,7 +45,7 @@ def overlay_areas_borders(
     areas_gdf: gpd.GeoDataFrame,
     border_gdf: gpd.GeoDataFrame,
     sensitivity_dist: int = BORDER_BUFFER_METERS * 4,
-    id_col="tract",
+    id_col=GEOM_ID_COL,
 ):
     """ """
     border_gdf = border_gdf.drop(columns=["intersection_hash"])
@@ -54,9 +69,9 @@ def overlay_areas_borders(
 if __name__ == "__main__":
 
     print(f"define_tsi_segments {ANALYSIS_DATE}")
-    tracts = read_census_tracts(ANALYSIS_DATE)
+    analysis_geoms = gcs_geopandas().read_parquet(GEOM_INPUT_PATH)
     shapes = helpers.import_scheduled_shapes(ANALYSIS_DATE)
-    borders = gpd.read_parquet(f"borders_{ANALYSIS_DATE}.parquet")
+    borders = gcs_geopandas().read_parquet(f"{GCS_PATH}{GEOM_SUBFOLDER}borders_{ANALYSIS_DATE}.parquet")
 
     trip_cols = [
         "gtfs_dataset_key",
@@ -74,9 +89,13 @@ if __name__ == "__main__":
 
     trips = helpers.import_scheduled_trips(ANALYSIS_DATE, columns=trip_cols).dropna(subset=["shape_id"])
 
-    tsi_segs = (
-        shapes.groupby("shape_array_key")
-        .progress_apply(overlay_areas_borders, areas_gdf=tracts, border_gdf=borders)
-        .reset_index(drop=True)
-    )
-    tsi_segs.to_parquet(f"tsi_segments_{ANALYSIS_DATE}.parquet")
+    # grouping is slow, but may be necessary depending on input geometries and available memory
+    # tsi_segs = (
+    #     shapes.groupby("shape_array_key")
+    #     .progress_apply(overlay_areas_borders, areas_gdf=analysis_geoms, border_gdf=borders)
+    #     .reset_index(drop=True)
+    # )
+
+    tsi_segs = overlay_areas_borders(shape_gdf=shapes, areas_gdf=analysis_geoms, border_gdf=borders, id_col=GEOM_ID_COL)
+    path = f"{GCS_PATH}{GEOM_SUBFOLDER}tsi_segs_{ANALYSIS_DATE}.parquet"
+    gcs_geopandas().geo_data_frame_to_parquet(tsi_segs, path)

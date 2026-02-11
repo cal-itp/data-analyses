@@ -1,13 +1,20 @@
+from functools import cache
+
 import dask.dataframe as dd
-import geopandas as gpd
 import pandas as pd
 from calitp_data_analysis import geography_utils
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from dask.diagnostics import ProgressBar
 from segment_speed_utils import helpers
 from shared_utils import rt_utils
-from update_vars import ANALYSIS_DATE
+from update_vars import ANALYSIS_DATE, GCS_PATH, GEOM_SUBFOLDER
 
 ProgressBar().register()
+
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
 
 
 def attach_projected_stop_times(analysis_date: str):
@@ -25,7 +32,8 @@ def attach_projected_stop_times(analysis_date: str):
 
 
 def read_tsi_segs(analysis_date, shapes):
-    tsi_segs = gpd.read_parquet(f"tsi_segments_{analysis_date}.parquet")
+    path = f"{GCS_PATH}{GEOM_SUBFOLDER}tsi_segs_{analysis_date}.parquet"
+    tsi_segs = gcs_geopandas().read_parquet(path)
     tsi_segs = tsi_segs.drop(columns=["geometry"])
 
     shape_merged = shapes.merge(tsi_segs, on="shape_array_key").rename(columns={"geometry": "shape_geometry"})
@@ -90,7 +98,10 @@ if __name__ == "__main__":
         .apply(tract_border_time_by_trip, st_proj_df=st_proj)
     )
     meta = many_trip_test[:0]
-    dask_calculate_batch(tsi_segments_trips, st_proj, meta).to_parquet(f"trip_tables_all_{ANALYSIS_DATE}.parquet")
+    trip_tsi_segments = dask_calculate_batch(tsi_segments_trips, st_proj, meta)
+
+    path = f"{GCS_PATH}{GEOM_SUBFOLDER}trip_tsi_segments_{ANALYSIS_DATE}.parquet"
+    gcs_geopandas().geo_data_frame_to_parquet(trip_tsi_segments, path)
 
     # trips = tsi_segments_trips.trip_instance_key.unique()
     # trips1 = trips[:len(trips)//10]
