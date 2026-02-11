@@ -3,8 +3,6 @@
 
 build_portfolio_site:
 	cd portfolio/ && pip install -r requirements.txt && cd ../
-	#need git rm because otherwise, just local removal, but git change is untracked
-	#git rm portfolio/$(site)/ -rf
 	python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site)
 	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra
@@ -12,16 +10,9 @@ build_portfolio_site:
 	git add portfolio/sites/$(site).yml
 	#make production_portfolio
 
-git_check_sections:
-	git add portfolio/$(site)/*.ipynb # this one is most common, where operators nested under district
-
-git_check_no_sections:
-	git add portfolio/$(site)/district_*/*.ipynb # this one less common, but it's district pages only
-
 remove_portfolio_site:
 	python portfolio/portfolio.py clean $(site)
 	git rm portfolio/sites/$(site).yml
-	git rm portfolio/$(site)/ -rf
 
 build_ntd_report:
 	$(eval export site = ntd_monthly_ridership)
@@ -43,7 +34,6 @@ build_gtfs_digest:
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	cd gtfs_digest/ && make digest_report && cd ..
 	make build_portfolio_site
-	make git_check_sections
 
 build_district_digest:
 	$(eval export site = district_digest)
@@ -51,14 +41,12 @@ build_district_digest:
 	cd portfolio/ && pip install -r requirements.txt && cd ../
 	cd gtfs_digest/ && python deploy_district_yaml.py district && cd ..
 	make build_portfolio_site
-	make git_check_no_sections
 
 build_legislative_district_digest:
 	$(eval export site = legislative_district_digest)
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd ..
 	make build_portfolio_site
-	make git_check_no_sections
 
 build_fund_split:
 	$(eval export site = sb125_fund_split_analysis)
