@@ -22,8 +22,7 @@ from axe_selenium_python import Axe
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from papermill import PapermillExecutionError
 from papermill.engines import NBClientEngine, papermill_engines
-from pydantic import BaseModel
-from pydantic.class_validators import validator
+from pydantic import BaseModel, field_validator
 from selenium import webdriver
 from slugify import slugify
 from typing_extensions import Annotated
@@ -108,6 +107,7 @@ class Chapter(BaseModel):
     notebook: Optional[Path] = None
     params: Dict = {}
     sections: List[Dict] = []
+    site: "Site" = None
     part: "Part" = None
 
     @property
@@ -116,15 +116,20 @@ class Chapter(BaseModel):
 
     @property
     def resolved_params(self):
-        return {**self.part.params, **self.params}
+        part_params = self.part.params if self.part else {}
+        return {**part_params, **self.params}
 
     @property
     def slug(self):
         return slugify_params(self.resolved_params)
 
     @property
+    def output_dir(self):
+        return self.part.site.output_dir if self.part else self.site.output_dir
+
+    @property
     def path(self):
-        return self.part.site.output_dir / Path(self.slug)
+        return self.output_dir / Path(self.slug)
 
     def generate(
         self, execute_papermill=True, continue_on_error=False, **papermill_kwargs
@@ -133,7 +138,7 @@ class Chapter(BaseModel):
         self.path.mkdir(parents=True, exist_ok=True)
 
         if self.sections:
-            fname = self.part.site.output_dir / f"{self.slug}.md"
+            fname = self.output_dir / f"{self.slug}.md"
             with open(fname, "w") as f:
                 typer.secho(f"writing readme to {fname}", fg=typer.colors.GREEN)
                 f.write(f"# {self.caption}")
@@ -220,7 +225,7 @@ class Chapter(BaseModel):
         if self.sections:
             return {
                 "file": f"{self.slug}.md",
-                "sections": [
+                "children": [
                     {
                         "glob": f"{self.slug}/*",
                     }
@@ -252,7 +257,13 @@ class Part(BaseModel):
 
     @property
     def to_toc(self):
-        return {"caption": self.caption, "chapters": [chapter.toc for chapter in self.chapters]}
+        return {"title": self.caption, "children": [chapter.toc for chapter in self.chapters]}
+
+
+class YamlPartialDumper(yaml.Dumper):
+
+    def increase_indent(self, flow=False, indentless=False):
+        return super(YamlPartialDumper, self).increase_indent(flow, False)
 
 
 class Site(BaseModel):
@@ -262,21 +273,25 @@ class Site(BaseModel):
     directory: Path
     readme: Optional[Path] = "README.md"
     notebook: Optional[Path] = None
-    parts: List[Part]
+    parts: List[Part] = []
+    chapters: List[Chapter] = []
     prepare_only: bool = False
 
     def __init__(self, **data):
         super().__init__(**data)
 
-        for part in self.parts:
-            part.site = self
+        content = [*self.chapters, *self.parts]
+        for child in content:
+            child.site = self
 
-    @validator("readme", pre=True, always=True, check_fields=False)
-    def default_readme(cls, v, *, values, **kwargs):
+    @field_validator("readme", mode="before", check_fields=False)
+    @classmethod
+    def default_readme(cls, v, info):
         if "./" in v:
             return Path(v)
         else:
-            return (values["directory"] / Path("README.md")) or (values["directory"] / Path(v))
+            directory = info.data["directory"]
+            return (directory / Path("README.md")) or (directory / Path(v))
 
     @property
     def slug(self) -> str:
@@ -284,9 +299,13 @@ class Site(BaseModel):
 
     @property
     def toc_yaml(self) -> str:
+        chapters = [chapter.toc for chapter in self.chapters]
+        parts = [part.to_toc for part in self.parts if part.chapters]
+        children = [*chapters, *parts]
         return yaml.dump(
-            {"format": "jb-book", "root": "README", "parts": [part.to_toc for part in self.parts if part.chapters]},
+            {"toc": [{"file": "README.md"}, *children]},
             indent=4,
+            Dumper=YamlPartialDumper,
         )
 
 
@@ -322,7 +341,7 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
 
             # hide input (i.e. code) for all cells
             if cell.cell_type == "code":
-                cell.metadata.tags.append("remove_input")
+                cell.metadata.tags.append("remove-input")
 
                 # Consider importing this name from calitp.magics
                 if "%%capture_parameters" in cell.source:
@@ -335,13 +354,6 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
                     cell.outputs = [
                         output for output in cell.outputs if "name" not in output.keys() or output["name"] != "stderr"
                     ]
-
-                # right side widget to add "tags" (it reverts to "tags": ["tags"]),
-                if cell.metadata.get("tags"):
-                    # "%%full_width" in cell.source doesn't pick up
-                    # when Jupyterbook builds, it says
-                    # UsageError: Line magic function `%%full_width` not found.
-                    cell.metadata.tags.append("full-width")
 
 
 papermill_engines.register("markdown", EngineWithParameterizedMarkdown)
@@ -392,7 +404,7 @@ def build(
         help="If false, will skip calls to papermill.",
     ),
     no_stderr: bool = typer.Option(
-        False,
+        True,
         help="If true, will clear stderr stream for cell outputs",
     ),
     prepare_only: bool = typer.Option(
@@ -415,18 +427,27 @@ def build(
     typer.echo(f"copying readme from {portfolio_site.directory} to {site_output_dir}")
     shutil.copy(portfolio_site.readme, site_output_dir / portfolio_site.readme.name)
 
-    fname = site_output_dir / Path("_config.yml")
+    fname = site_output_dir / Path("myst.yml")
     with open(fname, "w") as f:
-        typer.secho(f"writing config to {fname}", fg=typer.colors.GREEN)
+        typer.secho(f"writing config and toc to {fname}", fg=typer.colors.GREEN)
+        toc = portfolio_site.toc_yaml
         f.write(
-            env.get_template("_config.yml").render(site=portfolio_site, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID)
+            env.get_template("myst.yml").render(
+                site=portfolio_site, toc=toc, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID
+            )
         )
-    fname = site_output_dir / Path("_toc.yml")
-    with open(fname, "w") as f:
-        typer.secho(f"writing toc to {fname}", fg=typer.colors.GREEN)
-        f.write(portfolio_site.toc_yaml)
 
     errors = []
+
+    for chapter in portfolio_site.chapters:
+        errors.extend(
+            chapter.generate(
+                execute_papermill=execute_papermill,
+                continue_on_error=continue_on_error,
+                prepare_only=prepare_only,
+                no_stderr=no_stderr,
+            )
+        )
 
     for part in portfolio_site.parts:
         for chapter in part.chapters:
@@ -439,16 +460,17 @@ def build(
                 )
             )
 
+    environment = os.environ.copy()
+    environment["BASE_URL"] = f"/{site.value}"
     subprocess.run(
         [
-            "jb",
+            "jupyter",
+            "book",
             "build",
-            "-W",
-            "-n",
-            "--keep-going",
-            ".",
+            "--html",
         ],
         cwd=site_output_dir,
+        env=environment,
     ).check_returncode()
 
     accessibilty_errors = check_accessibility(site)

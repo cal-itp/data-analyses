@@ -1,6 +1,6 @@
 # Monthly NTD Ridership by RTPA
 
-Provide CalSTA with NTD Monthly Ridership by each RTPA. 
+Provide CalSTA with NTD Monthly Ridership by each RTPA.
 
 Per the [SB125 Final Guidelines](https://calsta.ca.gov/-/media/calsta-media/documents/sb125-final-guidelines-a11y.pdf)
 >Caltrans will provide all RTPAs with a summary report each month that meets the requirements of this statutory provision, drawn from the data reported to the National Transit Database. The data will be drawn from the NTD at: [Complete Monthly Ridership (with adjustments and estimates) | FTA (dot.gov)](https://www.transit.dot.gov/ntd/data-product/monthly-module-adjusted-data-release). RTPAs are required to post a link to this report and data in a manner easily accessed by the public, so that ridership trends within their region can be easily reviewed.
@@ -30,15 +30,15 @@ Per the [NTD Complete Monthly Ridership Report](https://www.transit.dot.gov/ntd/
 Transit operators/agencies that are **Urban full reporters, that submit monthly ridership data to NTD from 2018 to present**, are included in this report.
 
 Operators/agencies that do not appear in the report may be due to:
-- Were previously Urban full reporters, but are currently not 
-- Non-monthly reporters (small system/rural/reduced reporters) 
+- Were previously Urban full reporters, but are currently not
+- Non-monthly reporters (small system/rural/reduced reporters)
 - Has not reported data (empty or NULL values) since 2018
 - Has reported "0" data since 2018
 
-Examples: 
+Examples:
 - Reporter A is an urban full reporter from 2019-2022, then became a reduced reporter for 2023. Reporter A's ridership data will be displayed for 2019-2022 only.
 - Reporter B is an urban full reporter from 2000-2017, then became a reduced reporter for 2018. Reporter B will not display ridership data.
-- Reporter C was a reduced reporter form 2015-2020, then became an urban full reporter and began submitting monthly ridership data to NTD for 2021. Reporter C's ridership data will be displayed for 2021-present. 
+- Reporter C was a reduced reporter form 2015-2020, then became an urban full reporter and began submitting monthly ridership data to NTD for 2021. Reporter C's ridership data will be displayed for 2021-present.
 
 
 **Q: Where can I download my RTPA's data?**
@@ -56,7 +56,7 @@ Per the [SB125 Final Guidelines](https://calsta.ca.gov/-/media/calsta-media/docu
 Hyperlinking this report on your RTPA's/Agency's webpage is a common method to meeting this requirement.
 
 ## Datasets / Data Sources
-- [NTD Complete Monthly Ridership Report](https://www.transit.dot.gov/ntd/data-product/monthly-module-adjusted-data-release) 
+- [NTD Complete Monthly Ridership Report](https://www.transit.dot.gov/ntd/data-product/monthly-module-adjusted-data-release)
 - [California RTPA list](https://gis.data.ca.gov/datasets/CAEnergy::regional-transportation-planning-agencies/explore?appid=cf412a17daaa47bca93c6d6b7e77aff0&edit=true)
 - [Fully Processed Data Download](https://console.cloud.google.com/storage/browser/calitp-publish-data-analysis)
 
@@ -65,6 +65,6 @@ Hyperlinking this report on your RTPA's/Agency's webpage is a common method to m
 ## Who We Are
 This website was created by the [California Department of Transportation](https://dot.ca.gov/)'s Division of Data and Digital Services. We are a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. For more of our work, visit our [portfolio](https://analysis.calitp.org/).
 
-<img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/CT_logo_Wht_outline.gif" alt="Alt text" width="129" height="100">
+<img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/templates/assets/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/templates/assets/CT_logo_Wht_outline.gif" alt="Alt text" width="129" height="100">
 
 <br>Caltrans®, the California Department of Transportation® and the Caltrans logo are registered service marks of the California Department of Transportation and may not be copied, distributed, displayed, reproduced or transmitted in any form without prior written permission from the California Department of Transportation.

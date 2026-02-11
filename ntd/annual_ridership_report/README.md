@@ -26,14 +26,14 @@ Ridership data extract from NTD  via the [Service Data - Annual Data Tables](htt
 ## Frequently Asked Questions
 **Q: Which Annual NTD Reporters are in this report? Why are some Reporters missing from an RTPA?**
 
-Transit operators/agencies that submit annual reports to NTD are included in this report. Reporters that were previously active reporters, but are currently not, may appear. This may result in Reporters showing zero or partial ridership data in the report. 
+Transit operators/agencies that submit annual reports to NTD are included in this report. Reporters that were previously active reporters, but are currently not, may appear. This may result in Reporters showing zero or partial ridership data in the report.
 
 If a Reporter, type of service, mode, or any combination of, is not a annual reporter or has not reported data since 2018, they will not appear in the report.
 
-Examples: 
+Examples:
 - **Reporter A** is an annual reporter from 2019-2022, then became inactive and did not report for 2023. Reporter A's ridership data will be displayed for 2019-2022 only.
 - **Reporter B** is an annual from 2000-2017, then became inactive and did not report for 2018. Reporter B will be named in the report, but will not display ridership data.
-- **Reporter C** was an inactive reporter form 2015-2020, then became an active full reporter for 2021. Reporter C's ridership data will be displayed for 2021-present.  
+- **Reporter C** was an inactive reporter form 2015-2020, then became an active full reporter for 2021. Reporter C's ridership data will be displayed for 2021-present.
 
 
 **Q: Where can I download my RTPA's data?**
@@ -51,7 +51,7 @@ Per the [SB125 Final Guidelines](https://calsta.ca.gov/-/media/calsta-media/docu
 Hyperlinking this report on your RTPA's/Agency's webpage is a common method to meeting this requirement.
 
 ## Datasets / Data Sources
-- [NTD Annual Service data](https://www.transit.dot.gov/ntd/data-product/2022-annual-database-service) 
+- [NTD Annual Service data](https://www.transit.dot.gov/ntd/data-product/2022-annual-database-service)
 - [California RTPA list](https://gis.data.ca.gov/datasets/CAEnergy::regional-transportation-planning-agencies/explore?appid=cf412a17daaa47bca93c6d6b7e77aff0&edit=true)
 - [Fully Processed Data Download](https://console.cloud.google.com/storage/browser/calitp-publish-data-analysis)
 
@@ -60,6 +60,6 @@ Hyperlinking this report on your RTPA's/Agency's webpage is a common method to m
 ## Who We Are
 This website was created by the [California Department of Transportation](https://dot.ca.gov/)'s Division of Data and Digital Services. We are a group of data analysts and scientists who analyze transportation data, such as General Transit Feed Specification (GTFS) data, or data from funding programs such as the Active Transportation Program. Our goal is to transform messy and indecipherable original datasets into usable, customer-friendly products to better the transportation landscape. For more of our work, visit our [portfolio](https://analysis.calitp.org/).
 
-<img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/CT_logo_Wht_outline.gif" alt="Alt text" width="129" height="100">
+<img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/templates/assets/Calitp_logo_MAIN.png" alt="Alt text" width="200" height="100"> <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/templates/assets/CT_logo_Wht_outline.gif" alt="Alt text" width="129" height="100">
 
 <br>Caltrans®, the California Department of Transportation® and the Caltrans logo are registered service marks of the California Department of Transportation and may not be copied, distributed, displayed, reproduced or transmitted in any form without prior written permission from the California Department of Transportation.
