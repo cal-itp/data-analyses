@@ -62,11 +62,10 @@ def prep_operator_summary(file_name: str) -> pd.DataFrame:
             "month_first_day", "analysis_name", "caltrans_district", "vp_name", "tu_name",
             "n_trips", "day_type", "daily_trips", "ttl_service_hours", "n_routes", "n_days",
             "n_shapes", "n_stops", "vp_messages_per_minute", "n_vp_trips", "daily_vp_trips",
-            "pct_vp_trips", "pct_vp_service_hours", "tu_messages_per_minute",
-            "n_tu_trips", "daily_tu_trips", "pct_tu_trips", "pct_tu_service_hours",
+            "pct_vp_trips", "tu_messages_per_minute",
+            "n_tu_trips", "daily_tu_trips", "pct_tu_trips", 
         ]
     ]
-
     
     # Multiply percetnage columns by 100. Clip any values above 100.
     df2.pct_tu_trips = df2.pct_tu_trips * 100
