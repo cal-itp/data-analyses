@@ -432,3 +432,5 @@
 2026-02-05 17:07:56.124 | INFO     | __main__:<module>:191 - C3_create_bus_hqta_types 2026-01-14 execution time: 0:00:20.951075
 2026-02-06 01:08:26.222 | INFO     | __main__:<module>:258 - D1_assemble_hqta_points 2026-01-14 execution time: 0:00:19.607352
 2026-02-06 01:08:51.252 | INFO     | __main__:<module>:155 - D2_assemble_hqta_polygons 2026-01-14 execution time: 0:00:12.909884
+2026-02-11 09:48:41.455 | INFO     | __main__:<module>:445 - B2_create_aggregate_stop_frequencies 2026-01-14 execution time: 0:02:35.078091
+2026-02-11 10:06:39.881 | INFO     | __main__:<module>:445 - B2_create_aggregate_stop_frequencies 2026-01-14 execution time: 0:02:24.825400

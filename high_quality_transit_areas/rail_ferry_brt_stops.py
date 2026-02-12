@@ -170,7 +170,7 @@ def assemble_stops(analysis_date: str) -> gpd.GeoDataFrame:
     )
 
     # Attach stop geometry
-    stops_cols = ["feed_key", "stop_id", "stop_name", "geometry"]
+    stops_cols = ["feed_key", "stop_id", "stop_name", "parent_station", "location_type", "geometry"]
     stops = helpers.import_scheduled_stops(analysis_date, columns=stops_cols, get_pandas=True)
     lookback_stops = lookback_wrappers.get_lookback_stops(published_operators_dict, lookback_trips_ix, stops_cols)
     stops = pd.concat([stops, lookback_stops])
@@ -257,6 +257,7 @@ def compile_rail_ferry_brt_stops(list_of_files: list) -> gpd.GeoDataFrame:
     df = pd.concat(list_of_files, axis=0, ignore_index=True)
 
     keep_cols = ["schedule_gtfs_dataset_key", "stop_id", "stop_name", "route_id", "route_type", "hqta_type", "geometry"]
+    keep_cols += ["parent_station", "location_type"]  # for testing
 
     df2 = (
         df[keep_cols]
