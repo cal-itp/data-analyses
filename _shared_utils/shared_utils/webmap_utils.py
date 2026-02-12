@@ -146,13 +146,13 @@ def render_spa_link(spa_map_url: str, text="Full Map") -> None:
     return
 
 
-def display_spa_map(spa_map_url: str, width: int = 1000, height: int = 650) -> None:
+def display_spa_map(spa_map_url: str, width: int = 1000, height: int = 650, title: str = "Map Image") -> None:
     """
     Display map from external simple web app in the notebook/JupyterBook context via an IFrame.
     Width/height defaults are current best option for JupyterBook, don't change for portfolio use
     width, height: int (pixels)
     """
-    i = IFrame(spa_map_url, width=width, height=height)
+    i = IFrame(spa_map_url, width=width, height=height, title=title)
     display(i)
     return
 
