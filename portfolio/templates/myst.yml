@@ -21,5 +21,6 @@ site:
     logo: ../templates/assets/CT+DDS-Logo_FC-Black_Horizontal_Digital.png
     logo_dark: ../templates/assets/CT+DDS-Logo_FC-White_Horizontal_Digital.png
     logo_url: '/'
+    logo_alt: Caltrans Data and Digital Services Logos
     style: ../templates/custom.css
   template: book-theme
