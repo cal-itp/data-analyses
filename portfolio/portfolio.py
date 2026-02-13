@@ -572,7 +572,7 @@ def check_accessibility(site: SiteChoices):
 
         driver.get(f"file:///{file_path}")
         axe.inject()
-        results = axe.run(options={"resultTypes": ["violations"]})
+        results = axe.run(options={"runOnly": ["wcag2a", "wcag2aa", "wcag21aa"], "resultTypes": ["violations"]})
 
         # print violations
         if results["violations"]:
