@@ -6,10 +6,12 @@ import importlib
 import os
 import shutil
 import sys
+from functools import cache
 from typing import Literal
 
 import gcsfs
 import pandas as pd
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.sql import query_sql
 from segment_speed_utils.project_vars import PUBLIC_GCS
 from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS
@@ -19,6 +21,11 @@ module_name = importlib.import_module("update_vars")
 
 
 fs = gcsfs.GCSFileSystem()
+
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
 
 
 def add_change_columns(df: pd.DataFrame, sort_cols: str, group_cols: str, change_col: str) -> pd.DataFrame:
@@ -421,7 +428,7 @@ def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame
     """
     full_upt = query_sql(monthly_query, as_df=True)
 
-    full_upt.to_parquet(f"{GCS_FILE_PATH}ntd_monthly_ridership_{year}_{month}.parquet")
+    gcs_pandas().data_frame_to_parquet(full_upt, f"{GCS_FILE_PATH}ntd_monthly_ridership_{year}_{month}.parquet")
 
     ca = full_upt[(full_upt["uza_name"].str.contains(", CA")) & (full_upt.agency.notna())].reset_index(drop=True)
 
