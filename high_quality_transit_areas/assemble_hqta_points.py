@@ -58,6 +58,14 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     major_stop_bus_branching = catalog.major_stop_bus_branching().read().to_crs(crs)
     stops_in_corridor = catalog.stops_in_hq_corr().read().to_crs(crs)
 
+    # ensure rail stops aren't included as corridor bus stops
+    stops_in_corridor = stops_in_corridor.merge(
+        rail_ferry_brt[["schedule_gtfs_dataset_key_primary", "stop_id"]],
+        on=["schedule_gtfs_dataset_key_primary", "stop_id"],
+        indicator=True,
+    )
+    stops_in_corridor = stops_in_corridor[stops_in_corridor._merge == "left_only"].drop(columns=["_merge"])
+
     trip_count_cols = ["am_max_trips_hr", "pm_max_trips_hr"]
 
     max_arrivals = (
@@ -88,8 +96,9 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     # Merge in max arrivals
     with_stops = (
         pd.merge(hqta_points_combined, max_arrivals, on=["schedule_gtfs_dataset_key_primary", "stop_id"], how="left")
-        .fillna({"avg_trips_per_peak_hr": 0})
-        .astype({"avg_trips_per_peak_hr": "int"})
+        # right now, this is bus only. keep nullable until we have rail arrivals integrated.
+        # .fillna({"avg_trips_per_peak_hr": 0})
+        # .astype({"avg_trips_per_peak_hr": "int"})
     )
 
     keep_stop_cols = [
@@ -140,14 +149,15 @@ def add_route_agency_info(gdf: gpd.GeoDataFrame, analysis_date: str) -> gpd.GeoD
     # agency_info = get_agency_crosswalk(analysis_date)
     agency_info = get_agency_crosswalk()
 
-    # Make sure all the stops have route_id
+    # Make sure all the stops have route_id. Currently station entrances are not in crosswalk, so left join.
+    # Station entrances do have route_id added in rail_ferry_brt, but we may want to rethink this at some point
     gdf2 = pd.merge(
         gdf,
         stop_with_route_crosswalk[["schedule_gtfs_dataset_key", "stop_id", "route_id"]]
         .drop_duplicates()
         .pipe(_utils.primary_rename),
         on=["schedule_gtfs_dataset_key_primary", "stop_id"],
-        how="inner",
+        how="left",
     )
 
     # Make sure gtfs_dataset_name and organization columns are added

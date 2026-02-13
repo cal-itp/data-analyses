@@ -17,6 +17,7 @@ STANDARDIZED_COLUMNS_DICT = {
     "portfolio_organization_name": "agency",
     "analysis_name": "agency",
     "time_of_day": "time_period",
+    "caltrans_district": "district_name",
 }
 
 

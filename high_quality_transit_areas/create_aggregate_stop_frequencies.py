@@ -411,9 +411,10 @@ if __name__ == "__main__":
         max_arrivals_by_stop_single, max_arrivals_by_stop_multi, (HQ_TRANSIT_THRESHOLD, MS_TRANSIT_THRESHOLD)
     )
     share_counts = {}
-    multi_only_explode.groupby(["schedule_gtfs_dataset_key", "stop_id"]).apply(
-        accumulate_share_count, share_counts=share_counts
-    )
+    multi_only_explode.groupby(["schedule_gtfs_dataset_key", "stop_id"])[
+        ["schedule_gtfs_dataset_key", "stop_id", "route_dir"]
+    ].apply(accumulate_share_count, share_counts=share_counts)
+    pd.DataFrame.from_dict(share_counts, orient="index").to_parquet("share_counts.parquet")
     qualify_dict = {key: share_counts[key] for key in share_counts.keys() if share_counts[key] >= SHARED_STOP_THRESHOLD}
 
     keys_to_drop = []

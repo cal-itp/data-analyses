@@ -55,6 +55,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
     * From the tab that opens, open "Folders", then your project's working directory, then open `staging.gdb`
     * You should see a list of each dataset. For each dataset, select it (click once), then from the ribbon select "Catalog" then Import in the metadata section. There will likely be several identically labeled buttons that say "Import", but only the one within the metadata section is useful here.
     * You should see a popup window with two display boxes - one that says "Import metadata from", and one that says "The type of metadata to import". In "Import metadata from" box, enter the path to the `*_fgdc.xml` file that was generated earlier. You should be able to open a file browser with the little folder icon. In the "The type of metadata to import" box, select the option containing "FGDC".
+    * Please also add the corresponding thumbnail image, via the "edit metadata" option.
     * Repeat this process for each dataset.
 1. Grant yourself "Advanced" priviliges for ArcGIS:
    * Save everything, and close ArcGIS Pro entirely
@@ -64,7 +65,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
 1. Delete any existing databases that you intend to overwrite on the HQRail Enterprise Geodatabase (the .sde file).
 1. Run the remainder of the ArcGIS [notebook](./arcgis_pro_notebook_sample.ipynb) after importing the updated XML metadata for each feature class.
    * Note that since you re-started ArcGIS, the notebook's kernel will restart and you will need to re-run the first few cells.
-   * Once this completes, the new data will be added to the HQRail enterprise geodatabase, and you should be able to add datasets from there to the map.
+   * Once this completes, the new data will be added to the HQRail enterprise geodatabase and you should be able to add datasets from there to the map.
    * There are steps to create FGDC templates for each datasets to store field information, but this only needs to be done once when a new dataset is created.
 1. In terminal: `python cleanup.py` to clean up old XML files and remove zipped shapefiles.
    * The YAML and XML files created/have changes get checked into GitHub.
