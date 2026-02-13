@@ -47,10 +47,22 @@ if __name__ == "__main__":
         date_col="_valid_from_service_date",
         start_date="2025-12-01",
         end_date="2026-03-01",
-    )
+    ).drop(columns=["_valid_to_service_date"])
 
     stop_order.to_parquet(
         f"{PREDICTIONS_GCS}int_gtfs_schedule__stop_order_by_route.parquet", filesystem=gcsfs.GCSFileSystem()
     )
 
+    monthly_tu_route_direction_summary = bq_utils.download_table(
+        project_name="cal-itp-data-infra-staging",
+        dataset_name="tiffany_mart_gtfs_rollup",
+        table_name="fct_monthly_trip_updates_route_direction_summary",
+        date_col="month_first_day",
+        start_date="2025-12-01",
+        end_date="2026-01-01",
+    )
+
+    monthly_tu_route_direction_summary.to_parquet(
+        f"{PREDICTIONS_GCS}monthly_tu_route_direction_summary.parquet", filesystem=gcsfs.GCSFileSystem()
+    )
     end = datetime.datetime.now()

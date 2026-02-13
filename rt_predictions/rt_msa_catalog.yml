@@ -10,5 +10,6 @@ rt_vehicle_position_models:
 
 rt_schedule_models:
   dir: ${gcs_paths.PREDICTIONS_GCS}
-  weekday_stop_grain: "test_monthly_schedule_rt_stops"
+  weekday_stop_grain: "monthly_schedule_rt_stops"
+  weekday_route_direction_grain: "monthly_tu_route_direction_summary"
   stop_order: "int_gtfs_schedule__stop_order_by_route"
