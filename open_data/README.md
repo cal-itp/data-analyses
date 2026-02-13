@@ -64,7 +64,7 @@ Traffic Ops had a request for all transit routes and transit stops to be publish
 1. Delete any existing databases that you intend to overwrite on the HQRail Enterprise Geodatabase (the .sde file).
 1. Run the remainder of the ArcGIS [notebook](./arcgis_pro_notebook_sample.ipynb) after importing the updated XML metadata for each feature class.
    * Note that since you re-started ArcGIS, the notebook's kernel will restart and you will need to re-run the first few cells.
-   * Once this completes, the new data will be added to the HQRail enterprise geodatabase, and you should be able to add datasets from there to the map.
+   * Once this completes, the new data will be added to the HQRail enterprise geodatabase and you should be able to add datasets from there to the map. Please also add the corresponding thumbnail image.
    * There are steps to create FGDC templates for each datasets to store field information, but this only needs to be done once when a new dataset is created.
 1. In terminal: `python cleanup.py` to clean up old XML files and remove zipped shapefiles.
    * The YAML and XML files created/have changes get checked into GitHub.

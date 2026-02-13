@@ -2,8 +2,8 @@ from pathlib import Path
 
 from shared_utils import catalog_utils, rt_dates
 
-analysis_date = rt_dates.DATES["nov2025"]
-analysis_month = "2025-12-01"
+analysis_date = rt_dates.DATES["jan2026"]
+analysis_month = "2026-01-01"  # should correspond to first day of month above
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
@@ -23,10 +23,10 @@ META_JSON = Path("metadata.json")
 DATA_DICT_YML = Path("data_dictionary.yml")
 
 RUN_ME = [
-    # "ca_hq_transit_areas",
-    # "ca_hq_transit_stops",
+    "ca_hq_transit_areas",
+    "ca_hq_transit_stops",
     # "ca_transit_routes",
     # "ca_transit_stops",
-    "speeds_by_stop_segments",
+    # "speeds_by_stop_segments",
     # "speeds_by_route_time_of_day",
 ]

@@ -6,21 +6,27 @@ Turn rail_ferry_brt.ipynb and combine_and_visualize.ipynb
 into scripts.
 """
 
-import datetime
-import sys
-from functools import cache
+import os
 
-import _utils
-import geopandas as gpd
-import intake
-import lookback_wrappers
-import pandas as pd
-from calitp_data_analysis import utils
-from calitp_data_analysis.gcs_pandas import GCSPandas
-from loguru import logger
-from segment_speed_utils import helpers
-from shared_utils import portfolio_utils
-from update_vars import GCS_FILE_PATH, analysis_date
+os.environ["CALITP_BQ_MAX_BYTES"] = str(800_000_000_000)
+
+import datetime  # noqa e402
+import sys  # noqa e402
+from functools import cache  # noqa e402
+
+import _utils  # noqa e402
+import geopandas as gpd  # noqa e402
+import intake  # noqa e402
+import lookback_wrappers  # noqa e402
+import pandas as pd  # noqa e402
+from calitp_data_analysis import utils  # noqa e402
+from calitp_data_analysis.gcs_pandas import GCSPandas  # noqa e402
+from calitp_data_analysis.geography_utils import WGS84, CA_NAD83Albers_m  # noqa e402
+from calitp_data_analysis.sql import query_sql  # noqa e402
+from loguru import logger  # noqa e402
+from segment_speed_utils import helpers  # noqa e402
+from shared_utils import portfolio_utils  # noqa e402
+from update_vars import GCS_FILE_PATH, analysis_date  # noqa e402
 
 
 @cache
@@ -249,24 +255,58 @@ def grab_brt_stops(gdf: gpd.GeoDataFrame, route_types: list = ["3"]) -> gpd.GeoD
     return brt_stops
 
 
-def compile_rail_ferry_brt_stops(list_of_files: list) -> gpd.GeoDataFrame:
+def query_current_entrances():
+    """
+    Grab stations and entrances via dim_stops, currently fetches most recent wednesday
+    """
+
+    query = """
+    SELECT t1.gtfs_dataset_name, t1.gtfs_dataset_key AS schedule_gtfs_dataset_key, t1.date, t2.feed_key, t2.stop_id,
+    t2.parent_station, t2.stop_code, t2.stop_name, t2.stop_desc, t2.location_type, t2.pt_geom
+    FROM cal-itp-data-infra.mart_gtfs.fct_daily_schedule_feeds AS t1
+    INNER JOIN cal-itp-data-infra.mart_gtfs.dim_stops AS t2
+    ON t1.feed_key = t2.feed_key
+    --WHERE t1.gtfs_dataset_name IN ("LA Metro Rail Schedule", "Bay Area 511 BART Schedule", "Metrolink Schedule",
+    --"Bay Area 511 Sonoma-Marin Area Rail Transit Schedule", "Sacramento Schedule", "San Diego Schedule", "Bay Area 511 Muni Schedule")
+    --AND t1.date = '2026-01-14' AND t2.location_type IN (1, 2)
+    AND t1.date = DATE_TRUNC(CURRENT_DATE(), WEEK(WEDNESDAY)) AND t2.location_type IN (1, 2)
+    """
+    df2 = query_sql(query)
+    gdf = gpd.GeoDataFrame(df2, geometry=gpd.GeoSeries.from_wkt(df2.pt_geom), crs=WGS84).to_crs(CA_NAD83Albers_m)
+    # may want to keep more in the future if we want to distinguish location_types
+    keep_cols = ["schedule_gtfs_dataset_key", "stop_id", "parent_station", "stop_name", "geometry"]
+    return gdf[keep_cols]
+
+
+def compile_rail_ferry_brt_stops(
+    rail_ferry_brt_gdfs: list, stations_entrances: gpd.GeoDataFrame = None
+) -> gpd.GeoDataFrame:
     """
     Prepare the rail / ferry / BRT stops to be assembled with
     the bus_hqta types and saved into the hqta_points file.
     """
-    df = pd.concat(list_of_files, axis=0, ignore_index=True)
+    df = pd.concat(rail_ferry_brt_gdfs, axis=0, ignore_index=True)
+    stop_info = df[~df.parent_station.isna()][
+        ["schedule_gtfs_dataset_key", "route_id", "route_type", "hqta_type", "parent_station"]
+    ]
+    stations_entrances = (
+        stations_entrances.merge(stop_info, on=["parent_station", "schedule_gtfs_dataset_key"])
+        .drop(columns=["parent_station"])
+        .drop_duplicates()
+    )
+    df2 = pd.concat([df, stations_entrances])
 
     keep_cols = ["schedule_gtfs_dataset_key", "stop_id", "stop_name", "route_id", "route_type", "hqta_type", "geometry"]
-    keep_cols += ["parent_station", "location_type"]  # for testing
+    # keep_cols += ["parent_station", "location_type"]  # for testing
 
-    df2 = (
-        df[keep_cols]
+    df3 = (
+        df2[keep_cols]
         .sort_values(["schedule_gtfs_dataset_key", "stop_id"])
         .reset_index(drop=True)
         .pipe(_utils.primary_rename)
     )
 
-    return df2
+    return df3
 
 
 if __name__ == "__main__":
@@ -284,8 +324,9 @@ if __name__ == "__main__":
     rail_stops = grab_rail_stops(stops_route_gdf)
     ferry_stops = grab_ferry_stops(stops_route_gdf)
     brt_stops = grab_brt_stops(stops_route_gdf)
+    stations_entrances = query_current_entrances()
 
-    major_transit_stops = compile_rail_ferry_brt_stops([rail_stops, ferry_stops, brt_stops])
+    major_transit_stops = compile_rail_ferry_brt_stops([rail_stops, ferry_stops, brt_stops], stations_entrances)
 
     utils.geoparquet_gcs_export(major_transit_stops, GCS_FILE_PATH, "rail_brt_ferry")
 
