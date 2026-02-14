@@ -5,7 +5,7 @@ staging_monthly_export:
 	cd monthly_ridership_report && python monthly_ridership_by_rtpa.py
 	# make site yaml
 	$(eval export site = ntd_monthly_ridership)
-	python deploy_portfolio_yaml.py
+	cd monthly_ridership_report && python deploy_portfolio_yaml.py
 	# build report html
 	cd portfolio/ && pip install -r requirements.txt && cd ../
 	python portfolio/portfolio.py clean $(site)
