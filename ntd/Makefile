@@ -7,12 +7,12 @@ staging_monthly_export:
 	$(eval export site = ntd_monthly_ridership)
 	cd monthly_ridership_report && python deploy_portfolio_yaml.py
 	# build report html
-	cd portfolio/ && pip install -r requirements.txt && cd ../
-	python portfolio/portfolio.py clean $(site)
-	python portfolio/portfolio.py build $(site)
+	cd ../portfolio/ && pip install -r requirements.txt && cd ../
+	python ../portfolio/portfolio.py clean $(site)
+	python ../portfolio/portfolio.py build $(site)
 	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra
 	# deploy to staging site
-	python portfolio/portfolio.py deploy-site $(site) --target staging
+	python ../portfolio/portfolio.py deploy-site $(site) --target staging
 	git add portfolio/sites/$(site).yml
 
 ntd_monthly_export:
