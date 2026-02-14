@@ -143,7 +143,9 @@ def evaluate_overlaps(
                         f"<h3>{these_shapes.analysis_name.iloc[0]} {pair} passed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target</h3>"
                     )
                 )
-                display(sym_diff.explore(column="route_dir", m=m, tiles="CartoDB Positron"))
+                new_map = sym_diff.explore(column="route_dir", m=m, tiles="CartoDB Positron")
+                new_map.get_root().title = f"{these_shapes.analysis_name.iloc[0]} {pair} passed"
+                display(new_map)
             results = {
                 "route_direction_pair": pair,
                 "schedule_gtfs_dataset_key": gtfs_dataset_key,
@@ -160,7 +162,9 @@ def evaluate_overlaps(
                         f"<h3>{these_shapes.analysis_name.iloc[0]} {pair} failed, {area_ratios[0]:.2f} and {area_ratios[1]:.2f} times area target</h3>"
                     )
                 )
-                display(these_shapes.explore(column="route_dir", tiles="CartoDB Positron"))
+                new_map = these_shapes.explore(column="route_dir", tiles="CartoDB Positron")
+                new_map.get_root().title = f"{these_shapes.analysis_name.iloc[0]} {pair} failed"
+                display(new_map)
             results = {
                 "route_direction_pair": pair,
                 "schedule_gtfs_dataset_key": gtfs_dataset_key,

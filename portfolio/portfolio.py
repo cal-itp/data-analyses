@@ -572,19 +572,18 @@ def check_accessibility(site: SiteChoices):
 
         driver.get(f"file:///{file_path}")
         axe.inject()
-        results = axe.run(options={"resultTypes": ["violations"]})
+        results = axe.run(options={"runOnly": ["wcag2a", "wcag2aa", "wcag21aa"], "resultTypes": ["violations"]})
 
         # print violations
         if results["violations"]:
-            print(f"Accessibility violations found in {file_path}:")
+            print(f"\nAccessibility violations found in {file_path}:")
             for violation in results["violations"]:
                 if violation["impact"] in ("serious", "critical"):
                     serious_count += 1
                 impact = {"minor": "❔", "moderate": "⚠️", "serious": "🛑", "critical": "🛑‼️"}.get(violation["impact"])
-                print(f"- {impact}  {violation['help']} ({violation['helpUrl']}):")
-                print(f"  {find_key_recursive(violation, 'failureSummary')}")
-                print(f"  {find_key_recursive(violation, 'html')}")
-                print("\n")
+                print(f"\n- {impact}  {violation['help']} ({violation['helpUrl']}):")
+                print(f"\n  {find_key_recursive(violation, 'failureSummary')}")
+                print(f"\n  HTML fragment: {find_key_recursive(violation, 'html')[:100]}")
         else:
             print(f"✅ {file_path}.\n")
 
