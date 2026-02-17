@@ -1,4 +1,4 @@
-# Make sure update_vars.py and ntd_dates.py are updated
+# Make sure update_vars.py and ntd_dates.py are updated.
 
 
 ntd_monthly_export:
