@@ -6,22 +6,30 @@ import importlib
 import os
 import shutil
 import sys
+from functools import cache
 from typing import Literal
 
 import gcsfs
 import pandas as pd
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.sql import query_sql
 from segment_speed_utils.project_vars import PUBLIC_GCS
-from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS
+
+# from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS
 
 sys.path.append(os.path.abspath("./monthly_ridership_report"))
-module_name = importlib.import_module("update_vars")
+update_vars = importlib.import_module("update_vars")
 
 
 fs = gcsfs.GCSFileSystem()
 
 
-def add_change_columns(df: pd.DataFrame, sort_cols: str, group_cols: str, change_col: str) -> pd.DataFrame:
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+
+def add_change_columns(df: pd.DataFrame, sort_cols: list, group_cols: list, change_col: str) -> pd.DataFrame:
     """
     This function works with the warehouse `dim_monthly_ntd_ridership_with_adjustments` long data format.
     Sorts the df by ntd id, mode, tos, period month and period year. then adds 2 new columns, 1. previous year/month UPT and 2. UPT change 1yr.
@@ -34,7 +42,7 @@ def add_change_columns(df: pd.DataFrame, sort_cols: str, group_cols: str, change
 
     df = df.assign(
         # unpacks dictionary to use change_col arg
-        **{change_col: (df.sort_values(sort_cols).groupby(group_cols)["upt"].apply(lambda x: x.shift(1)))}
+        **{change_col: (df.sort_values(sort_cols).groupby(group_cols)["upt"].shift(1))}
     )
 
     df["change_1yr"] = df["upt"] - df[change_col]
@@ -264,7 +272,7 @@ def save_rtpa_outputs(
 
     print("Zipped folder")
 
-    fs.upload(f"./{output_file_name}.zip", f"{GCS_FILE_PATH}{year}_{month}.zip")
+    fs.upload(f"./{output_file_name}.zip", f"{update_vars.GCS_FILE_PATH}{year}_{month}.zip")
 
     if monthly_upload_to_public:
         fs.upload(f"./{output_file_name}.zip", f"{PUBLIC_GCS}ntd_monthly_ridership/{year}_{month}.zip")
@@ -387,7 +395,8 @@ def produce_annual_ntd_ridership_data_by_rtpa(min_year: str, split_scag: bool) -
 
     print("map mode and tos desc.")
     ntd_data_by_rtpa = ntd_data_by_rtpa.assign(
-        mode_full=ntd_data_by_rtpa["mode"].map(NTD_MODES), service_full=ntd_data_by_rtpa["type_of_service"].map(NTD_TOS)
+        mode_full=ntd_data_by_rtpa["mode"].map(update_vars.NTD_MODES),
+        service_full=ntd_data_by_rtpa["type_of_service"].map(update_vars.NTD_TOS),
     )
     print("complete")
     return ntd_data_by_rtpa
@@ -421,7 +430,9 @@ def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame
     """
     full_upt = query_sql(monthly_query, as_df=True)
 
-    full_upt.to_parquet(f"{GCS_FILE_PATH}ntd_monthly_ridership_{year}_{month}.parquet")
+    gcs_pandas().data_frame_to_parquet(
+        full_upt, f"{update_vars.GCS_FILE_PATH}ntd_monthly_ridership_{year}_{month}.parquet"
+    )
 
     ca = full_upt[(full_upt["uza_name"].str.contains(", CA")) & (full_upt.agency.notna())].reset_index(drop=True)
 
@@ -487,7 +498,7 @@ def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame
         df, sort_cols=monthly_sort_cols, group_cols=monthly_group_cols, change_col=monthly_change_col
     )
 
-    df = df.assign(Mode_full=df["mode"].map(NTD_MODES), TOS_full=df["tos"].map(NTD_TOS))
+    df = df.assign(Mode_full=df["mode"].map(update_vars.NTD_MODES), TOS_full=df["tos"].map(update_vars.NTD_TOS))
 
     return df
 

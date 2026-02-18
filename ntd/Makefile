@@ -1,4 +1,6 @@
-# Make sure update_vars.py and ntd_dates.py are updated
+# Make sure update_vars.py and ntd_dates.py are updated.
+
+
 ntd_monthly_export:
 	cd monthly_ridership_report && python monthly_ridership_by_rtpa.py
 	cd ../ && make build_ntd_report -f Makefile
