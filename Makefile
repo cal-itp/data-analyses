@@ -19,6 +19,11 @@ build_ntd_report:
 	cd ntd/monthly_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
 	make build_portfolio_site
 
+build_ntd_report_staging:
+	$(eval export site = ntd_monthly_ridership)
+	cd ntd/monthly_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
+	make staging_portfolio site=$(site)
+
 build_ntd_annual_report:
 	$(eval export site = ntd_annual_ridership_report)
 	cd ntd/annual_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
