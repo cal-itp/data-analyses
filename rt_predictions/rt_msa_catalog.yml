@@ -4,12 +4,18 @@ gcs_paths:
   PREDICTIONS_GCS: ${.GCS}rt_predictions/
   VP_GCS: ${.GCS}rt_vehicle_positions/
 
+dbt_model_downloads:
+  dir: ${gcs_paths.PREDICTIONS_GCS}
+  weekday_stop_grain: "monthly_schedule_rt_stops"
+  weekday_route_direction_grain: "monthly_tu_route_direction_summary" # these are metrics by route-direction, including percentiles
+  stop_order: "int_gtfs_schedule__stop_order_by_route"
+
 rt_vehicle_position_models:
   dir: ${gcs_paths.VP_GCS}
   daily_stop_grain: "test_dp3_vp_stop_metrics"
 
+# Clean up dbt_model_downloads for visualization (drop outliers, column renaming, merges, etc)
 rt_schedule_models:
   dir: ${gcs_paths.PREDICTIONS_GCS}
-  weekday_stop_grain: "monthly_schedule_rt_stops"
-  weekday_route_direction_grain: "monthly_tu_route_direction_summary"
-  stop_order: "int_gtfs_schedule__stop_order_by_route"
+  weekday_stop_with_route: "monthly_schedule_rt_stops_cleaned" # the way stop data will be used is with route-direction info
+  weekday_route_direction: "monthly_tu_route_direction_summary_cleaned" # add new columns, round, etc
