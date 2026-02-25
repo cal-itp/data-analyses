@@ -1,6 +1,9 @@
 -e .
+altair==6.0.0
 altair-transform==0.2.0
-great_tables==0.16.1
+great_tables==0.20.0
+gt_extras==0.0.8
+itables==2.7.0
 loguru (>=0.6.0, <0.7)
 mapclassify (>=2.8.0,<3)
 movingpandas==0.22.4
@@ -10,6 +13,6 @@ polars==1.22.0
 quarto==0.1.0
 quarto-cli==1.6.40
 stonesoup==1.8
-vegafusion==2.0.2
+vegafusion==2.0.3
 vl-convert-python>=1.6.0
 xmltodict (>=0.13.0,<0.14)

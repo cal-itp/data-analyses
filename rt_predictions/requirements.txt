@@ -1,6 +1,1 @@
-altair==6.0.0
 altair_tiles==0.4.0
-itables==2.7.0
-great_tables==0.20.0
-vegafusion==2.0.3
-gt_extras==0.0.8
