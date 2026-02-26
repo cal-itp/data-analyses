@@ -115,9 +115,9 @@ def overwrite_yaml(name: str = typer.Argument(default="rt_msa"), month: str = ""
         print(month)
         df = check_stop_and_route_counts(month)
 
-        # how should Torrance be handled? maybe use tu_name?
+        # TODO: extend for ability to do 2 entries, tu_name/schedule_name
         create_portfolio_yaml_chapters_no_sections(
-            RT_TRIP_UPDATES_STOP_YAML, chapter_name="name", chapter_values=sorted(list(df.schedule_name))
+            RT_TRIP_UPDATES_STOP_YAML, chapter_name="name", chapter_values=sorted(list(df.tu_name.unique()))
         )
 
     return
