@@ -4,22 +4,18 @@ gcs_paths:
   PREDICTIONS_GCS: ${.GCS}rt_predictions/
   VP_GCS: ${.GCS}rt_vehicle_positions/
 
-# Existing dbt models or tweaks to existing dbt models
-rt_trip_updates_downloads:
+dbt_model_downloads:
   dir: ${gcs_paths.PREDICTIONS_GCS}
-  daily_trip_grain: "fct_trip_updates_trip_metrics_2025-06-01_2025-06-15"
-  daily_stop_grain: "fct_trip_updates_stop_metrics_2025-06-01_2025-06-15"
-  daily_schedule_rt_trip_grain: "test_schedule_rt_trip_metrics"
+  weekday_stop_grain: "monthly_schedule_rt_stops"
+  weekday_route_direction_grain: "monthly_tu_route_direction_summary" # these are metrics by route-direction, including percentiles
+  stop_order: "int_gtfs_schedule__stop_order_by_route"
 
 rt_vehicle_position_models:
   dir: ${gcs_paths.VP_GCS}
   daily_stop_grain: "test_dp3_vp_stop_metrics"
 
-# Stage future dbt models that are aggregations or joins across quartet
+# Clean up dbt_model_downloads for visualization (drop outliers, column renaming, merges, etc)
 rt_schedule_models:
   dir: ${gcs_paths.PREDICTIONS_GCS}
-  weekday_route_direction_grain: "test_schedule_rt_route_direction_metrics"
-  weekday_route_grain: "test_schedule_rt_route_metrics"
-  weekday_stop_grain: "test_monthly_schedule_rt_stop_metrics"
-  crosswalk_stops_route_dir: "crosswalk_stop_times_route_dir"
-  crosswalk_stops_route_dir2: "crosswalk_stop_times_route_dir2_2025-06-01_2025-06-01"
+  weekday_stop_with_route: "monthly_schedule_rt_stops_cleaned" # the way stop data will be used is with route-direction info
+  weekday_route_direction: "monthly_tu_route_direction_summary_cleaned" # add new columns, round, etc

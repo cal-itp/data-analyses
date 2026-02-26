@@ -4,152 +4,186 @@ parts:
 - caption: Introduction
 - chapters:
   - params:
-      name: AC Transit Schedule
+      name: Antelope Valley Transit Authority Trip Updates
   - params:
-      name: Anaheim Resort Schedule
+      name: B-Line Trip Updates
   - params:
-      name: Anaheim Resort Schedule v2
+      name: Banning Pass Trip Updates
   - params:
-      name: Banning Pass Schedule
+      name: Basin Transit GMV Trip Updates
   - params:
-      name: Basin Transit GMV Schedule
+      name: Bay Area 511 AC Trip Updates
   - params:
-      name: Bay Area 511 AC Transit Schedule
+      name: Bay Area 511 ACE TripUpdates
   - params:
-      name: Bay Area 511 ACE Schedule
+      name: Bay Area 511 Capitol Corridor TripUpdates
   - params:
-      name: Bay Area 511 Capitol Corridor Schedule
+      name: Bay Area 511 County Connection TripUpdates
   - params:
-      name: Bay Area 511 County Connection Schedule
+      name: Bay Area 511 Dumbarton Express TripUpdates
   - params:
-      name: Bay Area 511 Fairfield and Suisun Transit Schedule
+      name: Bay Area 511 Emery Go-Round TripUpdates
   - params:
-      name: Bay Area 511 Golden Gate Transit Schedule
+      name: Bay Area 511 Golden Gate Trip Updates
   - params:
-      name: Bay Area 511 Marin Schedule
+      name: Bay Area 511 MVGO TripUpdates
   - params:
-      name: Bay Area 511 Petaluma Schedule
+      name: Bay Area 511 Marin TripUpdates
   - params:
-      name: Bay Area 511 PresidiGo Schedule
+      name: Bay Area 511 Muni TripUpdates
   - params:
-      name: Bay Area 511 SamTrans Schedule
+      name: Bay Area 511 SamTrans Trip Updates
   - params:
-      name: Bay Area 511 San Francisco Bay Ferry Schedule
+      name: Bay Area 511 San Francisco Bay Ferry TripUpdates
   - params:
-      name: Bay Area 511 Santa Clara Transit Schedule
+      name: Bay Area 511 Santa Clara Transit TripUpdates
   - params:
-      name: Bay Area 511 Santa Rosa CityBus Schedule
+      name: Bay Area 511 SolTrans TripUpdates
   - params:
-      name: Bay Area 511 Sonoma-Marin Area Rail Transit Schedule
+      name: Bay Area 511 Sonoma County Transit TripUpdates
   - params:
-      name: Bay Area 511 Tri Delta Schedule
+      name: Bay Area 511 Sonoma-Marin Area Rail Transit TripUpdates
   - params:
-      name: Bay Area 511 Tri-Valley Wheels Schedule
+      name: Bay Area 511 Tri Delta TripUpdates
   - params:
-      name: Bay Area 511 Union City Transit Schedule
+      name: Bay Area 511 Vacaville City Coach TripUpdates
   - params:
-      name: Bay Area 511 Vine Transit Schedule
+      name: Bay Area 511 Vine Transit Trip Updates
   - params:
-      name: Beach Cities GMV Schedule
+      name: Bay Area 511 WestCAT TripUpdates
   - params:
-      name: Beaumont Transit Schedule
+      name: Beach Cities TripUpdates
   - params:
-      name: Big Blue Bus Swiftly Schedule
+      name: Beaumont Transit Trip Updates
   - params:
-      name: BruinBus Schedule
+      name: Big Blue Bus Clever Trip Updates
   - params:
-      name: Burbank Schedule
+      name: Big Blue Bus TripUpdates
   - params:
-      name: Commerce Schedule
+      name: BruinBus Trip Updates
   - params:
-      name: County Connection Schedule
+      name: Burbank TripUpdates
   - params:
-      name: Desert Roadrunner GMV Schedule
+      name: Commerce TripUpdates
   - params:
-      name: Eastern Sierra Schedule
+      name: County Connection Swiftly Trip Update
   - params:
-      name: Fairfield Schedule
+      name: Culver City TripUpdates
   - params:
-      name: Fresno Schedule
+      name: Desert Roadrunner Trip Updates
   - params:
-      name: Humboldt Schedule
+      name: DowneyLink Avail Trip Updates
   - params:
-      name: Irvine CONNECT Schedule
+      name: Eastern Sierra Trip Updates
   - params:
-      name: Kern Schedule
+      name: Emery Go-Round TripShot Trip Updates
   - params:
-      name: LA DOT Schedule
+      name: Foothill Trip Updates
   - params:
-      name: LA Metro Bus Schedule
+      name: Fresno Trip Updates
   - params:
-      name: LA Metro Rail Schedule
+      name: G Trans Trip Updates
   - params:
-      name: Lake Schedule
+      name: GET TripUpdates
   - params:
-      name: Lawndale Beat GMV Schedule
+      name: Humboldt Trip Updates
   - params:
-      name: Madera County Connection Schedule
+      name: Kern Swiftly Trip Update
   - params:
-      name: Marin GMV Schedule
+      name: Kings Trip Updates
   - params:
-      name: Marin Optibus Schedule
+      name: LA DOT TripUpdates
   - params:
-      name: Mendocino Schedule
+      name: LA Metro Bus Trip Updates
   - params:
-      name: Merced GMV Schedule
+      name: LA Metro Rail Trip Updates
   - params:
-      name: Monterey Salinas Schedule
+      name: Lake Trip Updates
   - params:
-      name: Mountain Transit GMV Schedule
+      name: Lawndale Beat Trip Updates
   - params:
-      name: Nevada County Schedule
+      name: LongBeach TripUpdates
   - params:
-      name: North County Schedule
+      name: MVGO TripUpdates
   - params:
-      name: OCTA Schedule
+      name: Marin Swiftly Trip Update
   - params:
-      name: Petaluma GMV Schedule
+      name: Mendocino Trip Updates
   - params:
-      name: PresidiGo Schedule
+      name: Merced Trip Updates
   - params:
-      name: Redding Schedule
+      name: Metrolink TripUpdates
   - params:
-      name: Redwood Coast Schedule
+      name: Monterey Salinas TripUpdates
   - params:
-      name: Roseville Transit GMV Schedule
+      name: Mountain Transit GMV TripUpdate
   - params:
-      name: SCVTA Schedule
+      name: Nevada County Trip Updates
   - params:
-      name: SMART Schedule
+      name: OCTA TripUpdates
   - params:
-      name: San Francisco Bay Ferry Schedule
+      name: OmniTrans Trip Updates
   - params:
-      name: San Joaquin Schedule
+      name: Pasadena TripUpdates
   - params:
-      name: Santa Rosa CityBus GMV Schedule
+      name: Petaluma GMV Trip Updates
   - params:
-      name: TCRTA TripShot Schedule
+      name: PresidiGo TripUpdates
   - params:
-      name: Tahoe Transportation District GMV Schedule
+      name: Redding Trip Updates
   - params:
-      name: Tehama Schedule
+      name: Redwood Coast Trip Updates
   - params:
-      name: Torrance Schedule
+      name: Riverside TripUpdates
   - params:
-      name: Tri-Valley Wheels Schedule
+      name: SCVTA Swiftly Trip Update
   - params:
-      name: Tuolumne Remix Schedule
+      name: SLO Trip Updates
   - params:
-      name: Turlock Schedule
+      name: SLORTA TripUpdates
   - params:
-      name: Union City GMV Schedule
+      name: SMART Trip Updates
   - params:
-      name: VCTC GMV Schedule
+      name: Sacramento Trip Updates
   - params:
-      name: Victor Valley GMV Schedule
+      name: San Francisco Bay Ferry Trip Updates
   - params:
-      name: Vine GMV Schedule
+      name: San Joaquin Trip Updates
   - params:
-      name: Visalia Schedule
+      name: Santa Clarita TripUpdates
+  - params:
+      name: Santa Cruz Trip Updates
+  - params:
+      name: Santa Maria TripUpdates
+  - params:
+      name: SolTrans TripUpdates
+  - params:
+      name: StanRTA TripUpdates
+  - params:
+      name: SunLine Trip Updates
+  - params:
+      name: Sunline Swiftly Trip Updates
+  - params:
+      name: TCRTA Trip Updates
+  - params:
+      name: Tahoe Transportation District GMV TripUpdates
+  - params:
+      name: Torrance Swiftly Trip Updates
+  - params:
+      name: Tuolumne Swiftly Trip Update
+  - params:
+      name: Turlock Trip Updates
+  - params:
+      name: Unitrans Trip Updates
+  - params:
+      name: VCTC TripUpdates
+  - params:
+      name: Vacaville Trip Updates
+  - params:
+      name: Victor Valley Trip Updates
+  - params:
+      name: Vine GMV Trip Updates
+  - params:
+      name: WeHo Trip Updates
 readme: ./rt_predictions/README.md
 title: GTFS Real-Time Stop Metrics
