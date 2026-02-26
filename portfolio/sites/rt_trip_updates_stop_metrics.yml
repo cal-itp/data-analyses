@@ -24,8 +24,6 @@ parts:
   - params:
       name: Bay Area 511 Emery Go-Round Schedule
   - params:
-      name: Bay Area 511 Fairfield and Suisun Transit Schedule
-  - params:
       name: Bay Area 511 Golden Gate Transit Schedule
   - params:
       name: Bay Area 511 MVGO Schedule
@@ -34,17 +32,11 @@ parts:
   - params:
       name: Bay Area 511 Muni Schedule
   - params:
-      name: Bay Area 511 Petaluma Schedule
-  - params:
-      name: Bay Area 511 PresidiGo Schedule
-  - params:
       name: Bay Area 511 SamTrans Schedule
   - params:
       name: Bay Area 511 San Francisco Bay Ferry Schedule
   - params:
       name: Bay Area 511 Santa Clara Transit Schedule
-  - params:
-      name: Bay Area 511 Santa Rosa CityBus Schedule
   - params:
       name: Bay Area 511 SolTrans Schedule
   - params:
@@ -62,13 +54,11 @@ parts:
   - params:
       name: Beach Cities GMV Schedule
   - params:
-      name: Bear Schedule
-  - params:
       name: Beaumont Transit Schedule
   - params:
       name: Big Blue Bus Schedule
   - params:
-      name: Big Blue Bus Swiftly Schedule
+      name: Big Blue Bus Schedule
   - params:
       name: BruinBus Schedule
   - params:
@@ -86,11 +76,7 @@ parts:
   - params:
       name: Eastern Sierra Schedule
   - params:
-      name: Elk Grove Schedule
-  - params:
       name: Emery Go-Round TripShot Schedule
-  - params:
-      name: Fairfield Schedule
   - params:
       name: Foothill Schedule
   - params:
@@ -120,8 +106,6 @@ parts:
   - params:
       name: MVGO Schedule
   - params:
-      name: Madera County Connection Schedule
-  - params:
       name: Marin Optibus Schedule
   - params:
       name: Mendocino Schedule
@@ -134,11 +118,7 @@ parts:
   - params:
       name: Mountain Transit GMV Schedule
   - params:
-      name: Mountain View Community Shuttle Schedule
-  - params:
       name: Nevada County Remix Schedule
-  - params:
-      name: Norwalk Avail Schedule
   - params:
       name: OCTA Schedule
   - params:
@@ -157,8 +137,6 @@ parts:
       name: Redwood Coast Schedule
   - params:
       name: Riverside Schedule
-  - params:
-      name: SBMTD Schedule
   - params:
       name: SCVTA Schedule
   - params:
@@ -180,19 +158,17 @@ parts:
   - params:
       name: Santa Maria Schedule
   - params:
-      name: Santa Rosa CityBus GMV Schedule
-  - params:
       name: SolTrans Schedule
   - params:
       name: StanRTA Schedule
   - params:
       name: SunLine Avail Schedule
   - params:
-      name: TCRTA TripShot Schedule
+      name: SunLine Avail Schedule
+  - params:
+      name: TCRTA Schedule
   - params:
       name: Tahoe Transportation District GMV Schedule
-  - params:
-      name: Tehama Schedule
   - params:
       name: Torrance Schedule
   - params:
@@ -211,7 +187,5 @@ parts:
       name: Vine GMV Schedule
   - params:
       name: WeHo Schedule
-  - params:
-      name: Yolobus Schedule
 readme: ./rt_predictions/README.md
 title: GTFS Real-Time Stop Metrics
