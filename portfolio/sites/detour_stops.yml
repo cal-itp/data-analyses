@@ -1,0 +1,19 @@
+directory: ./rt_predictions/
+notebook: ./rt_predictions/detour_stops.ipynb
+parts:
+- caption: Introduction
+- chapters:
+  - params:
+      name: Bay Area 511 Caltrain VehiclePositions
+  - params:
+      name: Lake Vehicle Positions
+  - params:
+      name: Metrolink VehiclePositions
+  - params:
+      name: Montebello Vehicle Positions
+  - params:
+      name: OmniTrans Vehicle Positions
+  - params:
+      name: Santa Maria Vehicle Positions
+readme: ./rt_predictions/README_detour_stops.md
+title: Potential Detour Stops using GTFS Vehicle Positions
