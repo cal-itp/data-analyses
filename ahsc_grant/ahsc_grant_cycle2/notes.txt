@@ -1,6 +1,7 @@
 BART Ridership : BART provides daily reported Daily Boarding and Daily Ridership data from October 1 2024 to September 30 2025. The data has Holiday, Saturday, Sunday and Weekday day type. We have normalized holiday data to Saturday, Sunday and Weekday for our modeling purpose. 
 
 Big Blue Bus: Not present in combined data file. Data is an average across 4 different time period so weighted average method is being used, counting the number of weekdays, weekend, in between
+
 Caltrains: Not sure whether its boarding or ridership. 
 
 Culver City Bus Ridership: Upon detailed checking I found that Culver City stop id data in the combined file is not correct, so I am skipping the agency for now. Also, they provide Route data which was in the preprocessed dataset. However the combined file doesnt contain that. So it probably makes sense to use the preprocessed file. 
