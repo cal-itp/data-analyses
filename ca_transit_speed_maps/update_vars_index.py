@@ -4,11 +4,6 @@ import geopandas as gpd
 import pandas as pd
 import yaml
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
-from segment_speed_utils.project_vars import (
-    COMPILED_CACHED_VIEWS,
-    PROJECT_CRS,
-    SEGMENT_GCS,
-)
 from shared_utils import catalog_utils, rt_dates
 
 gcsgp = GCSGeoPandas()
@@ -26,9 +21,9 @@ def datetime_to_rt_date_key(datetime: dt.datetime, day_offset: int = 0) -> str:
 
 
 #  default is current month if available in rt_dates then 3 months of lookback
-# ANALYSIS_DATE_LIST = [datetime_to_rt_date_key(dt.datetime.now(), x) for x in range(0, -91, -30)]
-# ANALYSIS_DATE_LIST = [rt_dates.DATES[key] for key in ANALYSIS_DATE_LIST if key in rt_dates.DATES.keys()]
-ANALYSIS_DATE_LIST = [rt_dates.DATES["sep2025"]]
+ANALYSIS_DATE_LIST = [datetime_to_rt_date_key(dt.datetime.now(), x) for x in range(0, -91, -30)]
+ANALYSIS_DATE_LIST = [rt_dates.DATES[key] for key in ANALYSIS_DATE_LIST if key in rt_dates.DATES.keys()]
+# ANALYSIS_DATE_LIST = [rt_dates.DATES["sep2025"]]
 PROGRESS_PATH = f"./_rt_progress_{ANALYSIS_DATE_LIST[0]}.parquet"
 SPEED_SEGS_PATH = f"{catalog.speedmap_segments.dir}{catalog.speedmap_segments.segment_timeofday}"
 GEOJSON_SUBFOLDER = f"segment_speeds_{ANALYSIS_DATE_LIST[0]}/"
