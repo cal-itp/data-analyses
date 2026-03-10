@@ -1,8 +1,11 @@
 -r requirements.txt
-calitp-data-analysis==2026.3.5
+calitp-data-analysis==2026.3.9
+dask-geopandas (>=0.5.0)
+sqlalchemy (>=2.0.0, <3.0.0)
+sqlalchemy-bigquery (>=1.6.1, <2.0.0)
 intake==0.6.4
 numpy (>=1.26.4, <2.0.0)
-pytest (>=8.4.1, <9.0.0)
-pytest-mock (>=3.15.1, <4.0.0)
-pytest-recording (>=0.13.4,<0.14.0)
-pytest-unordered (>=0.7.0,<0.8.0)
+pytest (>=9.0.2)
+pytest-mock (>=3.15.1)
+pytest-recording (>=0.13.4)
+pytest-unordered (>=0.7.0)
