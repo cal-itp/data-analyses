@@ -65,4 +65,18 @@ if __name__ == "__main__":
     monthly_tu_route_direction_summary.to_parquet(
         f"{PREDICTIONS_GCS}monthly_tu_route_direction_summary.parquet", filesystem=gcsfs.GCSFileSystem()
     )
+
+    monthly_operator_summary = bq_utils.download_table(
+        project_name="cal-itp-data-infra-staging",
+        dataset_name="tiffany_mart_gtfs_rollup",
+        table_name="fct_monthly_operator_summary",
+        date_col="month_first_day",
+        start_date="2025-12-01",
+        end_date="2026-02-01",
+    )
+
+    monthly_operator_summary.to_parquet(
+        f"{PREDICTIONS_GCS}monthly_operator_summary.parquet", filesystem=gcsfs.GCSFileSystem()
+    )
+
     end = datetime.datetime.now()
