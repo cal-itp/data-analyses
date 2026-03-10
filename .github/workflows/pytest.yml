@@ -34,16 +34,15 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Cache Python packages
-        uses: actions/cache@v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          path: ~/.local
-          key: python-cache-${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-${{ hashFiles('.github/workflows/*.yml') }}
+          enable-cache: true
 
       - name: Install shared_utils dependencies
         working-directory: _shared_utils/
-        run: pip install -r requirements_non_jupyterhub.txt
+        run: uv sync --group test
 
       - name: Run shared_utils tests
         working-directory: _shared_utils/
-        run: pytest tests
+        run: uv run pytest tests
