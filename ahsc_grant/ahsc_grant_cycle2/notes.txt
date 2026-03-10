@@ -27,25 +27,29 @@ Golden Gate Transit data is not included in the combined file. The day type is a
 Long Beach Transit data has many missing rows in the combined file, so the preprocessed dataset is used. A flag is added to indicate that the values represent reported average daily ridership. Ridership is summed across directions at each stop for boardings and alightings, and the data is grouped by stop, route, day type, and service period. Columns are renamed for consistency, resulting in a clean stop-level dataset of daily boardings and alightings ready for analysis.
 
 
-Orange County Transportation: Many rows missing and there were A, C and E in the direction which could be the reason. But waiting on this until I get the updated combined data
+Orange County Transportation: Many rows missing and there were A, C and E in the direction which could be the reason. But waiting on this until I get the updated combined data. For now, using all the data. Has weekday data only. 
 
-Omni Trans Data provided total ridership across the whole year, which was divided by 365 to get the average ridership per day so we don't have weekday, weekend seperated. Its not being used as of now.
+Omni Trans Data : all day GTFS data only, just using that for now.
 
 
 Riverside Transit data is not included in the combined file, but daily boardings data is available in the preprocessed dataset. The day type is added based on the service date, and ridership is summed across all directions at each stop. Columns are renamed for consistency, and a flag is added to indicate that the values represent reported daily boardings. Finally, average daily boardings are calculated for each stop and route by day type, producing a representative stop-level dataset suitable for analysis and modeling.
 
 
-SacRt : Not processed yet. The SacRT stop-level ridership dataset contains three types of records: weekday, daily, and other. Weekday rows have the Saturday and Sunday flags set to 0 and represent average boardings on Monday through Friday only. Daily rows have all day-of-week flags set to 1, meaning the stop operates every day; for these stops, the average_boardings reflects the average across all 7 days, calculated as an average over a three-month period. Importantly, in the daily type, Saturday and Sunday always appear together, either the stop runs both weekend days or neither, so there are no cases where only one weekend day is active. Other rows are exceptions, for example stops that don’t operate on a specific weekday, and need to be handled individually. There is just one case of Other where one of the stop shows 0 on a Tuesday.  I’m thinking that, for modeling purposes, since weekend-specific averages aren’t directly provided, the best approach would be to take stops with daily records that operate on weekends and use any available weekday data to estimate total weekend ridership using S + U = 7 × daily − 5 × weekday.
- Then, using GTFS data, we can allocate that weekend total across Saturday and Sunday based on the number of trips serving each stop. For example, if a stop has 60 trips on Saturday and 40 trips on Sunday, we would assign 60% of the weekend ridership to Saturday and 40% to Sunday.
+SacRt : The SacRT stop-level ridership dataset contains three types of records: weekday, daily, and other. Weekday rows have the Saturday and Sunday flags set to 0 and represent average boardings on Monday through Friday only. Daily rows have all day-of-week flags set to 1, meaning the stop operates every day; for these stops, the average_boardings reflects the average across all 7 days, calculated as an average over a three-month period. Importantly, in the daily type, Saturday and Sunday always appear together, either the stop runs both weekend days or neither, so there are no cases where only one weekend day is active. Other rows are exceptions, for example stops that don’t operate on a specific weekday, and need to be handled individually. There is just one case of Other where one of the stop shows 0 on a Tuesday.  For now, processing weekday and all. 
+
+
+If we want to get weekend specific data
+(I’m thinking that, for modeling purposes, since weekend-specific averages aren’t directly provided, the best approach would be to take stops with daily records that operate on weekends and use any available weekday data to estimate total weekend ridership using S + U = 7 × daily − 5 × weekday.
+ Then, using GTFS data, we can allocate that weekend total across Saturday and Sunday based on the number of trips serving each stop. For example, if a stop has 60 trips on Saturday and 40 trips on Sunday, we would assign 60% of the weekend ridership to Saturday and 40% to Sunday.)
 
 
 SamTrans data is not fully represented in the combined file, so the preprocessed dataset is used. The day type is added based on the service date, and columns are renamed for consistency. A flag is added to indicate that the values represent reported daily boardings and alightings. Finally, average daily boardings and alightings are calculated for each stop and route by day type, producing a representative stop-level dataset ready for analysis and modeling.
 
-Santa Cruz metro have all day GTFS data only, so need to bring in Schedule data to process it
+Santa Cruz metro have all day GTFS data only, just using that for now.
 
 SDMTS ridership data is aggregated at the stop and route level by day type. Boardings and alightings are summed across directions, and the route name is cleaned by removing any prefix before the colon. Columns are renamed for consistency, and a flag is added to indicate that the values represent reported average daily ridership. This results in a clean stop-level dataset of daily boardings and alightings ready for analysis and modeling.
 
-SBMTD have all day GTFS data only, so need to bring in Schedule data to process it. Not processed yet. 
+SBMTD have all day GTFS data only, just using that for now.
 
 Sunline Ridership has average of season and fiscal level data. Also not present in the combined file.
 
@@ -69,13 +73,26 @@ SDMTS: Septmeber 1 2024 - Jan 25 2025
 
 There is no common dates that work for all the agencies. So trying to find the dates that works for most agencies 
 
-Weekday: 2025-01-08
-Saturday - 2025-01-11
-Sunday - 2025-01-12
+Weekday: 2025-05-21
+Saturday - 2025-05-17
+Sunday - 2025-05-18
  
 
+Agencies that have ridership data per routes per stop 
+- Big Blue Bus
+- CulverCity
+- Foothill transit
+- Golden Gate Transit
+- Long Beach 
+- Riverside
+- Samtrans
+- SDMTS
 
 
+Agencies that have weekday/ all day data only 
+- Octa Transit : weekday only
+- Omni Transit: all day data only 
+- Santa Cruz Metro Ridership: all day data only
 
 
 
