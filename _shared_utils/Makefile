@@ -1,3 +1,3 @@
 setup_env:
-	cd ../calitp-data-analysis && pip install -e .
-	pip install -e .
+	cd ../calitp-data-analysis && uv pip install --system -e .
+	uv pip install --system -e .
