@@ -6,6 +6,8 @@ authors = [{ name = "Cal-ITP" }, { name = "Erika Pacheco" }, { name = "Rae Bonfa
 requires-python = ">=3.11.0, <3.12.0"
 dependencies = [
     "altair>=5.1.1",
+    "dask>=2024.10.0,<2025.4.0",
+    "dask-geopandas>=0.5.0",
     "gcsfs==2024.5.0",
     "geopandas>=0.14.0,<0.15.0",
     "ipython>=8.9.0,<9.0.0",
@@ -17,7 +19,7 @@ dependencies = [
     "sqlalchemy>=2.0.0,<3.0.0",
     "sqlalchemy-bigquery>=1.6.1,<2.0.0",
 ]
-# Dropped from PyPI version: dask, dask-geopandas, gtfs-segments, pyairtable, black
+# Dropped from PyPI version: gtfs-segments, pyairtable, black
 # — not imported by this package's code. Per-project deps if needed.
 
 [build-system]
