@@ -39,8 +39,7 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Install shared_utils dependencies
-        working-directory: _shared_utils/
+      - name: Install dependencies
         run: uv sync --group test
 
       - name: Run shared_utils tests

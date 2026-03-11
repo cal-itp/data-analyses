@@ -72,20 +72,16 @@ build_new_transit_metrics_report:
 
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
-	cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	cd gtfs_digest/ && make digest_report && cd ..
 	make build_portfolio_site
 
 build_district_digest:
 	$(eval export site = district_digest)
-	cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
-	cd portfolio/ && pip install -r requirements.txt && cd ../
 	cd gtfs_digest/ && python deploy_district_yaml.py district && cd ..
 	make build_portfolio_site
 
 build_legislative_district_digest:
 	$(eval export site = legislative_district_digest)
-	cd rt_segment_speeds && pip install -r requirements.txt && cd ../_shared_utils && make setup_env && cd ..
 	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd ..
 	make build_portfolio_site
 
@@ -103,10 +99,10 @@ add_precommit:
 #alias go='cd ~/data-analyses/portfolio && pip install -r requirements.txt && cd #../_shared_utils && make setup_env && cd ..'
 
 install_env:
-	cd ~/data-analyses/_shared_utils && make setup_env && cd ..
 	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	#cd rt_delay/ && make setup_rt_analysis && cd ..
-	cd rt_segment_speeds && pip install -r requirements.txt && cd ..
+	uv sync
+	uv run python -m ipykernel install --user --name cal-itp --display-name "Cal-ITP"
 	make add_precommit
 
 install_portfolio:
