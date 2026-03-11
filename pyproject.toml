@@ -1,0 +1,33 @@
+[project]
+name = "cal-itp-data-analyses"
+version = "0.1.0"
+requires-python = ">=3.11.0, <3.12.0"
+
+[tool.uv.workspace]
+members = [
+    "calitp-data-analysis",
+    "_shared_utils",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "shared-utils",
+    "segment-speed-utils",
+    "rt-analysis",
+]
+test = [
+    { include-group = "dev" },
+    "pytest>=9.0.2,<10.0.0",
+    "pytest-mock>=3.15.1,<4.0.0",
+    "pytest-recording>=0.13.4,<0.14.0",
+    "pytest-unordered>=0.7.0,<0.8.0",
+]
+
+[tool.uv.sources]
+shared-utils = { workspace = true }
+calitp-data-analysis = { workspace = true }
+segment-speed-utils = { path = "rt_segment_speeds", editable = true }
+rt-analysis = { path = "rt_delay", editable = true }
