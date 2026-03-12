@@ -1,4 +1,0 @@
-portfolio/**/*.ipynb filter=lfs diff=lfs merge=lfs -text
-portfolio/**/**/*.ipynb filter=lfs diff=lfs merge=lfs -text
-“portfolio/**/**/*.ipynb” filter=lfs diff=lfs merge=lfs -text
-“portfolio/**/*.ipynb” filter=lfs diff=lfs merge=lfs -text
