@@ -16,12 +16,15 @@ remove_portfolio_site:
 
 build_ntd_report:
 	$(eval export site = ntd_monthly_ridership)
-	cd ntd/monthly_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
+	#cd ntd/monthly_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
 	make build_portfolio_site
 
 build_ntd_report_staging:
 	$(eval export site = ntd_monthly_ridership)
 	cd ntd/monthly_ridership_report/ && python deploy_portfolio_yaml.py && cd ..
+	pip install -r portfolio/requirements.txt
+	python portfolio/portfolio.py clean $(site)
+	python portfolio/portfolio.py build $(site)
 	make staging_portfolio site=$(site)
 
 build_ntd_annual_report:

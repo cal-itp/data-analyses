@@ -2,7 +2,7 @@
 
 
 ntd_monthly_export:
-	cd monthly_ridership_report && python monthly_ridership_by_rtpa.py
+	#cd monthly_ridership_report && python monthly_ridership_by_rtpa.py
 	cd ../ && make build_ntd_report -f Makefile
 
 staging_ntd_monthly_export:
