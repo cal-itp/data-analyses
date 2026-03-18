@@ -18,6 +18,9 @@ dev = [
     "segment-speed-utils",
     "rt-analysis",
     "ipykernel>=6.29.0",
+    "black==24.10.0",
+    "isort==5.10.1",
+    "pre-commit>=2.18.1",
 ]
 test = [
     { include-group = "dev" },
