@@ -17,6 +17,7 @@ dev = [
     "shared-utils",
     "segment-speed-utils",
     "rt-analysis",
+    "ipykernel>=6.29.0",
 ]
 test = [
     { include-group = "dev" },

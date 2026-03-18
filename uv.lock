@@ -300,11 +300,13 @@ source = { virtual = "." }
 
 [package.dev-dependencies]
 dev = [
+    { name = "ipykernel" },
     { name = "rt-analysis" },
     { name = "segment-speed-utils" },
     { name = "shared-utils" },
 ]
 test = [
+    { name = "ipykernel" },
     { name = "pytest" },
     { name = "pytest-mock" },
     { name = "pytest-recording" },
@@ -318,11 +320,13 @@ test = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "rt-analysis", editable = "rt_delay" },
     { name = "segment-speed-utils", editable = "rt_segment_speeds" },
     { name = "shared-utils", editable = "_shared_utils" },
 ]
 test = [
+    { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "pytest", specifier = ">=9.0.2,<10.0.0" },
     { name = "pytest-mock", specifier = ">=3.15.1,<4.0.0" },
     { name = "pytest-recording", specifier = ">=0.13.4,<0.14.0" },
