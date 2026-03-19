@@ -79,4 +79,17 @@ if __name__ == "__main__":
         f"{PREDICTIONS_GCS}monthly_operator_summary.parquet", filesystem=gcsfs.GCSFileSystem()
     )
 
+    monthly_routes = bq_utils.download_table(
+        project_name="cal-itp-data-infra",
+        dataset_name="mart_gtfs_rollup",
+        table_name="fct_monthly_routes",
+        date_col="month_first_day",
+        start_date="2025-12-01",
+        end_date="2026-02-01",
+        geom_col="pt_array",
+        geom_type="line",
+    )
+
+    utils.geoparquet_gcs_export(monthly_routes, PREDICTIONS_GCS, "monthly_routes")
+
     end = datetime.datetime.now()
