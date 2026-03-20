@@ -425,7 +425,7 @@ def produce_ntd_monthly_ridership_by_rtpa(year: int, month: int) -> pd.DataFrame
     FROM
       `cal-itp-data-infra.mart_ntd_ridership.fct_complete_monthly_ridership_with_adjustments_and_estimates`
     WHERE
-      period_year IN ("2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025")
+      period_year IN ("2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025","2026")
       AND agency IS NOT NULL
     """
     full_upt = query_sql(monthly_query, as_df=True)
