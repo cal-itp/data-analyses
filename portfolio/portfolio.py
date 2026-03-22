@@ -184,7 +184,6 @@ class Chapter(BaseModel):
 
         else:
             notebook = self.resolved_notebook
-
             if not notebook:
                 raise ValueError("no notebook found at any level")
 
@@ -257,7 +256,11 @@ class Part(BaseModel):
 
     @property
     def to_toc(self):
-        return {"title": self.caption, "children": [chapter.toc for chapter in self.chapters]}
+        return {"title": self.caption} if self.caption else {}
+        # if self.caption:
+        #     return {"title": self.caption, "children": [chapter.toc for chapter in self.chapters]}
+        # else:
+        #     return [chapter.toc for chapter in self.chapters]
 
 
 class YamlPartialDumper(yaml.Dumper):
@@ -274,15 +277,16 @@ class Site(BaseModel):
     readme: Optional[Path] = "README.md"
     notebook: Optional[Path] = None
     parts: List[Part] = []
-    chapters: List[Chapter] = []
     prepare_only: bool = False
 
     def __init__(self, **data):
         super().__init__(**data)
 
-        content = [*self.chapters, *self.parts]
-        for child in content:
-            child.site = self
+        for part in self.parts:
+            part.site = self
+        # content = [*self.chapters, *self.parts]
+        # for child in content:
+        #     child.site = self
 
     @field_validator("readme", mode="before", check_fields=False)
     @classmethod
@@ -291,7 +295,7 @@ class Site(BaseModel):
             return Path(v)
         else:
             directory = info.data["directory"]
-            return (directory / Path("README.md")) or (directory / Path(v))
+            return directory / Path(v)
 
     @property
     def slug(self) -> str:
@@ -299,11 +303,41 @@ class Site(BaseModel):
 
     @property
     def toc_yaml(self) -> str:
-        chapters = [chapter.toc for chapter in self.chapters]
-        parts = [part.to_toc for part in self.parts if part.chapters]
-        children = [*chapters, *parts]
+        # chapters = [chapter.toc for chapter in self.chapters]
+        # parts = [part.to_toc for part in self.parts if part.chapters]
+        # children = [*chapters, *parts]
+
+        # children = [part.to_toc for part in self.parts if part.chapters]
+        # readme_title = self.parts.get("caption")
+        # files = [part.toc for part in self.parts]
+        toc = [{"file": self.readme.name}]
+        print(f"** toc with readme: {toc}")
+        for part in self.parts:
+            if part.chapters:
+                if part.to_toc:
+                    children = {"children": [chapter.toc for chapter in part.chapters]}
+                    toc.append(part.to_toc | children)
+                    print(f"** 1 toc: {toc}")
+                else:
+                    for chapter in part.chapters:
+                        toc.append(chapter.toc)
+                    # print(f"** chapters: {chapters}")
+                    # toc.append(chapters)
+                    print(f"** 2 toc: {toc}")
+
+        # parts = [part.to_toc  if part.chapters]
+        # children = [part.to_toc for part in self.parts if part.chapters]
+        # children = []
+        # for part in self.parts:
+        #     for chapter in part.chapters:
+        #         children.append(chapter.toc)
+        # print(f"** readme: {readme}")
+        # print(f"** children: {children}")
+        print(f"** toc: {toc}")
+
+        # {"format": "jb-book", "root": "README", "parts": [part.to_toc for part in self.parts if part.chapters]},
         return yaml.dump(
-            {"toc": [{"file": "README.md"}, *children]},
+            {"toc": toc},
             indent=4,
             Dumper=YamlPartialDumper,
         )
@@ -424,13 +458,14 @@ def build(
     with open(SITES_DIR / Path(f"{site_yml_name}.yml")) as f:
         portfolio_site = Site(output_dir=site_output_dir, name=site_yml_name, **yaml.safe_load(f))
 
-    typer.echo(f"copying readme from {portfolio_site.directory} to {site_output_dir}")
+    typer.echo(f"copying {portfolio_site.readme.name} from {portfolio_site.directory} to {site_output_dir}")
     shutil.copy(portfolio_site.readme, site_output_dir / portfolio_site.readme.name)
 
     fname = site_output_dir / Path("myst.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing config and toc to {fname}", fg=typer.colors.GREEN)
         toc = portfolio_site.toc_yaml
+        print(f"*** Toc={toc}")
         f.write(
             env.get_template("myst.yml").render(
                 site=portfolio_site, toc=toc, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID
@@ -439,15 +474,15 @@ def build(
 
     errors = []
 
-    for chapter in portfolio_site.chapters:
-        errors.extend(
-            chapter.generate(
-                execute_papermill=execute_papermill,
-                continue_on_error=continue_on_error,
-                prepare_only=prepare_only,
-                no_stderr=no_stderr,
-            )
-        )
+    # for chapter in portfolio_site.chapters:
+    #     errors.extend(
+    #         chapter.generate(
+    #             execute_papermill=execute_papermill,
+    #             continue_on_error=continue_on_error,
+    #             prepare_only=prepare_only,
+    #             no_stderr=no_stderr,
+    #         )
+    #     )
 
     for part in portfolio_site.parts:
         for chapter in part.chapters:

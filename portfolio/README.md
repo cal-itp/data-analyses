@@ -20,6 +20,12 @@ See instructions here for authoring a notebook for paramaterization [pointers fo
      * by Caltrans district (chapter) and each district is its own page (no section).
    * [various parameterization examples](https://docs.calitp.org/data-infra/publishing/sections/5_analytics_portfolio_site.html)
 
+Examples:
+https://analysis-staging.dds.dot.ca.gov/_my_simple_analyses_test/
+https://analysis-staging.dds.dot.ca.gov/_my_readme_only_analyses_test
+https://analysis-staging.dds.dot.ca.gov/_my_new_readme_analyses_test/
+https://analysis-staging.dds.dot.ca.gov/_my_group_analyses_test
+
 1. Build and deploy your parameterized notebook as a JupyterBook
    * (Optionally) Remove the local folder containing the previously generate portfolio site
      ```
