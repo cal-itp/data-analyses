@@ -5,6 +5,21 @@ This website contains data analysis and reports developed by Cal-ITP data analys
 
 All source code for these analyses and reports may be found [on GitHub](https://github.com/cal-itp/data-analyses).
 
+## Setup
+
+Portfolio has additional dependencies beyond the workspace baseline. Install them with:
+
+```
+uv sync --group portfolio
+```
+
+## Running locally (without JupyterHub)
+
+```
+uv sync --group portfolio
+uv run python portfolio/portfolio.py build MY_NEW_REPORT
+```
+
 ## Deployment
 ### Typical Workflow
 Creating a parameterized notebook means creating a Jupyter notebook set up so that multiple notebooks can be dynamically created from it by passing different configurations.
