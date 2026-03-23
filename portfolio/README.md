@@ -11,6 +11,15 @@ See instructions for authoring a notebook in [Getting Notebooks Ready for the Po
 All source code for these analyses and reports may be found [on GitHub](https://github.com/cal-itp/data-analyses).
 
 
+## Setup
+
+Portfolio has additional dependencies beyond the workspace baseline. Install them with:
+
+```
+uv sync --group portfolio
+```
+
+
 ## Environments
 
 > [!IMPORTANT]

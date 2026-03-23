@@ -15,7 +15,7 @@ For longer-term projects, consider making a new repository!
 This repository uses pre-commit hooks to format code, including [Black](https://black.readthedocs.io/en/stable/index.html). This ensures baseline consistency in code formatting.
 
 > [!IMPORTANT]
-> Before contributing to this project, please install pre-commit locally by running `pip install pre-commit` and `pre-commit install` in the root of the repo.
+> Before contributing to this project, please install dependencies and pre-commit by running `make install_env` in the root of the repo.
 
 Once installed, pre-commit checks will run before you can make commits locally. If a pre-commit check fails, it will need to be addressed before you can make your commit. Many formatting issues are fixed automatically within the pre-commit actions, so check the changes made by pre-commit on failure -- they may have automatically addressed the issues that caused the failure, in which case you can simply re-add the files, re-attempt the commit, and the checks will then succeed.
 

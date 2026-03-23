@@ -8,22 +8,22 @@
 # Build and Deploy Production Portfolio Site with:
 # make build_production_portfolio_site site='MY_SITE_IDENTIFIER'
 build_production_portfolio_site:
-	cd portfolio/ && pip install -r requirements.txt && cd ../
-	python portfolio/portfolio.py clean $(site)
-	python portfolio/portfolio.py build $(site)
+	uv sync --group portfolio
+	uv run python portfolio/portfolio.py clean $(site)
+	uv run python portfolio/portfolio.py build $(site)
 	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra
-	python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy --target production
+	uv run python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy --target production
 	git add portfolio/sites/$(site).yml
 	#make build_production_portfolio_index
 
 # Build and Deploy Staging Portfolio Site with:
 # make build_staging_portfolio_site site='MY_SITE_IDENTIFIER'
 build_staging_portfolio_site:
-	cd portfolio/ && pip install -r requirements.txt && cd ../
-	python portfolio/portfolio.py clean $(site)
+	uv sync --group portfolio
+	uv run python portfolio/portfolio.py clean $(site)
 	gcloud auth login --login-config=iac/login.json
-	python portfolio/portfolio.py build $(site)
-	python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy --target staging
+	uv run python portfolio/portfolio.py build $(site)
+	uv run python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy --target staging
 	#make build_staging_portfolio_index
 
 # Build and Deploy Production Portfolio Index page with:
@@ -84,23 +84,24 @@ build_legislative_district_digest:
 
 build_fund_split:
 	$(eval export site = sb125_fund_split_analysis)
-	pip install -r portfolio/requirements.txt
 	make build_production_portfolio_site
 
 add_precommit:
-	pip install pre-commit
-	pre-commit install
+	uv run pre-commit install
 	#pre-commit run --all-files
 
 # Add to _.bash_profile outside of data-analyses
-#alias go='cd ~/data-analyses/portfolio && pip install -r requirements.txt && cd #../_shared_utils && make setup_env && cd ..'
+#alias go='cd ~/data-analyses && uv sync'
 
 install_env:
 	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
 	#cd rt_delay/ && make setup_rt_analysis && cd ..
 	uv sync
-	uv run python -m ipykernel install --user --name cal-itp --display-name "Cal-ITP"
 	make add_precommit
 
 install_portfolio:
-	cd portfolio/ && pip install -r requirements.txt && cd ../
+	uv sync --group portfolio
+
+# Create .egg to upload to dask cloud cluster
+egg_modules:
+	cd ~/data-analyses/rt_segment_speeds && python setup.py bdist_egg && cd ..
