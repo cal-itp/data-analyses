@@ -579,3 +579,23 @@
 2026-01-21 16:56:07.623 | INFO     | __main__:download_one_day:38 - # operators to run: 184
 2026-01-21 16:56:07.623 | INFO     | __main__:download_one_day:42 - *********** Download st data ***********
 2026-01-21 16:56:59.363 | INFO     | __main__:download_one_day:67 - execution time: 0:00:54.927954
+2026-03-24 10:23:12.197 | INFO     | __main__:download_one_day:47 - Analysis date: 2026-02-11
+2026-03-24 10:23:57.515 | INFO     | __main__:download_one_day:47 - Analysis date: 2026-02-11
+2026-03-24 10:23:58.769 | INFO     | __main__:download_one_day:54 - # operators to run: 231
+2026-03-24 10:23:58.770 | INFO     | __main__:download_one_day:58 - *********** Download trips data ***********
+2026-03-24 10:24:19.743 | INFO     | __main__:download_one_day:96 - execution time: 0:00:22.227792
+2026-03-24 10:24:24.599 | INFO     | __main__:download_one_day:23 - Analysis date: 2026-02-11
+2026-03-24 10:24:25.624 | INFO     | __main__:download_one_day:30 - # operators to run: 231
+2026-03-24 10:24:25.625 | INFO     | __main__:download_one_day:34 - *********** Download stops data ***********
+2026-03-24 10:24:34.128 | INFO     | __main__:download_one_day:69 - execution time: 0:00:09.528897
+2026-03-24 10:24:38.512 | INFO     | __main__:download_one_day:22 - Analysis date: 2026-02-11
+2026-03-24 10:24:39.555 | INFO     | __main__:download_one_day:29 - # operators to run: 231
+2026-03-24 10:24:39.556 | INFO     | __main__:download_one_day:33 - *********** Download routelines data ***********
+2026-03-24 10:25:52.483 | INFO     | __main__:download_one_day:63 - execution time: 0:01:13.970515
+2026-03-24 10:25:57.023 | INFO     | __main__:download_one_day:28 - Analysis date: 2026-02-11
+2026-03-24 10:26:00.555 | INFO     | __main__:download_one_day:37 - # operators to run: 192
+2026-03-24 10:26:00.555 | INFO     | __main__:download_one_day:41 - *********** Download st data ***********
+2026-03-24 10:33:18.985 | INFO     | __main__:download_one_day:28 - Analysis date: 2026-02-11
+2026-03-24 10:33:22.888 | INFO     | __main__:download_one_day:37 - # operators to run: 192
+2026-03-24 10:33:22.889 | INFO     | __main__:download_one_day:41 - *********** Download st data ***********
+2026-03-24 10:34:39.716 | INFO     | __main__:download_one_day:66 - execution time: 0:01:20.730665

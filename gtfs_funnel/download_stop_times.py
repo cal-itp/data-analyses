@@ -4,7 +4,7 @@ Download all stop_times for a day.
 
 import os
 
-os.environ["CALITP_BQ_MAX_BYTES"] = str(500_000_000_000)
+os.environ["CALITP_BQ_MAX_BYTES"] = str(5_000_000_000_000)
 
 import datetime as dt  # noqa: E402
 import sys  # noqa: E402
