@@ -1,0 +1,10 @@
+title: Greetings Analyses Test with Params
+directory: ./tests/fixtures/portfolio/
+readme: ./tests/fixtures/portfolio/README.md
+notebook: ./tests/fixtures/portfolio/notebook_with_params_1.ipynb
+parts:
+  - chapters:
+    - params:
+        greetings: Hi! So happy to see you here!!
+    - params:
+        greetings: Bye! See you soon!!

@@ -387,18 +387,33 @@ def index(
     prod: bool = False,
 ) -> None:
     sites = []
+    test_sites = []
+
     for site in os.listdir("./portfolio/sites/"):
+        if prod and site.lower().endswith("_test.yml"):
+            continue
+
         with open(f"./portfolio/sites/{site}") as f:
             name = site.replace(".yml", "")
             site_output_dir = PORTFOLIO_DIR / Path(name)
-            sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
+            if site.lower().endswith("_test.yml"):
+                test_sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
+            else:
+                sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
+
+    sites.sort(key=lambda s: s.title)
+    test_sites.sort(key=lambda s: s.title)
 
     Path("./portfolio/index").mkdir(parents=True, exist_ok=True)
     for template in ["index.html"]:
         fname = f"./portfolio/index/{template}"
         with open(fname, "w") as f:
             typer.echo(f"writing out to {fname}")
-            f.write(env.get_template(template).render(sites=sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
+            f.write(
+                env.get_template(template).render(
+                    sites=sites, test_sites=test_sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID
+                )
+            )
 
     if deploy:
         deploy_index("production" if prod else "staging")
