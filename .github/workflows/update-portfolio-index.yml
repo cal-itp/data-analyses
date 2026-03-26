@@ -56,4 +56,4 @@ jobs:
 
       - name: Deploy index
         run: |
-          python portfolio/portfolio.py index --deploy
+          python portfolio/portfolio.py index --deploy --prod
