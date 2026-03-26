@@ -21,7 +21,9 @@ def gcs_pandas():
     return GCSPandas()
 
 
-def create_portfolio_yaml_chapters_no_sections(portfolio_site_yaml: Path, chapter_name: str, chapter_values: list):
+def create_portfolio_yaml_chapters_no_sections(
+    portfolio_site_yaml: Path, chapter_name: str, chapter_values: list, group_caption: str = None
+):
     """
     Overwrite a portfolio site yaml by filling in all the parameters.
     Chapters no sections refer to analyses parameterized by 1 value.
@@ -40,8 +42,11 @@ def create_portfolio_yaml_chapters_no_sections(portfolio_site_yaml: Path, chapte
     chapters_list = [{**{"params": {chapter_name: str(one_chapter_value)}}} for one_chapter_value in chapter_values]
 
     # Make this into a list item
-    parts_list = [{"caption": "Introduction"}, {"chapters": chapters_list}]
-    site_yaml_dict["parts"] = parts_list
+    part = {"chapters": chapters_list}
+    if group_caption:
+        part["caption"] = group_caption
+
+    site_yaml_dict["parts"] = [part]
 
     # dump this dict into the yaml and overwrite existing file
     output = yaml.dump(site_yaml_dict)
