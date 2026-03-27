@@ -1,0 +1,12 @@
+title: Greetings Analyses Test with Params (Hiding Title Block and Blank Lines)
+directory: ./tests/fixtures/portfolio/
+readme: ./tests/fixtures/portfolio/README_BR.md
+notebook: ./tests/fixtures/portfolio/notebook_with_params_2.ipynb
+parts:
+  - chapters:
+    - caption: Hi!
+      params:
+        greetings: Hi! So happy to see you here!!
+    - caption: Bye!
+      params:
+        greetings: Bye! See you soon!!

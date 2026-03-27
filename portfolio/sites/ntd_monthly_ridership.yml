@@ -1,79 +1,56 @@
-title: NTD Monthly Ridership by RTPA
 directory: ./ntd/monthly_ridership_report
-readme: ./ntd/monthly_ridership_report/README.md
-chapters:
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
+parts:
+- chapters:
+  - params:
       rtpa: Butte County Association of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: El Dorado County Transportation Commission
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Fresno Council of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Imperial County Transportation Commission
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Kern Council of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Kings County Association of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Los Angeles County Metropolitan Transportation Authority
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Merced County Association of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Metropolitan Transportation Commission
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Orange County Transportation Authority
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Placer County Transportation Planning Agency
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Riverside County Transportation Commission
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Sacramento Area Council of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: San Bernardino County Transportation Authority
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: San Diego Association of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: San Joaquin Council of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: San Luis Obispo Council of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Santa Barbara County Association of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Santa Cruz County Regional Transportation Commission
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Shasta Regional Transportation Agency
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Stanislaus Council of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Tahoe Regional Planning Agency
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Transportation Agency for Monterey County
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Tulare County Association of Governments
-  - notebook: ./ntd/monthly_ridership_report/monthly_ridership_report.ipynb
-    params:
+  - params:
       rtpa: Ventura County Transportation Commission
+readme: ./ntd/monthly_ridership_report/README.md
+title: NTD Monthly Ridership by RTPA

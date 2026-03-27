@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Cal-ITP Data Analyses Portfolio</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/cal-itp/data-analyses/refs/heads/main/portfolio/templates/assets/favicon.ico" type="image/x-icon">
     <!-- Shamelessly stolen -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;family=Raleway:wght@700&amp;display=swap">
      <style type="text/css">
@@ -64,6 +65,14 @@
         <p><a href="/{{ site.name }}/">{{ site.title }}</a></p>
         {% endfor %}
         <p><p>
+        {% if test_sites %}
+            <h3>Test Projects</h3>
+            <p>Examples of projects to build sites. Source code can be found <a href="https://github.com/cal-itp/data-analyses/tree/mov/1956-fix-build-portfolio/tests/fixtures/portfolio/">on GitHub.</a></p>
+            {% for test_site in test_sites -%}
+            <p><a href="/{{ test_site.name }}/">{{ test_site.title }}</a></p>
+            {% endfor %}
+            <p><p>
+        {% endif %}
         <h2>Reports</h2>
 <p>Accurate and timely GTFS data is a critical part of a providing a good transit experience. Our reports measure the quality of the GTFS data produced by an individual transit operator each month.</p>
 <a href="https://reports.dds.dot.ca.gov/">California GTFS Quality Dashboard</a><p>

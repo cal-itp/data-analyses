@@ -1,0 +1,15 @@
+title: Section Analyses Test (as Group)
+directory: ./tests/fixtures/portfolio/
+readme: ./tests/fixtures/portfolio/README_BR.md
+notebook: ./tests/fixtures/portfolio/notebook_with_params_2.ipynb
+parts:
+    - caption: Daily Greetings
+      chapters:
+        - params:
+            greetings: Good Morning!
+        - params:
+            greetings: Good Afternoon!
+    - caption: Night Greetings
+      chapters:
+        - params:
+            greetings: Sleep well!

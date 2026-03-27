@@ -1,15 +1,56 @@
 # Run this in data-analyses
 # To specify different Makefile: make build_parallel_corridors -f Makefile
 
+# Build and Deploy Production Portfolio Site with:
+# make build_portfolio_site site='MY_SITE_IDENTIFIER'
 build_portfolio_site:
 	cd portfolio/ && pip install -r requirements.txt && cd ../
-	python portfolio/portfolio.py clean $(site)
+	#python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site)
 	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra
-	python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy
+	python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy --target production
 	git add portfolio/sites/$(site).yml
-	#make production_portfolio
+	#make build_portfolio_index
 
+# Build and Deploy Staging Portfolio Site with:
+# make build_staging_portfolio_site site='MY_SITE_IDENTIFIER'
+build_staging_portfolio_site:
+	cd portfolio/ && pip install -r requirements.txt && cd ../
+	#python portfolio/portfolio.py clean $(site)
+	gcloud auth login --login-config=iac/login.json
+	python portfolio/portfolio.py build $(site)
+	python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy --target staging
+	#make build_staging_portfolio_index
+
+# Build and Deploy Production Portfolio Index page with:
+build_portfolio_index:
+	python portfolio/portfolio.py index --deploy --prod
+
+# Build and Deploy Staging Portfolio Index page (including test portfolios) with:
+build_staging_portfolio_index:
+	python portfolio/portfolio.py index --deploy --no-prod
+
+# Build locally the Portfolio Site without deploying with:
+# make test_build_portfolio_site site='MY_SITE_IDENTIFIER'
+test_build_portfolio_site:
+	#python portfolio/portfolio.py clean $(site)
+	#gcloud auth login --login-config=iac/login.json
+	python portfolio/portfolio.py build $(site)
+
+# Build locally the Portfolio Site without deploying with:
+# make test_build_portfolio_site site='MY_SITE_IDENTIFIER'
+test_build_portfolio_site:
+	#python portfolio/portfolio.py clean $(site)
+	#gcloud auth login --login-config=iac/login.json
+	python portfolio/portfolio.py build $(site)
+
+# Delete Local Site folder with:
+# make build_portfolio_site site='MY_SITE_IDENTIFIER'
+clean_portfolio_site:
+	python portfolio/portfolio.py clean $(site)
+
+# Delete Local Site folder and Remove Portfolio site with:
+# make build_staging_portfolio_site site='MY_SITE_IDENTIFIER'
 remove_portfolio_site:
 	python portfolio/portfolio.py clean $(site)
 	git rm portfolio/sites/$(site).yml
@@ -68,15 +109,8 @@ install_env:
 	cd rt_segment_speeds && pip install -r requirements.txt && cd ..
 	make add_precommit
 
-production_portfolio:
-	python portfolio/portfolio.py index --deploy
-
-# deploy site with:
-# make staging_portfolio site='MY_SITE_IDENTIFIER'
-staging_portfolio:
-	gcloud auth login --login-config=iac/login.json
-	python portfolio/portfolio.py deploy-index --target staging
-	python portfolio/portfolio.py deploy-site $(site) --target staging
+install_portfolio:
+	cd portfolio/ && pip install -r requirements.txt && cd ../
 
 # Create .egg to upload to dask cloud cluster
 egg_modules:

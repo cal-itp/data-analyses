@@ -25,7 +25,6 @@ from papermill.engines import NBClientEngine, papermill_engines
 from pydantic import BaseModel, field_validator
 from selenium import webdriver
 from slugify import slugify
-from typing_extensions import Annotated
 
 assert os.getcwd().endswith("data-analyses"), "this script must be run from the root of the data-analyses repo!"
 
@@ -64,6 +63,12 @@ def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
     assert old_path.suffix == ".ipynb"
 
     return Path(str(i).zfill(2) + "__" + old_path.stem + "__" + slugify_params(params) + old_path.suffix)
+
+
+class YamlPartialDumper(yaml.Dumper):
+
+    def increase_indent(self, flow=False, indentless=False):
+        return super(YamlPartialDumper, self).increase_indent(flow, False)
 
 
 class TyperLoggerHandler(logging.Handler):
@@ -223,19 +228,35 @@ class Chapter(BaseModel):
     @property
     def toc(self):
         if self.sections:
-            return {
-                "file": f"{self.slug}.md",
-                "children": [
-                    {
-                        "glob": f"{self.slug}/*",
-                    }
-                ],
-            }
+            if self.caption:
+                return {
+                    "title": f"{self.caption}",
+                    "file": f"{self.slug}.md",
+                    "children": [
+                        {
+                            "pattern": f"{self.slug}/*",
+                        }
+                    ],
+                }
+            else:
+                return {
+                    "file": f"{self.slug}.md",
+                    "children": [
+                        {
+                            "glob": f"{self.slug}/*",
+                        }
+                    ],
+                }
 
         folder = f"{self.slug}/" if self.slug else ""
-        return {
-            "file": f"{folder}{parameterize_filename('00', self.resolved_notebook, self.resolved_params)}",
-        }
+
+        if self.caption:
+            return {
+                "title": f"{self.caption}",
+                "file": f"{folder}{parameterize_filename('00', self.resolved_notebook, self.resolved_params)}",
+            }
+        else:
+            return {"file": f"{folder}{parameterize_filename('00', self.resolved_notebook, self.resolved_params)}"}
 
 
 class Part(BaseModel):
@@ -257,13 +278,7 @@ class Part(BaseModel):
 
     @property
     def to_toc(self):
-        return {"title": self.caption, "children": [chapter.toc for chapter in self.chapters]}
-
-
-class YamlPartialDumper(yaml.Dumper):
-
-    def increase_indent(self, flow=False, indentless=False):
-        return super(YamlPartialDumper, self).increase_indent(flow, False)
+        return {"title": self.caption} if self.caption else {}
 
 
 class Site(BaseModel):
@@ -274,15 +289,13 @@ class Site(BaseModel):
     readme: Optional[Path] = "README.md"
     notebook: Optional[Path] = None
     parts: List[Part] = []
-    chapters: List[Chapter] = []
     prepare_only: bool = False
 
     def __init__(self, **data):
         super().__init__(**data)
 
-        content = [*self.chapters, *self.parts]
-        for child in content:
-            child.site = self
+        for part in self.parts:
+            part.site = self
 
     @field_validator("readme", mode="before", check_fields=False)
     @classmethod
@@ -291,7 +304,7 @@ class Site(BaseModel):
             return Path(v)
         else:
             directory = info.data["directory"]
-            return (directory / Path("README.md")) or (directory / Path(v))
+            return directory / Path(v)
 
     @property
     def slug(self) -> str:
@@ -299,11 +312,18 @@ class Site(BaseModel):
 
     @property
     def toc_yaml(self) -> str:
-        chapters = [chapter.toc for chapter in self.chapters]
-        parts = [part.to_toc for part in self.parts if part.chapters]
-        children = [*chapters, *parts]
+        toc = [{"file": self.readme.name}]
+        for part in self.parts:
+            if part.chapters:
+                if part.to_toc:
+                    children = {"children": [chapter.toc for chapter in part.chapters]}
+                    toc.append(part.to_toc | children)
+                else:
+                    for chapter in part.chapters:
+                        toc.append(chapter.toc)
+
         return yaml.dump(
-            {"toc": [{"file": "README.md"}, *children]},
+            {"toc": toc},
             indent=4,
             Dumper=YamlPartialDumper,
         )
@@ -367,21 +387,36 @@ def index(
     prod: bool = False,
 ) -> None:
     sites = []
+    test_sites = []
+
     for site in os.listdir("./portfolio/sites/"):
+        if prod and site.lower().endswith("_test.yml"):
+            continue
+
         with open(f"./portfolio/sites/{site}") as f:
             name = site.replace(".yml", "")
             site_output_dir = PORTFOLIO_DIR / Path(name)
-            sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
+            if site.lower().endswith("_test.yml"):
+                test_sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
+            else:
+                sites.append(Site(output_dir=site_output_dir, name=name, **yaml.safe_load(f)))
+
+    sites.sort(key=lambda s: s.title)
+    test_sites.sort(key=lambda s: s.title)
 
     Path("./portfolio/index").mkdir(parents=True, exist_ok=True)
     for template in ["index.html"]:
         fname = f"./portfolio/index/{template}"
         with open(fname, "w") as f:
             typer.echo(f"writing out to {fname}")
-            f.write(env.get_template(template).render(sites=sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID))
+            f.write(
+                env.get_template(template).render(
+                    sites=sites, test_sites=test_sites, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID
+                )
+            )
 
     if deploy:
-        deploy_index("production")
+        deploy_index("production" if prod else "staging")
 
 
 @app.command()
@@ -405,18 +440,23 @@ def build(
     ),
     no_stderr: bool = typer.Option(
         True,
-        help="If true, will clear stderr stream for cell outputs",
+        help="If true, will clear stderr stream for cell outputs.",
     ),
     prepare_only: bool = typer.Option(
         False,
         help="Pass-through flag to papermill; if true, papermill will not actually execute cells.",
     ),
-    verbose_logging: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging, DEBUG"),
+    verbose_logging: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging, DEBUG."),
+    target: str = typer.Option("staging", help="Where to deploy the site: staging or production."),
+    hide_title_block: bool = typer.Option(False, help="If true, will hide the title block for all pages."),
 ) -> None:
     """
     Builds a static site from parameterized notebooks as defined in a site YAML file.
     """
+    assert target in ["staging", "production"]
+
     configure_logging(verbose_logging)
+
     site_yml_name = site.value
     site_output_dir = PORTFOLIO_DIR / Path(site_yml_name)
     site_output_dir.mkdir(parents=True, exist_ok=True)
@@ -424,31 +464,24 @@ def build(
     with open(SITES_DIR / Path(f"{site_yml_name}.yml")) as f:
         portfolio_site = Site(output_dir=site_output_dir, name=site_yml_name, **yaml.safe_load(f))
 
-    typer.echo(f"copying readme from {portfolio_site.directory} to {site_output_dir}")
+    typer.echo(f"copying {portfolio_site.readme.name} from {portfolio_site.directory} to {site_output_dir}")
     shutil.copy(portfolio_site.readme, site_output_dir / portfolio_site.readme.name)
 
     fname = site_output_dir / Path("myst.yml")
     with open(fname, "w") as f:
         typer.secho(f"writing config and toc to {fname}", fg=typer.colors.GREEN)
         toc = portfolio_site.toc_yaml
+        typer.echo(toc)
         f.write(
             env.get_template("myst.yml").render(
-                site=portfolio_site, toc=toc, google_analytics_id=GOOGLE_ANALYTICS_TAG_ID
+                site=portfolio_site,
+                toc=toc,
+                hide_title_block=hide_title_block,
+                google_analytics_id=GOOGLE_ANALYTICS_TAG_ID,
             )
         )
 
     errors = []
-
-    for chapter in portfolio_site.chapters:
-        errors.extend(
-            chapter.generate(
-                execute_papermill=execute_papermill,
-                continue_on_error=continue_on_error,
-                prepare_only=prepare_only,
-                no_stderr=no_stderr,
-            )
-        )
-
     for part in portfolio_site.parts:
         for chapter in part.chapters:
             errors.extend(
@@ -485,7 +518,7 @@ def build(
             if ans != "ignore":
                 return
 
-        deploy_site(site, "production")
+        deploy_site(site, target)
 
     if errors:
         typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
@@ -493,7 +526,7 @@ def build(
 
 
 @app.command()
-def deploy_index(target: Annotated[str, typer.Option(help="Where to deploy the site [staging|production]")]):
+def deploy_index(target: str = typer.Option("staging", help="Where to deploy the site: staging or production.")):
     """
     Deploys index page for analysis portfolio.
     """
@@ -507,7 +540,7 @@ def deploy_index(target: Annotated[str, typer.Option(help="Where to deploy the s
 
 @app.command()
 def deploy_site(
-    site: SiteChoices, target: Annotated[str, typer.Option(help="Where to deploy the site [staging|production]")]
+    site: SiteChoices, target: str = typer.Option("staging", help="Where to deploy the site: staging or production.")
 ):
     """
     Deploys site.
