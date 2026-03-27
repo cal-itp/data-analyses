@@ -24,4 +24,5 @@ site:
     logo_alt: Caltrans Data and Digital Services Logos
     style: ../templates/custom.css
     hide_title_block: {{ hide_title_block }}
+    hide_authors: true
   template: book-theme
