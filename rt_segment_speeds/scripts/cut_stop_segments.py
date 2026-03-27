@@ -94,7 +94,7 @@ def cut_stop_segments(analysis_date: str) -> gpd.GeoDataFrame:
         columns=["start", "end", "snap_start_id", "snap_end_id", "arrival_time1", "arrival_time2"]
     ).pipe(gtfs_schedule_wrangling.gtfs_segments_rename_cols, natural_identifier=False)
     segments = dg.from_dask_dataframe(segments)
-    segments = segments.set_crs(WGS84).to_crs(PROJECT_CRS).compute()
+    segments = segments.compute().set_crs(WGS84).to_crs(PROJECT_CRS)
 
     # Add stop_pair now
     segments = segments.assign(stop_pair=segments.stop_id1 + "__" + segments.stop_id2)
