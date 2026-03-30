@@ -29,16 +29,19 @@ def stage_portfolio():
 def deploy_portfolio():
 
     os.chdir("/home/jovyan/data-analyses")
-    os.system("python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy")
+    os.system("python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy --target staging")
+    print(
+        "deployed to staging, check and use python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy --target production to deploy to prod"
+    )
 
 
 if __name__ == "__main__":
 
     speedmaps_index_joined = pd.read_parquet(PROGRESS_PATH).sort_values(["caltrans_district", "analysis_name"])
-    portfolio_utils.create_portfolio_yaml_chapters_with_sections(
+    portfolio_utils.create_portfolio_yaml_chapters_no_sections(
         portfolio_site_yaml="../portfolio/sites/rt.yml",
         df=speedmaps_index_joined,
         section_info={"column": "analysis_name", "name": "analysis_name"},
     )
-    # stage_portfolio()
-    # deploy_portfolio()
+    stage_portfolio()
+    deploy_portfolio()
