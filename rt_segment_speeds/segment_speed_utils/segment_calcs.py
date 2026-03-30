@@ -182,7 +182,7 @@ def merge_in_segment_geometry(
     segment_geom = dask_utils.get_ddf(
         paths, analysis_date_list, data_type="gdf", get_pandas=False, add_date=False, columns=segment_cols
     ).drop_duplicates()
-    segment_geom = dg.from_dask_dataframe(segment_geom).to_crs(WGS84).compute()
+    segment_geom = dg.from_dask_dataframe(segment_geom).compute().to_crs(WGS84)
 
     col_order = [c for c in speeds_by_segment.columns]
 

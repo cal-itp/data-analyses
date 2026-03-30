@@ -47,7 +47,8 @@ def append_previous(speedmap_segs: pd.DataFrame, date: str, operators: dict) -> 
     operators: dict of the most recent rt_date an operator's feed was seen,
     currently via '../gtfs_funnel/published_operators.yml'
     """
-    previous_segs = read_segs(date).query("name.isin(@operators[@date])")
+    previous_segs = read_segs(date)
+    previous_segs = previous_segs[previous_segs.name.isin(operators[date])]
     previous_segs["analysis_date"] = date
     speedmap_segs = pd.concat([speedmap_segs, previous_segs])
     return speedmap_segs
