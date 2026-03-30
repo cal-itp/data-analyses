@@ -14,6 +14,7 @@ def read_published_operators(
         published_operators_dict = yaml.safe_load(f)
 
     current_date = dt.date.fromisoformat(current_date)
+    assert current_date in published_operators_dict.keys()
     lookback_limit = current_date - dt.timedelta(days=lookback_days)
 
     # Convert the published operators file into a dict mapping dates to an iterable of operators

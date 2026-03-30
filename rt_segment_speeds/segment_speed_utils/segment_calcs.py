@@ -5,6 +5,7 @@ Functions related to calculating segment speeds.
 from typing import Literal
 
 import dask.dataframe as dd
+import dask_geopandas as dg
 import geopandas as gpd
 import numpy as np
 import pandas as pd
@@ -178,14 +179,10 @@ def merge_in_segment_geometry(
 
     paths = [f"{GCS_PATH}{SEGMENT_FILE}" for date in analysis_date_list]
 
-    segment_geom = (
-        dask_utils.get_ddf(
-            paths, analysis_date_list, data_type="gdf", get_pandas=False, add_date=False, columns=segment_cols
-        )
-        .drop_duplicates()
-        .to_crs(WGS84)
-        .compute()
-    )
+    segment_geom = dask_utils.get_ddf(
+        paths, analysis_date_list, data_type="gdf", get_pandas=False, add_date=False, columns=segment_cols
+    ).drop_duplicates()
+    segment_geom = dg.from_dask_dataframe(segment_geom).compute().to_crs(WGS84)
 
     col_order = [c for c in speeds_by_segment.columns]
 

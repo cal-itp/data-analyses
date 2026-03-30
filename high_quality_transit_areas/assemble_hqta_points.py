@@ -58,11 +58,12 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     major_stop_bus_branching = catalog.major_stop_bus_branching().read().to_crs(crs)
     stops_in_corridor = catalog.stops_in_hq_corr().read().to_crs(crs)
 
-    # ensure rail stops aren't included as corridor bus stops
+    # ensure rail/ferry/brt stops aren't included as corridor bus stops
     stops_in_corridor = stops_in_corridor.merge(
         rail_ferry_brt[["schedule_gtfs_dataset_key_primary", "stop_id"]],
         on=["schedule_gtfs_dataset_key_primary", "stop_id"],
         indicator=True,
+        how="left",
     )
     stops_in_corridor = stops_in_corridor[stops_in_corridor._merge == "left_only"].drop(columns=["_merge"])
 

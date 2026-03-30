@@ -7,14 +7,11 @@ parts:
       district: 01 - Eureka
     sections:
     - analysis_name: Humboldt Transit Authority
-    - analysis_name: Lake Transit Authority
     - analysis_name: Mendocino Transit Authority
-    - analysis_name: Redwood Coast Transit Authority
   - caption: District 02 - Redding
     params:
       district: 02 - Redding
     sections:
-    - analysis_name: Redding Area Bus Authority
     - analysis_name: Tehama County
   - caption: District 03 - Marysville / Sacramento
     params:
@@ -22,8 +19,11 @@ parts:
     sections:
     - analysis_name: Butte County Association of Governments
     - analysis_name: City of Elk Grove
+    - analysis_name: City of Roseville
+    - analysis_name: Nevada County
     - analysis_name: Sacramento Regional Transit District
     - analysis_name: University of California, Davis
+    - analysis_name: None
   - caption: District 04 - Bay Area / Oakland
     params:
       district: 04 - Bay Area / Oakland
@@ -34,7 +34,6 @@ parts:
     - analysis_name: City and County of San Francisco
     - analysis_name: City of Fairfield
     - analysis_name: City of Santa Rosa
-    - analysis_name: City of Union City
     - analysis_name: City of Vacaville
     - analysis_name: Eastern Contra Costa Transit Authority
     - analysis_name: Emeryville Transportation Management Agency
@@ -51,6 +50,7 @@ parts:
     - analysis_name: Solano Transportation Authority
     - analysis_name: Sonoma County Transit Schedule
     - analysis_name: Sonoma-Marin Area Rail Transit District
+    - analysis_name: University of California, Berkeley
     - analysis_name: Western Contra Costa Transit Authority
   - caption: District 05 - San Luis Obispo / Santa Barbara
     params:
@@ -60,17 +60,17 @@ parts:
     - analysis_name: Monterey-Salinas Transit
     - analysis_name: San Luis Obispo Regional Transit Authority
     - analysis_name: Santa Barbara Metropolitan Transit District
-    - analysis_name: UCSC and City of Santa Cruz Beach Shuttle
+    - analysis_name: Santa Cruz Metropolitan Transit District
   - caption: District 06 - Fresno / Bakersfield
     params:
       district: 06 - Fresno / Bakersfield
     sections:
     - analysis_name: City of Fresno
-    - analysis_name: City of Visalia
     - analysis_name: Golden Empire Transit District
     - analysis_name: Kern County
     - analysis_name: Kings County Area Public Transit Agency
     - analysis_name: Madera County
+    - analysis_name: Tulare County Regional Transit Agency
   - caption: District 07 - Los Angeles / Ventura
     params:
       district: 07 - Los Angeles / Ventura
@@ -82,6 +82,7 @@ parts:
     - analysis_name: City of Culver City
     - analysis_name: City of Downey
     - analysis_name: City of Gardena
+    - analysis_name: City of Lawndale
     - analysis_name: City of Los Angeles
     - analysis_name: City of Montebello
     - analysis_name: City of Monterey Park
@@ -91,6 +92,7 @@ parts:
     - analysis_name: City of Santa Clarita
     - analysis_name: City of Santa Monica
     - analysis_name: City of Torrance
+    - analysis_name: Foothill Transit
     - analysis_name: Long Beach Transit
     - analysis_name: Los Angeles County Metropolitan Transportation Authority
     - analysis_name: University of California, Los Angeles
@@ -104,7 +106,9 @@ parts:
     - analysis_name: City of Beaumont
     - analysis_name: OmniTrans
     - analysis_name: Riverside Transit Agency
+    - analysis_name: Southern California Regional Rail Authority
     - analysis_name: SunLine Transit Agency
+    - analysis_name: None
   - caption: District 09 - Bishop
     params:
       district: 09 - Bishop
@@ -119,7 +123,9 @@ parts:
     - analysis_name: City of Turlock
     - analysis_name: San Joaquin Regional Rail Commission
     - analysis_name: San Joaquin Regional Transit District
+    - analysis_name: Stanislaus Regional Transit Authority
     - analysis_name: Tuolumne County Transit Agency
+    - analysis_name: None
   - caption: District 11 - San Diego
     params:
       district: 11 - San Diego
