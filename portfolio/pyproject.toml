@@ -1,0 +1,21 @@
+[project]
+name = "portfolio"
+version = "0.1.0"
+requires-python = ">=3.11.0, <3.12.0"
+dependencies = [
+    "shared-utils",
+    "axe-selenium-python",
+    "humanize~=4.6",
+    "jupyter-book==2.1.1",
+    "nbformat~=5.8",
+    "papermill~=2.4",
+    "pydantic>=2.0",
+    "pyaml==21.10.1",
+    "typer~=0.9",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+shared-utils = { workspace = true }
