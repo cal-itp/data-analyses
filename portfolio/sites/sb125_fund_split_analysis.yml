@@ -1,5 +1,6 @@
 title: SB125 Fund Split Analysis
 directory: sb125_analyses/sb125_fund_split_analysis/
 readme: ./sb125_analyses/sb125_fund_split_analysis/README.md
-chapters:
-  - notebook: ./sb125_analyses/sb125_fund_split_analysis/sb125_fund_split_analysis.ipynb
+parts:
+  - chapters:
+    - notebook: ./sb125_analyses/sb125_fund_split_analysis/sb125_fund_split_analysis.ipynb
