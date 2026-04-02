@@ -426,7 +426,10 @@ def clean(
     """
     Cleans the portfolio folder for a given site.
     """
-    shutil.rmtree(PORTFOLIO_DIR / Path(site))
+    try:
+        shutil.rmtree(PORTFOLIO_DIR / Path(site))
+    except FileNotFoundError:
+        None
 
 
 @app.command()

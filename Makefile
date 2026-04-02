@@ -5,7 +5,7 @@
 # make build_portfolio_site site='MY_SITE_IDENTIFIER'
 build_portfolio_site:
 	cd portfolio/ && pip install -r requirements.txt && cd ../
-	#python portfolio/portfolio.py clean $(site)
+	python portfolio/portfolio.py clean $(site)
 	python portfolio/portfolio.py build $(site)
 	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra
 	python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy --target production
@@ -16,7 +16,7 @@ build_portfolio_site:
 # make build_staging_portfolio_site site='MY_SITE_IDENTIFIER'
 build_staging_portfolio_site:
 	cd portfolio/ && pip install -r requirements.txt && cd ../
-	#python portfolio/portfolio.py clean $(site)
+	python portfolio/portfolio.py clean $(site)
 	gcloud auth login --login-config=iac/login.json
 	python portfolio/portfolio.py build $(site)
 	python portfolio/portfolio.py build $(site) --no-execute-papermill --deploy --target staging
@@ -33,14 +33,7 @@ build_staging_portfolio_index:
 # Build locally the Portfolio Site without deploying with:
 # make test_build_portfolio_site site='MY_SITE_IDENTIFIER'
 test_build_portfolio_site:
-	#python portfolio/portfolio.py clean $(site)
-	#gcloud auth login --login-config=iac/login.json
-	python portfolio/portfolio.py build $(site)
-
-# Build locally the Portfolio Site without deploying with:
-# make test_build_portfolio_site site='MY_SITE_IDENTIFIER'
-test_build_portfolio_site:
-	#python portfolio/portfolio.py clean $(site)
+	python portfolio/portfolio.py clean $(site)
 	#gcloud auth login --login-config=iac/login.json
 	python portfolio/portfolio.py build $(site)
 
