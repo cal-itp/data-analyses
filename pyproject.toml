@@ -32,6 +32,7 @@ portfolio = [
     "pydantic>=2.0",
     "pyaml==21.10.1",
     "typer~=0.9",
+    "msgpack>=1.1.2",
 ]
 test = [
     { include-group = "dev" },
