@@ -6,10 +6,10 @@ and get it ready for visualization.
 import gcsfs
 import geopandas as gpd
 import google.auth
+import outlier_detection
 import pandas as pd
 import report_utils
 from calitp_data_analysis import utils
-from outlier_detection import remove_outliers
 from rt_msa_utils import PREDICTIONS_GCS, RT_MSA_DICT
 
 credentials, project = google.auth.default()
@@ -99,7 +99,7 @@ def merge_stops_with_route_info(filename: str) -> gpd.GeoDataFrame:
             avg_prediction_spread_minutes=stop_gdf.avg_prediction_spread_minutes.round(2),
         )
         .pipe(report_utils.convert_seconds_to_minutes, "avg_prediction_error_sec")
-        .pipe(remove_outliers)
+        .pipe(outlier_detection.remove_outliers)
         .pipe(
             categorize_prediction_error,
             "avg_prediction_error_minutes",
@@ -123,8 +123,12 @@ def merge_stops_with_route_info(filename: str) -> gpd.GeoDataFrame:
     return stop_with_route_gdf
 
 
-def clean_route_file(filename: str):
-    """ """
+def clean_route_file(filename: str) -> pd.DataFrame:
+    """
+    Removing outliers (stops removed 1% on each tail, cutoff was 5 min).
+    for routes, use same 5 min cutoff, and this removes less than 1% on each tail.
+    1% on each tail is around 3.5 min.
+    """
     route_df = pd.read_parquet(
         f"{PREDICTIONS_GCS}{filename}.parquet",
         filesystem=gcsfs.GCSFileSystem(),
@@ -135,6 +139,10 @@ def clean_route_file(filename: str):
             bus_catch_likelihood=(route_df.n_predictions_early + route_df.n_predictions_ontime)
             .divide(route_df.n_predictions)
             .round(3),
+            pct_tu_complete_minutes=route_df.n_tu_complete_minutes.divide(route_df.n_tu_minutes_available).round(3),
+        )
+        .pipe(
+            outlier_detection.drop_outliers, outlier_detection.MIN_ERROR_SEC_5MIN, outlier_detection.MAX_ERROR_SEC_5MIN
         )
         .pipe(report_utils.convert_seconds_to_minutes, "avg_prediction_error_sec")
         .pipe(
@@ -166,12 +174,11 @@ def clean_route_file(filename: str):
         group_cols,
         array_col="scaled_prediction_error_sec_array",
         ptile_array_col="scaled_prediction_error_sec_percentile_array",
-        ptiles_to_keep=PTILES_TO_DISPLAY,
+        ptiles_to_keep=[25, 75],
     ).rename(
         columns={
-            **{f"p{i}": f"scaled_p{i}" for i in PTILES_TO_DISPLAY},
+            **{f"p{i}": f"scaled_p{i}" for i in [25, 75]},
             "iqr": "scaled_iqr",
-            "p5": "scaled_prediction_padding",
         }
     )
 
@@ -193,7 +200,7 @@ def clean_route_file(filename: str):
 
     # prediction padding is absolute value of 5th percentile, make that explicit here
     percentiles_df = pd.merge(
-        scaled_df.assign(scaled_prediction_padding=scaled_df.scaled_prediction_padding.abs()),
+        scaled_df,
         unscaled_df.assign(prediction_padding=unscaled_df.prediction_padding.abs()),
         on=group_cols,
         how="inner",
@@ -202,6 +209,28 @@ def clean_route_file(filename: str):
     route_df2 = pd.merge(route_df, percentiles_df, on=group_cols, how="inner")
 
     return route_df2
+
+
+def merge_in_route_geom(route_df: pd.DataFrame, route_geom_filename: str) -> gpd.GeoDataFrame:
+    """ """
+    route_geom = (
+        gpd.read_parquet(
+            f"{PREDICTIONS_GCS}{route_geom_filename}.parquet",
+            storage_options={"token": credentials.token},
+            columns=["month_first_day", "name", "route_name", "direction_id", "geometry"],
+        )
+        .pipe(report_utils.add_route_direction_column)
+        .drop(columns=["route_name", "direction_id"])
+    )
+
+    route_gdf = pd.merge(
+        route_geom.rename(columns={"name": "schedule_name"}),
+        route_df,
+        on=["month_first_day", "schedule_name", "route_dir_name"],
+        how="inner",
+    )
+
+    return route_gdf
 
 
 if __name__ == "__main__":
@@ -217,7 +246,9 @@ if __name__ == "__main__":
     utils.geoparquet_gcs_export(stop_with_route_gdf, PREDICTIONS_GCS, TU_STOP_CLEANED)
 
     TU_ROUTE_DOWNLOADED = DOWNLOADED_DICT.weekday_route_direction_grain
-    TU_ROUTE_CLEANED = PROCESSED_DICT.weekday_route_direction
+    ROUTE_GEOM_FILE = DOWNLOADED_DICT.route_geom
 
-    route_cleaned = clean_route_file(TU_ROUTE_DOWNLOADED)
-    route_cleaned.to_parquet(f"{PREDICTIONS_GCS}{TU_ROUTE_CLEANED}.parquet", filesystem=gcsfs.GCSFileSystem())
+    TU_ROUTE_CLEANED = PROCESSED_DICT.weekday_route_direction
+    route_cleaned = clean_route_file(TU_ROUTE_DOWNLOADED).pipe(merge_in_route_geom, ROUTE_GEOM_FILE)
+
+    utils.geoparquet_gcs_export(route_cleaned, PREDICTIONS_GCS, TU_ROUTE_CLEANED)
