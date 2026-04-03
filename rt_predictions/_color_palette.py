@@ -48,3 +48,9 @@ PREDICTION_ERROR_COLOR_PALETTE = {
     "1-3 min early": get_color("aquatic"),
     "3-5 min early": get_color("metro_blue"),
 }
+
+DAY_TYPE_COLOR_PALETTE = {
+    "Weekday": get_color("earls_green"),
+    "Saturday": get_color("lady_blue"),
+    "Sunday": get_color("valentino"),
+}
