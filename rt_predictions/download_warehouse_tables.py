@@ -40,7 +40,6 @@ if __name__ == "__main__":
 
     utils.geoparquet_gcs_export(monthly_stops, PREDICTIONS_GCS, "monthly_schedule_rt_stops")
 
-    # need to download again
     stop_order = bq_utils.download_table(
         project_name=PRODUCTION_PROJECT,
         dataset_name="staging",
@@ -67,7 +66,6 @@ if __name__ == "__main__":
         f"{PREDICTIONS_GCS}monthly_tu_route_direction_summary.parquet", filesystem=gcsfs.GCSFileSystem()
     )
 
-    # download this again
     monthly_operator_summary = bq_utils.download_table(
         project_name=PRODUCTION_PROJECT,
         dataset_name=PRODUCTION_MART_ROLLUP,
