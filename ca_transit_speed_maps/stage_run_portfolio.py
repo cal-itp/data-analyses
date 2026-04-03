@@ -38,10 +38,10 @@ def deploy_portfolio():
 if __name__ == "__main__":
 
     speedmaps_index_joined = pd.read_parquet(PROGRESS_PATH).sort_values(["caltrans_district", "analysis_name"])
-    portfolio_utils.create_portfolio_yaml_chapters_no_sections(
+    portfolio_utils.create_portfolio_yaml_chapters_with_groups(
         portfolio_site_yaml="../portfolio/sites/rt.yml",
         df=speedmaps_index_joined,
-        section_info={"column": "analysis_name", "name": "analysis_name"},
+        param_info={"column": "analysis_name", "name": "analysis_name"},
     )
     stage_portfolio()
     deploy_portfolio()

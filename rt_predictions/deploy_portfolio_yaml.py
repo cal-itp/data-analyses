@@ -48,8 +48,7 @@ def create_portfolio_yaml_chapters_no_sections(portfolio_site_yaml: Path, chapte
     chapters_list = [{**{"params": {chapter_name: str(one_chapter_value)}}} for one_chapter_value in chapter_values]
 
     # Make this into a list item
-    parts_list = [{"caption": "Introduction"}, {"chapters": chapters_list}]
-    site_yaml_dict["parts"] = parts_list
+    site_yaml_dict["parts"] = [{"chapters": chapters_list}]
 
     # dump this dict into the yaml and overwrite existing file
     output = yaml.dump(site_yaml_dict)
