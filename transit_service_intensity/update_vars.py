@@ -7,5 +7,5 @@ GEOM_INPUT_PATH = f'{GCS_PATH}{INPUT_GEOM_PATHS["urbanized_areas"]}'
 GEOM_ID_COL = "uace20"  # a natural identifier for input geometries, such as a census geoid or county name
 GEOM_SUBFOLDER = "urbanized_areas/"
 
-ANALYSIS_DATE = rt_dates.DATES["jul2025"]
+ANALYSIS_DATE = rt_dates.DATES["feb2026"]
 BORDER_BUFFER_METERS = 35
