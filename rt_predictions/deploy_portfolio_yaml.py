@@ -22,6 +22,7 @@ import yaml
 # from shared_utils import portfolio_utils
 
 RT_TRIP_UPDATES_STOP_YAML = Path("../portfolio/sites/rt_trip_updates_stop_metrics.yml")
+RT_TRIP_UPDATES_OPERATOR_YAML = Path("../portfolio/sites/rt_trip_updates_operator_metrics.yml")
 
 credentials, project = google.auth.default()
 fs = gcsfs.GCSFileSystem()
@@ -48,7 +49,8 @@ def create_portfolio_yaml_chapters_no_sections(portfolio_site_yaml: Path, chapte
     chapters_list = [{**{"params": {chapter_name: str(one_chapter_value)}}} for one_chapter_value in chapter_values]
 
     # Make this into a list item
-    site_yaml_dict["parts"] = [{"chapters": chapters_list}]
+    parts_list = [{"caption": "Introduction"}, {"chapters": chapters_list}]
+    site_yaml_dict["parts"] = parts_list
 
     # dump this dict into the yaml and overwrite existing file
     output = yaml.dump(site_yaml_dict)
@@ -105,6 +107,33 @@ def check_stop_and_route_counts(one_month: str):
     return count_df
 
 
+def check_route_counts(one_month: str):
+    """
+    Filter the dfs the same way in the stop report,
+    and grab the operators that can be populated .
+    """
+    filtering = [
+        [
+            ("month_first_day", "==", pd.to_datetime(one_month)),
+            ("schedule_name", "!=", "Bay Area 511 Regional Schedule"),
+        ]
+    ]
+
+    route_df = (
+        report_utils.import_route_df(
+            filters=filtering,
+            columns=[
+                "schedule_name",
+                "tu_name",
+            ],
+        )
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+
+    return route_df
+
+
 @app.command()
 def overwrite_yaml(name: str = typer.Argument(default="rt_msa"), month: str = ""):
     """
@@ -116,7 +145,15 @@ def overwrite_yaml(name: str = typer.Argument(default="rt_msa"), month: str = ""
 
         # TODO: extend for ability to do 2 entries, tu_name/schedule_name
         create_portfolio_yaml_chapters_no_sections(
-            RT_TRIP_UPDATES_STOP_YAML, chapter_name="name", chapter_values=sorted(list(df.tu_name.unique()))
+            RT_TRIP_UPDATES_STOP_YAML, chapter_name="name", chapter_values=sorted(list(df.tu_name))
+        )
+
+    elif name == "rt_msa_operators":
+        print(month)
+        df = check_route_counts(month)
+
+        create_portfolio_yaml_chapters_no_sections(
+            RT_TRIP_UPDATES_OPERATOR_YAML, chapter_name="name", chapter_values=sorted(list(df.tu_name))
         )
 
     return
