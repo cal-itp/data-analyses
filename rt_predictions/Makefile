@@ -27,5 +27,7 @@ operator_report:
     #cd ../portfolio/ && pip install -r requirements.txt && cd ../
     cd ../ && python portfolio/portfolio.py clean test_tu
     gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra # will need to authenticate this step
-    python portfolio/portfolio.py build test_tu --hide-title-block --deploy
+    #python portfolio/portfolio.py build test_tu
+    # still set H1, hide title instead
+    python portfolio/portfolio.py build test_tu --hide-title-block --deploy --target staging
     python portfolio/portfolio.py index --deploy --no-prod
