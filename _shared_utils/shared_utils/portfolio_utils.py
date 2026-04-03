@@ -21,9 +21,7 @@ def gcs_pandas():
     return GCSPandas()
 
 
-def create_portfolio_yaml_chapters_no_sections(
-    portfolio_site_yaml: Path, chapter_name: str, chapter_values: list, group_caption: str = None
-):
+def create_portfolio_yaml_chapters_no_sections(portfolio_site_yaml: Path, chapter_name: str, chapter_values: list):
     """
     Overwrite a portfolio site yaml by filling in all the parameters.
     Chapters no sections refer to analyses parameterized by 1 value.
@@ -41,12 +39,88 @@ def create_portfolio_yaml_chapters_no_sections(
 
     chapters_list = [{**{"params": {chapter_name: str(one_chapter_value)}}} for one_chapter_value in chapter_values]
 
-    # Make this into a list item
-    part = {"chapters": chapters_list}
-    if group_caption:
-        part["caption"] = group_caption
+    # Make part into a list item
+    site_yaml_dict["parts"] = [{"chapters": chapters_list}]
 
-    site_yaml_dict["parts"] = [part]
+    # dump this dict into the yaml and overwrite existing file
+    output = yaml.dump(site_yaml_dict)
+
+    with open(portfolio_site_yaml, "w") as f:
+        f.write(output)
+
+    print(f"{portfolio_site_yaml} generated")
+
+    return
+
+
+def create_portfolio_yaml_chapters_with_groups(
+    portfolio_site_yaml: Path,
+    df: pd.DataFrame,
+    chapter_info: dict = {
+        "column": "caltrans_district",
+        "caption_prefix": "District ",
+        "caption_suffix": "",
+    },
+    param_info: dict = {
+        "column": "organization_name",
+        "name": "organization_name",
+    },
+):
+    """
+    Overwrite a portfolio site yaml by filling in all the parameters.
+    Grouped Chapters refer to nested analyses.
+    An example is a report parameterized for the transit operator,
+    and several operators are grouped by under a Caltrans District.
+    The operator pages are accessed by a dropdown under Caltrans District.
+
+    portfolio_site_yaml: str | Path
+        relative path to where the yaml is for portfolio
+        '../portfolio/sites/gtfs_digest.yml'
+
+    Example: Use the column "caltrans_district" which holds values like
+    "04 - Oakland". We want to display "District 04 - Oakland, CA",
+    so we can make use of prefix and suffix.
+
+    chapter_info: dict = {
+        "column": "caltrans_district",
+        # column from df for parameterized values is the label/key on the yaml
+        "caption_prefix": "District ",
+        "caption_suffix": ", CA"
+        # caption format is caption_prefix + chapter_value + caption_suffix
+
+    },
+    param_info: dict = {
+        "column": "organization_name",
+        "name": "organization",
+    }
+    """
+    chapter_col = chapter_info["column"]
+    chapter_values = sorted(list(df[chapter_col].unique()))
+
+    # Eric's example
+    # https://github.com/cal-itp/data-analyses/blob/main/rt_delay/04_generate_all.ipynb
+    with open(portfolio_site_yaml) as f:
+        site_yaml_dict = yaml.load(f, yaml.Loader)
+
+    # Loop through each chapter (district) and params (operators)
+    param_col = param_info["column"]
+    caption_prefix = chapter_info["caption_prefix"]
+    caption_suffix = chapter_info["caption_suffix"]
+
+    chapters_list = [
+        {
+            **{
+                "caption": f"{caption_prefix}{one_chapter_value}{caption_suffix}",
+                "chapters": [
+                    {"params": {param_info["name"]: str(one_param_value)}}
+                    for one_param_value in df[df[chapter_col] == one_chapter_value][param_col].unique().tolist()
+                ],
+            }
+        }
+        for one_chapter_value in chapter_values
+    ]
+
+    site_yaml_dict["parts"] = chapters_list
 
     # dump this dict into the yaml and overwrite existing file
     output = yaml.dump(site_yaml_dict)

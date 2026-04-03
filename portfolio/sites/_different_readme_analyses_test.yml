@@ -1,6 +1,0 @@
-title: Different Readme Analyses Test
-directory: ./tests/fixtures/portfolio/
-readme: ./tests/fixtures/portfolio/README_SIMPLE.md
-parts:
-  - chapters:
-    - notebook: ./tests/fixtures/portfolio/notebook_new_readme_1.ipynb
