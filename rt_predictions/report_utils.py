@@ -16,8 +16,12 @@ from rt_msa_utils import PREDICTIONS_GCS, RT_MSA_DICT
 
 credentials, project = google.auth.default()
 
+DAYTYPE_ORDER_DICT = {"Weekday": 1, "Saturday": 2, "Sunday": 3}
 
-def explode_percentiles(df: pd.DataFrame, group_cols: list, array_col: str, ptile_array_col: str, ptiles_to_keep: list):
+
+def explode_percentiles(
+    df: pd.DataFrame, group_cols: list, array_col: str, ptile_array_col: str, ptiles_to_keep: list, pivoted: bool = True
+):
     subset_df = (
         df[group_cols + [array_col, ptile_array_col]]
         .explode([array_col, ptile_array_col])
@@ -26,15 +30,18 @@ def explode_percentiles(df: pd.DataFrame, group_cols: list, array_col: str, ptil
         .astype({array_col: float, ptile_array_col: int})
     )
 
-    pivoted_df = subset_df.pivot(index=group_cols, columns=ptile_array_col, values=array_col).reset_index()
+    if pivoted:
+        pivoted_df = subset_df.pivot(index=group_cols, columns=ptile_array_col, values=array_col).reset_index()
 
-    pivoted_df = pivoted_df.rename(columns={c: f"p{c}" for c in ptiles_to_keep})
+        pivoted_df = pivoted_df.rename(columns={c: f"p{c}" for c in ptiles_to_keep})
 
-    # if IQR can be calculated, calculate it as a new column
-    if (25 in ptiles_to_keep) and (75 in ptiles_to_keep):
-        pivoted_df = pivoted_df.assign(iqr=pivoted_df.p75 - pivoted_df.p25)
+        # if IQR can be calculated, calculate it as a new column
+        if (25 in ptiles_to_keep) and (75 in ptiles_to_keep):
+            pivoted_df = pivoted_df.assign(iqr=pivoted_df.p75 - pivoted_df.p25)
 
-    return pivoted_df
+        return pivoted_df
+    else:
+        return subset_df
 
 
 def convert_seconds_to_minutes(
@@ -60,22 +67,25 @@ def add_route_direction_column(df: pd.DataFrame) -> pd.DataFrame:
 
 def import_stop_df(**kwargs) -> gpd.GeoDataFrame:
     """ """
-    gdf = gpd.read_parquet(
-        f"{PREDICTIONS_GCS}{RT_MSA_DICT.rt_schedule_models.weekday_stop_with_route}.parquet",
-        storage_options={"token": credentials.token},
-        **kwargs,
-    )
+    filename = f"{PREDICTIONS_GCS}{RT_MSA_DICT.rt_schedule_models.weekday_stop_with_route}.parquet"
 
-    return gdf
+    # If specific columns are defined, and one of those is geometry, use geopandas
+    if "columns" in kwargs and "geometry" in kwargs["columns"]:
+        df = gpd.read_parquet(filename, storage_options={"token": credentials.token}, **kwargs)
+    else:
+        df = pd.read_parquet(filename, filesystem=gcsfs.GCSFileSystem(), **kwargs)
+    return df
 
 
-def import_route_df(**kwargs) -> pd.DataFrame:
+def import_route_df(**kwargs) -> gpd.GeoDataFrame:
     """ """
-    df = pd.read_parquet(
-        f"{PREDICTIONS_GCS}{RT_MSA_DICT.rt_schedule_models.weekday_route_direction}.parquet",
-        filesystem=gcsfs.GCSFileSystem(),
-        **kwargs,
-    )
+    filename = f"{PREDICTIONS_GCS}{RT_MSA_DICT.rt_schedule_models.weekday_route_direction}.parquet"
+
+    # If specific columns are defined, and one of those is geometry, use geopandas
+    if "columns" in kwargs and "geometry" in kwargs["columns"]:
+        df = gpd.read_parquet(filename, storage_options={"token": credentials.token}, **kwargs)
+    else:
+        df = pd.read_parquet(filename, filesystem=gcsfs.GCSFileSystem(), **kwargs)
 
     return df
 
@@ -156,8 +166,24 @@ def merge_route_to_stop_for_nanoplot(route_df: pd.DataFrame, stop_df: gpd.GeoDat
         .astype({c: int for c in early_late_cols})
     )
 
-    # df = df.assign(
-    # early_late_stop_counts = df.apply(lambda x: list([x.n_early_stops, x.n_late_stops]), axis=1)
-    # ).drop(columns = early_late_cols)
+    return df
+
+
+def import_operator_df(**kwargs) -> pd.DataFrame:
+    """ """
+    # subset columns
+    df = pd.read_parquet(
+        f"{PREDICTIONS_GCS}{RT_MSA_DICT.dbt_model_downloads.weekday_operator_grain}.parquet",
+        filesystem=gcsfs.GCSFileSystem(),
+        **kwargs,
+    )
+
+    # in deploy script, need to drop rows where any of this is present
+    # if we don't, we'll have dupes
+    # can't drop duplicates earlier with arrays
+    # operators may not have both RT data, so sometimes one will be missing
+    for c in ["schedule_name", "vp_name", "tu_name"]:
+        if c in df.columns:
+            df = df.dropna(subset=c).reset_index(drop=True)
 
     return df
