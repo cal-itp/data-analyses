@@ -40,10 +40,11 @@ if __name__ == "__main__":
 
     utils.geoparquet_gcs_export(monthly_stops, PREDICTIONS_GCS, "monthly_schedule_rt_stops")
 
+    # need to download again
     stop_order = bq_utils.download_table(
-        project_name="cal-itp-data-infra-staging",
-        dataset_name="tiffany_staging",
-        table_name="test_int_gtfs_schedule__stop_order_by_route",
+        project_name=PRODUCTION_PROJECT,
+        dataset_name="staging",
+        table_name="int_gtfs_schedule__stop_order_by_route",
         date_col="_valid_from_service_date",
         start_date="2025-12-01",
         end_date="2026-03-01",
@@ -66,9 +67,10 @@ if __name__ == "__main__":
         f"{PREDICTIONS_GCS}monthly_tu_route_direction_summary.parquet", filesystem=gcsfs.GCSFileSystem()
     )
 
+    # download this again
     monthly_operator_summary = bq_utils.download_table(
-        project_name="cal-itp-data-infra-staging",
-        dataset_name="tiffany_mart_gtfs_rollup",
+        project_name=PRODUCTION_PROJECT,
+        dataset_name=PRODUCTION_MART_ROLLUP,
         table_name="fct_monthly_operator_summary",
         date_col="month_first_day",
         start_date="2025-12-01",
@@ -80,8 +82,8 @@ if __name__ == "__main__":
     )
 
     monthly_routes = bq_utils.download_table(
-        project_name="cal-itp-data-infra",
-        dataset_name="mart_gtfs_rollup",
+        project_name=PRODUCTION_PROJECT,
+        dataset_name=PRODUCTION_MART_ROLLUP,
         table_name="fct_monthly_routes",
         date_col="month_first_day",
         start_date="2025-12-01",
