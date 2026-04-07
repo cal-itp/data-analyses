@@ -17,9 +17,7 @@ import google.auth
 import pandas as pd
 import report_utils
 import typer
-import yaml
-
-# from shared_utils import portfolio_utils
+from shared_utils import portfolio_utils
 
 RT_TRIP_UPDATES_STOP_YAML = Path("../portfolio/sites/rt_trip_updates_stop_metrics.yml")
 RT_TRIP_UPDATES_OPERATOR_YAML = Path("../portfolio/sites/rt_trip_updates_operator_metrics.yml")
@@ -28,39 +26,6 @@ credentials, project = google.auth.default()
 fs = gcsfs.GCSFileSystem()
 
 app = typer.Typer()
-
-
-def create_portfolio_yaml_chapters_no_sections(portfolio_site_yaml: Path, chapter_name: str, chapter_values: list):
-    """
-    Overwrite a portfolio site yaml by filling in all the parameters.
-    Chapters no sections refer to analyses parameterized by 1 value.
-    An example is a report parameterized for each Caltrans District,
-    where each district has a page, but there is no dropdown below the district.
-
-    chapter_name: this is the label/key on the yaml
-
-    chapter_values: list of values used to parameterize notebook
-        ex: list of districts [1, 2, 3, ..., 12]
-        ex: list of district names ["04 - Oakland", "07 - Los Angeles"]
-    """
-    with open(portfolio_site_yaml) as f:
-        site_yaml_dict = yaml.load(f, yaml.Loader)
-
-    chapters_list = [{**{"params": {chapter_name: str(one_chapter_value)}}} for one_chapter_value in chapter_values]
-
-    # Make this into a list item
-    parts_list = [{"caption": "Introduction"}, {"chapters": chapters_list}]
-    site_yaml_dict["parts"] = parts_list
-
-    # dump this dict into the yaml and overwrite existing file
-    output = yaml.dump(site_yaml_dict)
-
-    with open(portfolio_site_yaml, "w") as f:
-        f.write(output)
-
-    print(f"{portfolio_site_yaml} generated")
-
-    return
 
 
 def check_stop_and_route_counts(one_month: str):
@@ -109,7 +74,7 @@ def check_stop_and_route_counts(one_month: str):
 
 def check_route_counts(one_month: str):
     """
-    Filter the dfs the same way in the stop report,
+    Filter the dfs the same way in the route report,
     and grab the operators that can be populated .
     """
     filtering = [
@@ -119,6 +84,9 @@ def check_route_counts(one_month: str):
         ]
     ]
 
+    # TODO: should portfolio_utils be extended to include multiple params that move together?
+    # simpler to have 1 param. Here, tu_name would be used, since the same schedule_name
+    # can appear for different tu_names (Marin Swiftly/Equans or Torrance).
     route_df = (
         report_utils.import_route_df(
             filters=filtering,
@@ -143,8 +111,7 @@ def overwrite_yaml(name: str = typer.Argument(default="rt_msa"), month: str = ""
         print(month)
         df = check_stop_and_route_counts(month)
 
-        # TODO: extend for ability to do 2 entries, tu_name/schedule_name
-        create_portfolio_yaml_chapters_no_sections(
+        portfolio_utils.create_portfolio_yaml_chapters_no_sections(
             RT_TRIP_UPDATES_STOP_YAML, chapter_name="name", chapter_values=sorted(list(df.tu_name))
         )
 
@@ -152,7 +119,7 @@ def overwrite_yaml(name: str = typer.Argument(default="rt_msa"), month: str = ""
         print(month)
         df = check_route_counts(month)
 
-        create_portfolio_yaml_chapters_no_sections(
+        portfolio_utils.create_portfolio_yaml_chapters_no_sections(
             RT_TRIP_UPDATES_OPERATOR_YAML, chapter_name="name", chapter_values=sorted(list(df.tu_name))
         )
 

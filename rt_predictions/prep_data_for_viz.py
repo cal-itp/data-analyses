@@ -62,7 +62,17 @@ def categorize_prediction_error(
 
 
 def import_stop_order_by_route(**kwargs) -> pd.DataFrame:
-    """ """
+    """
+    Import int_gtfs_schedule__stop_order_by_route.
+
+    This is feed-route-direction-stop grain.
+    It is possible for multiple feed_keys to be active for the month.
+
+    For viz, the stops should roughly be plotted by the order they appear
+    for each route-direction.
+    Take average across feed_keys for avg(stop_sequence) (not meaningful beyond sorting)
+    and assign a stop_rank (whole number).
+    """
     df = pd.read_parquet(
         f"{PREDICTIONS_GCS}{RT_MSA_DICT.dbt_model_downloads.stop_order}.parquet",
         filesystem=gcsfs.GCSFileSystem(),
@@ -88,7 +98,15 @@ def import_stop_order_by_route(**kwargs) -> pd.DataFrame:
 
 
 def merge_stops_with_route_info(filename: str) -> gpd.GeoDataFrame:
-    """ """
+    """
+    Stop metrics should have route-direction + stop_rank attached.
+    Merge stop metrics with result returned from import_stop_order_by_route().
+
+    Derive several more metrics, drop outliers, handle unit conversions, rounding.
+        - bus catch likelihood - sum of early + on-time predictions,
+        - prediction error categorized (we can adjust this for viz)
+    Note: Since stops can serve multiple routes, the same metrics will show up for both routes.
+    """
     stop_gdf = gpd.read_parquet(
         f"{PREDICTIONS_GCS}{filename}.parquet",
         storage_options={"token": credentials.token},
@@ -125,6 +143,13 @@ def merge_stops_with_route_info(filename: str) -> gpd.GeoDataFrame:
 
 def clean_route_file(filename: str) -> pd.DataFrame:
     """
+    Clean route metrics.
+
+    Derive more metrics, drop outliers, handle unit conversions, rounding.
+        - bus catch likelihood - sum of early + on-time predictions,
+        - prediction error categorized (we can adjust this for viz)
+        - unpack percentile arrays for ones to visualize (IQR, prediction_padding, can adjust to have more too)
+
     Removing outliers (stops removed 1% on each tail, cutoff was 5 min).
     for routes, use same 5 min cutoff, and this removes less than 1% on each tail.
     1% on each tail is around 3.5 min.
@@ -212,7 +237,9 @@ def clean_route_file(filename: str) -> pd.DataFrame:
 
 
 def merge_in_route_geom(route_df: pd.DataFrame, route_geom_filename: str) -> gpd.GeoDataFrame:
-    """ """
+    """
+    Merge route metrics with fct_monthly_routes to get the line geometry.
+    """
     route_geom = (
         gpd.read_parquet(
             f"{PREDICTIONS_GCS}{route_geom_filename}.parquet",
