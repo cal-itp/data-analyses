@@ -155,7 +155,7 @@ def pct_completeness_line_chart(
             dropdown_selection=dropdown_selection,
             is_faceted=False,
         )
-        .mark_point(size=10, strokeWidth=2)
+        .mark_point(size=8, strokeWidth=2)
         .encode(color=alt.value(_color_palette.get_color("lady_blue")))
     )
 
@@ -244,7 +244,7 @@ def prediction_spread_line_chart(
             dropdown_selection=dropdown_selection,
             is_faceted=False,
         )
-        .mark_point(size=10, strokeWidth=2)
+        .mark_point(size=8, strokeWidth=2)
         .encode(color=alt.value(_color_palette.get_color("valentino")))
     )
 
@@ -473,7 +473,7 @@ def stripplot_by_route(gdf: pd.DataFrame, plot_col: str = "pct_tu_complete_minut
 
     chart = (
         alt.Chart(gdf2)
-        .mark_point(size=10)
+        .mark_point(size=8)
         .encode(
             x=alt.X("day_type:N", sort=["Weekday", "Saturday", "Sunday"]),
             y=alt.Y(f"{plot_col}:Q", scale=alt.Scale(domain=[Y_MIN, 100])),
