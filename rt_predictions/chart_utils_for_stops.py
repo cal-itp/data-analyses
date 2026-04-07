@@ -20,7 +20,11 @@ def chart_ordered_by_stop(
     dropdown_selection: alt.Parameter = None,
     is_faceted: bool = False,
 ) -> alt.Chart:
-    """ """
+    """
+    Plot a metric ordered by the stop.
+    This chart will be filtered for a route from a selector.
+    For a route, we want a faceted chart (direction = 0 / direction = 1) returned.
+    """
     Y_MIN_VALUE = df[y_col].min()
     if Y_MIN_VALUE <= 1:
         Y_MIN = round(Y_MIN_VALUE, 1) - 0.1
@@ -75,7 +79,9 @@ def prediction_error_categories_stacked_bar(
     dropdown_selection: alt.Parameter = None,
     legend_selection: alt.Parameter = None,
 ) -> alt.Chart:
-    """ """
+    """
+    Stacked bar chart of counts for each prediction_error_label category.
+    """
     # should this use aggregated stop_df?
     stop_df_grouped_by_route = (
         stop_df.groupby(["route_name", "direction_id", category_col], dropna=False)
@@ -92,8 +98,6 @@ def prediction_error_categories_stacked_bar(
                 category_col,
                 title="Prediction Error",
                 sort=list(_color_palette.PREDICTION_ERROR_COLOR_PALETTE.keys()),
-                # adding scale to keep all categories is wonky with the bars shifting - need to add zeroes for this to work
-                # scale=alt.Scale(domain=list(_color_palette.PREDICTION_ERROR_COLOR_PALETTE.keys()))
             ),
             y=alt.Y(f"sum({stop_col})", title="# stops"),
             color=alt.Color(
@@ -122,7 +126,11 @@ def pct_completeness_line_chart(
     dropdown_selection: alt.Parameter = None,
     horiz_y_value: float = 0.9,
 ) -> alt.Chart:
-    """ """
+    """
+    Line chart of pct completeness, ordered by stop rank.
+    Attach dropdown selector as an arg, as this is one of
+    many charts that are controlled by 1 dropdown.
+    """
     line_chart = (
         chart_ordered_by_stop(
             stop_df,
@@ -163,7 +171,12 @@ def bus_catch_likelihood_line_chart(
     direction_col: str = "direction_id",
     dropdown_selection: alt.Parameter = None,
     horiz_y_value: float = 0.8,
-):
+) -> alt.Chart:
+    """
+    Line chart of bus catch likelihood, ordered by stop rank.
+    Attach dropdown selector as an arg, as this is one of
+    many charts that are controlled by 1 dropdown.
+    """
     line_chart = (
         chart_ordered_by_stop(
             stop_df,
@@ -203,7 +216,12 @@ def prediction_spread_line_chart(
     y_col: str = "avg_prediction_spread_minutes",
     direction_col: str = "direction_id",
     dropdown_selection: alt.Parameter = None,
-):
+) -> alt.Chart:
+    """
+    Line chart of avg prediction_spread, ordered by stop rank.
+    Attach dropdown selector as an arg, as this is one of
+    many charts that are controlled by 1 dropdown.
+    """
     line_chart = (
         chart_ordered_by_stop(
             stop_df,
@@ -283,6 +301,11 @@ def boxplot_by_date(df: pd.DataFrame, y_col: str) -> alt.Chart:
 
 
 def bar_chart_by_date(df: pd.DataFrame, legend_color_column: str, is_stacked: bool) -> alt.Chart:
+    """
+    Bar chart of prediction_error_label by service_date.
+    1st draft of stop report used service_date.
+    2nd draft averages it up to weekdays.
+    """
     selection = alt.selection_point(fields=[legend_color_column], bind="legend")
 
     chart = (
@@ -393,10 +416,19 @@ def stacked_bar_chart_by_route(
 
 def make_layer_map(
     gdf: gpd.GeoDataFrame, plot_col: str, layer_col: str = "route_name", sort_layer_col: str = "route_name"
-):
-    # https://github.com/python-visualization/folium/issues/1857
-    # couldn't get choropleth and geojson to work, this one works better
-    # https://stackoverflow.com/questions/75398354/show-multiple-layers-on-geopandas-explore-with-correct-legend-labels
+) -> folium.Map:
+    """
+    Loop through a column and create separate layers
+    on a map that is selectable in the legend.
+
+    https://github.com/python-visualization/folium/issues/1857
+    couldn't get choropleth and geojson to work, this one works better
+    https://stackoverflow.com/questions/75398354/show-multiple-layers-on-geopandas-explore-with-correct-legend-labels
+
+    TODO: explore other options for layered maps. layering by routes
+    gets out of control, as many operators have 25+ layers, and
+    without a select_all or clear_all option, it is unwieldy.
+    """
     sorted_routes = sorted(gdf[sort_layer_col].unique().tolist())
 
     first_layer_name = sorted_routes[0]
@@ -416,27 +448,31 @@ def make_layer_map(
     return m
 
 
-def stripplot_by_route(gdf2: pd.DataFrame, plot_col: str = "pct_tu_complete_minutes"):
+def stripplot_by_route(gdf: pd.DataFrame, plot_col: str = "pct_tu_complete_minutes") -> alt.Chart:
+    """
+    Stripplot of update availability by route.
+    Newmark paper fig 4.
+    """
     # update availability by route
     stop_route_cols_tabular = ["schedule_name", "day_type", "stop_id", "route_id", "direction_id"]
 
     plot_col = "pct_tu_complete_minutes"
 
-    gdf3 = (
-        gdf2[stop_route_cols_tabular + [plot_col]]
+    gdf2 = (
+        gdf[stop_route_cols_tabular + [plot_col]]
         .groupby(["schedule_name", "day_type", "route_id", "direction_id"], dropna=False)
         .agg({"pct_tu_complete_minutes": "mean", "stop_id": "count"})
         .reset_index()
         .rename(columns={"stop_id": "n_stops"})
     )
 
-    gdf3 = gdf3.assign(pct_tu_complete_minutes=gdf3.pct_tu_complete_minutes.round(3) * 100)
+    gdf2 = gdf2.assign(pct_tu_complete_minutes=gdf2.pct_tu_complete_minutes.round(3) * 100)
 
     # 89 rounds to 90, then set axis to 80
-    Y_MIN = round(gdf3[plot_col].min(), -1) - 10
+    Y_MIN = round(gdf2[plot_col].min(), -1) - 10
 
     chart = (
-        alt.Chart(gdf3)
+        alt.Chart(gdf2)
         .mark_point(size=10)
         .encode(
             x=alt.X("day_type:N", sort=["Weekday", "Saturday", "Sunday"]),
@@ -461,6 +497,10 @@ def ranged_dot_plot(df: pd.DataFrame, x_col: str, y_col: str, ptile_col: str, ti
     """
     Use this for IQR plot by route.
     https://altair-viz.github.io/gallery/ranged_dot_plot.html
+
+    altair equivalent of plotting IQR, though
+    if it appears in great_tables, having it here would be redundant.
+
     """
     chart = alt.Chart(df).encode(x=x_col, y=f"{y_col}:N", tooltip=[x_col, y_col])
 
@@ -483,9 +523,13 @@ def ranged_dot_plot(df: pd.DataFrame, x_col: str, y_col: str, ptile_col: str, ti
     return dot_chart
 
 
-def prediction_padding(prediction_padding_df):
+def prediction_padding(prediction_padding_df: pd.DataFrame) -> alt.Chart:
+    """
+    Prediction padding chart that replicates Newmark paper fig 15.
+    This one is difficult to interpret as-is.
     # can this one add selector for day_type?
     # then hide legend for route?
+    """
     chart = (
         alt.Chart(prediction_padding_df)
         .mark_point()

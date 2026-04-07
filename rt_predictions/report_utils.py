@@ -21,7 +21,25 @@ DAYTYPE_ORDER_DICT = {"Weekday": 1, "Saturday": 2, "Sunday": 3}
 
 def explode_percentiles(
     df: pd.DataFrame, group_cols: list, array_col: str, ptile_array_col: str, ptiles_to_keep: list, pivoted: bool = True
-):
+) -> pd.DataFrame:
+    """
+    Subset the array to keep values we want to plot.
+    If pivoted, then explode the array columns for percentiles from "wide" to long.
+    Derive IQR
+
+    Ex: percentile: [10, 20, 30, ...]
+    values: [25, 50, 80, ....]
+
+    percentile  value
+    10          25
+    20          50
+    30          80
+
+    If not pivoted, can still subset the array so that we aren't carrying
+    all the possible percentiles that are calculated in warehouse.
+    Ex: percentile: [25, 75]
+    values: [value1, value2]
+    """
     subset_df = (
         df[group_cols + [array_col, ptile_array_col]]
         .explode([array_col, ptile_array_col])
@@ -49,8 +67,11 @@ def convert_seconds_to_minutes(
     seconds_col: str,
 ) -> pd.DataFrame:
     """
-    This one is done repeatedly, but sometimes the array
-    needs to be exploded first.
+    Convert column from seconds to minutes.
+
+    This one is done repeatedly, as most metrics use seconds as the unit,
+    but minutes is a bit more interpretable for visualizations.
+    Sometimes the array needs to be exploded first.
     """
     minute_col = seconds_col.replace("_sec", "_minutes")
     df[minute_col] = df[seconds_col].divide(60).round(2)
@@ -59,14 +80,20 @@ def convert_seconds_to_minutes(
 
 
 def add_route_direction_column(df: pd.DataFrame) -> pd.DataFrame:
-    """ """
+    """
+    Concatenate a combined route_name with direction_id.
+    Use this to label route-direction consistently.
+    """
     df = df.assign(route_dir_name=df.route_name + "_" + df.direction_id.astype(str))
 
     return df
 
 
 def import_stop_df(**kwargs) -> gpd.GeoDataFrame:
-    """ """
+    """
+    Import the processed stop df for viz.
+    It already includes stop order and stop_geom merged in.
+    """
     filename = f"{PREDICTIONS_GCS}{RT_MSA_DICT.rt_schedule_models.weekday_stop_with_route}.parquet"
 
     # If specific columns are defined, and one of those is geometry, use geopandas
@@ -78,7 +105,11 @@ def import_stop_df(**kwargs) -> gpd.GeoDataFrame:
 
 
 def import_route_df(**kwargs) -> gpd.GeoDataFrame:
-    """ """
+    """
+    Import the processed route df for viz.
+    It already includes percentiles that we want to visualize and
+    route_geom merged in.
+    """
     filename = f"{PREDICTIONS_GCS}{RT_MSA_DICT.rt_schedule_models.weekday_route_direction}.parquet"
 
     # If specific columns are defined, and one of those is geometry, use geopandas
@@ -94,6 +125,7 @@ def merge_route_to_stop_for_nanoplot(route_df: pd.DataFrame, stop_df: gpd.GeoDat
     """
     In great tables, display route-direction metrics with
     individual stop's avg_prediction_error_minute (ordered by stop_rank).
+    For nanoplot column, it needs to be an array.
     """
     operator_group_cols = [
         "schedule_name",
@@ -170,7 +202,10 @@ def merge_route_to_stop_for_nanoplot(route_df: pd.DataFrame, stop_df: gpd.GeoDat
 
 
 def import_operator_df(**kwargs) -> pd.DataFrame:
-    """ """
+    """
+    Import the processed operator df for viz.
+    It already includes percentiles that we want to visualize.
+    """
     # subset columns
     df = pd.read_parquet(
         f"{PREDICTIONS_GCS}{RT_MSA_DICT.dbt_model_downloads.weekday_operator_grain}.parquet",
