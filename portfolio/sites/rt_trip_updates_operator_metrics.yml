@@ -1,7 +1,6 @@
 directory: ./rt_predictions/
 notebook: ./rt_predictions/rt_trip_updates_operator_report.ipynb
 parts:
-- caption: Introduction
 - chapters:
   - params:
       name: Antelope Valley Transit Authority Trip Updates

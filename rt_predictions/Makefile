@@ -16,7 +16,6 @@ stop_report:
     python portfolio/portfolio.py build test_tu_stops --hide-title-block --deploy --target staging #rt_trip_updates_stop_metrics
     python portfolio/portfolio.py index --deploy --no-prod
 
-
 operator_report:
     #python download_warehouse_tables.py
     # things that should be done before report is run, but probably can't make it into dbt model

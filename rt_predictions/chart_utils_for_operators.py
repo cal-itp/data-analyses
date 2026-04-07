@@ -73,7 +73,7 @@ def fig5and6_prediction_error_plots(df: pd.DataFrame) -> alt.Chart:
     return chart
 
 
-def format_great_table(table: GT, day_type_grouping: bool = False) -> GT:
+def format_great_table(table: GT, day_type_grouping: bool = True) -> GT:
     """
     Apply common table formatting - font size, center align,
     force table to span 100%, rather than shrinking
