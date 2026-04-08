@@ -1,5 +1,5 @@
 directory: ./rt_predictions/
-notebook: ./rt_predictions/rt_trip_updates_operator_report.ipynb
+notebook: ./rt_predictions/operator_report.ipynb
 parts:
 - chapters:
   - params:
