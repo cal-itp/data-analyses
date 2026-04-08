@@ -19,8 +19,8 @@ import report_utils
 import typer
 from shared_utils import portfolio_utils
 
-RT_TRIP_UPDATES_STOP_YAML = Path("../portfolio/sites/rt_trip_updates_stop_metrics.yml")
-RT_TRIP_UPDATES_OPERATOR_YAML = Path("../portfolio/sites/rt_trip_updates_operator_metrics.yml")
+RT_TRIP_UPDATES_STOP_YAML = Path("../portfolio/sites/rt_stop_metrics.yml")
+RT_TRIP_UPDATES_OPERATOR_YAML = Path("../portfolio/sites/rt_operator_metrics.yml")
 
 credentials, project = google.auth.default()
 fs = gcsfs.GCSFileSystem()
