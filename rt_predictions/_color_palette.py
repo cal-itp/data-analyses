@@ -23,6 +23,8 @@ COLOR_NAME_TO_HEX = {
     "light_gray": "#faf0e6",  # linen in gt
     "valentino": "#7a378b",  # dark purple, mediumorchid4 in gt
     "lizard_green": "#6e8b3d",  # dark olive, darkolivegreen4 in gt
+    "light_goldenrod": "#ffec8b",  # light goldenrod1 in gt
+    "pastel_peppermint": "#e5f5e0",  # white alyssum in gt (from greens)
 }
 
 
