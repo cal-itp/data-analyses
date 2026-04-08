@@ -1,5 +1,5 @@
 # Run this in data-analyses
-# To specify different Makefile: make build_parallel_corridors -f Makefile
+# To specify different Makefile: make some_command -f Makefile2
 
 # Build and Deploy Production Portfolio Site with:
 # make build_portfolio_site site='MY_SITE_IDENTIFIER'
@@ -104,7 +104,3 @@ install_env:
 
 install_portfolio:
 	cd portfolio/ && pip install -r requirements.txt && cd ../
-
-# Create .egg to upload to dask cloud cluster
-egg_modules:
-	cd ~/data-analyses/rt_segment_speeds && python setup.py bdist_egg && cd ..
