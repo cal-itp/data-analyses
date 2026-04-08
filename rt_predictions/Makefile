@@ -13,7 +13,7 @@ stop_report:
     python deploy_portfolio_yaml.py rt_msa_stops --month 2026-01-01
     cd ../portfolio/ && pip install -r requirements.txt && cd ../
     gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra # will need to authenticate this step
-    python portfolio/portfolio.py build test_tu_stops --hide-title-block --deploy --target staging #rt_trip_updates_stop_metrics
+    python portfolio/portfolio.py build rt_trip_updates_stop_metrics --hide-title-block --deploy --target staging
     python portfolio/portfolio.py index --deploy --no-prod
 
 operator_report:
@@ -29,3 +29,14 @@ operator_report:
     # still set H1, hide title instead
     python portfolio/portfolio.py build test_tu --hide-title-block --deploy --target staging
     python portfolio/portfolio.py index --deploy --no-prod
+
+test_stop_report:
+    cd ../ && python portfolio/portfolio.py clean test_tu_stops
+    python portfolio/portfolio.py build test_tu_stops --hide-title-block --deploy --target staging
+    python portfolio/portfolio.py index --deploy --no-prod
+
+test_operator_report:
+    @echo "something"
+    #cd ../ && python portfolio/portfolio.py clean test_tu
+    #python portfolio/portfolio.py build test_tu --hide-title-block --deploy --target staging
+    #python portfolio/portfolio.py index --deploy --no-prod
