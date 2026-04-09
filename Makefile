@@ -1,6 +1,10 @@
 # Run this in data-analyses
 # To specify different Makefile: make some_command -f Makefile2
 
+# IMPORTANT!
+# If you are using `Prototype Image - 2026.3.18, Python 3.11` in JupyterHub, you need to add `uv run ` to the beginning of the commands in order to work.
+# For example: Instead of `python portfolio/portfolio.py clean $(site)`, run `uv run python portfolio/portfolio.py clean $(site)`.
+
 # Build and Deploy Production Portfolio Site with:
 # make build_production_portfolio_site site='MY_SITE_IDENTIFIER'
 build_production_portfolio_site:

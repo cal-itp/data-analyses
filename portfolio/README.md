@@ -46,6 +46,11 @@ Or run the generator code from shared_utils:
 
 ### 3. Build your notebook as a JupyterBook
 
+> [!IMPORTANT]
+> If you are using **Prototype Image - 2026.3.18, Python 3.11** in JupyterHub, add `uv run` to the beginning of the command.<br/>
+> For example: `uv run python portfolio/portfolio.py clean MY_REPORT_SITE`.
+
+
 > [!NOTE]
 > Files generated to build the site are [ignored](https://github.com/cal-itp/data-analyses/blob/2303a904302a8e9ff53b5710a7bc2a71d590593c/.gitignore#L141) and will not be tracked or commited to the github repo.
 
