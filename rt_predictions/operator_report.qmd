@@ -1,0 +1,507 @@
+---
+title: '{one_month_formatted} Summary'
+jupyter: python3
+---
+
+```{python}
+%%capture
+
+import warnings
+warnings.filterwarnings("ignore")
+
+import altair as alt
+import branca.colormap as cm
+import folium
+import pandas as pd
+
+import calitp_data_analysis.magics
+import gt_extras as gte
+
+from great_tables import GT, md
+
+import chart_utils_for_operators as chart_utils
+import prep_operator_data
+import report_utils
+import _color_palette
+from rt_msa_utils import operator_report_month
+
+alt.data_transformers.enable("vegafusion")
+
+one_month = pd.to_datetime(operator_report_month)
+```
+
+```{python}
+#| editable: true
+#| slideshow: {slide_type: ''}
+#| tags: [parameters]
+# parameters cell
+#name = "Antelope Valley Transit Authority Trip Updates"
+#schedule_name = "Antelope Valley Transit Authority Schedule"
+```
+
+```{python}
+%%capture_parameters
+
+date_format = "%b %Y" # gtfs_digest/_new_operator_report_utils.py
+one_month_formatted = one_month.strftime(date_format)
+
+name, one_month_formatted
+```
+
+
+Generally, we want better transit user experience. Specifically, the performance metrics we can derive from GTFS RT Trip Updates distills into the following objectives:
+
+* Increase prediction reliability and accuracy
+* Increase the availability and completeness of GTFS RT
+* Decrease the inconsistency and fluctuations of predictions
+
+
+```{python}
+operator_cols = ["day_type"]
+
+schedule_cols = [
+    "daily_trips", "daily_service_hours", "n_routes", "n_shapes",
+    "n_stops", "num_stop_times", "daily_arrivals", 'n_days_schedule_and_rt'
+]
+
+vp_cols = ['vp_messages_per_minute', 'pct_vp_trips', 'pct_vp_routes'] #'daily_vp_trips'
+tu_cols =['tu_messages_per_minute', 'pct_tu_trips', 'pct_tu_routes'] #'daily_tu_trips',
+
+tu_prediction_cols = [
+    "bus_catch_likelihood", "pct_tu_complete_minutes", # both are percents
+    "p25", "p75", "iqr", "p50",
+    "n_predictions",
+    "prediction_padding_minutes", "avg_prediction_spread_minutes"
+]
+```
+
+```{python}
+df = report_utils.import_operator_df(
+    filters = [[
+        ("month_first_day", "==", one_month),
+        ("tu_name", "==", name),
+    ]],
+).pipe(prep_operator_data.merge_in_operator_percentiles)
+
+schedule_name = df.schedule_name.iloc[0]
+```
+
+```{python}
+# Set variables for color bars used across maps, route dropdown, and great tables
+PREDICTION_ERROR_COLORS =list(_color_palette.PREDICTION_ERROR_COLOR_PALETTE.values())
+PREDICTION_ERROR_INDEX = [-5, -3, -1, 1, 3, 5]
+PREDICTION_ERROR_LEGEND_CAPTION = "minutes (negative = late; positive = early)"
+
+POS_BAR_COLOR = _color_palette.get_color("blueberry")
+NEG_BAR_COLOR = _color_palette.get_color("vivid_cerise")
+```
+
+## Schedule + RT Summary Stats
+
+```{python}
+schedule_table = (
+    GT(df[operator_cols + schedule_cols])
+    .cols_label(
+        daily_trips = "Daily Trips",
+        daily_service_hours = "Daily Service Hours",
+        n_routes = "# Routes",
+        n_shapes = "# Shapes",
+        n_stops = "# Stops",
+        num_stop_times = "Total Scheduled Arrivals",
+        daily_arrivals = "Daily Scheduled Arrivals",
+        n_days_schedule_and_rt = "# days with both RT",
+    ).fmt_integer(
+        columns = [
+            "daily_trips", "n_routes", "n_shapes", "n_stops",
+            "num_stop_times", "daily_arrivals", "n_days_schedule_and_rt"]
+    ).fmt_number(
+        columns = ["daily_service_hours"], decimals=1
+    ).tab_spanner(
+        label="Schedule",
+        columns = schedule_cols
+    ).tab_header(
+        title = "Schedule + RT Summary Metrics",
+        subtitle = f"{one_month_formatted}"
+    )
+)
+
+chart_utils.format_great_table(schedule_table)
+```
+
+## General RT Metrics
+
+<span style="color:#4477aa">**Update Availability Goal 1:** 2+ vehicle positions or trip updates messages per minute.</span>
+
+<span style="color:#4477aa">**Update Availability Goal 2:** 100% routes are covered by RT, and 75%+ of trips have RT.</span>
+
+```{python}
+rt_table = (
+    GT(df[operator_cols + vp_cols + tu_cols])
+    .cols_label(
+        tu_messages_per_minute = "Trip Updates per Minute",
+        pct_tu_trips = "% Trips",
+        pct_tu_routes = "% Routes",
+        vp_messages_per_minute = "Vehicle Positions per Minute",
+        pct_vp_trips = "% Trips",
+        pct_vp_routes = "% Routes",
+    ).fmt_number(
+        columns = ["tu_messages_per_minute", "vp_messages_per_minute"],
+        decimals=1
+    ).fmt_percent(
+        columns=["pct_tu_trips", "pct_tu_routes", "pct_vp_trips", "pct_vp_routes"],
+        decimals=1
+    ).tab_spanner(
+        label="Trip Updates",
+        columns=tu_cols
+    ).tab_spanner(
+        label="Vehicle Positions",
+        columns=vp_cols
+    )
+)
+
+chart_utils.format_great_table(rt_table, day_type_grouping = True).pipe(
+    gte.gt_color_box,
+    columns=["tu_messages_per_minute", "vp_messages_per_minute"],
+    palette="Blues",
+    domain=[1, 3]
+).pipe(
+    gte.gt_hulk_col_numeric,
+    columns=["pct_tu_trips", "pct_tu_routes", "pct_vp_trips", "pct_vp_routes"],
+    palette=["#FFEC8B", "#E5F5E0"], #[light goldenrod1, white alyssum (from greens)]
+    domain=[0, 1],
+    alpha=0.1
+)
+```
+
+## Prediction Accuracy Metrics
+
+<span style="color:#4477aa">**Update Availability Goal:** 90%+ of minutes has predicted arrival information.</span>
+
+<span style="color:#4477aa">**Bus Catch Likelihood Goal:** 75%+ of predictions result in catching the bus.</span>
+
+<span style="color:#4477aa">**Prediction Error Goal:** Closer to zero or smaller positive values (early predictions). Late predictions = negative values = riders miss bus</span>
+
+```{python}
+table = (
+    GT(df[operator_cols + tu_prediction_cols])
+    .cols_label(
+        pct_tu_complete_minutes = "% Minutes with 2+ Predictions",
+        bus_catch_likelihood = "Bus Catch Likelihood (Early + On-time)",
+        p50 = "Prediction Error",
+        avg_prediction_spread_minutes = "Prediction Spread / Wobble",
+        prediction_padding_minutes = "Prediction Padding",
+        n_predictions = "# Predictions",
+        iqr = "Variability"
+    ).fmt_percent(columns=["bus_catch_likelihood", "pct_tu_complete_minutes"], decimals=1)
+    .fmt_number(columns=["p50", "avg_prediction_spread_minutes", "prediction_padding_minutes"], decimals=1)
+    .fmt_integer(columns=["n_predictions"])
+    .tab_header(title = f"Trip Update Prediction Accuracy Metrics",
+                subtitle = "units are in minutes")
+).pipe(chart_utils.format_great_table)
+
+table.pipe(
+    gte.gt_plt_dumbbell,
+    col1='p25',
+    col2='p75',
+    label = "IQR",
+    num_decimals=1,
+    col1_color=_color_palette.get_color("valentino"),
+    col2_color=_color_palette.get_color("lizard_green"),
+    width=100, height=50, # check these each time
+    font_size=8
+).pipe(
+    gte.gt_hulk_col_numeric,
+    columns=["bus_catch_likelihood", "pct_tu_complete_minutes"],
+    palette=[_color_palette.get_color("light_goldenrod"),
+             _color_palette.get_color("pastel_peppermint")],
+    domain=[0, 1],
+    alpha=0.1
+).pipe(
+    gte.gt_color_box,
+    columns=["p50"],
+    palette=PREDICTION_ERROR_COLORS,
+    domain=[-5, 5]
+).cols_width(
+    cases={
+        c: "10%" for c in [
+            "bus_catch_likelihood", "pct_tu_complete_minutes",
+            "prediction_padding_minutes", "avg_prediction_spread_minutes",
+            "n_predictions", "p50"
+        ]
+    }
+).cols_move_to_end(columns=["n_predictions"])
+#.pipe(gte.gt_color_box, columns=["iqr"], palette="YlOrRd"),
+# maybe IQR doesn't make sense to color, it'll just be ranked by day_type
+```
+
+## Prediction Error Percentiles
+
+### Distribution of Prediction Errors
+
+The 50th percentile is the typical or median rider experience, and it can show that, on average, this transit agency is roughly on-time.
+* If the 10th percentile is fairly close to the 50th percentile, it means that the transit agency is consistent and reliable in its predictions.
+* Extreme values for the 10th percentile would indicate that predictions fluctuate, or, are somewhat unreliable.
+* Steeper lines indicate fairly reliable predictions for the rider.
+
+```{python}
+decile_cols = [
+    "month_first_day", "day_type",
+    "schedule_name", "tu_name",
+    'pos_prediction_error_sec_array', 'pos_prediction_error_sec_percentile_array',
+    'neg_prediction_error_sec_array', 'prediction_error_sec_percentile_array'
+]
+
+operator_deciles_df = report_utils.import_operator_df(
+    filters = [[
+        ("month_first_day", "==", one_month),
+        ("tu_name", "==", name),
+    ]],
+    columns = decile_cols
+).pipe(prep_operator_data.operator_deciles_for_chart)
+```
+
+```{python}
+percentile_chart = chart_utils.fig5and6_prediction_error_plots(operator_deciles_df)
+percentile_chart
+```
+
+### Accuracy Loss
+Ratio of the 10th to 50th percentiles
+
+* Newmark's paper on a small sample of transit agencies suggests that the positive prediction errors typically have ratios of 4.
+* Late predictions (negative prediction errors) have ratios around 3.
+* Steeper lines = less accuracy loss = better
+   * y-axis is percentile (moving from 10th to 50th percentile is moving from upwards on y-axis)
+   * x-axis is error (smaller change along x-axis is less accuracy loss).
+   * less accuracy loss = less change along x-axis, since change along y-axis is constant (10 to 50) = steeper (unintuitive to the normal interpretation of slope!)
+
+```{python}
+operator_cols = ["day_type"]
+percentile_chart_cols = [
+    "pos_p10", "pos_p50", "pos_error_ratio",
+    "neg_p10", "neg_p50", "neg_error_ratio"
+]
+
+mini_df = df[df.month_first_day == one_month][
+    operator_cols + percentile_chart_cols]
+
+# convert the 10th, 50th percentile columns to minutes
+seconds_cols = ["pos_p10", "pos_p50", "neg_p10", "neg_p50"]
+mini_df[seconds_cols] = mini_df[seconds_cols].divide(60).round(2)
+```
+
+```{python}
+mini_p10_p50_table = (
+    GT(mini_df)
+    .cols_label(
+        pos_p10 = "10th percentile ",
+        neg_p10 = "10th percentile",
+        pos_p50 = "50th percentile",
+        neg_p50 = "50th percentile",
+        pos_error_ratio = "Accuracy Loss",
+        neg_error_ratio = "Accuracy Loss",
+    ).fmt_number(
+        columns=["pos_error_ratio", "neg_error_ratio"], decimals=1
+    ).tab_spanner(
+        label="Early Predictions (Positive Prediction Error)",
+        columns=["pos_p10", "pos_p50", "pos_error_ratio"]
+    ).tab_spanner(
+        label="Late Predictions (Negative Prediction Error)",
+        columns = ["neg_p10", "neg_p50", "neg_error_ratio"]
+    )
+    .tab_header(
+        title = "Accuracy Loss = Ratio of 10th to 50th percentile error",
+        subtitle = "units are in minutes (lower = less accuracy loss)"
+    )
+).pipe(
+    gte.gt_color_box,
+    columns=["pos_p10", "pos_p50", "neg_p10", "neg_p50"],
+    palette=PREDICTION_ERROR_COLORS,
+    domain=[-5, 5]
+)
+
+chart_utils.format_great_table(mini_p10_p50_table).pipe(
+    chart_utils.format_great_table,
+    day_type_grouping=False
+)
+```
+
+## Route Map by Priority Criteria
+
+The following layers are available and selectable (if no routes match the criteria, the layer is excluded):
+
+1. **Average prediction error** (minutes) for all routes
+2. Routes with **<90% update completeness**
+   Providing complete real-time information for all routes is the crucial foundation.
+3. **Highly Variable Routes (IQR > 3)** that could benefit from transit-supportive policies (signal priority, bus lanes).
+   The variability in prediction accuracy here could be due to the local traffic conditions.
+4. Routes with **Bus Catch Likelihood (early + on-time accuracy < 75%)**, or late predictions 25% of the time.
+
+```{python}
+route_gdf = report_utils.import_route_df(
+    filters = [[
+        ("month_first_day", "==", one_month),
+        ("schedule_name", "==", schedule_name),
+        ("day_type", "==", "Weekday")
+    ]],
+    columns = [
+        "schedule_name", "tu_name",
+        "route_dir_name",
+        "avg_prediction_error_minutes", "prediction_error_label",
+        "pct_tu_complete_minutes",
+        "iqr", "bus_catch_likelihood",
+        "geometry"
+    ]
+).drop_duplicates().reset_index(drop=True)
+```
+
+```{python}
+# Set conditions for filtering to pick out priority criteria
+condition_completeness = route_gdf.pct_tu_complete_minutes < 0.9
+condition_variability = route_gdf.iqr >= 3
+condition_likelihood = route_gdf.bus_catch_likelihood < 0.75
+```
+
+```{python}
+m = route_gdf.explore(
+    "avg_prediction_error_minutes",
+    tiles = "CartoDB Positron",
+    name = "All Routes",
+    cmap = cm.StepColormap(
+        colors=PREDICTION_ERROR_COLORS, index=PREDICTION_ERROR_INDEX,
+        vmin=-5, vmax=5,
+        tick_labels=PREDICTION_ERROR_INDEX,
+        caption=PREDICTION_ERROR_LEGEND_CAPTION
+    ),
+    marker_kwds={"fill": True},
+    style_kwds={"opacity": 0.5, "fillOpacity": 0.3}
+)
+```
+
+```{python}
+if len(route_gdf[condition_completeness]) > 0:
+    m = route_gdf[condition_completeness].explore(
+        "route_dir_name",
+        m=m,
+        tiles = "CartoDB Positron",
+        name = "< 90% update completeness", # color by route-dir name, same as stop report
+        categorical = True,
+        legend = False,
+    )
+
+if len(route_gdf[condition_variability]) > 0:
+    m = route_gdf[condition_variability].explore(
+        "iqr",
+        m=m,
+        tiles = "CartoDB Positron",
+        name = "High Variability (IQR 3+ minutes) Routes",
+        categorical = False,
+        legend = True,
+        cmap="YlOrRd",
+    )
+
+if len(route_gdf[condition_likelihood]) > 0:
+    m = route_gdf[condition_likelihood].explore(
+        "bus_catch_likelihood",
+        m=m,
+        tiles = "CartoDB Positron",
+        name = "<75% Bus Catch Likelihood",
+        categorical = False,
+        legend = True,
+        cmap="cividis"
+    )
+
+folium.LayerControl().add_to(m)
+m
+```
+
+## Route Summary
+
+Prediction accuracy varies by routes. The routes shown at the top have high variability (high IQRs).
+
+* **High variability = high IQRs**: local traffic conditions mat confound the prediction algorithm. For these routes, a focus on improving service reliability through additional infrastructure (signal priority, bus lanes), or other transit planning and policies could be explored.
+
+* **Negative 25th percentiles**: riders miss the bus (late predictions). These routes may benefit from service reliability improvements for riders.
+
+   *Interpretation*: A value of -5 means that one quarter of riders miss the bus by 5 minutes.
+
+* **scaled IQR**: IQR adjusted so predictions closer to the bus arrival are weighted more. Predictions 5 minutes out are more important than predictions 25 minutes out.
+
+```{python}
+route_iqr_df = report_utils.import_route_df(
+    filters = [[
+        ("tu_name", "==", name),
+        ("month_first_day", "==", one_month),
+        ("day_type", "==", "Weekday")
+    ]],
+    columns= [
+        "route_dir_name",
+        "avg_prediction_error_minutes",
+        "n_predictions",
+        "p25", "p75",
+        "iqr",
+        "scaled_p25", "scaled_p75",
+        # does putting IQR help in interpretation?
+    ]
+).sort_values("iqr", ascending=False)
+```
+
+```{python}
+route_iqr_table = (
+    GT(route_iqr_df)
+    .cols_label(
+        route_dir_name = "Route-Direction",
+        n_predictions = "# Predictions",
+        iqr = "Variability",
+        avg_prediction_error_minutes = "Prediction Error (minutes)",
+    ).fmt_integer(["n_predictions"])
+    .tab_header(
+        title = "Route Summary Metrics",
+        subtitle = md(
+            """
+            High IQR = variability -> focus on service reliability through transit planning and policies.
+            Variability could be due to local traffic conditions.
+            Negative 25th percentiles = riders miss bus."""
+        )
+    ).pipe(chart_utils.format_great_table, day_type_grouping=False)
+)
+
+route_iqr_table.pipe(
+    gte.gt_plt_dumbbell,
+    col1='p25',
+    col2='p75',
+    label = "IQR (minutes)",
+    num_decimals=1,
+    width=200, height=50,
+    col1_color=_color_palette.get_color("valentino"),
+    col2_color=_color_palette.get_color("lizard_green"),
+    font_size=8
+).pipe(
+    gte.gt_plt_dumbbell,
+    col1="scaled_p25",
+    col2='scaled_p75',
+    label='scaled IQR',
+    num_decimals=3,
+    width=200, height=50,
+    col1_color=_color_palette.get_color("valentino"),
+    col2_color=_color_palette.get_color("lizard_green"),
+    font_size=8
+).pipe(
+    gte.gt_color_box,
+    columns=["avg_prediction_error_minutes"],
+    palette=PREDICTION_ERROR_COLORS,
+    domain=[-5, 5]
+).pipe(
+    gte.gt_color_box,
+    columns=["iqr"],
+    palette="YlOrRd",
+).cols_width(
+    cases={
+        "avg_prediction_error_minutes": "10%",
+        "n_predictions": "10%",
+        "iqr": "10%"
+    }
+).cols_align("center").cols_align(
+    "left", columns = "route_dir_name"
+).cols_move_to_end(columns=["n_predictions"])
+```

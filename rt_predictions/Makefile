@@ -31,11 +31,13 @@ operator_report:
 	python portfolio/portfolio.py index --deploy --no-prod
 
 test_stop_report:
+	cd ../
 	cd ../ && python portfolio/portfolio.py clean test_tu_stops
-	python portfolio/portfolio.py build test_tu_stops --hide-title-block --deploy --target staging
-	python portfolio/portfolio.py index --deploy --no-prod
+	cd ../ && python portfolio/portfolio.py build test_tu_stops --hide-title-block --deploy --target staging
+	cd ../ && python portfolio/portfolio.py index --deploy --no-prod
 
 test_operator_report:
 	cd ../ && python portfolio/portfolio.py clean test_tu
-	python portfolio/portfolio.py build test_tu --hide-title-block --deploy --target staging
-	python portfolio/portfolio.py index --deploy --no-prod
+	cd ../ && python portfolio/portfolio.py build test_tu
+	cd ../ && python portfolio/portfolio.py build test_tu --no-execute-papermill --hide-title-block --deploy --target staging
+	cd ../ && python portfolio/portfolio.py index --deploy --no-prod

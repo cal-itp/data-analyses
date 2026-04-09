@@ -39,7 +39,7 @@ def chart_ordered_by_stop(
             x=alt.X(f"{stop_col}:Q", title="Stop (ordered)"),
             y=alt.Y(f"{y_col}:Q", title="", scale=alt.Scale(domain=[Y_MIN, Y_MAX])),
             tooltip=["route_name", direction_col, "stop_id", "stop_name", stop_col, y_col],
-            opacity=alt.when(dropdown_selection).then(alt.value(1)).otherwise(alt.value(0.2)),
+            opacity=alt.when(dropdown_selection).then(alt.value(1)).otherwise(alt.value(0)),
             strokeWidth=alt.when(dropdown_selection).then(alt.value(2)).otherwise(alt.value(1)),
         )
         .add_params(dropdown_selection)
@@ -107,7 +107,7 @@ def prediction_error_categories_stacked_bar(
             ),
             column=alt.Column(direction_col, title="Direction"),
             tooltip=["route_name", direction_col, category_col, f"sum({stop_col})"],
-            opacity=alt.when(dropdown_selection).then(alt.value(1)).otherwise(alt.value(0.2)),
+            opacity=alt.when(dropdown_selection).then(alt.value(1)).otherwise(alt.value(0)),
             strokeWidth=alt.when(dropdown_selection).then(alt.value(2)).otherwise(alt.value(1)),
         )
         .transform_filter(dropdown_selection)
