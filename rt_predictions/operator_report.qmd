@@ -35,8 +35,7 @@ one_month = pd.to_datetime(operator_report_month)
 #| slideshow: {slide_type: ''}
 #| tags: [parameters]
 # parameters cell
-#name = "Antelope Valley Transit Authority Trip Updates"
-#schedule_name = "Antelope Valley Transit Authority Schedule"
+#name = "Redding Trip Updates"
 ```
 
 ```{python}
@@ -76,12 +75,47 @@ tu_prediction_cols = [
 ```
 
 ```{python}
+def check_counts_across_quartet(df: pd.DataFrame):
+    url_cols = [f"{s}_base64_url" for s in ["schedule", "vp", "tu"]]
+
+    counts_df = df.groupby(["schedule_name", "vp_name", "tu_name"]).agg({
+        **{c: "nunique" for c in url_cols}
+    }).reset_index()
+
+    # Need to do this for everyone
+    counts_df["max_count"] = counts_df[url_cols].max(axis=1)
+
+    if counts_df.max_count.iloc[0] > 1:
+        print("There were multiple entries for each day_type:")
+        display(counts_df)
+
+    urls_with_most_predictions = (
+        df[url_cols + ["n_predictions"]]
+        .sort_values("n_predictions", ascending=False)
+        .reset_index(drop=True)
+    ).head(1)[url_cols]
+
+    df2 = pd.merge(
+        df,
+        urls_with_most_predictions,
+        on = url_cols,
+        how = "inner"
+    )
+
+    return df2
+```
+
+```{python}
 df = report_utils.import_operator_df(
     filters = [[
         ("month_first_day", "==", one_month),
         ("tu_name", "==", name),
     ]],
-).pipe(prep_operator_data.merge_in_operator_percentiles)
+).pipe(
+    check_counts_across_quartet
+).pipe(
+    prep_operator_data.merge_in_operator_percentiles
+)
 
 schedule_name = df.schedule_name.iloc[0]
 ```
