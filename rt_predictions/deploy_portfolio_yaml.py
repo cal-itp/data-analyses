@@ -27,6 +27,10 @@ fs = gcsfs.GCSFileSystem()
 
 app = typer.Typer()
 
+exclude_operators = [
+    "Bay Area 511 Regional Schedule",
+]
+
 
 def check_stop_and_route_counts(one_month: str):
     """
@@ -36,7 +40,8 @@ def check_stop_and_route_counts(one_month: str):
     filtering = [
         [
             ("month_first_day", "==", pd.to_datetime(one_month)),
-            ("schedule_name", "!=", "Bay Area 511 Regional Schedule"),
+            ("schedule_name", "not in", exclude_operators),
+            ("tu_name", "not in", exclude_operators),
             ("day_type", "==", "Weekday"),  # for operator report, show day_types
         ]
     ]
@@ -74,19 +79,22 @@ def check_stop_and_route_counts(one_month: str):
 
 def check_route_counts(one_month: str):
     """
-    Filter the dfs the same way in the route report,
-    and grab the operators that can be populated .
+    Filter the dfs the same way in the operator report,
+    and grab the operators that can be populated for both
+    percentiles chart and route map.
     """
     filtering = [
         [
             ("month_first_day", "==", pd.to_datetime(one_month)),
-            ("schedule_name", "!=", "Bay Area 511 Regional Schedule"),
+            ("schedule_name", "not in", exclude_operators),
+            ("tu_name", "not in", exclude_operators),
         ]
     ]
 
     # TODO: should portfolio_utils be extended to include multiple params that move together?
     # simpler to have 1 param. Here, tu_name would be used, since the same schedule_name
     # can appear for different tu_names (Marin Swiftly/Equans or Torrance).
+    # Drop if there's is either column
     route_df = (
         report_utils.import_route_df(
             filters=filtering,
@@ -96,10 +104,20 @@ def check_route_counts(one_month: str):
             ],
         )
         .drop_duplicates()
+        .dropna()
         .reset_index(drop=True)
     )
 
-    return route_df
+    operator_df = (
+        report_utils.import_operator_df(filters=filtering, columns=["schedule_name", "tu_name"])
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+
+    # Use inner merge - charts and maps need both dfs to work
+    count_df = pd.merge(operator_df, route_df, on=["schedule_name", "tu_name"], how="inner")
+
+    return count_df
 
 
 @app.command()

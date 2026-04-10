@@ -11,8 +11,6 @@ parts:
   - params:
       name: Basin Transit GMV Trip Updates
   - params:
-      name: Bay Area 511 AC Trip Updates
-  - params:
       name: Bay Area 511 ACE TripUpdates
   - params:
       name: Bay Area 511 Capitol Corridor TripUpdates
@@ -62,8 +60,6 @@ parts:
       name: Beaumont Transit Trip Updates
   - params:
       name: Big Blue Bus Clever Trip Updates
-  - params:
-      name: Big Blue Bus TripUpdates
   - params:
       name: BruinBus Trip Updates
   - params:
@@ -144,8 +140,6 @@ parts:
       name: Petaluma GMV Trip Updates
   - params:
       name: PresidiGo TripUpdates
-  - params:
-      name: Redding Trip Updates
   - params:
       name: Redding Trip Updates
   - params:
