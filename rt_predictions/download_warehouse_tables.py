@@ -67,8 +67,8 @@ if __name__ == "__main__":
     )
 
     monthly_operator_summary = bq_utils.download_table(
-        project_name=PRODUCTION_PROJECT,
-        dataset_name=PRODUCTION_MART_ROLLUP,
+        project_name="cal-itp-data-infra-staging",
+        dataset_name="tiffany_mart_gtfs_rollup",
         table_name="fct_monthly_operator_summary",
         date_col="month_first_day",
         start_date="2025-12-01",

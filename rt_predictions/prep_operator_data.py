@@ -34,6 +34,7 @@ def operator_percentiles_summary(
         )
         .rename(columns={"p5": "prediction_padding"})
         .pipe(report_utils.convert_seconds_to_minutes, "p25")
+        .pipe(report_utils.convert_seconds_to_minutes, "p50")
         .pipe(report_utils.convert_seconds_to_minutes, "p75")
         .pipe(report_utils.convert_seconds_to_minutes, "prediction_padding")
         .pipe(report_utils.convert_seconds_to_minutes, "iqr")
