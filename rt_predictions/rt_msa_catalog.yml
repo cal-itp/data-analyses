@@ -9,6 +9,8 @@ dbt_model_downloads:
   weekday_stop_grain: "monthly_schedule_rt_stops"
   weekday_route_direction_grain: "monthly_tu_route_direction_summary" # these are metrics by route-direction, including percentiles
   stop_order: "int_gtfs_schedule__stop_order_by_route"
+  route_geom: "monthly_routes" # get the shape's line geom to plot
+  weekday_operator_grain: "monthly_operator_summary"
 
 rt_vehicle_position_models:
   dir: ${gcs_paths.VP_GCS}
@@ -18,4 +20,4 @@ rt_vehicle_position_models:
 rt_schedule_models:
   dir: ${gcs_paths.PREDICTIONS_GCS}
   weekday_stop_with_route: "monthly_schedule_rt_stops_cleaned" # the way stop data will be used is with route-direction info
-  weekday_route_direction: "monthly_tu_route_direction_summary_cleaned" # add new columns, round, etc
+  weekday_route_direction: "monthly_tu_route_direction_summary_cleaned" # add new columns, round, with line geom, etc
