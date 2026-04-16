@@ -1,171 +1,211 @@
-import pandas as pd
-import numpy as np
-import geopandas as gpd
-from shared_utils import rt_utils, catalog_utils, webmap_utils
-from segment_speed_utils import helpers
-from calitp_data_analysis.geography_utils import CA_NAD83Albers_m
 import datetime as dt
-import altair as alt
-from IPython.display import display, Markdown, IFrame
-catalog = catalog_utils.get_catalog('gtfs_analytics_data')
-from update_vars_index import SPEED_SEGS_PATH, ANALYSIS_DATE_LIST, GEOJSON_SUBFOLDER
 
+import altair as alt
+import geopandas as gpd
+import numpy as np
+import pandas as pd
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.geography_utils import CA_NAD83Albers_m
+from IPython.display import display
+from segment_speed_utils import helpers
+from shared_utils import catalog_utils, rt_utils, webmap_utils
+from update_vars_index import ANALYSIS_DATE_LIST, GEOJSON_SUBFOLDER, SPEED_SEGS_PATH
+
+catalog = catalog_utils.get_catalog("gtfs_analytics_data")
 gcsgp = GCSGeoPandas()
 
+
 def read_segments_shn(analysis_name: str, force_analysis_date: str = None) -> (gpd.GeoDataFrame, gpd.GeoDataFrame):
-    '''
+    """
     Get filtered detailed speedmap segments for an organization, and relevant district SHN.
-    '''
+    """
     if force_analysis_date:
         analysis_date = force_analysis_date
     else:
-        ix_df = pd.read_parquet(f'./_rt_progress_{ANALYSIS_DATE_LIST[0]}.parquet')
-        this_org_ix = ix_df.query('analysis_name == @analysis_name')
-        analysis_date = this_org_ix.analysis_date.iloc[0] #  with lookback, this may be a previous date
+        ix_df = pd.read_parquet(f"./_rt_progress_{ANALYSIS_DATE_LIST[0]}.parquet")
+        this_org_ix = ix_df.query("analysis_name == @analysis_name")
+        analysis_date = this_org_ix.analysis_date.iloc[0]  # with lookback, this may be a previous date
     # path = './speedmaps_analysis_name_test.parquet'
     # print(f'testing with {path}')
     # speedmap_segs = gpd.read_parquet(path, filters=[['analysis_name', '==', analysis_name]])
-    path = f'{SPEED_SEGS_PATH}_{analysis_date}.parquet'
-    speedmap_segs = gcsgp.read_parquet(path,
-                                     filters=[['analysis_name', '==', analysis_name]]) #  aggregated
-    msg = 'no cols besides route_short_name, direction_id should be nan'
-    assert speedmap_segs.drop(columns=['route_short_name', 'direction_id']).isna().any().any() == False, msg
-    speedmap_segs = prepare_segment_gdf(speedmap_segs).assign(analysis_date = analysis_date)
+    path = f"{SPEED_SEGS_PATH}_{analysis_date}.parquet"
+    speedmap_segs = gcsgp.read_parquet(path, filters=[["analysis_name", "==", analysis_name]])  # aggregated
+    msg = "no cols besides route_short_name, direction_id should be nan"
+    assert speedmap_segs.drop(columns=["route_short_name", "direction_id"]).isna().any().any() == False, msg
+    speedmap_segs = prepare_segment_gdf(speedmap_segs).assign(analysis_date=analysis_date)
     shn = gcsgp.read_parquet(rt_utils.SHN_PATH)
     this_district = [int(x[:2]) for x in speedmap_segs.caltrans_district.unique()]
-    this_shn = shn.query('District.isin(@this_district)')
-    
+    this_shn = shn[shn["District"].isin(this_district)]
+
     return (speedmap_segs, this_shn)
+
 
 def read_shapes(speedmap_segs: gpd.GeoDataFrame):
     analysis_date = speedmap_segs.analysis_date.iloc[0]
-    shapes = helpers.import_scheduled_shapes(analysis_date, columns=['shape_array_key', 'geometry'])
-    trips = helpers.import_scheduled_trips(analysis_date, columns=['shape_array_key', 'shape_id', 'route_id',
-                                                                   'route_short_name', 'gtfs_dataset_key']).drop_duplicates()
-    shapes = shapes.merge(trips, on='shape_array_key')
-    org_shapes = shapes.merge(speedmap_segs[['schedule_gtfs_dataset_key']].drop_duplicates(),
-                              on='schedule_gtfs_dataset_key')
-    return org_shapes.dropna(subset=['geometry'])
+    shapes = helpers.import_scheduled_shapes(analysis_date, columns=["shape_array_key", "geometry"])
+    trips = helpers.import_scheduled_trips(
+        analysis_date, columns=["shape_array_key", "shape_id", "route_id", "route_short_name", "gtfs_dataset_key"]
+    ).drop_duplicates()
+    shapes = shapes.merge(trips, on="shape_array_key")
+    org_shapes = shapes.merge(
+        speedmap_segs[["schedule_gtfs_dataset_key"]].drop_duplicates(), on="schedule_gtfs_dataset_key"
+    )
+    return org_shapes.dropna(subset=["geometry"])
+
 
 def prepare_segment_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
-    '''
+    """
     Project segment speeds gdf and add column for rich speedmap display
-    '''
+    """
     gdf = gdf.to_crs(CA_NAD83Albers_m)
     #  TODO move upstream and investigate
-    gdf['fast_slow_ratio'] = gdf.p80_mph / gdf.p20_mph
+    gdf["fast_slow_ratio"] = gdf.p80_mph / gdf.p20_mph
     gdf.fast_slow_ratio = gdf.fast_slow_ratio.replace(np.inf, 3)
     gdf = gdf.round(1)
 
-    ## shift to right side of road to display direction
+    # shift to right side of road to display direction
     gdf.geometry = gdf.geometry.apply(rt_utils.try_parallel)
-    gdf = gdf.apply(rt_utils.arrowize_by_frequency, axis=1, frequency_col='trips_hr_sch')
+    gdf = gdf.apply(rt_utils.arrowize_by_frequency, axis=1, frequency_col="trips_hr_sch")
 
-    gdf = gdf.sort_values(by='trips_hr_sch', ascending=False)
+    gdf = gdf.sort_values(by="trips_hr_sch", ascending=False)
 
     return gdf
 
+
 def map_shn(district_gdf: gpd.GeoDataFrame):
     dist = district_gdf.District.iloc[0]
-    filename = f'{dist}_SHN'
+    filename = f"{dist}_SHN"
     title = f"D{dist} State Highway Network"
-    
-    export_result = webmap_utils.set_state_export(district_gdf, subfolder = GEOJSON_SUBFOLDER, filename = filename,
-                        map_type = 'state_highway_network', map_title = title)
-    spa_map_state = export_result['state_dict']
+
+    export_result = webmap_utils.set_state_export(
+        district_gdf, subfolder=GEOJSON_SUBFOLDER, filename=filename, map_type="state_highway_network", map_title=title
+    )
+    spa_map_state = export_result["state_dict"]
     return spa_map_state
 
-def map_excluded_shapes(existing_state: dict, speedmap_segs: gpd.GeoDataFrame, shapes_gdf: gpd.GeoDataFrame,
-                       time_of_day: str, analysis_date: dt.date):
-    '''
-    
-    '''
-    display_date = dt.date.fromisoformat(analysis_date).strftime('%B %d %Y (%A)')
+
+def map_excluded_shapes(
+    existing_state: dict,
+    speedmap_segs: gpd.GeoDataFrame,
+    shapes_gdf: gpd.GeoDataFrame,
+    time_of_day: str,
+    analysis_date: dt.date,
+):
+    """ """
+    display_date = dt.date.fromisoformat(analysis_date).strftime("%B %d %Y (%A)")
     filename = f"{analysis_date}_{speedmap_segs.base64_url.iloc[0]}_excluded_shapes_{time_of_day}"
     title = f"{speedmap_segs.analysis_name.iloc[0]} {display_date} Excluded Shapes {time_of_day}"
 
-    shapes_gdf = shapes_gdf[['shape_id', 'route_id', 'route_short_name', 'geometry']]
+    shapes_gdf = shapes_gdf[["shape_id", "route_id", "route_short_name", "geometry"]]
     speedmap_segs = speedmap_segs.dissolve()
-    speedmap_segs.geometry = speedmap_segs.buffer(35) #  slightly bigger than parallel_offset in rt_utils
-    excluded_shapes = shapes_gdf.overlay(speedmap_segs, how='difference')
-    excluded_shapes['color'] = [(50,50,50) for _ in excluded_shapes.iterrows()] #  make it dark gray!
-    excluded_shapes['info'] = "No data in time period"
-    excluded_shapes.geometry = excluded_shapes.buffer(8) #  for display
-    
+    speedmap_segs.geometry = speedmap_segs.buffer(35)  # slightly bigger than parallel_offset in rt_utils
+    excluded_shapes = shapes_gdf.overlay(speedmap_segs, how="difference")
+    excluded_shapes["color"] = [(50, 50, 50) for _ in excluded_shapes.iterrows()]  # make it dark gray!
+    excluded_shapes["info"] = "No data in time period"
+    excluded_shapes.geometry = excluded_shapes.buffer(8)  # for display
+
     if excluded_shapes.empty:
         return {}
-    export_result = webmap_utils.set_state_export(excluded_shapes, subfolder = GEOJSON_SUBFOLDER, filename = filename,
-                        map_title = title, existing_state = existing_state)
-    
-    return export_result['state_dict']
+    export_result = webmap_utils.set_state_export(
+        excluded_shapes, subfolder=GEOJSON_SUBFOLDER, filename=filename, map_title=title, existing_state=existing_state
+    )
+
+    return export_result["state_dict"]
 
 
-def map_time_period(district_gdf: gpd.GeoDataFrame, speedmap_segs: gpd.GeoDataFrame, org_shapes: gpd.GeoDataFrame,
-                    analysis_date: dt.date, time_of_day: str, map_type: str):
-    '''
+def map_time_period(
+    district_gdf: gpd.GeoDataFrame,
+    speedmap_segs: gpd.GeoDataFrame,
+    org_shapes: gpd.GeoDataFrame,
+    analysis_date: dt.date,
+    time_of_day: str,
+    map_type: str,
+):
+    """
     Always add State Highway Network first.
-    '''
-    time_of_day_lower = time_of_day.lower().replace(' ', '_')
-    speedmap_segs = speedmap_segs.query('time_of_day == @time_of_day')
+    """
+    speedmap_segs = speedmap_segs.query("time_of_day == @time_of_day")
     if speedmap_segs.empty:
         return None
-    color_col = {'new_speedmap': 'p20_mph', 'new_speed_variation': 'fast_slow_ratio'}[map_type]
+    color_col = {"new_speedmap": "p20_mph", "new_speed_variation": "fast_slow_ratio"}[map_type]
     shn_state = map_shn(district_gdf)
-    excluded_shapes_state = map_excluded_shapes(shn_state, speedmap_segs, org_shapes,
-                                                time_of_day, analysis_date)
-    
-    display_date = dt.date.fromisoformat(analysis_date).strftime('%B %d %Y (%A)')
+    excluded_shapes_state = map_excluded_shapes(shn_state, speedmap_segs, org_shapes, time_of_day, analysis_date)
+
+    display_date = dt.date.fromisoformat(analysis_date).strftime("%B %d %Y (%A)")
     filename = f"{analysis_date}_{speedmap_segs.base64_url.iloc[0]}_{map_type}_{time_of_day}"
     title = f"{speedmap_segs.analysis_name.iloc[0]} {display_date} {time_of_day}"
-    
-    if map_type == 'new_speedmap':
+
+    if map_type == "new_speedmap":
         cmap = rt_utils.ACCESS_ZERO_THIRTY_COLORSCALE
         legend_url = rt_utils.ACCESS_SPEEDMAP_LEGEND_URL
-    elif map_type == 'new_speed_variation':
+    elif map_type == "new_speed_variation":
         cmap = rt_utils.VARIANCE_FIXED_COLORSCALE
         legend_url = rt_utils.VARIANCE_LEGEND_URL
-        
+
     export_result = webmap_utils.set_state_export(
-        speedmap_segs, subfolder = GEOJSON_SUBFOLDER, filename=filename,
+        speedmap_segs,
+        subfolder=GEOJSON_SUBFOLDER,
+        filename=filename,
         map_type=map_type,
-        color_col=color_col, cmap=cmap, legend_url=legend_url,
+        color_col=color_col,
+        cmap=cmap,
+        legend_url=legend_url,
         map_title=title,
-        existing_state = excluded_shapes_state)
-    
-    spa_link = export_result['spa_link'] 
-    return spa_link
+        existing_state=excluded_shapes_state,
+    )
+
+    spa_link = export_result["spa_link"]
+    return spa_link, title
+
 
 def chart_speeds_by_time_period(speedmap_segs: gpd.GeoDataFrame) -> None:
-    '''
+    """
     Use Altair to chart p20,p50,p80 speeds by time of day.
     Match speedmap colorscale.
-    '''
+    """
     cmap = rt_utils.ACCESS_ZERO_THIRTY_COLORSCALE
     domain = cmap.index
     range_ = [cmap.rgb_hex_str(i) for i in cmap.index]
-    df = speedmap_segs[['time_of_day', 'p50_mph', 'p20_mph', 'p80_mph']]
-    df = df.groupby('time_of_day').median().reset_index()
-    df['p50 - p20'] = -(df['p50_mph'] - df['p20_mph'])
-    df['p80 - p50'] = df['p80_mph'] - df['p50_mph']
-    error_bars = alt.Chart(df).mark_errorbar(thickness=5, color='gray', opacity=.6).encode(
-        y = alt.Y("p50_mph:Q", title='Segment Speed (mph): 20, 50, 80%ile'),
-        yError=("p50 - p20:Q"),
-        yError2=("p80 - p50:Q"),
-        x = alt.X("time_of_day:N", sort=['Early AM', 'AM Peak', 'Midday', 'PM Peak', 'Evening', 'Owl']),
-        tooltip=[alt.Tooltip('p20_mph:Q', title="p20 mph"), alt.Tooltip('p50_mph:Q', title="p50 mph"),
-                alt.Tooltip('p80_mph:Q', title="p80 mph")]
-    ).properties(width=400)
-    points = alt.Chart(df).mark_point(filled=True, size = 300, opacity = 1).encode(
-        alt.Y("p50_mph:Q"),
-        alt.X("time_of_day:N", sort=['Early AM', 'AM Peak', 'Midday', 'PM Peak', 'Evening', 'Owl'],
-             title='Time of Day'),
-        color=alt.Color('p50_mph', title='Median Segment Speed (mph)').scale(domain=domain, range = range_),
-        tooltip=[alt.Tooltip('p50_mph:Q', title="p50 mph")],
+    df = speedmap_segs[["time_of_day", "p50_mph", "p20_mph", "p80_mph"]]
+    df = df.groupby("time_of_day").median().reset_index()
+    df["p50 - p20"] = -(df["p50_mph"] - df["p20_mph"])
+    df["p80 - p50"] = df["p80_mph"] - df["p50_mph"]
+    error_bars = (
+        alt.Chart(df)
+        .mark_errorbar(thickness=5, color="gray", opacity=0.6)
+        .encode(
+            y=alt.Y("p50_mph:Q", title="Segment Speed (mph): 20, 50, 80%ile"),
+            yError=("p50 - p20:Q"),
+            yError2=("p80 - p50:Q"),
+            x=alt.X("time_of_day:N", sort=["Early AM", "AM Peak", "Midday", "PM Peak", "Evening", "Owl"]),
+            tooltip=[
+                alt.Tooltip("p20_mph:Q", title="p20 mph"),
+                alt.Tooltip("p50_mph:Q", title="p50 mph"),
+                alt.Tooltip("p80_mph:Q", title="p80 mph"),
+            ],
+        )
+        .properties(width=400)
+    )
+    points = (
+        alt.Chart(df)
+        .mark_point(filled=True, size=300, opacity=1)
+        .encode(
+            alt.Y("p50_mph:Q"),
+            alt.X(
+                "time_of_day:N",
+                sort=["Early AM", "AM Peak", "Midday", "PM Peak", "Evening", "Owl"],
+                title="Time of Day",
+            ),
+            color=alt.Color("p50_mph", title="Median Segment Speed (mph)").scale(domain=domain, range=range_),
+            tooltip=[alt.Tooltip("p50_mph:Q", title="p50 mph")],
+        )
     )
     chart = error_bars + points
-    chart = chart.configure(axis = alt.AxisConfig(labelFontSize=14, titleFontSize=18),
-                           legend = alt.LegendConfig(titleFontSize=14, labelFontSize=14, titleLimit=250,
-                                                     titleOrient='left', labelOffset=100))
+    chart = chart.configure(
+        axis=alt.AxisConfig(labelFontSize=14, titleFontSize=18),
+        legend=alt.LegendConfig(
+            titleFontSize=14, labelFontSize=14, titleLimit=250, titleOrient="left", labelOffset=100
+        ),
+    )
     display(chart)
     return
