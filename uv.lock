@@ -783,6 +783,15 @@ wheels = [
 ]
 
 [[package]]
+name = "et-xmlfile"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d3/38/af70d7ab1ae9d4da450eeec1fa3918940a5fafb9055e934af8d6eb0c2313/et_xmlfile-2.0.0.tar.gz", hash = "sha256:dab3f4764309081ce75662649be815c4c9081e88f0837825f90fd28317d4da54", size = 17234, upload-time = "2024-10-25T17:25:40.039Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/8b/5fe2cc11fee489817272089c4203e679c63b570a5aaeb18d852ae3cbba6a/et_xmlfile-2.0.0-py3-none-any.whl", hash = "sha256:7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa", size = 18059, upload-time = "2024-10-25T17:25:39.051Z" },
+]
+
+[[package]]
 name = "executing"
 version = "2.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1430,11 +1439,11 @@ wheels = [
 
 [[package]]
 name = "itables"
-version = "2.7.0"
+version = "2.7.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/35/c1/bd0bdc1314cf2d682d4e364c2df381f127a39c7d1953a008af5de66f9e7d/itables-2.7.0.tar.gz", hash = "sha256:fd9e541973a654f79dcebbd7c0d875a08db7b99a3fc467a91de260c78f6643ea", size = 2386312, upload-time = "2026-02-04T19:52:14.823Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/85/43/c438b31429d4e8cefc76c7cba80a1c948d2e18d74589fb771ea719474bbf/itables-2.7.3.tar.gz", hash = "sha256:7a9680da20aa6495868265d397f1a8cc03d8fdbc592760d3ddb10b4d6081ff73", size = 2428026, upload-time = "2026-03-22T20:05:14.373Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/4f/f9/dffe93846eb054da789173c3c03e8f6a565e2c18bb941d54085032f8060b/itables-2.7.0-py3-none-any.whl", hash = "sha256:68910282840c0770da2f336a207e64c75e052b31949ac97faa15a1f621727a4c", size = 2420679, upload-time = "2026-02-04T19:52:08.031Z" },
+    { url = "https://files.pythonhosted.org/packages/79/a5/60a55bd4cb9488d21adcdce88625e1de9bc14ea454677160c162132838cb/itables-2.7.3-py3-none-any.whl", hash = "sha256:b24ebd6a4ab3edab200f41c56e20a12b12b95ec15d3697aeb9bee71d92c008a9", size = 2462653, upload-time = "2026-03-22T20:05:11.819Z" },
 ]
 
 [[package]]
@@ -2143,6 +2152,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/09/48/6388f1bb9da707110532cb70ec4d2822858ddfb44f1cdf1233c20a80ea4b/omegaconf-2.3.0.tar.gz", hash = "sha256:d5d4b6d29955cc50ad50c46dc269bcd92c6e00f5f90d23ab5fee7bfca4ba4cc7", size = 3298120, upload-time = "2022-12-08T20:59:22.753Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e3/94/1843518e420fa3ed6919835845df698c7e27e183cb997394e4a670973a65/omegaconf-2.3.0-py3-none-any.whl", hash = "sha256:7b4df175cdb08ba400f45cae3bdcae7ba8365db4d165fc65fd04b050ab63b46b", size = 79500, upload-time = "2022-12-08T20:59:19.686Z" },
+]
+
+[[package]]
+name = "openpyxl"
+version = "3.1.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "et-xmlfile" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/3d/f9/88d94a75de065ea32619465d2f77b29a0469500e99012523b91cc4141cd1/openpyxl-3.1.5.tar.gz", hash = "sha256:cf0e3cf56142039133628b5acffe8ef0c12bc902d2aadd3e0fe5878dc08d1050", size = 186464, upload-time = "2024-06-28T14:03:44.161Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c0/da/977ded879c29cbd04de313843e76868e6e13408a94ed6b987245dc7c8506/openpyxl-3.1.5-py2.py3-none-any.whl", hash = "sha256:5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2", size = 250910, upload-time = "2024-06-28T14:03:41.161Z" },
 ]
 
 [[package]]
@@ -3211,11 +3232,12 @@ dependencies = [
     { name = "numba" },
     { name = "numpy" },
     { name = "omegaconf" },
+    { name = "openpyxl" },
     { name = "polars" },
     { name = "python-slugify" },
     { name = "pyyaml" },
     { name = "quarto" },
-    { name = "quarto-cli" },
+    { name = "quarto-cli", marker = "sys_platform != 'win32'" },
     { name = "scipy" },
     { name = "seaborn" },
     { name = "stonesoup" },
@@ -3247,7 +3269,7 @@ requires-dist = [
     { name = "gt-extras", specifier = "==0.0.8" },
     { name = "intake", specifier = "==0.6.4" },
     { name = "intake-geopandas", specifier = ">=0.3.0" },
-    { name = "itables", specifier = "==2.7.0" },
+    { name = "itables", specifier = "==2.7.3" },
     { name = "loguru", specifier = ">=0.6.0,<0.7" },
     { name = "mapclassify", specifier = ">=2.8.0,<3" },
     { name = "matplotlib", specifier = ">=3.10.5,<4.0.0" },
@@ -3255,11 +3277,12 @@ requires-dist = [
     { name = "numba", specifier = ">=0.62.1,<0.63.0" },
     { name = "numpy", specifier = ">=1.26.4,<2.0.0" },
     { name = "omegaconf", specifier = "==2.3.0" },
+    { name = "openpyxl", specifier = ">=3.1.0" },
     { name = "polars", specifier = "==1.22.0" },
     { name = "python-slugify", specifier = ">=8.0.0" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "quarto", specifier = "==0.1.0" },
-    { name = "quarto-cli", specifier = "==1.6.40" },
+    { name = "quarto-cli", marker = "sys_platform != 'win32'", specifier = "==1.6.40" },
     { name = "scipy", specifier = ">=1.11.0" },
     { name = "seaborn", specifier = ">=0.11.2,<0.12.0" },
     { name = "stonesoup", specifier = "==1.8" },
