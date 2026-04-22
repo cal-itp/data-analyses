@@ -126,7 +126,7 @@ def map_time_period(
     """
     speedmap_segs = speedmap_segs.query("time_of_day == @time_of_day")
     if speedmap_segs.empty:
-        return None
+        return None, None
     color_col = {"new_speedmap": "p20_mph", "new_speed_variation": "fast_slow_ratio"}[map_type]
     shn_state = map_shn(district_gdf)
     excluded_shapes_state = map_excluded_shapes(shn_state, speedmap_segs, org_shapes, time_of_day, analysis_date)
@@ -155,7 +155,10 @@ def map_time_period(
     )
 
     spa_link = export_result["spa_link"]
-    return spa_link, title
+    if spa_link and title:
+        return spa_link, title
+    else:
+        return (None, None)
 
 
 def chart_speeds_by_time_period(speedmap_segs: gpd.GeoDataFrame) -> None:

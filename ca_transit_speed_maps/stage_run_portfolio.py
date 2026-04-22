@@ -31,9 +31,11 @@ def stage_portfolio():
 def deploy_portfolio():
 
     os.chdir("/home/jovyan/data-analyses")
-    os.system("python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy --target staging")
+    os.system(
+        "python3 portfolio/portfolio.py build rt --no-execute-papermill --hide-title-block --deploy --target staging"
+    )
     print(
-        "deployed to staging, check and use python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy --target production to deploy to prod"
+        "deployed to staging, check and use python3 portfolio/portfolio.py build rt --no-execute-papermill --hide-title-block --deploy --target production to deploy to prod"
     )
 
 
