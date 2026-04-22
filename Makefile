@@ -28,28 +28,28 @@ build_staging_portfolio_site:
 
 # Build and Deploy Production Portfolio Index page with:
 build_production_portfolio_index:
-	python portfolio/portfolio.py index --deploy --prod
+	uv run python portfolio/portfolio.py index --deploy --prod
 
 # Build and Deploy Staging Portfolio Index page (including test portfolios) with:
 build_staging_portfolio_index:
-	python portfolio/portfolio.py index --deploy --no-prod
+	uv run python portfolio/portfolio.py index --deploy --no-prod
 
 # Build locally the Portfolio Site without deploying with:
 # make test_build_portfolio_site site='MY_SITE_IDENTIFIER'
 test_build_portfolio_site:
-	python portfolio/portfolio.py clean $(site)
+	uv run python portfolio/portfolio.py clean $(site)
 	#gcloud auth login --login-config=iac/login.json
-	python portfolio/portfolio.py build $(site)
+	uv run python portfolio/portfolio.py build $(site)
 
 # Delete Local Site folder with:
 # make clean_portfolio_site site='MY_SITE_IDENTIFIER'
 clean_portfolio_site:
-	python portfolio/portfolio.py clean $(site)
+	uv run python portfolio/portfolio.py clean $(site)
 
 # Delete Local Site folder and Remove Portfolio site with:
 # make remove_portfolio_site site='MY_SITE_IDENTIFIER'
 remove_portfolio_site:
-	python portfolio/portfolio.py clean $(site)
+	uv run python portfolio/portfolio.py clean $(site)
 	git rm portfolio/sites/$(site).yml
 
 build_ntd_report:

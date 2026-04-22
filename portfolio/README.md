@@ -1,4 +1,5 @@
 # Introduction
+
 This website contains data analysis and reports developed by Cal-ITP data analysts and scientists.
 
 Creating a parameterized notebook means creating a Jupyter notebook set up so that multiple notebooks can be dynamically created from it by passing different configurations.
@@ -15,10 +16,17 @@ All source code for these analyses and reports may be found [on GitHub](https://
 
 Portfolio has additional dependencies beyond the workspace baseline. Install them with:
 
-```
-uv sync --group portfolio
+From the `data-analyses\` folder, install run:
+
+```bash
+$ uv sync
 ```
 
+Then:
+
+```bash
+$ uv sync --group portfolio
+```
 
 ## Environments
 
@@ -55,11 +63,6 @@ Or run the generator code from shared_utils:
 
 ### 3. Build your notebook as a JupyterBook
 
-> [!IMPORTANT]
-> If you are using **Prototype Image - 2026.3.18, Python 3.11** in JupyterHub, add `uv run` to the beginning of the command.<br/>
-> For example: `uv run python portfolio/portfolio.py clean MY_REPORT_SITE`.
-
-
 > [!NOTE]
 > Files generated to build the site are [ignored](https://github.com/cal-itp/data-analyses/blob/2303a904302a8e9ff53b5710a7bc2a71d590593c/.gitignore#L141) and will not be tracked or commited to the github repo.
 
@@ -67,18 +70,18 @@ Replace `MY_REPORT_SITE` with the same name from the `my_report_site.yml`, creat
 
 * (Optional) Remove the local folder containing the previously generate portfolio site:
   ```bash
-  $ python portfolio/portfolio.py clean MY_REPORT_SITE
+  $ uv run python portfolio/portfolio.py clean MY_REPORT_SITE
   ```
 
 * Parameterize the notebook specified in `portfolio/sites/MY_REPORT_SITE.yml`:
   ```bash
-  $ python portfolio/portfolio.py build MY_REPORT_SITE
+  $ uv run python portfolio/portfolio.py build MY_REPORT_SITE
   ```
 
   Add the option `--hide_title_block` if you want to build the site without the `Title Block`:
 
   ```bash
-  $ python portfolio/portfolio.py build MY_REPORT_SITE --hide_title_block
+  $ uv run python portfolio/portfolio.py build MY_REPORT_SITE --hide_title_block
   ```
 
   Local files will be created in `portfolio/MY_REPORT_SITE/`:
@@ -93,7 +96,7 @@ Replace `MY_REPORT_SITE` with the same name from the `my_report_site.yml`, creat
 Replace `MY_REPORT_SITE` with the same name from the `my_report_site.yml`, created on Step 1.
 
 ```bash
-$ python portfolio/portfolio.py deploy-site MY_REPORT_SITE
+$ uv run python portfolio/portfolio.py deploy-site MY_REPORT_SITE
 ```
 
 This command will deploys to `https://analysis-staging.dds.dot.ca.gov/MY_REPORT_SITE`. You can later deploy to production.
@@ -110,7 +113,7 @@ If you are changing the [Index Template](https://github.com/cal-itp/data-analyse
 To build the Index page locally, run:
 
 ```bash
-$ python portfolio/portfolio.py index
+$ uv run python portfolio/portfolio.py index
 ```
 This command will create `portfolio/index/index.html` in your local environment.
 
@@ -120,13 +123,13 @@ This command will create `portfolio/index/index.html` in your local environment.
 To deploy your local Index page to Staging, run:
 
 ```bash
-$ python portfolio/portfolio.py deploy-index
+$ uv run python portfolio/portfolio.py deploy-index
 ```
 
 Or if you want to build and deploy in one command, run:
 
 ```bash
-$ python portfolio/portfolio.py index --deploy
+$ uv run python portfolio/portfolio.py index --deploy
 ```
 This command will deploy to [https://analysis-staging.dds.dot.ca.gov/](https://analysis-staging.dds.dot.ca.gov/).
 
@@ -136,7 +139,7 @@ This command will deploy to [https://analysis-staging.dds.dot.ca.gov/](https://a
 Once you reviewed your site on Staging and it is ready for Production, run:
 
 ```bash
-$ python portfolio/portfolio.py build MY_REPORT_SITE --no-execute-papermill --deploy --target production
+$ uv run python portfolio/portfolio.py build MY_REPORT_SITE --no-execute-papermill --deploy --target production
 ```
 
 This command will deploy to `https://analysis.dds.dot.ca.gov/MY_REPORT_SITE`.
@@ -150,7 +153,7 @@ This command will deploy to `https://analysis.dds.dot.ca.gov/MY_REPORT_SITE`.
 Once you reviewed your Index page on Staging and it is ready for Production, run:
 
 ```bash
-$ python portfolio/portfolio.py index --deploy --target production
+$ uv run python portfolio/portfolio.py index --deploy --target production
 ```
 
 This command will deploy to [https://analysis.dds.dot.ca.gov/](https://analysis.dds.dot.ca.gov/).
@@ -158,7 +161,7 @@ This command will deploy to [https://analysis.dds.dot.ca.gov/](https://analysis.
 
 ## Accessibility Testing
 
-You will see accessibility violations at the end of building your site. If you have already built your site and wish to run only accessibilty checks, you can run `python portfolio/portfolio.py check-accessibility MY_REPORT_SITE`
+You will see accessibility violations at the end of building your site. If you have already built your site and wish to run only accessibilty checks, you can run `uv run python portfolio/portfolio.py check-accessibility MY_REPORT_SITE`
 
 ### Accesibility Warning Severity
 
