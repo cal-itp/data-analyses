@@ -25,8 +25,6 @@ parts:
       analysis_name: Sacramento Regional Transit District
   - params:
       analysis_name: University of California, Davis
-  - params:
-      analysis_name: None
 - caption: District 04 - Bay Area / Oakland
   chapters:
   - params:
@@ -164,8 +162,6 @@ parts:
       analysis_name: Southern California Regional Rail Authority
   - params:
       analysis_name: SunLine Transit Agency
-  - params:
-      analysis_name: None
 - caption: District 09 - Bishop
   chapters:
   - params:
@@ -186,8 +182,6 @@ parts:
       analysis_name: Stanislaus Regional Transit Authority
   - params:
       analysis_name: Tuolumne County Transit Agency
-  - params:
-      analysis_name: None
 - caption: District 11 - San Diego
   chapters:
   - params:

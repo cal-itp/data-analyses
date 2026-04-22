@@ -6,17 +6,11 @@ if not sys.warnoptions:
 
     warnings.simplefilter("ignore")
 
-# import datetime as dt
 import os
 
 import pandas as pd
-
-# import pyaml
-# import yaml
 from shared_utils import portfolio_utils
 from update_vars_index import PROGRESS_PATH
-
-# import time
 
 
 def stage_portfolio():
@@ -29,15 +23,17 @@ def stage_portfolio():
 def deploy_portfolio():
 
     os.chdir("/home/jovyan/data-analyses")
-    os.system("python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy --target staging")
+    os.system(
+        "python3 portfolio/portfolio.py build rt --no-execute-papermill --hide-title-block --deploy --target staging"
+    )
     print(
-        "deployed to staging, check and use python3 portfolio/portfolio.py build rt --no-execute-papermill --deploy --target production to deploy to prod"
+        "deployed to staging, check and use python3 portfolio/portfolio.py build rt --no-execute-papermill --hide-title-block --deploy --target production to deploy to prod"
     )
 
 
 if __name__ == "__main__":
 
-    speedmaps_index_joined = pd.read_parquet(PROGRESS_PATH).sort_values(["caltrans_district", "analysis_name"])
+    speedmaps_index_joined = pd.read_parquet(PROGRESS_PATH).dropna().sort_values(["caltrans_district", "analysis_name"])
     portfolio_utils.create_portfolio_yaml_chapters_with_groups(
         portfolio_site_yaml="../portfolio/sites/rt.yml",
         df=speedmaps_index_joined,
