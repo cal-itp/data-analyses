@@ -5,15 +5,39 @@ stop_times_poc_cleaned_data:
 	python more_cleaning.py
 	#python schedule_stop_times_with_geom.py -- do this for easier mapping
 
-
-rt_msa_stop_report:
+stop_report:
 	python download_warehouse_tables.py
-    # things that should be done before report is run, but probably can't make it into dbt model
-    # save it out as parquet
+	# things that should be done before report is run, but probably can't make it into dbt model
+	# save it out as parquet
 	python prep_data_for_viz.py
-	python deploy_portfolio_yaml.py rt_msa_stops
+	python deploy_portfolio_yaml.py rt_msa_stops --month 2026-01-01
 	cd ../portfolio/ && pip install -r requirements.txt && cd ../
-	python portfolio/portfolio.py build rt_trip_updates_stop_metrics
 	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra # will need to authenticate this step
-	python portfolio/portfolio.py build rt_trip_updates_stop_metrics --no-execute-papermill --deploy
-	python portfolio/portfolio.py index --deploy
+	python portfolio/portfolio.py build rt_trip_updates_stop_metrics --hide-title-block --deploy --target staging
+	python portfolio/portfolio.py index --deploy --no-prod
+
+operator_report:
+	#python download_warehouse_tables.py
+	# things that should be done before report is run, but probably can't make it into dbt model
+	# save it out as parquet
+	#python prep_data_for_viz.py
+	#python deploy_portfolio_yaml.py rt_msa_operators --month 2026-01-01
+	#cd ../portfolio/ && pip install -r requirements.txt && cd ../
+	cd ../ && python portfolio/portfolio.py clean rt_operator_metrics
+	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra # will need to authenticate this step
+	#python portfolio/portfolio.py build rt_operator_metrics --hide-title-block
+	# still set H1, hide title instead
+	python portfolio/portfolio.py build rt_operator_metrics --no-execute-papermill --hide-title-block --deploy --target production
+	python portfolio/portfolio.py index --deploy --no-prod
+
+test_stop_report:
+	cd ../
+	cd ../ && python portfolio/portfolio.py clean test_tu_stops
+	cd ../ && python portfolio/portfolio.py build test_tu_stops --hide-title-block --deploy --target staging
+	cd ../ && python portfolio/portfolio.py index --deploy --no-prod
+
+test_operator_report:
+	cd ../ && python portfolio/portfolio.py clean test_tu
+	cd ../ && python portfolio/portfolio.py build test_tu
+	cd ../ && python portfolio/portfolio.py build test_tu --no-execute-papermill --hide-title-block --deploy --target staging
+	cd ../ && python portfolio/portfolio.py index --deploy --no-prod

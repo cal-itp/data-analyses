@@ -1,7 +1,7 @@
-title: Greetings Analyses Test with Params (Hiding Title Block)
+title: Param Analyses with Title Test
 directory: ./tests/fixtures/portfolio/
-readme: ./tests/fixtures/portfolio/README.md
-notebook: ./tests/fixtures/portfolio/notebook_with_params_1.ipynb
+readme: ./tests/fixtures/portfolio/README_TP.md
+notebook: ./tests/fixtures/portfolio/notebook_with_params_2.ipynb
 parts:
   - chapters:
     - caption: Hi!

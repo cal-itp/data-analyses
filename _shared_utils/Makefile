@@ -1,2 +1,2 @@
 setup_env:
-	pip install -r requirements.txt
+	cd .. && uv sync

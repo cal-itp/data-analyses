@@ -4,113 +4,168 @@ Mostly trip updates, but some vp and schedule metrics are also available.
 """
 
 import pandas as pd
+import report_utils
 
 
-def add_slope_of_prediction_error(
-    df: pd.DataFrame, group_cols: list = ["schedule_name", "service_date"], prediction_error_col: str = ""
+def operator_percentiles_summary(
+    df: pd.DataFrame, group_cols: list = ["month_first_day", "day_type", "schedule_name", "tu_name"]
 ) -> pd.DataFrame:
     """
-    Make sure the slope is calculated for all the dates present.
+    Several percentiles are linked to specific interpretations.
+    There are 3 arrays (full, positive only, negative only), so combine the
+    ones that are relevant into a df.
+
+    - Prediction padding (5th percentile) on prediction_error_sec_percentile_array.
+    - 25th, 50th, 75th (IQR + median) percentile on prediction_error_sec_percentile_array.
+    - deciles to plot on pos_prediction_error_sec_array and neg_prediction_error_sec_array
+    - drive ratio of 10th / 50th as accuracy loss on
+      pos_prediction_error_sec_array and neg_prediction_error_sec_array.
     """
-    p10_numerator = df[df.percentile == 10][group_cols + [prediction_error_col]].rename(
-        columns={prediction_error_col: "p10"}
+    PTILES_FOR_FULL_ARRAY = [5, 25, 50, 75]
+    PTILES_FOR_SLOPE = [10, 50]
+
+    percentiles_iqr = (
+        report_utils.explode_percentiles(
+            df,
+            group_cols,
+            array_col="prediction_error_sec_array",
+            ptile_array_col="prediction_error_sec_percentile_array",
+            ptiles_to_keep=PTILES_FOR_FULL_ARRAY,
+        )
+        .rename(columns={"p5": "prediction_padding"})
+        .pipe(report_utils.convert_seconds_to_minutes, "p25")
+        .pipe(report_utils.convert_seconds_to_minutes, "p50")
+        .pipe(report_utils.convert_seconds_to_minutes, "p75")
+        .pipe(report_utils.convert_seconds_to_minutes, "prediction_padding")
+        .pipe(report_utils.convert_seconds_to_minutes, "iqr")
     )
 
-    p50_denominator = df[df.percentile == 50][group_cols + [prediction_error_col]].rename(
-        columns={prediction_error_col: "p50"}
-    )
-
-    slope_df = pd.merge(p10_numerator, p50_denominator, on=group_cols)
-
-    slope_df[f"{prediction_error_col}_slope"] = slope_df.p10 / slope_df.p50
-
-    df2 = pd.merge(df, slope_df[group_cols + [f"{prediction_error_col}_slope"]], on=group_cols)
-
-    return df2
-
-
-def explode_decile_array_to_long(df: pd.DataFrame):
-    """
-    Get an exploded, cleaned up version of these deciles calculated for
-    positive and negative prediction errors.
-    Clean up column names so it's easier to use in charts and tables.
-    """
-    positive_error_cols = ["positive_prediction_error_sec_array", "positive_percentile_array"]
-    negative_error_cols = ["negative_prediction_error_sec_array", "negative_percentile_array"]
-
-    group_cols = ["schedule_name", "service_date"]
-
-    positive_df = (
-        df[group_cols + positive_error_cols]
-        .explode(column=positive_error_cols)
+    pos_slope = (
+        report_utils.explode_percentiles(
+            df,
+            group_cols,
+            array_col="pos_prediction_error_sec_array",
+            ptile_array_col="pos_prediction_error_sec_percentile_array",
+            ptiles_to_keep=PTILES_FOR_SLOPE,
+        )
         .rename(
             columns={
-                "positive_percentile_array": "percentile",
-                "positive_prediction_error_sec_array": "positive_prediction_error_sec",
+                **{f"p{i}": f"pos_p{i}" for i in PTILES_FOR_SLOPE},
             }
         )
-        .pipe(add_slope_of_prediction_error, group_cols, "positive_prediction_error_sec")
-    )
-
-    negative_df = (
-        df[group_cols + negative_error_cols]
-        .explode(column=negative_error_cols)
-        .rename(
-            columns={
-                "negative_percentile_array": "percentile",
-                "negative_prediction_error_sec_array": "negative_prediction_error_sec",
-            }
-        )
-        .pipe(add_slope_of_prediction_error, group_cols, "negative_prediction_error_sec")
-    )
-
-    df2 = pd.merge(positive_df, negative_df, on=group_cols + ["percentile"])
-
-    return df2
-
-
-def prep_trip_updates_metrics(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    * For the positive and negative prediction errors, display 10th and 50th percentiles.
-    * Calculate the slope (10th / 50th), because smaller the value, the smaller the loss in accuracy.
-    * Prediction padding is absolute value of 5th percentile (not reversed)...is this 95th percentile then?!
-       * TODO: reread paper, the few lines written on this is fairly confusing
-       * reversed percentiles show outliers at the bottom of graphs (Fig 5, 6)
-       * so not reversed means...what?
-       * If this is the padding to catch the bus, then presumably it means it's attached to late predictions,
-         because following those would mean you miss the bus, and behaviorally, riders take into account this handicap and adjust
-    * Bus catch likelihood is pct_predictions_early + pct_predictions_ontime, also show n_predictions
-    """
-    keep_cols = [
-        "schedule_name",
-        "service_date",
-        "n_predictions",
-        "pct_predictions_early",
-        "pct_predictions_ontime",
-        "pct_tu_complete_minutes",
-        "pct_tu_accurate_minutes",
-        "avg_prediction_spread_minutes",
-        "tu_messages_per_minute",
-        "prediction_error_sec_p10",
-        "prediction_error_sec_p25",
-        "prediction_error_sec_p50",
-        "prediction_error_sec_p75",
-        "prediction_error_sec_p90",
-        "pct_tu_trips",
-    ]
-
-    df2 = (
-        df[keep_cols]
-        .assign(
-            bus_catch_likelihood=(df.pct_predictions_early + df.pct_predictions_ontime).round(2),
-            prediction_padding_minutes=df.prediction_error_sec_p95.divide(60).round(1),
-            prediction_error_minutes_iqr=(df.prediction_error_sec_p75 - df.prediction_error_sec_p25)
-            .divide(60)
-            .round(1),
-            prediction_error_minutes_p50=df.prediction_error_sec_p50.divide(60).round(1),
-        )
-        .sort_values(["schedule_name", "service_date"])
         .reset_index(drop=True)
     )
 
-    return df2
+    neg_slope = (
+        report_utils.explode_percentiles(
+            df,
+            group_cols,
+            array_col="neg_prediction_error_sec_array",
+            ptile_array_col="prediction_error_sec_percentile_array",
+            ptiles_to_keep=PTILES_FOR_SLOPE,
+        )
+        .rename(
+            columns={
+                **{f"p{i}": f"neg_p{i}" for i in PTILES_FOR_SLOPE},
+            }
+        )
+        .reset_index(drop=True)
+    )
+
+    percentiles_df = pd.merge(percentiles_iqr, pos_slope, on=group_cols, how="inner").merge(
+        neg_slope, on=group_cols, how="inner"
+    )
+
+    # now calculate slope
+    # small is good, large ratios are bad (ex in paper is that 4 is pretty bad)
+    # prediction_padding is always absolute value
+    percentiles_df = percentiles_df.assign(
+        pos_error_ratio=percentiles_df.pos_p10.divide(percentiles_df.pos_p50).round(1),
+        neg_error_ratio=percentiles_df.neg_p10.divide(percentiles_df.neg_p50).round(1),
+        prediction_padding=percentiles_df.prediction_padding.abs(),
+    )
+
+    return percentiles_df
+
+
+def operator_deciles_for_chart(
+    df: pd.DataFrame, group_cols: list = ["month_first_day", "day_type", "schedule_name", "tu_name"]
+) -> pd.DataFrame:
+    """
+    Several percentiles are linked to specific interpretations.
+    There are 3 arrays (full, positive only, negative only), so combine the
+    ones that are relevant into a df.
+
+    - Prediction padding (5th percentile) on prediction_error_sec_percentile_array.
+    - 25th, 50th, 75th (IQR + median) percentile on prediction_error_sec_percentile_array.
+    - deciles to plot on pos_prediction_error_sec_array and neg_prediction_error_sec_array
+    - drive ratio of 10th / 50th as accuracy loss on
+      pos_prediction_error_sec_array and neg_prediction_error_sec_array.
+    """
+    DECILES = list(range(0, 100, 10))
+    pos_deciles = (
+        report_utils.explode_percentiles(
+            df,
+            group_cols,
+            array_col="pos_prediction_error_sec_array",
+            ptile_array_col="pos_prediction_error_sec_percentile_array",
+            ptiles_to_keep=DECILES,
+            pivoted=False,  # keep long so we can make a chart!
+        )
+        .rename(
+            columns={
+                "pos_prediction_error_sec_percentile_array": "percentile",
+                "pos_prediction_error_sec_array": "pos_prediction_error_sec",
+            }
+        )
+        .pipe(report_utils.convert_seconds_to_minutes, "pos_prediction_error_sec")
+    )
+
+    neg_deciles = (
+        report_utils.explode_percentiles(
+            df,
+            group_cols,
+            array_col="neg_prediction_error_sec_array",
+            ptile_array_col="prediction_error_sec_percentile_array",
+            ptiles_to_keep=DECILES,
+            pivoted=False,
+        )
+        .rename(
+            columns={
+                "prediction_error_sec_percentile_array": "percentile",
+                "neg_prediction_error_sec_array": "neg_prediction_error_sec",
+            }
+        )
+        .pipe(report_utils.convert_seconds_to_minutes, "neg_prediction_error_sec")
+    )
+
+    deciles_df = pd.merge(pos_deciles, neg_deciles, on=group_cols + ["percentile"], how="inner")
+
+    return deciles_df
+
+
+def merge_in_operator_percentiles(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    There's a part we can import, then we need to calculate the percentiles we need
+    to display in tables, and drop the arrays.
+    """
+    percentiles_df = operator_percentiles_summary(df)
+
+    df1 = pd.merge(df, percentiles_df, on=["month_first_day", "day_type", "schedule_name", "tu_name"], how="inner")
+
+    # can drop array cols
+    # add a bit more
+    array_cols = [c for c in df1.columns if "_array" in c]
+
+    df1 = (
+        df1.assign(
+            bus_catch_likelihood=(df1.pct_predictions_early + df1.pct_predictions_ontime).round(2),
+            day_type_sorted=df1.day_type.map(report_utils.DAYTYPE_ORDER_DICT),
+        )
+        .rename(columns={"prediction_padding": "prediction_padding_minutes"})
+        .drop(columns=["pct_predictions_early", "pct_predictions_ontime"] + array_cols)
+        .sort_values(["month_first_day", "schedule_name", "tu_name", "day_type_sorted"])
+        .reset_index(drop=True)
+    )
+
+    return df1

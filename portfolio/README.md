@@ -1,84 +1,167 @@
 # Introduction
 This website contains data analysis and reports developed by Cal-ITP data analysts and scientists.
 
+Creating a parameterized notebook means creating a Jupyter notebook set up so that multiple notebooks can be dynamically created from it by passing different configurations.
+
+See instructions for authoring a notebook in [Getting Notebooks Ready for the Portfolio](https://docs.calitp.org/data-infra/publishing/sections/4_notebooks_styling.html) and [The Cal-ITP Analytics Portfolio](https://docs.calitp.org/data-infra/publishing/sections/5_analytics_portfolio_site.html).
+
+
 ## Source code
 
 All source code for these analyses and reports may be found [on GitHub](https://github.com/cal-itp/data-analyses).
 
-## Deployment
-### Typical Workflow
-Creating a parameterized notebook means creating a Jupyter notebook set up so that multiple notebooks can be dynamically created from it by passing different configurations.
-See instructions here for authoring a notebook for paramaterization [pointers for styling notebooks](https://docs.calitp.org/data-infra/publishing/sections/4_notebooks_styling.html)
 
-1. Setup your configurations.
-   * Add a `site_name.yml` to `portfolio/sites/` - this controls the parameterization related to the notebooks.
-   * JupyterBooks have a table of contents and organize chapters and sections. We allow both chapters and sections to be parameterized, and examples are given for the most common types of supported parameterized reports.
-   * The path to the parameterized notebook must be defined (`project_folder/report.ipynb`)
-   * The path to the README must be defiend (`project_folder/README.md`)
-   * How to organize the chapters and sections. The 2 most common are
-     * by Caltrans district (chapter) and each transit operator within the district gets a page (section), and
-     * by Caltrans district (chapter) and each district is its own page (no section).
-   * [various parameterization examples](https://docs.calitp.org/data-infra/publishing/sections/5_analytics_portfolio_site.html)
+## Setup
 
-2. Build and deploy your parameterized notebook as a JupyterBook
-   * (Optionally) Remove the local folder containing the previously generate portfolio site
-     ```
-     python portfolio/portfolio.py clean MY_NEW_REPORT
-     ```
-   * Parameterize the notebook specified in `portfolio/sites/MY_NEW_REPORT.yml`
-     ```
-     python portfolio/portfolio.py build MY_NEW_REPORT
-     ```
+Portfolio has additional dependencies beyond the workspace baseline. Install them with:
 
-     Add the option `--hide_title_block` if you want to build the site without the Title Block.
-
-     ```
-     python portfolio/portfolio.py build MY_NEW_REPORT --hide_title_block
-     ```
-      * local files are created in `portfolio/MY_NEW_REPORT/` (all files below are within this newly created `portfolio/MY_NEW_REPORT/` sub-directory)
-      * JupyterBook necessary accessories: `myst.yml` and a README file.
-      * There will be additional files or directories holding the parameterized notebooks and site build files.
-   * During build you will see any accessibility violations that are detected in the generated site.
-
-3. Deploy your portfolio site to the staging environment for review
-> [!NOTE]
-> The default target is staging, so `--target staging` can be supplied.
-
-   ```
-   python portfolio/portfolio.py deploy-site MY_NEW_REPORT --target staging
-   ```
-
-   This will deploy to `https://analysis-staging.dds.dot.ca.gov/MY_NEW_REPORT`. You can later deploy to production with `--target production`.
-
-### Additional useful commands and info
-> [!NOTE]
-> The default target is staging, so `--target staging` can be supplied.
-
-* Combine __production__ build and deploy steps for a specific portfolio site
-  ```
-  python portfolio/portfolio.py build MY_NEW_REPORT --deploy --target staging
-  ```
-  This will deploy to `https://analysis.dds.dot.ca.gov/MY_NEW_REPORT`.
-* When we deploy, the HTML files in `portfolio/MY_NEW_REPORT/_build/html` are published either to the staging or production sites.
-* Many of these steps are also documented in the [Makefile](https://github.com/cal-itp/data-analyses/blob/main/Makefile).
-* Portfolio sites are now gitignored, no longer checked into git.
-
-### Deploy Portfolio Index
-> [!NOTE]
-> The default target is staging, so `--target staging` can be supplied.
-
-To deploy the Index page to the staging environment (https://analysis-staging.dds.dot.ca.gov/), run:
 ```
-python portfolio/portfolio.py deploy-index --target staging
+uv sync --group portfolio
 ```
-You can deploy to production with `--target production`.
 
-There is only one difference between staging and production Index page. In the Staging Index page you will see a list of `Test Projects` that you can use as examples or experiment building new ones.
+
+## Environments
+
+> [!IMPORTANT]
+> The default target is staging. To set the production target just add `--target production` to the commands.
+
+Portfolios will be generated in your local environment and can be deployed to the following targets:
+
+* [Production - https://analysis.dds.dot.ca.gov](https://analysis.dds.dot.ca.gov/)
+* [Staging - https://analysis-staging.dds.dot.ca.gov](https://analysis-staging.dds.dot.ca.gov/)
+
+
+## Typical Workflow
+
+Many of these steps are also documented in the [Makefile](https://github.com/cal-itp/data-analyses/blob/main/Makefile).
+
+### 1. Create a `README.md` file
+
+The `README.md` file will be the landing page of your Porfolio site.
+To create uniformity across portfolios, follow the [template](https://github.com/cal-itp/data-analyses/blob/main/portfolio/template_README.md).
+
+### 2. Setup your configurations
+
+JupyterBooks have a table of contents organized in chapters. Chapters can be grouped and parameterized.
+
+To configure how your notebooks are organized and parameterized, you need to create a configuration file like `<my_report_site>.yml` in [portfolio/sites/](https://github.com/cal-itp/data-analyses/tree/main/portfolio/sites). Replace `<my_report_site>` by your site name.
+
+You can create your file manually by following the example files (`_<example_name>_test.yml`) located in the [portfolio/sites/](https://github.com/cal-itp/data-analyses/tree/main/portfolio/sites) folder.
+
+Or run the generator code from shared_utils:
+- Create your own code generator in Python.
+- Import `from shared_utils import portfolio_utils`.
+- Use one of the functions available: [create_portfolio_yaml_chapters_no_sections](https://github.com/cal-itp/data-analyses/blob/ffc3dae8004cb7285958d1f2631f3ac87ae57f1c/_shared_utils/shared_utils/portfolio_utils.py#L24), [create_portfolio_yaml_chapters_with_groups](https://github.com/cal-itp/data-analyses/blob/ffc3dae8004cb7285958d1f2631f3ac87ae57f1c/_shared_utils/shared_utils/portfolio_utils.py#L56), or [create_portfolio_yaml_chapters_with_sections](https://github.com/cal-itp/data-analyses/blob/ffc3dae8004cb7285958d1f2631f3ac87ae57f1c/_shared_utils/shared_utils/portfolio_utils.py#L136).
+
+### 3. Build your notebook as a JupyterBook
+
+> [!IMPORTANT]
+> If you are using **Prototype Image - 2026.3.18, Python 3.11** in JupyterHub, add `uv run` to the beginning of the command.<br/>
+> For example: `uv run python portfolio/portfolio.py clean MY_REPORT_SITE`.
+
+
+> [!NOTE]
+> Files generated to build the site are [ignored](https://github.com/cal-itp/data-analyses/blob/2303a904302a8e9ff53b5710a7bc2a71d590593c/.gitignore#L141) and will not be tracked or commited to the github repo.
+
+Replace `MY_REPORT_SITE` with the same name from the `my_report_site.yml`, created on Step 1.
+
+* (Optional) Remove the local folder containing the previously generate portfolio site:
+  ```bash
+  $ python portfolio/portfolio.py clean MY_REPORT_SITE
+  ```
+
+* Parameterize the notebook specified in `portfolio/sites/MY_REPORT_SITE.yml`:
+  ```bash
+  $ python portfolio/portfolio.py build MY_REPORT_SITE
+  ```
+
+  Add the option `--hide_title_block` if you want to build the site without the `Title Block`:
+
+  ```bash
+  $ python portfolio/portfolio.py build MY_REPORT_SITE --hide_title_block
+  ```
+
+  Local files will be created in `portfolio/MY_REPORT_SITE/`:
+   * JupyterBook necessary accessories: `myst.yml` and a README file.
+   * Additional files or directories holding the parameterized notebooks and site.
+
+* Verify the accessibility violations that are detected in the generated site. See more info in [Accessibility Testing](#accessibility_testing) bellow.
+
+
+### 4. Deploy your portfolio site to Staging for review
+
+Replace `MY_REPORT_SITE` with the same name from the `my_report_site.yml`, created on Step 1.
+
+```bash
+$ python portfolio/portfolio.py deploy-site MY_REPORT_SITE
+```
+
+This command will deploys to `https://analysis-staging.dds.dot.ca.gov/MY_REPORT_SITE`. You can later deploy to production.
+
+
+### 5. (Optional) Update the Index page for Staging
+
+> [!NOTE]
+> Staging Index page displays a list of `Test Projects` that you can use for examples or experiments.
+
+If you are creating a new site or updating the name, this step will include a new link to the Portfolio list.
+If you are changing the [Index Template](https://github.com/cal-itp/data-analyses/blob/main/portfolio/templates/index.html), you need to re-build the Index page to see the changes.
+
+To build the Index page locally, run:
+
+```bash
+$ python portfolio/portfolio.py index
+```
+This command will create `portfolio/index/index.html` in your local environment.
+
+
+### 6. (Optional) Deploy the Index page to Staging for review
+
+To deploy your local Index page to Staging, run:
+
+```bash
+$ python portfolio/portfolio.py deploy-index
+```
+
+Or if you want to build and deploy in one command, run:
+
+```bash
+$ python portfolio/portfolio.py index --deploy
+```
+This command will deploy to [https://analysis-staging.dds.dot.ca.gov/](https://analysis-staging.dds.dot.ca.gov/).
+
+
+### 7. Deploy your portfolio site to Production
+
+Once you reviewed your site on Staging and it is ready for Production, run:
+
+```bash
+$ python portfolio/portfolio.py build MY_REPORT_SITE --no-execute-papermill --deploy --target production
+```
+
+This command will deploy to `https://analysis.dds.dot.ca.gov/MY_REPORT_SITE`.
+
+
+### 8. (Optional) Deploy the Index page to Production
+
+> [!NOTE]
+> When you build the Index page for Production, the page will not display `Test Projects`.
+
+Once you reviewed your Index page on Staging and it is ready for Production, run:
+
+```bash
+$ python portfolio/portfolio.py index --deploy --target production
+```
+
+This command will deploy to [https://analysis.dds.dot.ca.gov/](https://analysis.dds.dot.ca.gov/).
+
 
 ## Accessibility Testing
-You will see accessibility violations at the end of building your site. If you have already built your site and wish to run only accessibilty checks, you can run `python portfolio/portfolio.py check-accessibility MY_NEW_REPORT`
+
+You will see accessibility violations at the end of building your site. If you have already built your site and wish to run only accessibilty checks, you can run `python portfolio/portfolio.py check-accessibility MY_REPORT_SITE`
 
 ### Accesibility Warning Severity
+
 ❔- Minor
 ⚠️- Moderate
 🛑- Serious

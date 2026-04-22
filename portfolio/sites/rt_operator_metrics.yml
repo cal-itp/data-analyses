@@ -1,0 +1,210 @@
+directory: ./rt_predictions/
+notebook: ./rt_predictions/operator_report.ipynb
+parts:
+- chapters:
+  - params:
+      name: Antelope Valley Transit Authority Trip Updates
+  - params:
+      name: B-Line Trip Updates
+  - params:
+      name: Banning Pass Trip Updates
+  - params:
+      name: Basin Transit GMV Trip Updates
+  - params:
+      name: Bay Area 511 ACE TripUpdates
+  - params:
+      name: Bay Area 511 Capitol Corridor TripUpdates
+  - params:
+      name: Bay Area 511 County Connection TripUpdates
+  - params:
+      name: Bay Area 511 Dumbarton Express TripUpdates
+  - params:
+      name: Bay Area 511 Emery Go-Round TripUpdates
+  - params:
+      name: Bay Area 511 Fairfield and Suisun Transit TripUpdates
+  - params:
+      name: Bay Area 511 Golden Gate Trip Updates
+  - params:
+      name: Bay Area 511 MVGO TripUpdates
+  - params:
+      name: Bay Area 511 Marin TripUpdates
+  - params:
+      name: Bay Area 511 Muni TripUpdates
+  - params:
+      name: Bay Area 511 SamTrans Trip Updates
+  - params:
+      name: Bay Area 511 San Francisco Bay Ferry TripUpdates
+  - params:
+      name: Bay Area 511 Santa Clara Transit TripUpdates
+  - params:
+      name: Bay Area 511 Santa Rosa CityBus TripUpdates
+  - params:
+      name: Bay Area 511 SolTrans TripUpdates
+  - params:
+      name: Bay Area 511 Sonoma County Transit TripUpdates
+  - params:
+      name: Bay Area 511 Sonoma-Marin Area Rail Transit TripUpdates
+  - params:
+      name: Bay Area 511 Tri Delta TripUpdates
+  - params:
+      name: Bay Area 511 Vacaville City Coach TripUpdates
+  - params:
+      name: Bay Area 511 Vine Transit Trip Updates
+  - params:
+      name: Bay Area 511 WestCAT TripUpdates
+  - params:
+      name: Beach Cities TripUpdates
+  - params:
+      name: Bear Trip Updates
+  - params:
+      name: Beaumont Transit Trip Updates
+  - params:
+      name: Big Blue Bus Clever Trip Updates
+  - params:
+      name: BruinBus Trip Updates
+  - params:
+      name: Burbank TripUpdates
+  - params:
+      name: Commerce TripUpdates
+  - params:
+      name: County Connection Swiftly Trip Update
+  - params:
+      name: Culver City TripUpdates
+  - params:
+      name: Desert Roadrunner Trip Updates
+  - params:
+      name: DowneyLink Avail Trip Updates
+  - params:
+      name: Eastern Sierra Trip Updates
+  - params:
+      name: Elk Grove TripUpdates
+  - params:
+      name: Emery Go-Round TripShot Trip Updates
+  - params:
+      name: Fairfield Trip Updates
+  - params:
+      name: Foothill Trip Updates
+  - params:
+      name: Fresno Trip Updates
+  - params:
+      name: G Trans Trip Updates
+  - params:
+      name: GET TripUpdates
+  - params:
+      name: Humboldt Trip Updates
+  - params:
+      name: Kern Swiftly Trip Update
+  - params:
+      name: Kings Trip Updates
+  - params:
+      name: LA DOT TripUpdates
+  - params:
+      name: LA Metro Bus Trip Updates
+  - params:
+      name: LA Metro Rail Trip Updates
+  - params:
+      name: Lake Trip Updates
+  - params:
+      name: Lawndale Beat Trip Updates
+  - params:
+      name: LongBeach TripUpdates
+  - params:
+      name: MVGO TripUpdates
+  - params:
+      name: Madera County Connection Trip Updates
+  - params:
+      name: Marin Swiftly Trip Update
+  - params:
+      name: Mendocino Trip Updates
+  - params:
+      name: Merced Trip Updates
+  - params:
+      name: Metrolink TripUpdates
+  - params:
+      name: Monterey Salinas TripUpdates
+  - params:
+      name: Mountain Transit GMV TripUpdate
+  - params:
+      name: Mountain View Community Shuttle TripUpdates
+  - params:
+      name: Nevada County Trip Updates
+  - params:
+      name: Norwalk Trip Updates
+  - params:
+      name: OCTA TripUpdates
+  - params:
+      name: OmniTrans Trip Updates
+  - params:
+      name: Pasadena TripUpdates
+  - params:
+      name: Petaluma GMV Trip Updates
+  - params:
+      name: PresidiGo TripUpdates
+  - params:
+      name: Redding Trip Updates
+  - params:
+      name: Redwood Coast Trip Updates
+  - params:
+      name: Riverside TripUpdates
+  - params:
+      name: SBMTD TripUpdates
+  - params:
+      name: SCVTA Swiftly Trip Update
+  - params:
+      name: SLO Trip Updates
+  - params:
+      name: SLORTA TripUpdates
+  - params:
+      name: SMART Trip Updates
+  - params:
+      name: Sacramento Trip Updates
+  - params:
+      name: San Francisco Bay Ferry Trip Updates
+  - params:
+      name: San Joaquin Trip Updates
+  - params:
+      name: Santa Clarita TripUpdates
+  - params:
+      name: Santa Cruz Trip Updates
+  - params:
+      name: Santa Maria TripUpdates
+  - params:
+      name: Santa Rosa CityBus GMV TripUpdates
+  - params:
+      name: SolTrans TripUpdates
+  - params:
+      name: StanRTA TripUpdates
+  - params:
+      name: SunLine Trip Updates
+  - params:
+      name: Sunline Swiftly Trip Updates
+  - params:
+      name: TCRTA Trip Updates
+  - params:
+      name: Tahoe Transportation District GMV TripUpdates
+  - params:
+      name: Tehama Swiftly Trip Update
+  - params:
+      name: Torrance Swiftly Trip Updates
+  - params:
+      name: Tri-Valley Wheels Swiftly Trip Updates
+  - params:
+      name: Tuolumne Swiftly Trip Update
+  - params:
+      name: Turlock Trip Updates
+  - params:
+      name: Unitrans Trip Updates
+  - params:
+      name: VCTC TripUpdates
+  - params:
+      name: Vacaville Trip Updates
+  - params:
+      name: Victor Valley Trip Updates
+  - params:
+      name: Vine GMV Trip Updates
+  - params:
+      name: WeHo Trip Updates
+  - params:
+      name: Yolobus TripUpdates
+readme: ./rt_predictions/README.md
+title: GTFS Real-Time Operator Summary Metrics

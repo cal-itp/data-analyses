@@ -1,0 +1,532 @@
+---
+jupyter: python3
+---
+
+```{python}
+#| tags: []
+%%capture
+
+import warnings
+warnings.filterwarnings("ignore")
+
+import altair as alt
+import branca.colormap as cm
+import folium
+import gt_extras as gte
+import itables
+import pandas as pd
+import polars as pl
+
+import calitp_data_analysis.magics
+
+from datetime import datetime
+from great_tables import GT, nanoplot_options
+from IPython.display import HTML
+
+import _color_palette
+import chart_utils_for_stops as chart_utils
+import report_utils
+from rt_msa_utils import stop_report_month
+
+alt.data_transformers.enable("vegafusion")
+alt.data_transformers.enable(consolidate_datasets=True)
+
+# format date to be Jan 2026
+formatted_date = datetime.strptime(stop_report_month, "%Y-%m-%d").strftime("%b %Y")
+```
+
+```{python}
+#| editable: true
+#| slideshow: {slide_type: ''}
+#| tags: [parameters]
+# Comment out, this is `parameters` tagged cell
+#name = "Lake Trip Updates"
+```
+
+```{python}
+%%capture_parameters
+name, stop_report_month, formatted_date
+```
+
+```{python}
+#| editable: true
+#| slideshow: {slide_type: ''}
+#| tags: []
+operator_cols = [
+    "schedule_name", "schedule_base64_url",
+    "month_first_day", "day_type"
+]
+
+route_cols = ["route_name", "route_dir_name"]
+
+schedule_stop_cols = ["daily_stop_arrivals"]
+stop_cols = ["stop_id", "stop_name", "geometry"]
+
+route_filtering = [[
+    ("tu_name", "==", name),
+    ("month_first_day", "==", pd.to_datetime(stop_report_month)),
+    ("day_type", "==", "Weekday")
+]]
+
+keep_route_cols = operator_cols + route_cols + [
+    "tu_name", "base64_url",
+    "avg_prediction_error_minutes",
+    "prediction_error_label",
+    "avg_prediction_spread_minutes",
+    "n_predictions", "n_tu_trips", "n_tu_stops",
+    "bus_catch_likelihood",
+    "scaled_p25", "scaled_p75", "scaled_iqr",
+    "p25", "p75", "iqr", "prediction_padding"
+]
+
+route_df = report_utils.import_route_df(
+    filters = route_filtering,
+    columns = keep_route_cols
+).dropna(subset = ["route_name"]).reset_index(drop=True)
+
+one_tu_url = route_df.base64_url.iloc[0]
+```
+
+```{python}
+stop_filtering = [[
+    ("month_first_day", "==", pd.to_datetime(stop_report_month)),
+    ("day_type", "==", "Weekday"),
+    ("tu_base64_url", "==", one_tu_url)
+]]
+
+keep_stop_cols = (
+    operator_cols + schedule_stop_cols + stop_cols + route_cols + [
+        "tu_base64_url", "direction_id", "stop_rank",
+        'avg_prediction_error_minutes', "prediction_error_label",
+        'pct_tu_complete_minutes',
+        'avg_prediction_spread_minutes',
+        'n_predictions', 'n_tu_trips',
+        "bus_catch_likelihood",
+    ]
+)
+
+stop_gdf = report_utils.import_stop_df(
+    filters = stop_filtering,
+    columns = keep_stop_cols
+).dropna(subset = ["route_name"]).reset_index(drop=True)
+
+#schedule_name = stop_gdf.schedule_name.iloc[0]
+```
+
+```{python}
+%%capture_parameters
+name, stop_report_month, formatted_date
+```
+
+# {name}
+
+## {formatted_date} Weekday Stop Metrics
+
+One of the most common transit user behaviors is to consult an app (Google Maps, Apple Maps, NextBus, etc) to find out when the bus or train is going to arrive.
+
+That widely desired piece of information is powered by GTFS Real-Time Trip Updates, specifically the [Stop Time Updates](https://gtfs.org/documentation/realtime/reference/#message-stoptimeupdate) specification. The underlying data produced here is huge. Imagine every instance a bus arrives at a stop in California. Multiply that by 30 for the 30 minutes before the bus arrives, and that's the dataset we're working to distill into usable performance metrics for all transit operators.
+
+Generally, we want better transit user experience. Specifically, the performance metrics we can derive from GTFS RT Trip Updates distills into the following objectives:
+1. Increase prediction reliability and accuracy
+2. Increase the availability and completeness of GTFS RT
+3. Decrease the inconsistency and fluctuations of predictions
+
+```{python}
+# Set variables for color bars used across maps, route dropdown, and great tables
+PREDICTION_ERROR_COLORS =list(_color_palette.PREDICTION_ERROR_COLOR_PALETTE.values())
+PREDICTION_ERROR_INDEX = [-5, -3, -1, 1, 3, 5]
+PREDICTION_ERROR_LEGEND_CAPTION = "minutes (negative = late; positive = early)"
+
+POS_BAR_COLOR = _color_palette.get_color("blueberry")
+NEG_BAR_COLOR = _color_palette.get_color("vivid_cerise")
+```
+
+## Map of Stop Metrics
+
+The following layers are available:
+* Stops with too late predictions (riders miss bus) or too early predictions (riders wait longer).
+* Stops needing more real-time arrival information (<90% of minutes).
+* All stops along routes that meet either of the 1st two criteria.
+* All stops plotted by average prediction error
+
+### Priority Stops
+Stops that are too late (3-5 min late) or too early (3-5 min early)
+
+### < 90% minutes with stop time updates
+
+This metric is the easiest to achieve. For starters, having information is better than no information.
+* <span style="color:#4477aa">**Goal:** at least 90% of minutes has predicted arrival information.</span>
+* Note: Newmark paper shows that among four CA operators, this metric is fairly easy to reach and operators can even reach up to 90% completeness.
+
+```{python}
+early_bin = "3-5 min early"
+late_bin = "3-5 min late"
+
+routes_that_meet_criteria = stop_gdf[
+    (stop_gdf.prediction_error_label==early_bin) |
+    (stop_gdf.prediction_error_label==late_bin) |
+    (stop_gdf.pct_tu_complete_minutes < 0.9)
+].route_dir_name.unique().tolist()
+
+# Prepare gdf for map, remove columns that can't be used in gdf.explore
+plot_gdf = stop_gdf[
+    stop_gdf.route_dir_name.isin(routes_that_meet_criteria)
+].drop(columns = ["month_first_day"])
+
+plot_early_late_gdf = plot_gdf[
+    (plot_gdf.prediction_error_label==early_bin) |
+    (plot_gdf.prediction_error_label==late_bin)
+]
+
+plot_completeness_gdf = plot_gdf[(plot_gdf.pct_tu_complete_minutes < 0.9)]
+```
+
+```{python}
+m = stop_gdf.drop(
+    columns = ["month_first_day"]
+).drop_duplicates().explore(
+    "avg_prediction_error_minutes",
+    tiles = "CartoDB Positron",
+    name = "All Stops",
+    cmap = cm.StepColormap(
+        colors=PREDICTION_ERROR_COLORS, index=PREDICTION_ERROR_INDEX,
+        vmin=-5, vmax=5,
+        tick_labels=PREDICTION_ERROR_INDEX,
+        caption=PREDICTION_ERROR_LEGEND_CAPTION
+    ),
+    marker_kwds={"fill": True},
+    style_kwds={"opacity": 0.5, "fillOpacity": 0.3}
+)
+
+if len(plot_early_late_gdf) > 0:
+    m = plot_early_late_gdf.explore(
+        "prediction_error_label",
+        m=m,
+        name = f"3-5 min Early or Late Stops",
+        cmap = [_color_palette.PREDICTION_ERROR_COLOR_PALETTE[early_bin],
+                _color_palette.PREDICTION_ERROR_COLOR_PALETTE[late_bin]]
+    )
+
+if len(plot_completeness_gdf) > 0:
+    m = plot_completeness_gdf.explore(
+        "route_dir_name",
+        m=m,
+        tiles = "CartoDB Positron",
+        name = "< 90% update completeness", # color by route-dir name
+        categorical = True,
+        legend = False,
+    )
+
+if len(plot_gdf) > 0:
+    m = plot_gdf.explore(
+        "avg_prediction_error_minutes",
+        m=m,
+        tiles = "CartoDB Positron",
+        name = "Routes with 1+ Criteria Met",
+        cmap = cm.StepColormap(
+            colors=PREDICTION_ERROR_COLORS, index=PREDICTION_ERROR_INDEX,
+            vmin=-5, vmax=5,
+        ),
+        legend=False
+    )
+
+folium.LayerControl().add_to(m)
+m
+```
+
+```{python}
+del plot_early_late_gdf, plot_completeness_gdf
+```
+
+### Search by stop
+
+Due to size limitations, the routes that have at least one priority stop are presented in an interactive table.
+
+```{python}
+itables.init_notebook_mode()
+display_cols = [
+    'route_dir_name', 'stop_id', 'stop_name',
+    'daily_stop_arrivals',
+    'avg_prediction_error_minutes',
+    'pct_tu_complete_minutes',
+    'bus_catch_likelihood',
+    #'n_predictions', 'n_tu_trips'
+]
+
+group_cols = [c for c in display_cols if c != "route_dir_name"]
+
+# For df to display, only show the stop once, even if multiple routes serve it
+# save route_dir_name as list
+display_df = (
+    plot_gdf
+    .groupby(group_cols)
+    .agg({"route_dir_name": lambda x: list(set(x))})
+    .reset_index()
+).sort_values("daily_stop_arrivals", ascending=False)
+```
+
+```{python}
+# Format itables output so it's easier to read
+itables_rename_dict = {
+    "route_dir_name": "Route-Direction",
+    "stop_id": "Stop ID",
+    "stop_name": "Stop",
+    "daily_stop_arrivals": "Daily Stop Arrivals",
+    "bus_catch_likelihood": "Bus Catch Likelihood",
+    #"n_predictions": "# Predictions",
+    #"n_tu_trips": "# trips",
+    "pct_tu_complete_minutes": "% Minutes with 2+ Predictions",
+    "avg_prediction_error_minutes": "Prediction Error (min)"
+}
+
+display_df2 = display_df[["route_dir_name"] + group_cols].assign(
+    pct_tu_complete_minutes = display_df.pct_tu_complete_minutes * 100,
+    bus_catch_likelihood = display_df.bus_catch_likelihood * 100
+).rename(columns = itables_rename_dict)
+```
+
+```{python}
+itables.show(
+    display_df2,
+    caption="Stops",
+    classes="compact",
+    #pageLength=2,
+    maxBytes="5MB", # can play with what this is
+    search={"caseInsensitive": True},
+    showIndex=False,
+    fixedColumns={"start": 3, "end": 0},
+    scrollX=True,
+    buttons=[
+        "pageLength",
+        #"columnsToggle",
+        "copyHtml5", "csvHtml5", "excelHtml5"
+    ],
+    lengthMenu=[2, 5, 10, 20, 50],
+)
+```
+
+```{python}
+# https://mwouts.github.io/itables/apps/notebook.html
+# turn display of itables off
+itables.init_notebook_mode(all_interactive=False)
+del display_df, display_df2
+```
+
+## Stop Metrics by Route
+
+**Average prediction error**: The accuracy of the predictions is `predicted arrival - actual arrival`. <span style="color:#4477aa">Closer to zero or small positive values are better</span>, as you are more likely to catch the bus with minimal wait time.
+
+<span style="color:#4477aa">**Goal 1:** fewer stops with negative prediction errors.</span> We would rather have transit users follow the predictions and wait for the bus.
+
+<span style="color:#4477aa">**Goal 2:** tighten the IQR range of prediction errors and have the range move closer to zero for shorter expected wait times.</span>
+
+**Update completeness**: The`% of minutes with 2+ predictions available`. <span style="color:#4477aa">Higher is better.</span>
+<span style="color:#4477aa">**Goal:** 90% or above</span>
+
+**Bus catch likelihood**: The `% prediction early or on-time predictions`, and captures whether you're likely to catch the bus by following the prediction exactly. <span style="color:#4477aa">Higher is better</span>.
+<span style="color:#4477aa">**Goal:** 80% or above</span>
+
+**Prediction spread / wobble**: this metric tracks whether the predicted arrival time was consistent before the bus arrived. <span style="color:#4477aa">Lower is better</span>, as the predictions are not fluctuating wildly and frustrating for the rider.
+
+```{python}
+# Define parameters for interactive altair charts
+list_of_routes = sorted(stop_gdf.route_name.unique().tolist())
+
+dropdown = alt.binding_select(options=list_of_routes, name = "Route ")
+selection = alt.selection_point(
+    fields=['route_name'],
+    bind=dropdown,
+)
+legend_selection = alt.selection_point(fields = ['route_name'], bind='legend')
+
+# save out df to use for altair (can't have timestamp or geometry)
+stop_df = stop_gdf[[
+    "stop_id", "stop_name",
+    "route_name", "direction_id",
+    "stop_rank",
+    # these are the metrics
+    "avg_prediction_error_minutes", "prediction_error_label",
+    "pct_tu_complete_minutes",
+    "bus_catch_likelihood",
+    "avg_prediction_spread_minutes",
+    "n_predictions", "n_tu_trips"
+]]
+
+stop_col = "stop_rank"
+direction_col = "direction_id"
+HEIGHT = 110
+WIDTH = 150
+```
+
+```{python}
+prediction_error_bar = chart_utils.chart_ordered_by_stop(
+    stop_df,
+    y_col = "avg_prediction_error_minutes",
+    dropdown_selection = selection,
+    is_faceted = True
+).mark_bar().encode(
+    # not sure if when-then can support multiple conditions yet, seems to grab first and otherwise only
+    # https://github.com/vega/altair/issues/2759
+    color = alt.when(
+        alt.datum.avg_prediction_error_minutes >= 0, empty=False
+    ).then(alt.value(POS_BAR_COLOR))
+    .otherwise(alt.value(NEG_BAR_COLOR)),
+    # set the opacity to zero here, otherwise other routes are showing in background
+    opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0)),
+).properties(
+    title = "Avg Prediction Error (minutes)",
+    height = HEIGHT, width = WIDTH
+)
+
+error_stacked_bar = chart_utils.prediction_error_categories_stacked_bar(
+    stop_df,
+    dropdown_selection = selection,
+    legend_selection = legend_selection
+).properties(
+    title = "# Stops by Prediction Error Category",
+    height = HEIGHT, width = WIDTH
+)
+```
+
+```{python}
+# Note the order, define chart height/width first, then facet, then add title (so it appears over faceted chart)
+# https://stackoverflow.com/questions/52872927/altair-cant-facet-layered-plots
+completeness_chart = chart_utils.pct_completeness_line_chart(
+    stop_df,
+    y_col = "pct_tu_complete_minutes",
+    dropdown_selection = selection,
+    horiz_y_value = 0.9
+).properties(
+    height = HEIGHT, width = WIDTH
+).facet(column = direction_col, title = "Direction").properties(
+    title = "% Minutes with 2+ Prediction")
+# facet this way allows layering, but can't overwrite title correctly
+
+bus_catch_chart = chart_utils.bus_catch_likelihood_line_chart(
+    stop_df,
+    y_col = "bus_catch_likelihood",
+    dropdown_selection = selection,
+    horiz_y_value = 0.75
+).properties(
+    height = HEIGHT, width = WIDTH
+).facet(column = direction_col, title = "Direction").properties(
+    title = "% Early + On-time Predictions")
+
+prediction_spread_line = chart_utils.prediction_spread_line_chart(
+    stop_df,
+    y_col = "avg_prediction_spread_minutes",
+    dropdown_selection = selection,
+).properties(
+    height = HEIGHT, width = WIDTH
+).facet(column = direction_col, title = "Direction").properties(
+    title = "Prediction Spread / Wobble (minutes)")
+```
+
+```{python}
+DROPDOWN_LOCATION = HTML(
+    """
+    <style>
+    form.vega-bindings {
+      position: absolute;
+      right: 10px;
+      top: 0px;
+    }
+    </style>
+"""
+)
+display(DROPDOWN_LOCATION)
+
+row1 = alt.hconcat(prediction_error_bar, error_stacked_bar)
+row2 = alt.hconcat(completeness_chart, bus_catch_chart)
+alt.vconcat(
+    row1,
+    row2,
+    prediction_spread_line
+).configure(padding={'top': 100})
+```
+
+## Full Route Table
+
+This table shows all the routes side-by-side, in ascending order by prediction error (more late stops shown first).
+
+The nanoplots show prediction error by stop order, showing there is quite a bit of variation even along the same route.
+
+**Average prediction error**: The accuracy of the predictions is `predicted arrival - actual arrival`. <span style="color:#4477aa">Closer to zero or small positive values are better</span>, as you are more likely to catch the bus with minimal wait time.
+
+<span style="color:#4477aa">**Goal 1:** fewer stops with negative prediction errors, lower bound of IQR not negative.</span> We would rather have transit users follow the predictions and wait for the bus.
+
+<span style="color:#4477aa">**Goal 2:** small IQR range of prediction errors and have the range move closer to zero for shorter expected wait times.</span>
+
+```{python}
+nanoplot_df = report_utils.merge_route_to_stop_for_nanoplot(
+    route_df,
+    stop_gdf
+)
+
+# TODO: check torrance schedule, how it behaves, because maybe will have to pick 1
+# sort this so negative prediction errors show up first, then more late stops
+nanoplot_pl = pl.from_pandas(
+    nanoplot_df[[
+        "route_dir_name",
+        "avg_prediction_error_minutes",
+        # nanoplot columns
+        "prediction_error_by_stop",
+        "p25", "p75",
+        "n_early_stops", "n_late_stops"
+      ]].sort_values(
+        ["avg_prediction_error_minutes", "n_late_stops", "route_dir_name"],
+        ascending = [True, False, False]
+    )
+)
+```
+
+```{python}
+# negative is bad, it's late prediction, you'll miss bus if you follow it
+table = (
+    GT(nanoplot_pl)
+    .fmt_nanoplot(
+        "prediction_error_by_stop", plot_type="bar",
+        options=nanoplot_options(
+            data_bar_fill_color=POS_BAR_COLOR,
+            data_bar_stroke_color=POS_BAR_COLOR,
+            data_bar_negative_fill_color=NEG_BAR_COLOR,
+            data_bar_negative_stroke_color=NEG_BAR_COLOR,
+            reference_line_color="black",
+        )
+    )
+    .cols_label(
+        route_dir_name = "Route-Direction",
+        avg_prediction_error_minutes = "Prediction Error (negative = late; positive = early)",
+        prediction_error_by_stop = "Prediction Error (ordered by stop)",
+        n_early_stops = "3-5 Min Early Stops",
+        n_late_stops = "3-5 Min Late Stops",
+    ).tab_options(table_font_size="11px")
+    .tab_header(title = "Weekday Route Summary Metrics")
+
+)
+
+#https://posit-dev.github.io/gt-extras/examples/with-code.html#gt_plt_dumbbell
+(table.pipe(
+    gte.gt_plt_dumbbell,
+    col1='p25',
+    col2='p75',
+    label = "IQR",
+    num_decimals=1,
+    col1_color=_color_palette.get_color("valentino"),
+    col2_color=_color_palette.get_color("lizard_green"),
+    font_size=8
+).pipe(
+    gte.gt_plt_bar,
+    columns=["n_early_stops", "n_late_stops"],
+    width=70, show_labels=True,
+    fill=_color_palette.get_color("aquatic"), label_color = "black"
+).cols_align("center").cols_align("left", columns = "route_dir_name")
+.pipe(
+    gte.gt_color_box,
+    columns=["avg_prediction_error_minutes"],
+    palette=PREDICTION_ERROR_COLORS,
+    domain=[-5, 5]
+).cols_width(
+    cases={"avg_prediction_error_minutes": "10%"})
+)
+```

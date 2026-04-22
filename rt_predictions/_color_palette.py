@@ -23,6 +23,8 @@ COLOR_NAME_TO_HEX = {
     "light_gray": "#faf0e6",  # linen in gt
     "valentino": "#7a378b",  # dark purple, mediumorchid4 in gt
     "lizard_green": "#6e8b3d",  # dark olive, darkolivegreen4 in gt
+    "light_goldenrod": "#ffec8b",  # light goldenrod1 in gt
+    "pastel_peppermint": "#e5f5e0",  # white alyssum in gt (from greens)
 }
 
 
@@ -47,4 +49,10 @@ PREDICTION_ERROR_COLOR_PALETTE = {
     "1 min early to 1 min late": get_color("light_cadmium_yellow"),
     "1-3 min early": get_color("aquatic"),
     "3-5 min early": get_color("metro_blue"),
+}
+
+DAY_TYPE_COLOR_PALETTE = {
+    "Weekday": get_color("earls_green"),
+    "Saturday": get_color("lady_blue"),
+    "Sunday": get_color("valentino"),
 }
