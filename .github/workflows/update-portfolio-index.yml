@@ -2,7 +2,12 @@ name: Update and deploy portfolio index site
 
 on:
   push:
-    branches: [main]
+    branches:
+      - 'main'
+    paths:
+      - '.github/workflows/update-portfolio-index.yml'
+      - 'portfolio/**'
+  pull_request:
     paths:
       - '.github/workflows/update-portfolio-index.yml'
       - 'portfolio/**'
@@ -10,28 +15,27 @@ on:
 
 env:
   PYTHON_VERSION: '3.11'
-  POETRY_VERSION: '2.0.1'
-  SERVICE_ACCOUNT: 'github-actions-service-account@cal-itp-data-infra.iam.gserviceaccount.com'
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/1005246706141/locations/global/workloadIdentityPools/github-actions/providers/analysis'
-  PROJECT_ID: 'cal-itp-data-infra'
-  ANALYSIS_BUCKET: 'calitp-analysis'
+  SERVICE_ACCOUNT: ${{ github.ref == 'refs/heads/main' && 'github-actions-service-account@cal-itp-data-infra.iam.gserviceaccount.com' || 'github-actions-service-account@cal-itp-data-infra-staging.iam.gserviceaccount.com' }}
+  WORKLOAD_IDENTITY_PROVIDER: ${{ github.ref == 'refs/heads/main' && 'projects/1005246706141/locations/global/workloadIdentityPools/github-actions/providers/data-analyses' || 'projects/473674835135/locations/global/workloadIdentityPools/github-actions/providers/data-analyses' }}
+  PROJECT_ID: ${{ github.ref == 'refs/heads/main' && 'cal-itp-data-infra' || 'cal-itp-data-infra-staging' }}
 
 jobs:
   deploy-index:
+    name: Deploy index
     runs-on: ubuntu-latest
 
     permissions:
-      contents: 'read'
-      id-token: 'write'
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Authenticate Google Service Account
         uses: google-github-actions/auth@v2
         with:
-          create_credentials_file: true
+          create_credentials_file: 'true'
           project_id: ${{ env.PROJECT_ID }}
           workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ env.SERVICE_ACCOUNT }}
@@ -39,21 +43,22 @@ jobs:
       - name: Setup GCloud utilities
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+          cache-python: true
 
-      - name: Cache Python packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.local
-          key: python-cache-${{ runner.os }}-python-${{ env.PYTHON_VERSION }}-${{ hashFiles('.github/workflows/*.yml') }}
+      - name: Install the project
+        run: uv sync --locked --all-extras --dev
 
-      - name: Install python packages
-        run: |
-          pip install -r portfolio/requirements.txt
+      - name: Install portfolio packages
+        run: uv sync --group portfolio --locked --all-extras --dev
 
-      - name: Deploy index
-        run: |
-          python portfolio/portfolio.py index --deploy --prod
+      - name: Deploy index Staging
+        run: uv run python portfolio/portfolio.py index --deploy --no-prod
+
+      - name: Deploy index Production
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: uv run python portfolio/portfolio.py index --deploy --prod
