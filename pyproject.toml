@@ -22,6 +22,7 @@ dev = [
     "black==24.10.0",
     "isort==5.10.1",
     "pre-commit>=2.18.1",
+    "nbdime>=4.0.4",
 ]
 portfolio = [
     "axe-selenium-python",
