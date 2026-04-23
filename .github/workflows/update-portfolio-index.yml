@@ -16,8 +16,9 @@ on:
 env:
   PYTHON_VERSION: '3.11'
   SERVICE_ACCOUNT: ${{ github.ref == 'refs/heads/main' && 'github-actions-service-account@cal-itp-data-infra.iam.gserviceaccount.com' || 'github-actions-service-account@cal-itp-data-infra-staging.iam.gserviceaccount.com' }}
-  WORKLOAD_IDENTITY_PROVIDER: ${{ github.ref == 'refs/heads/main' && 'projects/1005246706141/locations/global/workloadIdentityPools/github-actions/providers/data-analyses' || 'projects/473674835135/locations/global/workloadIdentityPools/github-actions/providers/data-analyses' }}
+  WORKLOAD_IDENTITY_PROVIDER: ${{ github.ref == 'refs/heads/main' && 'projects/1005246706141/locations/global/workloadIdentityPools/github-actions/providers/analysis' || 'projects/473674835135/locations/global/workloadIdentityPools/github-actions/providers/data-analyses' }}
   PROJECT_ID: ${{ github.ref == 'refs/heads/main' && 'cal-itp-data-infra' || 'cal-itp-data-infra-staging' }}
+
 
 jobs:
   deploy-index:
@@ -57,6 +58,7 @@ jobs:
         run: uv sync --group portfolio --locked --all-extras --dev
 
       - name: Deploy index Staging
+        if: ${{ github.ref != 'refs/heads/main' }}
         run: uv run python portfolio/portfolio.py index --deploy --no-prod
 
       - name: Deploy index Production
