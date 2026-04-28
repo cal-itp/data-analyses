@@ -1,0 +1,60 @@
+﻿stop_name,direction,change_type
+Metrolink Station eastside terminal at Front St,eastbound,no_change
+Verdugo & Ikea Way,eastbound,relocating
+Verdugo & San Fernando,eastbound,adding_existing
+Glenoaks & Providencia,eastbound,adding_existing
+Glenoaks / Alameda,eastbound,adding_existing
+Alameda & San Fernando,eastbound,adding_existing
+Alameda & Lake,eastbound,adding_existing
+Alameda & Victory,eastbound,relocating
+Alameda & Main,eastbound,new_stop
+Alameda & Mariposa,eastbound,new_stop
+Alameda & Reese,eastbound,new_stop
+Alameda & Keystone,eastbound,new_stop
+Alameda / Buena Vista,eastbound,adding_existing
+Buena Vista & Olive,eastbound,adding_existing
+Buena Vista & Verdugo,eastbound,signage_update_required (nearside in NBR turn pocket; allow buses to proceed through)
+Buena Vista & Clark,eastbound,new_stop
+Buena Vista & Magnolia,eastbound,new_stop
+Buena Vista & Chandler,eastbound,new_stop
+Buena Vista & Burbank,eastbound,new_stop
+Buena Vista & Jeffries,eastbound,new_stop
+Buena Vista & Victory,eastbound,new_stop
+Buena Vista & Pacific,eastbound,new_stop
+Buena Vista & Empire,eastbound,new_stop
+Buena Vista & Thorton,eastbound,new_stop
+Buena Vista & Winona,eastbound,new_stop
+Buena Vista & Tulare,eastbound,new_stop
+Glenoaks / Buena Vista,eastbound,new_stop
+Glenoaks / Cohasset,eastbound,new_stop
+Cohasset & Bloomington,eastbound,new_stop
+Metrolink Station eastside terminal at Front St,westbound,no_change
+Verdugo & Ikea Way,westbound,adding_existing
+Verdugo & San Fernando,westbound,new_stop
+Glenoaks & Providencia,westbound,adding_existing
+Glenoaks / Alameda,westbound,adding_existing
+Alameda & San Fernando,westbound,adding_existing
+Alameda & Lake,westbound,adding_existing
+Alameda & Victory,westbound,relocating
+Alameda & Main,westbound,new_stop
+Alameda & Mariposa,westbound,new_stop
+Alameda & Reese,westbound,new_stop
+Alameda & Keystone,westbound,reactivate
+Alameda / Buena Vista,westbound,new_stop
+Buena Vista & Olive,westbound,adding_existing
+Buena Vista & Verdugo,westbound,new_stop
+Buena Vista & Clark,westbound,new_stop
+Buena Vista & Magnolia,westbound,relocating
+Buena Vista & Chandler,westbound,new_stop
+Buena Vista & Burbank,westbound,adding_existing
+Buena Vista & Jeffries,westbound,new_stop
+Buena Vista & Victory,westbound,new_stop
+Buena Vista & Pacific,westbound,adding_existing
+Buena Vista & Empire,westbound,new_stop
+Buena Vista & Thorton,westbound,new_stop
+Buena Vista & Winona,westbound,new_stop
+Buena Vista & Tulare,westbound,new_stop
+Glenoaks / Buena Vista,westbound,new_stop
+Glenoaks / Cohasset,westbound,adding_existing
+Cohasset & Bloomington,westbound,new_stop
+N San Fernando / Lima / Avon,westbound,terminus_nearside_stop (on San Fernando facing west; parking modifications)
