@@ -20,10 +20,6 @@ fs = get_fs()
 gcsgp = GCSGeoPandas()
 
 
-# set system time
-os.environ["TZ"] = "America/Los_Angeles"
-time.tzset()
-
 GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
 BUCKET_DIR = "data-analyses/rt_delay"
