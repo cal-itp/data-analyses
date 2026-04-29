@@ -1,6 +1,4 @@
 import datetime as dt
-import os
-import time
 from pathlib import Path
 
 import branca
@@ -19,10 +17,6 @@ from shared_utils import gtfs_utils_v2, portfolio_utils, rt_dates
 fs = get_fs()
 gcsgp = GCSGeoPandas()
 
-
-# set system time
-os.environ["TZ"] = "America/Los_Angeles"
-time.tzset()
 
 GCS_PROJECT = "cal-itp-data-infra"
 BUCKET_NAME = "calitp-analytics-data"
