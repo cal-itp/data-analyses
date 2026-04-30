@@ -1,0 +1,98 @@
+Ridership Data Notes
+
+
+BART Ridership: BART provides daily reported Daily Boarding and Daily Ridership data from October 1, 2024 to September 30, 2025. The dataset includes day-type classifications such as Holiday, Saturday, Sunday, and Weekday. For modeling purposes, holiday observations were normalized to the standard service day categories of Weekday, Saturday, and Sunday based on their operating characteristics. The ridership fields were converted to numeric values to ensure consistency, and average boardings and alightings were calculated at the stop level by grouping records by dataset, organization, service, stop information, and day type. This process produces representative average ridership values for each stop across the three standard service day categories.
+
+
+Big Blue Bus: Big Blue Bus ridership data is provided as averages across four different time periods. To create a representative stop-level dataset, boardings and alightings were summed across directions within each stop and weighted by the number of service days in each period. A weighted average was then calculated for each stop to produce representative daily boardings and alightings for weekdays, Saturdays, and Sundays, and a flag was set to indicate that these values are based on reported average daily ridership.
+
+
+Caltrain ridership data is provided as average ridership per station over multiple time periods, though it is unclear if it represents boardings or total ridership. Holidays are removed, and the number of service days for weekdays, Saturdays, and Sundays is calculated using U.S. federal holidays. A weighted average of ridership is then computed for each station across all periods, using the number of service days as weights. Finally, a flag is added to indicate that the values represent reported average daily ridership, producing a representative stop-level dataset for modeling purposes.
+
+
+Culver City Bus ridership is in the combined dataset but stop IDs were found to be incorrect. Instead, the preprocessed dataset is used, which includes route information. Columns are renamed for consistency, and the route name is extracted from the original `Route` column. The data is then grouped by stop, route, day type, and ridership basis, summing average boardings and alightings across directions. A flag is added to indicate that the values represent reported average daily ridership, resulting in a clean, stop-level dataset ready for analysis.
+
+
+Foothill Transit ridership data in the combined file includes a suffix on stop names and lacks route information, so the preprocessed dataset is used instead. The day type is added based on the service date, and ridership is summed across directions at each stop for boardings and alightings. A flag is added to indicate that these values represent reported daily ridership. Finally, average daily boardings and alightings are computed for each stop and route by day type, producing a representative stop-level dataset ready for modeling and analysis.
+
+
+Fresno Area Express data is missing from the combined file and only covers 1,198 of the 1,574 total stops. So preprocessed data is being used. The day type is added based on the service date, and a flag is set to indicate that ridership values represent reported daily boardings and alightings. Columns are renamed for consistency, and ridership values are converted to numeric. Finally, average daily boardings and alightings are computed for each stop by day type, producing a representative stop-level dataset for modeling and analysis.
+
+
+Gold Coast Transit Data: Not present in combined data file. Has only weekday data.
+
+
+Golden Gate Park Shuttle data is not present in the combined file, and it is unclear whether the reported values represent total ridership or boardings. The day type is added based on the service date, and ridership is summed across all directions at each stop. A flag is set to indicate that these values represent reported daily ridership. Finally, average daily boardings are calculated for each stop by day type, producing a representative stop-level dataset suitable for analysis and modeling.
+
+Golden Gate Transit data is not included in the combined file. The day type is added based on the service date, and stop and route columns are renamed for consistency. Stop names are cleaned by removing any text in parentheses. Ridership is summed across directions at each stop for boardings and alightings, and a flag is added to indicate that these values represent reported daily ridership. Finally, average daily boardings and alightings are calculated for each stop and route by day type, producing a representative stop-level dataset suitable for modeling and analysis.
+
+
+Long Beach Transit data has many missing rows in the combined file, so the preprocessed dataset is used. A flag is added to indicate that the values represent reported average daily ridership. Ridership is summed across directions at each stop for boardings and alightings, and the data is grouped by stop, route, day type, and service period. Columns are renamed for consistency, resulting in a clean stop-level dataset of daily boardings and alightings ready for analysis.
+
+
+Orange County Transportation: Many rows missing and there were A, C and E in the direction which could be the reason. But waiting on this until I get the updated combined data. For now, using all the data. Has weekday data only.
+
+Omni Trans Data : all day GTFS data only, just using that for now.
+
+
+Riverside Transit data is not included in the combined file, but daily boardings data is available in the preprocessed dataset. The day type is added based on the service date, and ridership is summed across all directions at each stop. Columns are renamed for consistency, and a flag is added to indicate that the values represent reported daily boardings. Finally, average daily boardings are calculated for each stop and route by day type, producing a representative stop-level dataset suitable for analysis and modeling.
+
+
+SacRt : The SacRT stop-level ridership dataset contains three types of records: weekday, daily, and other. Weekday rows have the Saturday and Sunday flags set to 0 and represent average boardings on Monday through Friday only. Daily rows have all day-of-week flags set to 1, meaning the stop operates every day; for these stops, the average_boardings reflects the average across all 7 days, calculated as an average over a three-month period. Importantly, in the daily type, Saturday and Sunday always appear together, either the stop runs both weekend days or neither, so there are no cases where only one weekend day is active. Other rows are exceptions, for example stops that don’t operate on a specific weekday, and need to be handled individually. There is just one case of Other where one of the stop shows 0 on a Tuesday.  For now, processing weekday and all.
+
+
+If we want to get weekend specific data
+(I’m thinking that, for modeling purposes, since weekend-specific averages aren’t directly provided, the best approach would be to take stops with daily records that operate on weekends and use any available weekday data to estimate total weekend ridership using S + U = 7 × daily − 5 × weekday.
+ Then, using GTFS data, we can allocate that weekend total across Saturday and Sunday based on the number of trips serving each stop. For example, if a stop has 60 trips on Saturday and 40 trips on Sunday, we would assign 60% of the weekend ridership to Saturday and 40% to Sunday.)
+
+
+SamTrans data is not fully represented in the combined file, so the preprocessed dataset is used. The day type is added based on the service date, and columns are renamed for consistency. A flag is added to indicate that the values represent reported daily boardings and alightings. Finally, average daily boardings and alightings are calculated for each stop and route by day type, producing a representative stop-level dataset ready for analysis and modeling.
+
+Santa Cruz metro have all day GTFS data only, just using that for now.
+
+SDMTS ridership data is aggregated at the stop and route level by day type. Boardings and alightings are summed across directions, and the route name is cleaned by removing any prefix before the colon. Columns are renamed for consistency, and a flag is added to indicate that the values represent reported average daily ridership. This results in a clean stop-level dataset of daily boardings and alightings ready for analysis and modeling.
+
+SBMTD have all day GTFS data only, just using that for now.
+
+Sunline Ridership has average of season and fiscal level data. Also not present in the combined file.
+
+
+Representative Service Dates:
+
+BART Ridership: 2024 October 1 - 2025 September 30
+Big Blue Bus: 2024 August 1 - 2025 November 30
+Caltrain: 2023 November 1 - 2025 July 31
+Culver City: 2025 July 14 - 2025 August 25
+Foothill Transit Ridership: 2024 July 1 - 2025 June 30
+Fresno Express Area: 2024 Septmeber 1 - 2025 August 31
+Gold Coast Transit: 2025 May 1 - 2025 May 31
+Golden Gate Park Shuttle: 2024 July 1 - 2025 June 30
+Golden Gate Transit: 2025 September 1 - 2025 September 30
+Long Beach Transit Ridership: 2024 July 1 - 2025 June 30
+Riverside Transit: Jan 1 2025 - October 31 2025
+Samtrans: August 1 2025 - August 31 2025
+SDMTS: Septmeber 1 2024 - Jan 25 2025
+
+
+There is no common dates that work for all the agencies. So trying to find the dates that works for most agencies
+
+Weekday: 2025-05-21
+Saturday - 2025-05-17
+Sunday - 2025-05-18
+
+
+Agencies that have ridership data per routes per stop
+- Big Blue Bus
+- CulverCity
+- Foothill transit
+- Golden Gate Transit
+- Long Beach
+- Riverside
+- Samtrans
+- SDMTS
+
+
+Agencies that have weekday/ all day data only
+- Octa Transit : weekday only
+- Omni Transit: all day data only
+- Santa Cruz Metro Ridership: all day data only
