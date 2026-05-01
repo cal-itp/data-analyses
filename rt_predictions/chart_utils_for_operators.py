@@ -2,10 +2,10 @@
 Chart and map functions for operator report.
 """
 
+import _color_palette
 import altair as alt
 import pandas as pd
 from great_tables import GT
-from gtfs_curator_utils import _color_palette
 
 
 def basic_percentiles_line_chart(
