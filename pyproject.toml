@@ -47,5 +47,5 @@ test = [
 [tool.uv.sources]
 shared-utils = { workspace = true }
 calitp-data-analysis = { workspace = true }
-segment-speed-utils = { path = "rt_segment_speeds", editable = true }
-rt-analysis = { path = "rt_delay", editable = true }
+segment-speed-utils = { path = "./rt_segment_speeds", editable = true }
+rt-analysis = { path = "./rt_delay", editable = true }
