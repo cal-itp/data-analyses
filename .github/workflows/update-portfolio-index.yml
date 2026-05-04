@@ -51,9 +51,6 @@ jobs:
           enable-cache: true
           cache-python: true
 
-      - name: Install the project
-        run: uv sync --locked --all-extras --dev
-
       - name: Install portfolio packages
         run: uv sync --group portfolio --locked --all-extras --dev
 

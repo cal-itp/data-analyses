@@ -8,7 +8,7 @@
 # Build and Deploy Production Portfolio Site with:
 # make build_production_portfolio_site site='MY_SITE_IDENTIFIER'
 build_production_portfolio_site:
-	uv sync --group portfolio
+	uv sync --all-groups
 	uv run python portfolio/portfolio.py clean $(site)
 	uv run python portfolio/portfolio.py build $(site)
 	gcloud auth login --login-config=iac/login.json && gcloud config set project cal-itp-data-infra
@@ -19,7 +19,7 @@ build_production_portfolio_site:
 # Build and Deploy Staging Portfolio Site with:
 # make build_staging_portfolio_site site='MY_SITE_IDENTIFIER'
 build_staging_portfolio_site:
-	uv sync --group portfolio
+	uv sync --all-groups
 	uv run python portfolio/portfolio.py clean $(site)
 	gcloud auth login --login-config=iac/login.json
 	uv run python portfolio/portfolio.py build $(site)
@@ -94,14 +94,9 @@ add_precommit:
 #alias go='cd ~/data-analyses && uv sync'
 
 install_env:
-	#cd bus_service_increase/ && make setup_bus_service_utils && cd ..
-	#cd rt_delay/ && make setup_rt_analysis && cd ..
-	uv sync
+	# "_shared_utils", "rt_segment_speeds", and "rt_delay" are already installed when `uv sync` runs.
+	uv sync --all-groups
 	make add_precommit
 
 install_portfolio:
 	uv sync --group portfolio
-
-# Create .egg to upload to dask cloud cluster
-egg_modules:
-	cd ~/data-analyses/rt_segment_speeds && python setup.py bdist_egg && cd ..

@@ -1,0 +1,8 @@
+[project]
+name = "rt-analysis"
+version = "0.4.2"
+description="Module for GTFS-RT transit speed analysis"
+authors = [{ name = "Cal-ITP" }]
+readme = "README.md"
+requires-python = ">=3.11.0, <3.12.0"
+dependencies = []

@@ -6,7 +6,7 @@ These shared utility functions are quality-of-life improvements for analysts as 
 
 ## Getting Started
 
-1. From the repo root (`data-analyses/`), run `make install_env` (runs `uv sync` + pre-commit setup)
+1. From the repo root (`data-analyses/`), run `make install_env` (runs `uv sync --all-groups` + pre-commit setup)
 2. In JupyterHub, select the **"Pyproject Local"** kernel when opening a notebook
 3. Within Jupyter Notebook or script: `import shared_utils`
 
