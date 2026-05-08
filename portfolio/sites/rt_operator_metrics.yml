@@ -1,4 +1,6 @@
 directory: ./rt_predictions/
+readme: ./rt_predictions/README.md
+title: GTFS Real-Time Operator Summary Metrics
 notebook: ./rt_predictions/operator_report.ipynb
 parts:
 - chapters:
@@ -206,5 +208,3 @@ parts:
       name: WeHo Trip Updates
   - params:
       name: Yolobus TripUpdates
-readme: ./rt_predictions/README.md
-title: GTFS Real-Time Operator Summary Metrics
