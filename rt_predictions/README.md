@@ -11,7 +11,6 @@ Accurate and reliable information should be provided to transit users for journe
 * prediction inconsistency - how much are predictions changing from minute to minute as the bus approaches time of arrival?
 * prediction reliability and accuracy - are these predictions accurate (when compared to our estimated actual time of arrival)?
 
-
 ## Reliable Prediction Accuracy
 
 The prediction is considered **accurate** if it falls within the bounds of this equation: `-60ln(Time to Prediction+1.3) < Prediction Error < 60ln(Time to Prediction+1.5)`.
@@ -36,13 +35,30 @@ As the bus approaches each stop, the software is making predictions for when the
    * follow the prediction, you will **miss** the bus...this is very bad!
    * we want fewer of these kinds of predictions, and would much rather wait for the bus than to miss it
 
+### Reliable Prediction Accuracy Metrics in Report
+
+| Goal | Metric Columns |
+|---|---|
+| Bus Catch Likelihood<br>75%+ of predictions result in catching the bus | Bus Catch Likelihood<br>% Early / On-Time / Late Predictions |
+| Prediction Error<br>Closer to zero, small positive values.<br>Late predictions = negative values = riders miss bus. | Average prediction error (minutes) |
+| Prediction Error Variability<br>Variability is the interquartile range (IQR = 75th - 25th percentile).<br>Smaller values = better = more consistent experience for riders using app.<br><br>Ex1: 25th percentile = -5 minutes = a quarter of riders get predictions that are 5 or more minutes late.<br>Ex2: 75th percentile = 3 minutes = a quarter of riders get predictions that are 3 or more minutes early.<br>Ex3: half of riders get predictions between 5 minutes late and 3 minutes early. | 10th, 20th, ..., 90th percentiles<br>Variability = IQR = 75th percentile - 25th percentile<br>Accuracy Loss = 10th percentile / 50th percentile |
+
 ## Availability and Completeness of Predictions
 
 * This metric is the easiest to achieve. For starters, having information is better than no information.
-* For each instance of scheduled stop arrival, there is complete information if there are at least 2 predictions each minute.
+* It measures the completeness _within_ the RT data we are capturing, regardless of coverage gaps _across_ dates.
+* For each instance of scheduled stop arrival, RT information is complete with at least 2 predictions each minute (every 30 seconds).
 * For the 30 minute period before the bus arrives at each stop, each minute is an observation that goes into this calculation (up to 30 observations).
 * This ensures that we have fairly equal number of observations for each stop and can compare across stops.
    * We want to avoid having 30 minutes of predictions for the 1st stop and 60 minutes of predictions for the last stop and comparing metrics that have different denominators.
+
+### Availability and Completeness Metrics in Report
+
+| Goal | Metric Columns |
+|---|---|
+| 2+ vehicle positions and trip updates messages per minute. | [Trip Updates / Vehicle Positions] Messages per Minute |
+| 100% routes are covered by RT, and 75%+ of trips have RT.<br><br>Out of scheduled trips, how many trips have RT, regardless of completeness?<br>Out of scheduled routes, how many routes have at least 1 trip with RT? | [Trip Updates / Vehicle Positions] % Trips, <br>[Trip Updates / Vehicle Positions] % Routes |
+| 90%+ of minutes has predicted arrival information.<br><br>How many minutes have at least 2+ messages, in the 30 minutes before the bus arrives? | % Minutes with 2+ Predictions |
 
 ## Prediction Inconsistency
 
@@ -50,6 +66,13 @@ As the bus approaches each stop, the software is making predictions for when the
    * If the prediction is changing from minute to minute, a large spread would show up.
    * If the prediction is fairly consistent, we would see small spread.
 * There is [research](https://www.sciencedirect.com/science/article/abs/pii/S0965856416303494) around how transit users perceive wait time, and that users perceive longer wait times than what is actually experienced. Decreasing the perceived wait time by providing real-time information has positive benefits for user experience.
+
+### Prediction Inconsistency Metrics in Report
+
+| Goal | Metric Columns |
+|---|---|
+| Less wobbly or jittery predictions, to a point.<br><br>Real-time predictions should reflect traffic conditions and convey<br>updated information to riders, so aiming for zero is not the goal.<br><br>Higher = predictions change more = worse rider experience.<br><br>Lower = predictions are not fluctuating minute to minute = <br>riders trust the real-time arrival information. | Prediction Spread (minutes) |
+| Lower padding = riders add less time to prevent missing the bus.<br><br>Riders adjust their behavior to catch the bus, and add time to adjust <br>for receiving late predictions.<br><br>Late predictions (negative prediction error values) become the <br>*time a rider adds to make sure they don't miss the bus next time*, <br>signaling a lack of trust with the information. | Prediction Padding (minutes)<br>Absolute value of the 5th percentile prediction error.  |
 
 ## Master Services Agreement
 Exhibit H definitions (pg 53 on pdf)

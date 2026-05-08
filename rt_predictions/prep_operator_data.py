@@ -163,9 +163,29 @@ def merge_in_operator_percentiles(df: pd.DataFrame) -> pd.DataFrame:
             day_type_sorted=df1.day_type.map(report_utils.DAYTYPE_ORDER_DICT),
         )
         .rename(columns={"prediction_padding": "prediction_padding_minutes"})
-        .drop(columns=["pct_predictions_early", "pct_predictions_ontime"] + array_cols)
+        .drop(columns=array_cols)
         .sort_values(["month_first_day", "schedule_name", "tu_name", "day_type_sorted"])
         .reset_index(drop=True)
     )
 
     return df1
+
+
+def reshape_prediction_category_counts_to_long(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Get distribution of early / on-time/ late,
+    turn columns into long df to plot with altair stacked bar chart.
+    """
+    df2 = df.melt(
+        id_vars=["tu_name", "day_type"],
+        value_vars=["pct_predictions_early", "pct_predictions_ontime", "pct_predictions_late"],
+        var_name="prediction_category",
+        value_name="pct",
+    )
+
+    df2 = df2.assign(
+        prediction_category=df2.prediction_category.str.replace("pct_predictions_", ""),
+        pct=df2.pct * 100,  # scale this to match the axis without adjusting it in chart
+    )
+
+    return df2

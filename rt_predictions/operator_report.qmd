@@ -63,8 +63,8 @@ schedule_cols = [
     "n_stops", "num_stop_times", "daily_arrivals", 'n_days_schedule_and_rt'
 ]
 
-vp_cols = ['vp_messages_per_minute', 'pct_vp_trips', 'pct_vp_routes'] #'daily_vp_trips'
-tu_cols =['tu_messages_per_minute', 'pct_tu_trips', 'pct_tu_routes'] #'daily_tu_trips',
+vp_cols = ['vp_messages_per_minute', 'pct_vp_trips', 'pct_vp_routes']
+tu_cols =['tu_messages_per_minute', 'pct_tu_trips', 'pct_tu_routes']
 
 tu_prediction_cols = [
     "bus_catch_likelihood", "pct_tu_complete_minutes", # both are percents
@@ -164,9 +164,19 @@ chart_utils.format_great_table(schedule_table)
 
 ## General RT Metrics
 
+Vehicle positions and trip updates are distinct RT data sources, and each can be paired with GTFS schedule data.
+
+The metrics from the schedule-RT pairing include and % of schedule trips with vehicle positions and % of scheduled trips with trip updates. These are calculated the same way across both RT data sources.
+
 <span style="color:#4477aa">**Update Availability Goal 1:** 2+ vehicle positions or trip updates messages per minute.</span>
 
-<span style="color:#4477aa">**Update Availability Goal 2:** 100% routes are covered by RT, and 75%+ of trips have RT.</span>
+Vehicle positions or trip updates per minute is a measure of completeness *within* the RT data we are capturing, regardless of coverage gaps *across* dates.
+
+<span style="color:#4477aa">**Update Availability Goal 2:** 75%+ of trips have RT and 100% routes are covered by RT.</span>
+
+Out of scheduled trips, how many trips have RT, regardless of completeness? If the trip appeared in RT trip updates with at least 1 message, the trip counts as having RT trip updates (similarly for vehicle positions).
+
+Out of scheduled routes, how many routes have at least 1 trip with RT? If at least 1 trip for that route had RT trip updates, that route counts as having RT trip updates (similarly for vehicle positions).
 
 ```{python}
 rt_table = (
@@ -209,9 +219,13 @@ chart_utils.format_great_table(rt_table, day_type_grouping = True).pipe(
 
 ## Prediction Accuracy Metrics
 
-<span style="color:#4477aa">**Update Availability Goal:** 90%+ of minutes has predicted arrival information.</span>
+These metrics are derived entirely from RT trip updates (no comparison with schedule data).
+
+<span style="color:#4477aa">**Update Availability Goal 3:** 90%+ of minutes has predicted arrival information.</span>
 
 <span style="color:#4477aa">**Bus Catch Likelihood Goal:** 75%+ of predictions result in catching the bus.</span>
+
+On-time predictions use [this definition](https://analysis.dds.dot.ca.gov/rt_operator_metrics/#reliable-prediction-accuracy), where predictions 5 minutes before must fall within narrower bounds to be considered on-time, compared to predictions 30 minutes out.
 
 <span style="color:#4477aa">**Prediction Error Goal:** Closer to zero or smaller positive values (early predictions). Late predictions = negative values = riders miss bus</span>
 
@@ -266,6 +280,35 @@ table.pipe(
 ).cols_move_to_end(columns=["n_predictions"])
 #.pipe(gte.gt_color_box, columns=["iqr"], palette="YlOrRd"),
 # maybe IQR doesn't make sense to color, it'll just be ranked by day_type
+```
+
+```{python}
+pct_category_df = prep_operator_data.reshape_prediction_category_counts_to_long(df)
+
+category_counts_stacked_bar = alt.Chart(pct_category_df).mark_bar().encode(
+    x=alt.X(
+        'day_type',
+        title = "", sort=["Weekday", "Saturday", "Sunday"]
+    ),
+    y=alt.Y('pct', title="Percent"),
+    color=alt.Color(
+        'prediction_category:N',
+        title="Prediction Category",
+        sort=["early", "ontime", "late"],
+        scale=alt.Scale(range=[
+            _color_palette.get_color("light_cadmium_yellow"),
+            _color_palette.get_color("electric_orange"),
+            _color_palette.get_color("aquatic")
+        ])
+    ),
+    column=alt.Column("tu_name", title = ""),
+    tooltip=["tu_name", "day_type", "prediction_category", "pct"]
+).interactive().properties(
+    title = "Predictions by Category",
+    width=150, height = 200
+)
+
+category_counts_stacked_bar
 ```
 
 ## Prediction Error Percentiles
@@ -451,9 +494,11 @@ m
 
 ## Route Summary
 
-Prediction accuracy varies by routes. The routes shown at the top have high variability (high IQRs).
+Prediction accuracy varies by routes. The routes shown at the top have high variability.
 
-* **High variability = high IQRs**: local traffic conditions mat confound the prediction algorithm. For these routes, a focus on improving service reliability through additional infrastructure (signal priority, bus lanes), or other transit planning and policies could be explored.
+Variability is measured by the interquartile range (IQR), which is the difference between the 75th percentile and 25th percentile prediction errors.
+
+* **High variability = high IQRs**: local traffic conditions may confound the prediction algorithm. For these routes, a focus on improving service reliability through additional infrastructure (signal priority, bus lanes), or other transit planning and policies could be explored.
 
 * **Negative 25th percentiles**: riders miss the bus (late predictions). These routes may benefit from service reliability improvements for riders.
 

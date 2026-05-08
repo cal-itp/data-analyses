@@ -20,7 +20,7 @@ def basic_percentiles_line_chart(
     """
     chart = (
         alt.Chart(df)
-        .mark_line(point=True)
+        .mark_line(point=True, interpolate="natural")  # this one seems to smooth out the curves
         .encode(
             x=alt.X(x_col, title="Prediction Error (minutes)"),
             y=alt.Y("percentile", title="Percentiles", scale=alt.Scale(domain=[0, 100])),
@@ -36,7 +36,7 @@ def basic_percentiles_line_chart(
     return chart
 
 
-def fig5and6_prediction_error_plots(df: pd.DataFrame) -> alt.Chart:
+def fig5and6_prediction_error_plots(df: pd.DataFrame, color_col: str = "day_type") -> alt.Chart:
     """
     Negative and positive prediction error plots are combined side-by-side as 1 chart.
 
@@ -47,14 +47,18 @@ def fig5and6_prediction_error_plots(df: pd.DataFrame) -> alt.Chart:
     Instead of [10, 20, ....90] for percentiles, it should show [90, 80, ...10].
     """
     # Make legend selectable
-    selection = alt.selection_point(fields=["day_type"], bind="legend")
+    selection = alt.selection_point(fields=[color_col], bind="legend")
 
-    neg_errors_chart = basic_percentiles_line_chart(df, x_col="neg_prediction_error_minutes").encode(
+    neg_errors_chart = basic_percentiles_line_chart(
+        df, x_col="neg_prediction_error_minutes", color_col=color_col
+    ).encode(
         opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.2)),
         strokeWidth=alt.when(selection).then(alt.value(2)).otherwise(alt.value(1)),
     )
 
-    pos_errors_chart = basic_percentiles_line_chart(df, x_col="pos_prediction_error_minutes").encode(
+    pos_errors_chart = basic_percentiles_line_chart(
+        df, x_col="pos_prediction_error_minutes", color_col=color_col
+    ).encode(
         opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.2)),
         strokeWidth=alt.when(selection).then(alt.value(2)).otherwise(alt.value(1)),
     )
