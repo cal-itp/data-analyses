@@ -1,6 +1,6 @@
 [project]
 name = "shared-utils"
-version = "5.0.1"
+version = "5.0.3"
 requires-python = ">=3.11.0, <3.12.0"
 dependencies = [
     "calitp-data-analysis",
@@ -36,6 +36,7 @@ dependencies = [
     "vegafusion==2.0.3",
     "vl-convert-python>=1.6.0",
     "xmltodict>=0.13.0,<0.14",
+    "setuptools<82"
 ]
 
 [dependency-groups]

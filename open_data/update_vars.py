@@ -2,8 +2,8 @@ from pathlib import Path
 
 from shared_utils import catalog_utils, rt_dates
 
-analysis_date = rt_dates.DATES["feb2026"]
-analysis_month = "2026-02-01"  # should correspond to first day of month above
+analysis_date = rt_dates.DATES["apr2026"]
+analysis_month = "2026-04-01"  # should correspond to first day of month above
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
