@@ -6,18 +6,22 @@ NTD Monthly Ridership by RTPA
 3. Spreadsheets stored in folder to send to CalSTA.
 """
 
-import importlib
 import os
 import sys
 from functools import cache
 
 import gcsfs
-from calitp_data_analysis.gcs_pandas import GCSPandas
 
-sys.path.append(os.path.abspath("../monthly_ridership_report"))  # for update_var
+# import importlib
+import update_vars
+from calitp_data_analysis.gcs_pandas import GCSPandas
+from ridership_report_utils import _01_ntd_ridership_utils
+
 sys.path.append(os.path.abspath("../"))  # for module
-_01_ntd_ridership_utils = importlib.import_module("_01_ntd_ridership_utils")
-update_vars = importlib.import_module("update_vars")
+# sys.path.append(os.path.abspath("../monthly_ridership_report"))  # for update_var
+
+# _01_ntd_ridership_utils = importlib.import_module("_01_ntd_ridership_utils")
+# update_vars = importlib.import_module("update_vars")
 
 
 @cache
