@@ -16,13 +16,13 @@ All source code for these analyses and reports may be found [on GitHub](https://
 
 Portfolio has additional dependencies beyond the workspace baseline. Install them with:
 
-From the `data-analyses\` folder, install run:
+From the `data-analyses\` folder, run:
 
 ```bash
-$ uv sync
+$ uv sync --all-groups
 ```
 
-Then:
+If you don't want to install other group packages, you can specify only the portfolio group:
 
 ```bash
 $ uv sync --group portfolio

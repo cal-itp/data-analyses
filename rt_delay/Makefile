@@ -1,2 +1,2 @@
 setup_rt_analysis:
-	pip install -r requirements.txt
+	cd .. && uv sync --all-groups

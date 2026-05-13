@@ -7,6 +7,8 @@ members = [
     "cal-itp-data-analyses",
     "calitp-data-analysis",
     "portfolio",
+    "rt-analysis",
+    "segment-speed-utils",
     "shared-utils",
 ]
 
@@ -349,15 +351,13 @@ wheels = [
 name = "cal-itp-data-analyses"
 version = "0.1.0"
 source = { virtual = "." }
-dependencies = [
-    { name = "nbdime" },
-]
 
 [package.dev-dependencies]
 dev = [
     { name = "black" },
     { name = "ipykernel" },
     { name = "isort" },
+    { name = "nbdime" },
     { name = "pre-commit" },
     { name = "rt-analysis" },
     { name = "segment-speed-utils" },
@@ -377,6 +377,7 @@ test = [
     { name = "black" },
     { name = "ipykernel" },
     { name = "isort" },
+    { name = "nbdime" },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-mock" },
@@ -388,13 +389,13 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "nbdime", specifier = ">=4.0.4" }]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "black", specifier = "==24.10.0" },
     { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "isort", specifier = "==5.10.1" },
+    { name = "nbdime", specifier = ">=4.0.4" },
     { name = "pre-commit", specifier = ">=2.18.1" },
     { name = "rt-analysis", editable = "rt_delay" },
     { name = "segment-speed-utils", editable = "rt_segment_speeds" },
@@ -414,6 +415,7 @@ test = [
     { name = "black", specifier = "==24.10.0" },
     { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "isort", specifier = "==5.10.1" },
+    { name = "nbdime", specifier = ">=4.0.4" },
     { name = "pre-commit", specifier = ">=2.18.1" },
     { name = "pytest", specifier = ">=9.0.2,<10.0.0" },
     { name = "pytest-mock", specifier = ">=3.15.1,<4.0.0" },
@@ -3199,6 +3201,12 @@ wheels = [
 name = "segment-speed-utils"
 version = "1.8"
 source = { editable = "rt_segment_speeds" }
+dependencies = [
+    { name = "calitp-data-analysis" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "calitp-data-analysis", editable = "calitp-data-analysis" }]
 
 [[package]]
 name = "selenium"

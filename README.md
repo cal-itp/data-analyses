@@ -23,7 +23,7 @@ Follow these steps to start contributing:
 
 1. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this `data-analyses` repo.
 
-2. From the repo root (`data-analyses/`), run `make install_env` (runs `uv sync` + pre-commit setup)
+2. From the `data-analyses/` path (repo root path), run `make install_env` (runs `uv sync --all-groups` + pre-commit setup)
 
 3. In JupyterHub, select the **"Pyproject Local"** kernel when opening a notebook
 
@@ -32,11 +32,19 @@ Follow these steps to start contributing:
 
 ### uv
 
-This repository uses uv for package management. To learn more go to [uv documentation](https://docs.astral.sh/uv/concepts/projects/dependencies/).
+This repository uses [uv](https://docs.astral.sh/uv/concepts/projects/dependencies/) for package management.
+
+Every time you rebase your branch, add, upgrade, or remove packages, you need to run `uv sync` to install/update any change.
+
+* Dependencies from "\_shared_utils", "rt_segment_speeds", and "rt_delay" will be installed/updated too.
+
+You can see all the current dependencies in [pyproject.toml](https://github.com/cal-itp/data-analyses/blob/main/pyproject.toml).
 
 Basic commands:
 
-* `uv sync` install missing packages, update existing ones, and remove unnecessary ones to ensure the environment matches the lockfile.
+* `uv sync` install missing packages, update existing ones, and remove unnecessary ones to ensure the environment matches the main lockfile.
+* `uv sync --all-groups` install missing packages, update existing ones, and remove unnecessary ones to ensure the environment matches all group dependencies.
+* `uv sync --group <group name>` install missing packages, update existing ones, and remove unnecessary ones to ensure the environment matches the main lockfile and the specified group.
 * `uv add <package name>` include and install a new package to the main project.
 * `uv add <package name> --dev` include and install new packages/dependencies to the `dev` group.
 * `uv add <package name> --portfolio` include and install new packages/dependencies to the `portfolio` group.

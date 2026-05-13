@@ -2,7 +2,7 @@
 name = "calitp-data-analysis"
 version = "2026.4.0"
 description = "Shared code for querying Cal-ITP data in notebooks, primarily."
-authors = [{ name = "Cal-ITP" }, { name = "Erika Pacheco" }, { name = "Rae Bonfanti" }]
+authors = [{ name = "Cal-ITP" }]
 requires-python = ">=3.11.0, <3.12.0"
 dependencies = [
     "altair>=5.1.1",

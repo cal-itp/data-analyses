@@ -1,16 +1,17 @@
 [project]
 name = "cal-itp-data-analyses"
+authors = [{ name = "Cal-ITP" }]
 version = "0.1.0"
 requires-python = ">=3.11.0, <3.12.0"
-dependencies = [
-    "nbdime>=4.0.4",
-]
+dependencies = []
 
 [tool.uv.workspace]
 members = [
     "calitp-data-analysis",
     "_shared_utils",
     "portfolio",
+    "rt_segment_speeds",
+    "rt_delay",
 ]
 
 [tool.uv]
@@ -25,6 +26,7 @@ dev = [
     "black==24.10.0",
     "isort==5.10.1",
     "pre-commit>=2.18.1",
+    "nbdime>=4.0.4",
 ]
 portfolio = [
     "axe-selenium-python",
@@ -47,5 +49,5 @@ test = [
 [tool.uv.sources]
 shared-utils = { workspace = true }
 calitp-data-analysis = { workspace = true }
-segment-speed-utils = { path = "./rt_segment_speeds", editable = true }
-rt-analysis = { path = "./rt_delay", editable = true }
+segment-speed-utils  = { workspace = true }
+rt-analysis = { workspace = true }
