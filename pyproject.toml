@@ -3,13 +3,12 @@ name = "cal-itp-data-analyses"
 authors = [{ name = "Cal-ITP" }]
 version = "0.1.0"
 requires-python = ">=3.11.0, <3.12.0"
-# click<8.3: click 8.3 added strict flag validation that's incompatible with
-# typer's boolean-flag generation. See cal-itp/data-analyses#2044.
-dependencies = ["click<8.3"]
+dependencies = []
 
 [tool.uv.workspace]
 members = [
     "calitp-data-analysis",
+    "calitp-portfolio",
     "_shared_utils",
     "portfolio",
     "rt_segment_speeds",
@@ -24,6 +23,7 @@ dev = [
     "shared-utils",
     "segment-speed-utils",
     "rt-analysis",
+    "calitp-portfolio",
     "ipykernel>=6.29.0",
     "pyproject-local-kernel",
     "black==24.10.0",
@@ -39,7 +39,7 @@ portfolio = [
     "papermill~=2.4",
     "pydantic>=2.0",
     "pyaml==21.10.1",
-    "typer~=0.9",
+    "typer>=0.9",
 ]
 test = [
     { include-group = "dev" },
@@ -52,5 +52,6 @@ test = [
 [tool.uv.sources]
 shared-utils = { workspace = true }
 calitp-data-analysis = { workspace = true }
+calitp-portfolio = { workspace = true }
 segment-speed-utils  = { workspace = true }
 rt-analysis = { workspace = true }
