@@ -480,11 +480,19 @@ name = "calitp-portfolio"
 version = "0.1.0"
 source = { editable = "calitp-portfolio" }
 dependencies = [
+    { name = "jinja2" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
     { name = "typer" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "typer", specifier = ">=0.15" }]
+requires-dist = [
+    { name = "jinja2", specifier = ">=3.0" },
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "typer", specifier = ">=0.15" },
+]
 
 [[package]]
 name = "certifi"

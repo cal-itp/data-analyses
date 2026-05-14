@@ -6,6 +6,9 @@ authors = [{ name = "Cal-ITP" }]
 requires-python = ">=3.11.0, <3.12.0"
 dependencies = [
     "typer>=0.15",
+    "pydantic>=2.0",
+    "jinja2>=3.0",
+    "pyyaml>=6.0",
 ]
 
 [project.scripts]
