@@ -1,0 +1,37 @@
+deploy:
+  prod: gs://calitp-analysis/index.html
+  staging: gs://calitp-analysis-staging/index.html
+
+sites:
+  - title: GTFS Digest
+    name: gtfs_digest
+    source: ./gtfs_digest/
+  - title: RT Speeds
+    name: rt
+    source: https://github.com/cal-itp/data-analyses/tree/main/ca_transit_speed_maps/
+  - title: AHSC
+    name: ahsc
+    source: ./ahsc/
+
+test_sites:
+  - title: Basic Analyses Test
+    name: _basic_analyses_test
+    source: ./tests/fixtures/portfolio/
+  - title: Group Analyses Test
+    name: _group_analyses_test
+    source: ./tests/fixtures/portfolio/
+  - title: Group and Params Analyses Test
+    name: _group_and_params_analyses_test
+    source: ./tests/fixtures/portfolio/
+  - title: Param Analyses Test
+    name: _param_analyses_test
+    source: ./tests/fixtures/portfolio/
+  - title: Param Analyses with Title Test
+    name: _param_manual_title_analyses_test
+    source: ./tests/fixtures/portfolio/
+  - title: Readme Only Analyses Test
+    name: _readme_only_analyses_test
+    source: ./tests/fixtures/portfolio/
+  - title: Section Analyses Test
+    name: _section_analyses_test
+    source: ./tests/fixtures/portfolio/
