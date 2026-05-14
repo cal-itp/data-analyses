@@ -6,6 +6,7 @@ requires-python = "==3.11.*"
 members = [
     "cal-itp-data-analyses",
     "calitp-data-analysis",
+    "calitp-portfolio",
     "portfolio",
     "rt-analysis",
     "rt-predictions",
@@ -358,6 +359,7 @@ source = { virtual = "." }
 [package.dev-dependencies]
 dev = [
     { name = "black" },
+    { name = "calitp-portfolio" },
     { name = "ipykernel" },
     { name = "isort" },
     { name = "nbdime" },
@@ -379,6 +381,7 @@ portfolio = [
 ]
 test = [
     { name = "black" },
+    { name = "calitp-portfolio" },
     { name = "ipykernel" },
     { name = "isort" },
     { name = "nbdime" },
@@ -398,6 +401,7 @@ test = [
 [package.metadata.requires-dev]
 dev = [
     { name = "black", specifier = "==24.10.0" },
+    { name = "calitp-portfolio", editable = "calitp-portfolio" },
     { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "isort", specifier = "==5.10.1" },
     { name = "nbdime", specifier = ">=4.0.4" },
@@ -419,6 +423,7 @@ portfolio = [
 ]
 test = [
     { name = "black", specifier = "==24.10.0" },
+    { name = "calitp-portfolio", editable = "calitp-portfolio" },
     { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "isort", specifier = "==5.10.1" },
     { name = "nbdime", specifier = ">=4.0.4" },
@@ -469,6 +474,17 @@ requires-dist = [
     { name = "sqlalchemy", specifier = ">=2.0.0,<3.0.0" },
     { name = "sqlalchemy-bigquery", specifier = ">=1.6.1,<2.0.0" },
 ]
+
+[[package]]
+name = "calitp-portfolio"
+version = "0.1.0"
+source = { editable = "calitp-portfolio" }
+dependencies = [
+    { name = "typer" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "typer", specifier = ">=0.15" }]
 
 [[package]]
 name = "certifi"
@@ -2483,7 +2499,7 @@ requires-dist = [
     { name = "pyaml", specifier = "==21.10.1" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "shared-utils", editable = "_shared_utils" },
-    { name = "typer", specifier = ">=0.9" },
+    { name = "typer", specifier = ">=0.12" },
 ]
 
 [[package]]

@@ -8,6 +8,7 @@ dependencies = []
 [tool.uv.workspace]
 members = [
     "calitp-data-analysis",
+    "calitp-portfolio",
     "_shared_utils",
     "portfolio",
     "rt_segment_speeds",
@@ -25,6 +26,7 @@ dev = [
     "shared-utils",
     "segment-speed-utils",
     "rt-analysis",
+    "calitp-portfolio",
     "ipykernel>=6.29.0",
     "pyproject-local-kernel",
     "black==24.10.0",
@@ -53,5 +55,6 @@ test = [
 [tool.uv.sources]
 shared-utils = { workspace = true }
 calitp-data-analysis = { workspace = true }
+calitp-portfolio = { workspace = true }
 segment-speed-utils  = { workspace = true }
 rt-analysis = { workspace = true }
