@@ -13,8 +13,10 @@ import gcsfs
 import pandas as pd
 from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.sql import query_sql
-from segment_speed_utils.project_vars import PUBLIC_GCS
 
+# from segment_speed_utils.project_vars import PUBLIC_GCS
+
+PUBLIC_GCS = "gs://calitp-publish-data-analysis/"
 # from update_vars import GCS_FILE_PATH, NTD_MODES, NTD_TOS
 
 sys.path.append(os.path.abspath("./monthly_ridership_report"))
