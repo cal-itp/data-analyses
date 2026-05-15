@@ -2,6 +2,8 @@ title: Section Analyses Test
 directory: ./tests/fixtures/portfolio/
 readme: ./tests/fixtures/portfolio/README_SECTIONS.md
 notebook: ./tests/fixtures/portfolio/notebook_with_params_2.ipynb
+deploy:
+  staging: gs://calitp-analysis-staging/_section_analyses_test
 parts:
   - chapters:
     - caption: Daily Greetings
