@@ -1,0 +1,16 @@
+[project]
+name = "sb125-analyses"
+version = "0.1.0"
+requires-python = ">=3.11.0, <3.12.0"
+dependencies = [
+    "shared-utils",
+    "calitp-data-analysis",
+    "pygris",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+shared-utils = { workspace = true }
+calitp-data-analysis = { workspace = true }

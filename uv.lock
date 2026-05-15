@@ -8,8 +8,11 @@ members = [
     "calitp-data-analysis",
     "portfolio",
     "rt-analysis",
+    "rt-predictions",
+    "sb125-analyses",
     "segment-speed-utils",
     "shared-utils",
+    "thruway-intercity-bus",
 ]
 
 [[package]]
@@ -2710,6 +2713,20 @@ wheels = [
 ]
 
 [[package]]
+name = "pygris"
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "geopandas" },
+    { name = "platformdirs" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4b/c6/138d75978264144d11cfce5e03b1751c02d10ce5674a031d57f2573ac069/pygris-0.2.1.tar.gz", hash = "sha256:d0a6893b60a4f10c1fda1939228450a89b4c6f6c7a7afcbad441da24666d30d0", size = 52170, upload-time = "2025-12-27T15:06:35.281Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/64/8a/183cdcf7492b164d4e93abeb2c9af979c85e297aba5224395a023b793f4f/pygris-0.2.1-py3-none-any.whl", hash = "sha256:34645b3cc456f6b761326979f0bac98f780931e72956bb6c86e742895908beca", size = 58320, upload-time = "2025-12-27T15:06:36.444Z" },
+]
+
+[[package]]
 name = "pymap3d"
 version = "3.2.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3095,6 +3112,25 @@ version = "0.4.2"
 source = { editable = "rt_delay" }
 
 [[package]]
+name = "rt-predictions"
+version = "0.1.0"
+source = { virtual = "rt_predictions" }
+dependencies = [
+    { name = "calitp-data-analysis" },
+    { name = "shared-utils" },
+    { name = "vegafusion" },
+    { name = "vl-convert-python" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "calitp-data-analysis", editable = "calitp-data-analysis" },
+    { name = "shared-utils", editable = "_shared_utils" },
+    { name = "vegafusion", extras = ["embed"], specifier = ">=1.5.0" },
+    { name = "vl-convert-python", specifier = ">=1.6.0" },
+]
+
+[[package]]
 name = "rtree"
 version = "1.4.1"
 source = { registry = "https://pypi.org/simple" }
@@ -3117,6 +3153,23 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c7/3b/ebda527b56beb90cb7652cb1c7e4f91f48649fbcd8d2eb2fb6e77cd3329b/ruamel_yaml-0.19.1.tar.gz", hash = "sha256:53eb66cd27849eff968ebf8f0bf61f46cdac2da1d1f3576dd4ccee9b25c31993", size = 142709, upload-time = "2026-01-02T16:50:31.84Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b8/0c/51f6841f1d84f404f92463fc2b1ba0da357ca1e3db6b7fbda26956c3b82a/ruamel_yaml-0.19.1-py3-none-any.whl", hash = "sha256:27592957fedf6e0b62f281e96effd28043345e0e66001f97683aa9a40c667c93", size = 118102, upload-time = "2026-01-02T16:50:29.201Z" },
+]
+
+[[package]]
+name = "sb125-analyses"
+version = "0.1.0"
+source = { virtual = "sb125_analyses" }
+dependencies = [
+    { name = "calitp-data-analysis" },
+    { name = "pygris" },
+    { name = "shared-utils" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "calitp-data-analysis", editable = "calitp-data-analysis" },
+    { name = "pygris" },
+    { name = "shared-utils", editable = "_shared_utils" },
 ]
 
 [[package]]
@@ -3275,8 +3328,6 @@ dependencies = [
     { name = "seaborn" },
     { name = "stonesoup" },
     { name = "tqdm" },
-    { name = "vegafusion" },
-    { name = "vl-convert-python" },
     { name = "xmltodict" },
 ]
 
@@ -3320,8 +3371,6 @@ requires-dist = [
     { name = "seaborn", specifier = ">=0.11.2,<0.12.0" },
     { name = "stonesoup", specifier = "==1.8" },
     { name = "tqdm", specifier = ">=4.66.0" },
-    { name = "vegafusion", specifier = "==2.0.3" },
-    { name = "vl-convert-python", specifier = ">=1.6.0" },
     { name = "xmltodict", specifier = ">=0.13.0,<0.14" },
 ]
 
@@ -3496,6 +3545,25 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b7/4d/08c89e34946fce2aec4fbb45c9016efd5f4d7f24af8e5d93296e935631d8/threadpoolctl-3.6.0.tar.gz", hash = "sha256:8ab8b4aa3491d812b623328249fab5302a68d2d71745c8a4c719a2fcaba9f44e", size = 21274, upload-time = "2025-03-13T13:49:23.031Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/32/d5/f9a850d79b0851d1d4ef6456097579a9005b31fea68726a4ae5f2d82ddd9/threadpoolctl-3.6.0-py3-none-any.whl", hash = "sha256:43a0b8fd5a2928500110039e43a5eed8480b918967083ea48dc3ab9f13c4a7fb", size = 18638, upload-time = "2025-03-13T13:49:21.846Z" },
+]
+
+[[package]]
+name = "thruway-intercity-bus"
+version = "0.1.0"
+source = { virtual = "thruway_intercity_bus" }
+dependencies = [
+    { name = "calitp-data-analysis" },
+    { name = "shared-utils" },
+    { name = "vegafusion" },
+    { name = "vl-convert-python" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "calitp-data-analysis", editable = "calitp-data-analysis" },
+    { name = "shared-utils", editable = "_shared_utils" },
+    { name = "vegafusion", extras = ["embed"], specifier = ">=1.5.0" },
+    { name = "vl-convert-python", specifier = ">=1.6.0" },
 ]
 
 [[package]]
