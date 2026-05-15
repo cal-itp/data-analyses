@@ -11,7 +11,7 @@ import google.auth
 import pandas as pd
 from calitp_data_analysis import geography_utils, utils
 from loguru import logger
-from update_vars import OPEN_DATA_GCS, analysis_month
+from update_vars import OPEN_DATA_GCS, TRAFFIC_OPS_GCS, analysis_month
 
 credentials, _ = google.auth.default()
 
@@ -180,6 +180,8 @@ if __name__ == "__main__":
     routes = publish_routes(analysis_month)
 
     utils.geoparquet_gcs_export(routes, OPEN_DATA_GCS, f"export/ca_transit_routes_{analysis_month}")
+    utils.geoparquet_gcs_export(routes, OPEN_DATA_GCS, f"export/ca_transit_routes_latest")
 
+    
     end = datetime.datetime.now()
     logger.info(f"{analysis_month}: export routes: {end - start}")
