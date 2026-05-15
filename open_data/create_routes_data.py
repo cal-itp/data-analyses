@@ -180,6 +180,7 @@ if __name__ == "__main__":
     routes = publish_routes(analysis_month)
 
     utils.geoparquet_gcs_export(routes, OPEN_DATA_GCS, f"export/ca_transit_routes_{analysis_month}")
+    utils.geoparquet_gcs_export(routes, OPEN_DATA_GCS, "export/ca_transit_routes_latest")
 
     end = datetime.datetime.now()
     logger.info(f"{analysis_month}: export routes: {end - start}")

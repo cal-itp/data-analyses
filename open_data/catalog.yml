@@ -18,13 +18,13 @@ sources:
     description: All CA transit routes (lines)
     args:
       # source: open_data/create_routes_data.py
-      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_routes.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/open_data/export/ca_transit_routes_latest.parquet
   ca_transit_stops:
     driver: geoparquet
     description: All CA transit stops (points)
     args:
       # source: open_data/create_stops_data.py
-      urlpath: gs://calitp-analytics-data/data-analyses/traffic_ops/ca_transit_stops.parquet
+      urlpath: gs://calitp-analytics-data/data-analyses/open_data/export/ca_transit_stops_latest.parquet
   speeds_by_stop_segments:
     driver: geoparquet
     description: Segment speeds by route-direction-speedmap_segment-time_period. The geometry is a segment that runs between 2 stops, or 1km where stops are >1km apart.
