@@ -9,11 +9,10 @@ import gcsfs
 import geopandas as gpd
 import google.auth
 import intake
-import open_data_utils
 import pandas as pd
 from calitp_data_analysis import geography_utils, utils
 from loguru import logger
-from update_vars import OPEN_DATA_GCS, TRAFFIC_OPS_GCS, analysis_month
+from update_vars import OPEN_DATA_GCS, analysis_month
 
 credentials, _ = google.auth.default()
 catalog = intake.open_catalog("../_shared_utils/shared_utils/shared_data_catalog.yml")
@@ -168,7 +167,7 @@ if __name__ == "__main__":
     stops = publish_stops(analysis_month)
 
     utils.geoparquet_gcs_export(stops, OPEN_DATA_GCS, f"export/ca_transit_stops_{analysis_month}")
-    utils.geoparquet_gcs_export(stops, OPEN_DATA_GCS, f"export/ca_transit_stops_latest")
+    utils.geoparquet_gcs_export(stops, OPEN_DATA_GCS, "export/ca_transit_stops_latest")
 
     end = datetime.datetime.now()
     logger.info(f"{analysis_month}: export stops: {end - start}")
