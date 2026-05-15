@@ -1,12 +1,25 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import yaml
 from pydantic import BaseModel, field_validator
 from slugify import slugify
 
 
 def slugify_params(params: Dict) -> str:
     return "__".join(f"{k}_{slugify(str(v))}" for k, v in params.items())
+
+
+def parameterize_filename(i: int, old_path: Path, params: Dict) -> Path:
+    assert old_path.suffix == ".ipynb"
+
+    return Path(str(i).zfill(2) + "__" + old_path.stem + "__" + slugify_params(params) + old_path.suffix)
+
+
+class YamlPartialDumper(yaml.Dumper):
+
+    def increase_indent(self, flow=False, indentless=False):
+        return super(YamlPartialDumper, self).increase_indent(flow, False)
 
 
 class DeployTargets(BaseModel):
@@ -43,6 +56,39 @@ class Chapter(BaseModel):
     def path(self):
         return self.output_dir / Path(self.slug)
 
+    @property
+    def toc(self):
+        if self.sections:
+            if self.caption:
+                return {
+                    "title": f"{self.caption}",
+                    "file": f"{self.slug}.md",
+                    "children": [
+                        {
+                            "pattern": f"{self.slug}/*",
+                        }
+                    ],
+                }
+            else:
+                return {
+                    "file": f"{self.slug}.md",
+                    "children": [
+                        {
+                            "glob": f"{self.slug}/*",
+                        }
+                    ],
+                }
+
+        folder = f"{self.slug}/" if self.slug else ""
+
+        if self.caption:
+            return {
+                "title": f"{self.caption}",
+                "file": f"{folder}{parameterize_filename('00', self.resolved_notebook, self.resolved_params)}",
+            }
+        else:
+            return {"file": f"{folder}{parameterize_filename('00', self.resolved_notebook, self.resolved_params)}"}
+
 
 class Part(BaseModel):
     caption: Optional[Any] = None
@@ -60,6 +106,10 @@ class Part(BaseModel):
     @property
     def slug(self) -> str:
         return slugify_params(self.params)
+
+    @property
+    def to_toc(self):
+        return {"title": self.caption} if self.caption else {}
 
 
 class Site(BaseModel):
@@ -91,6 +141,24 @@ class Site(BaseModel):
     @property
     def slug(self) -> str:
         return slugify(self.title)
+
+    @property
+    def toc_yaml(self) -> str:
+        toc = [{"file": self.readme.name}]
+        for part in self.parts:
+            if part.chapters:
+                if part.to_toc:
+                    children = {"children": [chapter.toc for chapter in part.chapters]}
+                    toc.append(part.to_toc | children)
+                else:
+                    for chapter in part.chapters:
+                        toc.append(chapter.toc)
+
+        return yaml.dump(
+            {"toc": toc},
+            indent=4,
+            Dumper=YamlPartialDumper,
+        )
 
 
 class PortfolioConfig(BaseModel):
