@@ -2,6 +2,8 @@ title: Group and Params Analyses Test
 directory: ./tests/fixtures/portfolio/
 readme: ./tests/fixtures/portfolio/README_GP.md
 notebook: ./tests/fixtures/portfolio/notebook_with_params_2.ipynb
+deploy:
+  staging: gs://calitp-analysis-staging/_group_and_params_analyses_test
 parts:
 - caption: District 01 Eureka
   chapters:

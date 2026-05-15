@@ -4,12 +4,9 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pydantic import BaseModel
 
+from calitp_portfolio.models import DeployTargets
+
 TEMPLATES_DIR = Path(__file__).parent / "templates"
-
-
-class DeployTargets(BaseModel):
-    prod: str
-    staging: str
 
 
 class SiteEntry(BaseModel):

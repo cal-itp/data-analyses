@@ -1,5 +1,4 @@
 deploy:
-  prod: gs://calitp-analysis/index.html
   staging: gs://calitp-analysis-staging/index.html
 
 sites:
