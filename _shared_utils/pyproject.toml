@@ -36,7 +36,6 @@ dependencies = [
     "vegafusion==2.0.3",
     "vl-convert-python>=1.6.0",
     "xmltodict>=0.13.0,<0.14",
-    "setuptools<82"
 ]
 
 [dependency-groups]
