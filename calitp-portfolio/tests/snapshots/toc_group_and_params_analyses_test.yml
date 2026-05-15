@@ -1,0 +1,12 @@
+toc:
+    -   file: README_GP.md
+    -   children:
+            -   file: greetings_humboldt-transit-authority/00__notebook_with_params_2__greetings_humboldt-transit-authority.ipynb
+            -   file: greetings_lake-transit-authority/00__notebook_with_params_2__greetings_lake-transit-authority.ipynb
+            -   file: greetings_mendocino-transit-authority/00__notebook_with_params_2__greetings_mendocino-transit-authority.ipynb
+            -   file: greetings_redwood-coast-transit-authority/00__notebook_with_params_2__greetings_redwood-coast-transit-authority.ipynb
+        title: District 01 Eureka
+    -   children:
+            -   file: greetings_redding-area-bus-authority/00__notebook_with_params_2__greetings_redding-area-bus-authority.ipynb
+            -   file: greetings_tehama-county/00__notebook_with_params_2__greetings_tehama-county.ipynb
+        title: District 02 Redding
