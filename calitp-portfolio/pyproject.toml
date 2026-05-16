@@ -13,6 +13,7 @@ dependencies = [
     "papermill>=2.4",
     "nbformat>=5.8",
     "humanize>=4.6",
+    "jupyter-book==2.1.1",
 ]
 
 [project.scripts]

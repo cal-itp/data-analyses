@@ -1,7 +1,10 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+import papermill as pm
+import typer
 import yaml
+from papermill import PapermillExecutionError
 from pydantic import BaseModel, field_validator
 from slugify import slugify
 
@@ -55,6 +58,95 @@ class Chapter(BaseModel):
     @property
     def path(self):
         return self.output_dir / Path(self.slug)
+
+    def generate(
+        self, execute_papermill=True, continue_on_error=False, **papermill_kwargs
+    ) -> List[PapermillExecutionError]:
+        errors = []
+        self.path.mkdir(parents=True, exist_ok=True)
+
+        if self.sections:
+            fname = self.output_dir / f"{self.slug}.md"
+            with open(fname, "w") as f:
+                typer.secho(f"writing readme to {fname}", fg=typer.colors.GREEN)
+                f.write(f"# {self.caption}")
+
+            for i, section in enumerate(self.sections):
+                two_digit_i = str(i).format(width=2)
+                params = {**self.resolved_params, **section}
+                notebook = section.get("notebook") or self.resolved_notebook
+
+                if not notebook:
+                    raise ValueError("no notebook found at any level")
+
+                if isinstance(notebook, str):
+                    notebook = Path(notebook)
+
+                parameterized_path = self.path / Path(parameterize_filename(two_digit_i, notebook, params))
+
+                typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
+
+                if execute_papermill:
+                    try:
+                        pm.execute_notebook(
+                            input_path=notebook,
+                            output_path=parameterized_path,
+                            parameters=params,
+                            cwd=notebook.parent,
+                            engine_name="markdown",
+                            report_mode=True,
+                            original_parameters=params,
+                            **papermill_kwargs,
+                        )
+                    except PapermillExecutionError as e:
+                        if continue_on_error:
+                            typer.secho("error encountered during papermill execution", fg=typer.colors.RED)
+                            errors.append(e)
+                        else:
+                            raise
+                else:
+                    typer.secho(
+                        f"execute_papermill={execute_papermill} so we are skipping actual execution",
+                        fg=typer.colors.YELLOW,
+                    )
+
+        else:
+            notebook = self.resolved_notebook
+
+            if not notebook:
+                raise ValueError("no notebook found at any level")
+
+            if isinstance(notebook, str):
+                notebook = Path(notebook)
+
+            parameterized_path = self.path / Path(parameterize_filename("00", notebook, self.resolved_params))
+
+            typer.secho(f"parameterizing {notebook} => {parameterized_path}", fg=typer.colors.GREEN)
+
+            if execute_papermill:
+                try:
+                    pm.execute_notebook(
+                        input_path=notebook,
+                        output_path=parameterized_path,
+                        parameters=self.resolved_params,
+                        cwd=notebook.parent,
+                        engine_name="markdown",
+                        report_mode=True,
+                        original_parameters=self.resolved_params,
+                        **papermill_kwargs,
+                    )
+                except PapermillExecutionError as e:
+                    if continue_on_error:
+                        typer.secho("error encountered during papermill execution", fg=typer.colors.RED)
+                        errors.append(e)
+                    else:
+                        raise
+            else:
+                typer.secho(
+                    f"execute_papermill={execute_papermill} so we are skipping actual execution", fg=typer.colors.YELLOW
+                )
+
+        return errors
 
     @property
     def toc(self):
