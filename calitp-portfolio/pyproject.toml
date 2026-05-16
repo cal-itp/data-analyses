@@ -10,6 +10,9 @@ dependencies = [
     "jinja2>=3.0",
     "pyyaml>=6.0",
     "python-slugify>=8.0",
+    "papermill>=2.4",
+    "nbformat>=5.8",
+    "humanize>=4.6",
 ]
 
 [project.scripts]
