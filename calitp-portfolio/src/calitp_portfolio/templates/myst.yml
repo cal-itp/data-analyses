@@ -12,17 +12,17 @@ project:
       output: exports/book.pdf
 site:
   parts:
-    footer: ../templates/partials/footer.md
+    footer: _templates/partials/footer.md
     primary_sidebar_footer: '' # hide the Made with MyST footer
   options:
     analytics_google: '{{ google_analytics_id }}'
     folders: true
-    favicon: ../templates/assets/favicon.ico
-    logo: ../templates/assets/CT+DDS-Logo_FC-Black_Horizontal_Digital.png
-    logo_dark: ../templates/assets/CT+DDS-Logo_FC-White_Horizontal_Digital.png
+    favicon: _templates/assets/favicon.ico
+    logo: _templates/assets/CT+DDS-Logo_FC-Black_Horizontal_Digital.png
+    logo_dark: _templates/assets/CT+DDS-Logo_FC-White_Horizontal_Digital.png
     logo_url: '/'
     logo_alt: Caltrans Data and Digital Services Logos
-    style: ../templates/custom.css
+    style: _templates/custom.css
     hide_title_block: {{ hide_title_block }}
     hide_authors: true
   template: book-theme

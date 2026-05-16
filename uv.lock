@@ -482,6 +482,7 @@ source = { editable = "calitp-portfolio" }
 dependencies = [
     { name = "humanize" },
     { name = "jinja2" },
+    { name = "jupyter-book" },
     { name = "nbformat" },
     { name = "papermill" },
     { name = "pydantic" },
@@ -494,6 +495,7 @@ dependencies = [
 requires-dist = [
     { name = "humanize", specifier = ">=4.6" },
     { name = "jinja2", specifier = ">=3.0" },
+    { name = "jupyter-book", specifier = "==2.1.1" },
     { name = "nbformat", specifier = ">=5.8" },
     { name = "papermill", specifier = ">=2.4" },
     { name = "pydantic", specifier = ">=2.0" },
