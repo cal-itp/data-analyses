@@ -1,3 +1,5 @@
+import subprocess
+from importlib.resources import files
 from pathlib import Path
 from typing import Optional
 
@@ -5,6 +7,8 @@ import typer
 
 from calitp_portfolio.builder import build_site
 from calitp_portfolio.indexer import load_manifest, render_index
+
+LOGIN_CONFIG = str(files("calitp_portfolio.auth") / "login.json")
 
 app = typer.Typer(
     name="calitp-portfolio",
@@ -37,6 +41,15 @@ def index(
     typer.echo(f"wrote {output_path}")
 
 
+def _adc_authorized() -> bool:
+    """Check for valid credentials"""
+    result = subprocess.run(
+        ["gcloud", "auth", "application-default", "print-access-token"],
+        capture_output=True,
+    )
+    return result.returncode == 0
+
+
 @app.command()
 def build(
     site_yml: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
@@ -50,8 +63,16 @@ def build(
     prepare_only: bool = typer.Option(False, help="Pass-through to papermill; if true, cells are not executed."),
     continue_on_error: bool = typer.Option(False, help="Continue building remaining chapters on papermill error."),
     hide_title_block: bool = typer.Option(False, help="If true, will hide the title block for all pages."),
+    skip_auth_check: bool = typer.Option(False, "--skip-auth-check", help="Skip the auth pre-flight."),
 ) -> None:
     """Build a static site from a parameterized notebook portfolio."""
+    if execute and not prepare_only and not skip_auth_check and not _adc_authorized():
+        typer.secho(
+            "error: Auth check failed.\n" "  No valid credentials found.\n" "  Run: uv run calitp-portfolio login",
+            fg=typer.colors.RED,
+        )
+        raise typer.Exit(code=2)
+
     output = output_dir or site_yml.parent
     exit_code = build_site(
         yml_path=site_yml,
@@ -64,6 +85,15 @@ def build(
     )
     if exit_code != 0:
         raise typer.Exit(code=exit_code)
+
+
+@app.command()
+def login() -> None:
+    """Authenticate to Google Cloud using the Cal-ITP login config bundled with this tool."""
+    cmd = ["gcloud", "auth", "application-default", "login", f"--login-config={LOGIN_CONFIG}"]
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        raise typer.Exit(code=result.returncode)
 
 
 if __name__ == "__main__":

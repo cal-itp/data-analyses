@@ -22,6 +22,22 @@ def _stub_jupyter_book_build(mocker):
     return mocker.patch("calitp_portfolio.builder._run_subprocess_tee", side_effect=fake_run)
 
 
+def test_build_aborts_when_adc_unauthorized(tmp_path, mocker):
+    """Pre-flight ADC probe fails -> build exits 2 with a clear pointer at `calitp-portfolio login`."""
+    yml = FIXTURES / "sites" / "_basic_analyses_test.yml"
+    output_dir = tmp_path / "build"
+    mocker.patch("calitp_portfolio.cli.subprocess.run", return_value=mocker.MagicMock(returncode=1))
+    build_site = mocker.patch("calitp_portfolio.cli.build_site")
+
+    # No --no-execute / --prepare-only / --skip-auth-check, so pre-flight is active.
+    result = runner.invoke(app, ["build", str(yml), "--output-dir", str(output_dir)])
+
+    assert result.exit_code == 2
+    assert "Auth check failed" in result.stdout
+    assert "calitp-portfolio login" in result.stdout
+    build_site.assert_not_called()
+
+
 def test_build_produces_artifacts(tmp_path, mocker):
     yml = FIXTURES / "sites" / "_basic_analyses_test.yml"
     output_dir = tmp_path / "build"
