@@ -4,6 +4,7 @@ import json
 import shutil
 import subprocess
 import sys
+import traceback
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timezone
 from pathlib import Path
@@ -121,40 +122,47 @@ def build_site(
         tee_out = _Tee(terminal_stdout, log_file)
         tee_err = _Tee(terminal_stderr, log_file)
         with redirect_stdout(tee_out), redirect_stderr(tee_err):
-            site = _load_site(yml_path, output_dir)
+            try:
+                site = _load_site(yml_path, output_dir)
 
-            typer.echo(f"copying {site.readme.name} from {site.directory} to {output_dir}")
-            shutil.copy(site.readme, output_dir / site.readme.name)
+                typer.echo(f"copying {site.readme.name} from {site.directory} to {output_dir}")
+                shutil.copy(site.readme, output_dir / site.readme.name)
 
-            myst_path = output_dir / "myst.yml"
-            typer.secho(f"writing config and toc to {myst_path}", fg=typer.colors.GREEN)
-            myst_path.write_text(_render_myst_yml(site, hide_title_block=hide_title_block))
+                myst_path = output_dir / "myst.yml"
+                typer.secho(f"writing config and toc to {myst_path}", fg=typer.colors.GREEN)
+                myst_path.write_text(_render_myst_yml(site, hide_title_block=hide_title_block))
 
-            _bundle_template_assets(output_dir)
+                _bundle_template_assets(output_dir)
 
-            errors = []
-            for part in site.parts:
-                for chapter in part.chapters:
-                    errors.extend(
-                        chapter.generate(
-                            execute_papermill=execute_papermill,
-                            continue_on_error=continue_on_error,
-                            prepare_only=prepare_only,
-                            no_stderr=no_stderr,
+                errors = []
+                for part in site.parts:
+                    for chapter in part.chapters:
+                        errors.extend(
+                            chapter.generate(
+                                execute_papermill=execute_papermill,
+                                continue_on_error=continue_on_error,
+                                prepare_only=prepare_only,
+                                no_stderr=no_stderr,
+                            )
                         )
-                    )
 
-            _run_subprocess_tee(
-                ["jupyter", "book", "build", "--html", "--ci"],
-                cwd=output_dir,
-                log_file=log_file,
-                terminal=terminal_stdout,
-            )
+                _run_subprocess_tee(
+                    ["jupyter", "book", "build", "--html", "--ci"],
+                    cwd=output_dir,
+                    log_file=log_file,
+                    terminal=terminal_stdout,
+                )
 
-            _write_manifest(site, yml_path, output_dir, errors_count=len(errors))
+                _write_manifest(site, yml_path, output_dir, errors_count=len(errors))
 
-            if errors:
-                typer.secho(f"{len(errors)} errors encountered during papermill execution", fg=typer.colors.RED)
+                if errors:
+                    typer.secho(f"\n{len(errors)} papermill error(s) encountered during build:", fg=typer.colors.RED)
+                    for e in errors:
+                        typer.secho(f"  - cell In[{e.exec_count}]: {e.ename}: {e.evalue}", fg=typer.colors.RED)
+                    return 1
+            except Exception:
+                typer.secho("\nbuild aborted by unhandled exception:", fg=typer.colors.RED)
+                traceback.print_exc()
                 return 1
 
     return 0

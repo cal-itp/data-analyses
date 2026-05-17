@@ -100,7 +100,10 @@ class Chapter(BaseModel):
                         )
                     except PapermillExecutionError as e:
                         if continue_on_error:
-                            typer.secho("error encountered during papermill execution", fg=typer.colors.RED)
+                            typer.secho(
+                                f"papermill error in {notebook} at cell In[{e.exec_count}]: {e.ename}: {e.evalue}",
+                                fg=typer.colors.RED,
+                            )
                             errors.append(e)
                         else:
                             raise
@@ -137,7 +140,10 @@ class Chapter(BaseModel):
                     )
                 except PapermillExecutionError as e:
                     if continue_on_error:
-                        typer.secho("error encountered during papermill execution", fg=typer.colors.RED)
+                        typer.secho(
+                            f"papermill error in {notebook} at cell In[{e.exec_count}]: {e.ename}: {e.evalue}",
+                            fg=typer.colors.RED,
+                        )
                         errors.append(e)
                     else:
                         raise
