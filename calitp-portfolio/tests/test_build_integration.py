@@ -37,10 +37,11 @@ def _materialize_fixture(yml_name: str, dest: Path) -> Path:
     return yml_dest
 
 
-def test_integration_basic_build(tmp_path, monkeypatch):
+def test_integration_basic_build(tmp_path, monkeypatch, mocker):
     """Full pipeline against a chapter-bearing site with markdown-only notebooks."""
     yml = _materialize_fixture("_basic_analyses_test.yml", tmp_path)
     monkeypatch.chdir(tmp_path)
+    mocker.patch("calitp_portfolio.cli.auth.is_valid", return_value=True)
     output_dir = tmp_path / "build"
 
     result = runner.invoke(app, ["build", str(yml), "--output-dir", str(output_dir)])
@@ -53,10 +54,11 @@ def test_integration_basic_build(tmp_path, monkeypatch):
     assert (output_dir / "_build" / "html" / "index.html").exists()
 
 
-def test_integration_readme_only_build(tmp_path, monkeypatch):
+def test_integration_readme_only_build(tmp_path, monkeypatch, mocker):
     """Empty-parts pipeline: jupyter-book compiles a single-page site."""
     yml = _materialize_fixture("_readme_only_analyses_test.yml", tmp_path)
     monkeypatch.chdir(tmp_path)
+    mocker.patch("calitp_portfolio.cli.auth.is_valid", return_value=True)
     output_dir = tmp_path / "build"
 
     result = runner.invoke(app, ["build", str(yml), "--output-dir", str(output_dir)])
