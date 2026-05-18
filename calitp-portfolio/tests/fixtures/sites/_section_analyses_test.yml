@@ -1,19 +1,19 @@
 title: Section Analyses Test
-directory: ./tests/fixtures/portfolio/
+directory: tests/fixtures/portfolio
 readme: ./tests/fixtures/portfolio/README_SECTIONS.md
-notebook: ./tests/fixtures/portfolio/notebook_with_params_2.ipynb
-deploy:
-  staging: gs://calitp-analysis-staging/_section_analyses_test
+notebook: tests/fixtures/portfolio/notebook_with_params_2.ipynb
 parts:
   - chapters:
-    - caption: Daily Greetings
-      params:
-        day_or_night: 01 - Day
-      sections:
-        - greetings: Good Morning!
-        - greetings: Good Afternoon!
-    - caption: Night Greetings
-      params:
-        day_or_night: 02 - Night
-      sections:
-        - greetings: Sleep well!
+      - caption: Daily Greetings
+        params:
+          day_or_night: 01 - Day
+        sections:
+          - greetings: Good Morning!
+          - greetings: Good Afternoon!
+      - caption: Night Greetings
+        params:
+          day_or_night: 02 - Night
+        sections:
+          - greetings: Sleep well!
+deploy:
+  staging: gs://calitp-analysis-staging/_section_analyses_test
