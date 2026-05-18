@@ -480,6 +480,7 @@ name = "calitp-portfolio"
 version = "0.1.0"
 source = { editable = "calitp-portfolio" }
 dependencies = [
+    { name = "google-cloud-storage" },
     { name = "humanize" },
     { name = "jinja2" },
     { name = "jupyter-book" },
@@ -493,6 +494,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "google-cloud-storage", specifier = ">=2.10" },
     { name = "humanize", specifier = ">=4.6" },
     { name = "jinja2", specifier = ">=3.0" },
     { name = "jupyter-book", specifier = "==2.1.1" },
