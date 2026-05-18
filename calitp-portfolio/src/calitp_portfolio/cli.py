@@ -6,6 +6,7 @@ import typer
 
 from calitp_portfolio import auth, deployer
 from calitp_portfolio.builder import build_site
+from calitp_portfolio.check import run as run_check
 from calitp_portfolio.indexer import load_manifest, render_index
 from calitp_portfolio.models import load_site
 
@@ -238,6 +239,53 @@ def login() -> None:
     returncode = auth.login()
     if returncode != 0:
         raise typer.Exit(code=returncode)
+
+
+_WCAG_PRESETS = {
+    "a": ["wcag2a"],
+    "aa": ["wcag2a", "wcag2aa", "wcag21aa"],
+    "aaa": ["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa", "wcag21aaa"],
+}
+_ALL_IMPACTS = {"minor", "moderate", "serious", "critical"}
+
+
+@app.command()
+def check(
+    site_yml: Optional[Path] = typer.Argument(
+        None, exists=True, dir_okay=False, readable=True, help="Site yml; build dir is derived."
+    ),
+    html: Optional[Path] = typer.Option(None, "--html", exists=True, file_okay=False, help="Scan this directory."),
+    wcag: str = typer.Option("aa", "--wcag", help="WCAG conformance level: a, aa, or aaa."),
+    impact: str = typer.Option(
+        "serious,critical",
+        "--impact",
+        help="Comma-separated impact levels to show. Use 'all' for everything.",
+    ),
+    no_dedupe: bool = typer.Option(False, "--no-dedupe", help="Show one entry per page instead of grouping by rule."),
+    skip_axe_check: bool = typer.Option(False, "--skip-axe-check", help="Skip the axe CLI pre-flight."),
+    report: Optional[Path] = typer.Option(None, "--report", help="Write the full axe JSON report to this path."),
+) -> None:
+    """Run an accessibility scan against the built HTML."""
+    if wcag not in _WCAG_PRESETS:
+        raise typer.BadParameter(f"--wcag must be one of: {', '.join(_WCAG_PRESETS)}")
+    tags = _WCAG_PRESETS[wcag]
+
+    impacts = _ALL_IMPACTS if impact == "all" else {i.strip() for i in impact.split(",") if i.strip()}
+    unknown = impacts - _ALL_IMPACTS
+    if unknown:
+        raise typer.BadParameter(f"--impact: unknown levels {sorted(unknown)}; use {sorted(_ALL_IMPACTS)} or 'all'")
+
+    exit_code = run_check(
+        yml_path=site_yml,
+        html_dir=html,
+        tags=tags,
+        impacts=impacts,
+        dedupe=not no_dedupe,
+        skip_axe_check=skip_axe_check,
+        report_path=report,
+    )
+    if exit_code != 0:
+        raise typer.Exit(code=exit_code)
 
 
 if __name__ == "__main__":
