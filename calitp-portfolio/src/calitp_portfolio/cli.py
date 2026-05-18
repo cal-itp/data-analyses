@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 from typing import Optional
 
@@ -152,6 +153,25 @@ def deploy(
 
     count = deployer.upload_directory(resolved_url, html_dir)
     typer.echo(f"deployed {count} files from {html_dir} -> {resolved_url}")
+
+
+@app.command()
+def clean(
+    site_yml: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+    all_: bool = typer.Option(False, "--all", help="Also remove parameterized notebook output dirs."),
+) -> None:
+    """Remove a site's build artifacts. Idempotent."""
+    site = load_site(site_yml)
+    build_dir = site.output_dir / "_build"
+    shutil.rmtree(build_dir, ignore_errors=True)
+    typer.echo(f"removed {build_dir}")
+
+    if all_:
+        for part in site.parts:
+            for chapter in part.chapters:
+                if chapter.slug:
+                    shutil.rmtree(chapter.path, ignore_errors=True)
+                    typer.echo(f"removed {chapter.path}")
 
 
 @app.command()
