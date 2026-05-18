@@ -2,9 +2,8 @@ import os
 from pathlib import Path
 
 import pytest
-import yaml
 
-from calitp_portfolio.models import Site
+from calitp_portfolio.models import load_site
 
 SITE_FIXTURES = Path(__file__).parent / "fixtures" / "sites"
 SNAPSHOTS = Path(__file__).parent / "snapshots"
@@ -21,13 +20,6 @@ ALL_TEST_YMLS = [
 ]
 
 
-def _load_site(yml_name: str) -> Site:
-    path = SITE_FIXTURES / yml_name
-    name = path.stem
-    with open(path) as f:
-        return Site(output_dir=Path("./portfolio") / name, name=name, **yaml.safe_load(f))
-
-
 def _check_snapshot(actual: str, snapshot_name: str) -> None:
     snapshot_path = SNAPSHOTS / snapshot_name
     if UPDATE_SNAPSHOTS or not snapshot_path.exists():
@@ -40,6 +32,6 @@ def _check_snapshot(actual: str, snapshot_name: str) -> None:
 
 @pytest.mark.parametrize("yml_name", ALL_TEST_YMLS)
 def test_toc_yaml_matches_snapshot(yml_name):
-    site = _load_site(yml_name)
+    site = load_site(SITE_FIXTURES / yml_name)
     snapshot_name = f"toc_{yml_name.lstrip('_').replace('.yml', '.yml')}"
     _check_snapshot(site.toc_yaml, snapshot_name)

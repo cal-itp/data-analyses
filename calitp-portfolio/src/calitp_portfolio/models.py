@@ -5,7 +5,7 @@ import papermill as pm
 import typer
 import yaml
 from papermill import PapermillExecutionError
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_serializer, field_validator
 from slugify import slugify
 
 
@@ -35,8 +35,8 @@ class Chapter(BaseModel):
     notebook: Optional[Path] = None
     params: Dict = {}
     sections: List[Dict] = []
-    site: "Site" = None
-    part: "Part" = None
+    site: "Site" = Field(default=None, exclude=True, repr=False)
+    part: "Part" = Field(default=None, exclude=True, repr=False)
 
     @property
     def resolved_notebook(self):
@@ -193,7 +193,7 @@ class Part(BaseModel):
     notebook: Optional[Path] = None
     params: Dict = {}
     chapters: List[Chapter] = []
-    site: "Site" = None
+    site: "Site" = Field(default=None, exclude=True, repr=False)
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -211,8 +211,8 @@ class Part(BaseModel):
 
 
 class Site(BaseModel):
-    output_dir: Path
-    name: str
+    output_dir: Path = Field(exclude=True)
+    name: str = Field(exclude=True)
     title: str
     directory: Path
     readme: Optional[Path] = "README.md"
@@ -236,6 +236,15 @@ class Site(BaseModel):
             directory = info.data["directory"]
             return directory / Path(v)
 
+    # str(Path("./foo")) drops the "./" prefix; re-add it so the validator
+    # above doesn't double-prefix when this readme is reloaded from yml.
+    @field_serializer("readme")
+    def _serialize_readme(self, v: Optional[Path]) -> Optional[str]:
+        if v is None:
+            return None
+        s = str(v)
+        return s if s.startswith(("/", "./")) else f"./{s}"
+
     @property
     def slug(self) -> str:
         return slugify(self.title)
@@ -258,6 +267,26 @@ class Site(BaseModel):
             Dumper=YamlPartialDumper,
         )
 
+    def to_yaml(self) -> str:
+        """Serialize this Site to a portfolio site.yml string (canonical form, no disk I/O)."""
+        data = self.model_dump(mode="json", exclude_none=True, exclude_defaults=True)
+        return yaml.dump(data, sort_keys=False, Dumper=YamlPartialDumper)
+
+    def write_yaml(self, path: Path) -> None:
+        """Write `self.to_yaml()` to `path`."""
+        Path(path).write_text(self.to_yaml())
+
 
 class PortfolioConfig(BaseModel):
     sites: List[Site]
+
+
+def load_site(yml_path: Path, output_dir: Optional[Path] = None) -> Site:
+    """Load a Site from yml. `output_dir` (build-only) defaults to `<yml dir>/<yml stem>`."""
+    yml_path = Path(yml_path)
+    with open(yml_path) as f:
+        return Site(
+            output_dir=output_dir or (yml_path.parent / yml_path.stem),
+            name=yml_path.stem,
+            **yaml.safe_load(f),
+        )

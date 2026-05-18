@@ -1,9 +1,9 @@
 title: Basic Analyses Test
-directory: ./tests/fixtures/portfolio/
+directory: tests/fixtures/portfolio
 readme: ./tests/fixtures/portfolio/README.md
-deploy:
-  staging: gs://calitp-analysis-staging/_basic_analyses_test
 parts:
   - chapters:
-      - notebook: ./tests/fixtures/portfolio/notebook_1.ipynb
-      - notebook: ./tests/fixtures/portfolio/notebook_2.ipynb
+      - notebook: tests/fixtures/portfolio/notebook_1.ipynb
+      - notebook: tests/fixtures/portfolio/notebook_2.ipynb
+deploy:
+  staging: gs://calitp-analysis-staging/_basic_analyses_test

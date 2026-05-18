@@ -10,19 +10,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import typer
-import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # importing engine has the side effect of registering the "markdown" papermill engine
 from calitp_portfolio import engine  # noqa: F401
-from calitp_portfolio.models import Site
+from calitp_portfolio.models import Site, load_site
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
-
-
-def _load_site(yml_path: Path, output_dir: Path) -> Site:
-    with open(yml_path) as f:
-        return Site(output_dir=output_dir, name=yml_path.stem, **yaml.safe_load(f))
 
 
 def _render_myst_yml(site: Site, hide_title_block: bool) -> str:
@@ -123,7 +117,7 @@ def build_site(
         tee_err = _Tee(terminal_stderr, log_file)
         with redirect_stdout(tee_out), redirect_stderr(tee_err):
             try:
-                site = _load_site(yml_path, output_dir)
+                site = load_site(yml_path, output_dir)
 
                 typer.echo(f"copying {site.readme.name} from {site.directory} to {output_dir}")
                 shutil.copy(site.readme, output_dir / site.readme.name)
