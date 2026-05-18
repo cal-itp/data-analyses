@@ -26,7 +26,7 @@ def test_build_aborts_when_adc_unauthorized(tmp_path, mocker):
     """Pre-flight ADC probe fails -> build exits 2 with a clear pointer at `calitp-portfolio login`."""
     yml = FIXTURES / "sites" / "_basic_analyses_test.yml"
     output_dir = tmp_path / "build"
-    mocker.patch("calitp_portfolio.cli.subprocess.run", return_value=mocker.MagicMock(returncode=1))
+    mocker.patch("calitp_portfolio.cli.auth.is_valid", return_value=False)
     build_site = mocker.patch("calitp_portfolio.cli.build_site")
 
     # No --no-execute / --prepare-only / --skip-auth-check, so pre-flight is active.

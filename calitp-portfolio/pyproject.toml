@@ -14,6 +14,7 @@ dependencies = [
     "nbformat>=5.8",
     "humanize>=4.6",
     "jupyter-book==2.1.1",
+    "google-cloud-storage>=2.10",
 ]
 
 [project.scripts]
