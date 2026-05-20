@@ -89,7 +89,10 @@ def list_(
 def build(
     site_yml: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
     output_dir: Optional[Path] = typer.Option(
-        None, "--output-dir", "-o", help="Where to write build artifacts. Defaults to the yml's parent directory."
+        None,
+        "--output-dir",
+        "-o",
+        help="Where to write build artifacts. Defaults to `<yml dir>/<yml stem>/`.",
     ),
     execute: bool = typer.Option(True, "--execute/--no-execute", help="Skip calls to papermill when --no-execute."),
     show_stderr: bool = typer.Option(
@@ -136,10 +139,9 @@ def build(
             )
             raise typer.Exit(code=1)
 
-    output = output_dir or site_yml.parent
     exit_code = build_site(
         yml_path=site_yml,
-        output_dir=output,
+        output_dir=output_dir,
         execute_papermill=execute,
         no_stderr=not show_stderr,
         prepare_only=prepare_only,

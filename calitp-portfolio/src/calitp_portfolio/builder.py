@@ -124,7 +124,7 @@ def _limit_chapters(site, n: int) -> None:
 
 def build_site(
     yml_path: Path,
-    output_dir: Path,
+    output_dir: Optional[Path],
     execute_papermill: bool,
     no_stderr: bool,
     prepare_only: bool,
@@ -135,6 +135,8 @@ def build_site(
     readme_only: bool = False,
     toc_only: bool = False,
 ) -> int:
+    site = load_site(yml_path, output_dir)
+    output_dir = site.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
     log_path = output_dir / "build.log"
     terminal_stdout = sys.stdout
@@ -145,8 +147,6 @@ def build_site(
         tee_err = _Tee(terminal_stderr, log_file)
         with redirect_stdout(tee_out), redirect_stderr(tee_err):
             try:
-                site = load_site(yml_path, output_dir)
-
                 if only:
                     _filter_chapters_by_only(site, only)
                 if limit is not None:

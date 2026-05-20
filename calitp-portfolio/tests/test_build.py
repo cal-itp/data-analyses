@@ -163,6 +163,20 @@ def test_build_works_for_readme_only_site(tmp_path, mocker):
     assert (output_dir / "build.json").exists()
 
 
+def test_build_cli_output_dir_overrides_yml_output_dir(tmp_path, mocker):
+    """CLI `--output-dir` trumps yml's `output_dir:` field."""
+    yml = tmp_path / "_readme_only_analyses_test.yml"
+    base = (FIXTURES / "sites" / "_readme_only_analyses_test.yml").read_text()
+    yml.write_text(base + "output_dir: from-yml\n")
+    _stub_jupyter_book_build(mocker)
+
+    result = runner.invoke(app, ["build", str(yml), "--no-execute", "--output-dir", str(tmp_path / "from-cli")])
+
+    assert result.exit_code == 0, result.stdout
+    assert (tmp_path / "from-cli" / "myst.yml").exists()
+    assert not (tmp_path / "from-yml" / "myst.yml").exists()
+
+
 def test_build_only_filters_to_matching_chapter(tmp_path, mocker):
     """`build --only <slug>` skips chapters whose identifier doesn't match."""
     yml = FIXTURES / "sites" / "_param_analyses_test.yml"

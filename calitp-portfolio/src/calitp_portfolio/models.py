@@ -291,11 +291,23 @@ class PortfolioConfig(BaseModel):
 
 
 def load_site(yml_path: Path, output_dir: Optional[Path] = None) -> Site:
-    """Load a Site from yml. `output_dir` (build-only) defaults to `<yml dir>/<yml stem>`."""
+    """Load a Site from yml.
+
+    `output_dir` precedence (highest first):
+      1. explicit `output_dir` argument
+      2. yml's `output_dir:` field, resolved relative to the yml's directory
+      3. default: `<yml dir>/<yml stem>`
+    """
     yml_path = Path(yml_path)
     with open(yml_path) as f:
-        return Site(
-            output_dir=output_dir or (yml_path.parent / yml_path.stem),
-            name=yml_path.stem,
-            **yaml.safe_load(f),
-        )
+        data = yaml.safe_load(f)
+
+    yml_output_dir = data.pop("output_dir", None)
+    resolved_output_dir = output_dir or (
+        (yml_path.parent / yml_output_dir) if yml_output_dir else (yml_path.parent / yml_path.stem)
+    )
+    return Site(
+        output_dir=resolved_output_dir,
+        name=yml_path.stem,
+        **data,
+    )

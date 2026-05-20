@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from calitp_portfolio.models import DeployTargets, Site
+from calitp_portfolio.models import DeployTargets, Site, load_site
 
 SITE_FIXTURES = Path(__file__).parent / "fixtures" / "sites"
 
@@ -108,3 +108,31 @@ def test_deploy_block_is_required():
     )
     with pytest.raises(Exception):
         Site(output_dir=Path("./portfolio/no_deploy"), name="no_deploy", **yaml.safe_load(yml_text))
+
+
+def test_load_site_default_output_dir_is_yml_parent_stem(tmp_path):
+    yml = tmp_path / "s.yml"
+    yml.write_text((SITE_FIXTURES / "_readme_only_analyses_test.yml").read_text())
+
+    site = load_site(yml)
+    assert site.output_dir == tmp_path / "s"
+
+
+def test_load_site_resolves_yml_output_dir_relative_to_yml_parent(tmp_path):
+    """Optional `output_dir:` in the yml overrides the <stem> default, anchored at yml.parent."""
+    yml = tmp_path / "s.yml"
+    base = (SITE_FIXTURES / "_readme_only_analyses_test.yml").read_text()
+    yml.write_text(base + "output_dir: custom\n")
+
+    site = load_site(yml)
+    assert site.output_dir == tmp_path / "custom"
+
+
+def test_load_site_explicit_arg_overrides_yml_output_dir(tmp_path):
+    """Explicit `output_dir` arg trumps the yml's `output_dir:` field."""
+    yml = tmp_path / "s.yml"
+    base = (SITE_FIXTURES / "_readme_only_analyses_test.yml").read_text()
+    yml.write_text(base + "output_dir: from-yml\n")
+
+    site = load_site(yml, output_dir=tmp_path / "from-arg")
+    assert site.output_dir == tmp_path / "from-arg"
