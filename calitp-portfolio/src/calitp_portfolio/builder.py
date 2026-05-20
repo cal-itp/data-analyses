@@ -16,7 +16,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # importing engine has the side effect of registering the "markdown" papermill engine
 from calitp_portfolio import engine  # noqa: F401
-from calitp_portfolio.models import Site, load_site
+from calitp_portfolio.models import GOOGLE_ANALYTICS_TAG_ID, Site, load_site
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
@@ -30,7 +30,7 @@ def _render_myst_yml(site: Site, hide_title_block: bool) -> str:
         site=site,
         toc=site.toc_yaml,
         hide_title_block=hide_title_block,
-        google_analytics_id="",
+        google_analytics_id=GOOGLE_ANALYTICS_TAG_ID,
     )
 
 
