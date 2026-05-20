@@ -57,6 +57,27 @@ def test_deploy_uploads_built_html_to_staging(mocker, tmp_path):
     ]
 
 
+def test_deploy_announces_progress_preamble(mocker, tmp_path):
+    """Deploy prints a preamble with file count + source + target before uploading,
+    so the user knows the upload is running (was dead-air during the 1264-file ahsc deploy)."""
+    site_yml = tmp_path / "_basic_analyses_test.yml"
+    site_yml.write_text((FIXTURES / "sites" / "_basic_analyses_test.yml").read_text())
+    html_dir = tmp_path / "_basic_analyses_test" / "_build" / "html"
+    html_dir.mkdir(parents=True)
+    (html_dir / "index.html").write_text("<html>hi</html>")
+    (html_dir / "page.html").write_text("<html>page</html>")
+
+    mocker.patch("calitp_portfolio.cli.auth.is_valid", return_value=True)
+    _mock_storage(mocker)
+
+    result = runner.invoke(app, ["deploy", str(site_yml)])
+
+    assert result.exit_code == 0, result.stdout
+    assert "uploading 2 files" in result.stdout
+    assert str(html_dir) in result.stdout
+    assert "gs://calitp-analysis-staging/_basic_analyses_test" in result.stdout
+
+
 def test_deploy_exits_2_when_not_authorized(mocker, tmp_path):
     site_yml = tmp_path / "_basic_analyses_test.yml"
     site_yml.write_text((FIXTURES / "sites" / "_basic_analyses_test.yml").read_text())
