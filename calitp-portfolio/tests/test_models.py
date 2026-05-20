@@ -136,3 +136,9 @@ def test_load_site_explicit_arg_overrides_yml_output_dir(tmp_path):
 
     site = load_site(yml, output_dir=tmp_path / "from-arg")
     assert site.output_dir == tmp_path / "from-arg"
+
+
+def test_site_base_url_derived_from_deploy_staging():
+    """Site.base_url returns `/<prefix>` from the path component of `deploy.staging`."""
+    site = _load_site("_readme_only_analyses_test.yml")
+    assert site.base_url == "/_readme_only_analyses_test"

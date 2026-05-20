@@ -13,7 +13,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 def _stub_jupyter_book_build(mocker):
     """Patch the build's subprocess tee runner so we don't actually shell out to `jupyter book build`."""
 
-    def fake_run(cmd, cwd, log_file, terminal):
+    def fake_run(cmd, cwd, log_file, terminal, env=None):
         html_dir = Path(cwd) / "_build" / "html"
         html_dir.mkdir(parents=True, exist_ok=True)
         (html_dir / "index.html").write_text("<html><title>built</title></html>")
@@ -161,6 +161,22 @@ def test_build_works_for_readme_only_site(tmp_path, mocker):
     assert (output_dir / "myst.yml").exists()
     assert (output_dir / "README.md").exists()
     assert (output_dir / "build.json").exists()
+
+
+def test_build_passes_base_url_env_derived_from_deploy_staging(tmp_path, mocker):
+    """BASE_URL env var on the build subprocess derives from `site.deploy.staging`'s path.
+
+    Without it, the deployed staging site shows myst's "Site not loading correctly"
+    warning because the build emitted absolute asset paths but the site is served
+    under a `/<prefix>/` path."""
+    yml = FIXTURES / "sites" / "_readme_only_analyses_test.yml"
+    output_dir = tmp_path / "build"
+    fake_run = _stub_jupyter_book_build(mocker)
+
+    runner.invoke(app, ["build", str(yml), "--output-dir", str(output_dir), "--no-execute"])
+
+    env = fake_run.call_args.kwargs["env"]
+    assert env["BASE_URL"] == "/_readme_only_analyses_test"
 
 
 def test_build_cli_output_dir_overrides_yml_output_dir(tmp_path, mocker):

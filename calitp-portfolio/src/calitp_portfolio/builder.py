@@ -1,6 +1,7 @@
 import hashlib
 import importlib.metadata
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -79,7 +80,7 @@ class _Tee:
         return bool(self._streams) and self._streams[0].isatty()
 
 
-def _run_subprocess_tee(cmd, cwd, log_file, terminal) -> None:
+def _run_subprocess_tee(cmd, cwd, log_file, terminal, env=None) -> None:
     """Run a subprocess, streaming its combined stdout+stderr to terminal and log_file line-by-line."""
     proc = subprocess.Popen(
         cmd,
@@ -88,6 +89,7 @@ def _run_subprocess_tee(cmd, cwd, log_file, terminal) -> None:
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
+        env=env,
     )
     for line in proc.stdout:
         terminal.write(line)
@@ -178,11 +180,18 @@ def build_site(
                                 )
                             )
 
+                # Set BASE_URL so myst emits asset paths that work under
+                # `/<prefix>/` (the URL the site will be served at).
+                env = os.environ.copy()
+                if site.base_url:
+                    env["BASE_URL"] = site.base_url
+
                 _run_subprocess_tee(
                     ["jupyter", "book", "build", "--html", "--ci"],
                     cwd=output_dir,
                     log_file=log_file,
                     terminal=terminal_stdout,
+                    env=env,
                 )
 
                 _write_manifest(site, yml_path, output_dir, errors_count=len(errors))

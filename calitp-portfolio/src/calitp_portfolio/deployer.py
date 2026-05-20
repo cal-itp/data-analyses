@@ -1,16 +1,8 @@
 from pathlib import Path
-from typing import Tuple
-from urllib.parse import urlparse
 
 from google.cloud import storage
 
-
-def parse_gs_url(url: str) -> Tuple[str, str]:
-    """Split `gs://bucket/path/to/thing` into ('bucket', 'path/to/thing')."""
-    parsed = urlparse(url)
-    if parsed.scheme != "gs" or not parsed.netloc:
-        raise ValueError(f"expected gs://bucket/... URL, got {url!r}")
-    return parsed.netloc, parsed.path.lstrip("/").rstrip("/")
+from calitp_portfolio.models import parse_gs_url
 
 
 def upload_file(target_url: str, local_file: Path) -> None:
