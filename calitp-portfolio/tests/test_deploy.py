@@ -1,4 +1,5 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 from typer.testing import CliRunner
@@ -11,12 +12,28 @@ runner = CliRunner()
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
-def _mock_storage(mocker):
-    """Patch google.cloud.storage.Client where deployer references it. Returns the bucket mock."""
+def _mock_storage(mocker, existing_blobs=()):
+    """Patch google.cloud.storage.Client where deployer references it.
+
+    `existing_blobs` seeds bucket.list_blobs(...) so tests can simulate prior deploys.
+    Per-name blob mocks are cached on `bucket._blobs` so tests can assert per-blob
+    upload/delete calls (e.g. `bucket._blobs["a/b.css"].delete.called`).
+    """
     client = mocker.MagicMock()
     bucket = mocker.MagicMock()
     client.bucket.return_value = bucket
-    bucket.blob.side_effect = lambda name: mocker.MagicMock(name=f"blob:{name}")
+
+    blobs: dict = {}
+
+    def _blob(name):
+        if name not in blobs:
+            blobs[name] = mocker.MagicMock(name=f"blob:{name}")
+        return blobs[name]
+
+    bucket.blob.side_effect = _blob
+    bucket._blobs = blobs
+    bucket.list_blobs.return_value = [SimpleNamespace(name=n) for n in existing_blobs]
+
     mocker.patch("calitp_portfolio.deployer.storage.Client", return_value=client)
     return client, bucket
 
@@ -117,3 +134,90 @@ def test_deploy_generic_mode_requires_both_html_and_target_url(mocker, tmp_path)
 
     result = runner.invoke(app, ["deploy", "--html", str(html_dir)])
     assert result.exit_code != 0
+
+
+def _seed_site(tmp_path: Path) -> tuple[Path, Path]:
+    site_yml = tmp_path / "_basic_analyses_test.yml"
+    site_yml.write_text((FIXTURES / "sites" / "_basic_analyses_test.yml").read_text())
+    html_dir = tmp_path / "_basic_analyses_test" / "_build" / "html"
+    html_dir.mkdir(parents=True)
+    return site_yml, html_dir
+
+
+def test_deploy_skips_upload_for_unchanged_hashed_assets(mocker, tmp_path):
+    """myst content-hashes asset filenames, so a name match in the bucket means a content
+    match. Re-uploading is wasted bandwidth; skip it."""
+    site_yml, html_dir = _seed_site(tmp_path)
+    (html_dir / "build").mkdir()
+    (html_dir / "build" / "root-HKSGTRTI.css").write_text("h1{}")
+    (html_dir / "index.html").write_text("<html></html>")
+
+    existing = [
+        "_basic_analyses_test/build/root-HKSGTRTI.css",
+        "_basic_analyses_test/index.html",
+    ]
+    mocker.patch("calitp_portfolio.cli.auth.is_valid", return_value=True)
+    _, bucket = _mock_storage(mocker, existing_blobs=existing)
+
+    result = runner.invoke(app, ["deploy", str(site_yml)])
+
+    assert result.exit_code == 0, result.stdout
+    touched_names = [call.args[0] for call in bucket.blob.call_args_list]
+    assert "_basic_analyses_test/build/root-HKSGTRTI.css" not in touched_names
+    assert "_basic_analyses_test/index.html" in touched_names  # non-hashed re-uploaded
+    assert "skipped 1 unchanged hashed assets" in result.stdout
+
+
+def test_deploy_reuploads_non_hashed_files_even_on_name_match(mocker, tmp_path):
+    """HTML / non-hashed filenames are stable across builds but their contents change.
+    Name match alone isn't enough to skip; only hashed assets get the skip."""
+    site_yml, html_dir = _seed_site(tmp_path)
+    (html_dir / "index.html").write_text("<html>new</html>")
+
+    mocker.patch("calitp_portfolio.cli.auth.is_valid", return_value=True)
+    _, bucket = _mock_storage(mocker, existing_blobs=["_basic_analyses_test/index.html"])
+
+    result = runner.invoke(app, ["deploy", str(site_yml)])
+
+    assert result.exit_code == 0, result.stdout
+    assert bucket._blobs["_basic_analyses_test/index.html"].upload_from_filename.called
+    assert "skipped" not in result.stdout
+
+
+def test_deploy_deletes_stale_blobs_not_in_local_set(mocker, tmp_path):
+    """The bucket accumulates old hashed assets across deploys; cleanup deletes anything
+    at the prefix that the current build doesn't produce."""
+    site_yml, html_dir = _seed_site(tmp_path)
+    (html_dir / "build").mkdir()
+    (html_dir / "build" / "root-NEWHASH1.css").write_text("body{}")
+    (html_dir / "index.html").write_text("<html></html>")
+
+    existing = [
+        "_basic_analyses_test/build/root-OLDHASH9.css",  # stale
+        "_basic_analyses_test/build/root-NEWHASH1.css",  # current
+        "_basic_analyses_test/index.html",
+    ]
+    mocker.patch("calitp_portfolio.cli.auth.is_valid", return_value=True)
+    _, bucket = _mock_storage(mocker, existing_blobs=existing)
+
+    result = runner.invoke(app, ["deploy", str(site_yml)])
+
+    assert result.exit_code == 0, result.stdout
+    deleted = [name for name, blob in bucket._blobs.items() if blob.delete.called]
+    assert deleted == ["_basic_analyses_test/build/root-OLDHASH9.css"]
+    assert "deleting 1 stale files" in result.stdout
+
+
+def test_deploy_lists_blobs_with_trailing_slash_to_scope_prefix(mocker, tmp_path):
+    """list_blobs(prefix='ahsc') would also match 'ahsc-2/...' — must use 'ahsc/' to
+    avoid deleting siblings of the deploy prefix."""
+    site_yml, html_dir = _seed_site(tmp_path)
+    (html_dir / "index.html").write_text("<html></html>")
+
+    mocker.patch("calitp_portfolio.cli.auth.is_valid", return_value=True)
+    _, bucket = _mock_storage(mocker)
+
+    result = runner.invoke(app, ["deploy", str(site_yml)])
+
+    assert result.exit_code == 0, result.stdout
+    bucket.list_blobs.assert_called_once_with(prefix="_basic_analyses_test/")
