@@ -1,5 +1,6 @@
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 
 import papermill as pm
 import typer
@@ -7,6 +8,14 @@ import yaml
 from papermill import PapermillExecutionError
 from pydantic import BaseModel, Field, field_serializer, field_validator
 from slugify import slugify
+
+
+def parse_gs_url(url: str) -> Tuple[str, str]:
+    """Split `gs://bucket/path/to/thing` into ('bucket', 'path/to/thing')."""
+    parsed = urlparse(url)
+    if parsed.scheme != "gs" or not parsed.netloc:
+        raise ValueError(f"expected gs://bucket/... URL, got {url!r}")
+    return parsed.netloc, parsed.path.lstrip("/").rstrip("/")
 
 
 def slugify_params(params: Dict) -> str:
@@ -257,6 +266,15 @@ class Site(BaseModel):
     @property
     def slug(self) -> str:
         return slugify(self.title)
+
+    @property
+    def base_url(self) -> str:
+        """URL prefix the site is served under, derived from `deploy.staging`.
+
+        Used as the `BASE_URL` env var on `jupyter book build` so myst emits asset
+        paths that resolve under `/<prefix>/`. Empty string for bucket-root deploys."""
+        _, prefix = parse_gs_url(self.deploy.staging)
+        return f"/{prefix}" if prefix else ""
 
     @property
     def toc_yaml(self) -> str:
