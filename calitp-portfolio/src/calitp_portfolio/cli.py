@@ -15,6 +15,7 @@ app = typer.Typer(
     name="calitp-portfolio",
     help="Build, validate, and deploy Cal-ITP portfolio sites.",
     no_args_is_help=True,
+    add_completion=False,
 )
 
 
@@ -70,6 +71,20 @@ def index(
         typer.echo(f"deployed {output_path} -> {target_url}")
 
 
+@app.command(name="list")
+def list_(
+    site_yml: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+) -> None:
+    """Print the resolved part/chapter tree with slugs, params, and notebook paths."""
+    site = load_site(site_yml)
+    for part in site.parts:
+        for chapter in part.chapters:
+            part_label = f"[{part.caption}] " if part.caption else ""
+            params = dict(chapter.resolved_params) or "{}"
+            notebook = chapter.resolved_notebook
+            typer.echo(f"{part_label}{chapter.identifier}  params={params}  notebook={notebook}")
+
+
 @app.command()
 def build(
     site_yml: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
@@ -83,10 +98,43 @@ def build(
     prepare_only: bool = typer.Option(False, help="Pass-through to papermill; if true, cells are not executed."),
     continue_on_error: bool = typer.Option(False, help="Continue building remaining chapters on papermill error."),
     hide_title_block: bool = typer.Option(False, help="If true, will hide the title block for all pages."),
+    only: Optional[str] = typer.Option(
+        None,
+        "--only",
+        help="Comma-separated chapter identifiers to build (see `calitp-portfolio list`).",
+    ),
+    limit: Optional[int] = typer.Option(None, "--limit", help="Build only the first N chapters in source order."),
+    readme_only: bool = typer.Option(False, "--readme-only", help="Build just the landing page; skip all chapters."),
+    toc_only: bool = typer.Option(
+        False, "--toc-only", help="Re-render myst.yml and run jupyter-book; skip papermill and readme copy."
+    ),
 ) -> None:
     """Build a static site from a parameterized notebook portfolio."""
-    if execute and not prepare_only:
+    if readme_only and toc_only:
+        typer.secho("error: --readme-only and --toc-only are mutually exclusive", fg=typer.colors.RED)
+        raise typer.Exit(code=2)
+    if readme_only and (only or limit is not None):
+        typer.secho("error: --readme-only cannot be combined with --only or --limit", fg=typer.colors.RED)
+        raise typer.Exit(code=2)
+    if toc_only and (only or limit is not None):
+        typer.secho("error: --toc-only cannot be combined with --only or --limit", fg=typer.colors.RED)
+        raise typer.Exit(code=2)
+
+    papermill_runs = execute and not prepare_only and not readme_only and not toc_only
+    if papermill_runs:
         _require_auth()
+
+    only_slugs = [s.strip() for s in only.split(",")] if only else None
+    if only_slugs:
+        available = {c.identifier for p in load_site(site_yml).parts for c in p.chapters}
+        unknown = [s for s in only_slugs if s not in available]
+        if unknown:
+            typer.secho(
+                f"error: --only references unknown chapter(s): {', '.join(unknown)}\n"
+                f"  Run `calitp-portfolio list {site_yml}` to see available slugs.",
+                fg=typer.colors.RED,
+            )
+            raise typer.Exit(code=1)
 
     output = output_dir or site_yml.parent
     exit_code = build_site(
@@ -97,6 +145,10 @@ def build(
         prepare_only=prepare_only,
         continue_on_error=continue_on_error,
         hide_title_block=hide_title_block,
+        only=only_slugs,
+        limit=limit,
+        readme_only=readme_only,
+        toc_only=toc_only,
     )
     if exit_code != 0:
         raise typer.Exit(code=exit_code)

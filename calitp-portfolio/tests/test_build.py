@@ -163,6 +163,141 @@ def test_build_works_for_readme_only_site(tmp_path, mocker):
     assert (output_dir / "build.json").exists()
 
 
+def test_build_only_filters_to_matching_chapter(tmp_path, mocker):
+    """`build --only <slug>` skips chapters whose identifier doesn't match."""
+    yml = FIXTURES / "sites" / "_param_analyses_test.yml"
+    output_dir = tmp_path / "build"
+    _stub_jupyter_book_build(mocker)
+    generate = mocker.patch("calitp_portfolio.models.Chapter.generate", return_value=[])
+
+    only = "00__notebook_with_params_2__greetings_hi-so-happy-to-see-you-here"
+    result = runner.invoke(
+        app,
+        ["build", str(yml), "--output-dir", str(output_dir), "--no-execute", "--only", only],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert generate.call_count == 1
+
+
+def test_build_limit_caps_chapter_count(tmp_path, mocker):
+    """`--limit 1` builds only the first chapter in source order."""
+    yml = FIXTURES / "sites" / "_param_analyses_test.yml"  # 2 chapters
+    output_dir = tmp_path / "build"
+    _stub_jupyter_book_build(mocker)
+    generate = mocker.patch("calitp_portfolio.models.Chapter.generate", return_value=[])
+
+    result = runner.invoke(
+        app,
+        ["build", str(yml), "--output-dir", str(output_dir), "--no-execute", "--limit", "1"],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert generate.call_count == 1
+
+
+def test_build_limit_spans_parts(tmp_path, mocker):
+    """`--limit N` counts across parts, not within each part."""
+    yml = FIXTURES / "sites" / "_group_and_params_analyses_test.yml"  # 4 chapters in part 1, 2 in part 2
+    output_dir = tmp_path / "build"
+    _stub_jupyter_book_build(mocker)
+    generate = mocker.patch("calitp_portfolio.models.Chapter.generate", return_value=[])
+
+    result = runner.invoke(
+        app,
+        ["build", str(yml), "--output-dir", str(output_dir), "--no-execute", "--limit", "5"],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert generate.call_count == 5
+
+
+def test_build_readme_only_skips_chapters(tmp_path, mocker):
+    """`--readme-only` copies the readme, renders a minimal TOC, never calls Chapter.generate."""
+    yml = FIXTURES / "sites" / "_param_analyses_test.yml"
+    output_dir = tmp_path / "build"
+    _stub_jupyter_book_build(mocker)
+    generate = mocker.patch("calitp_portfolio.models.Chapter.generate", return_value=[])
+
+    result = runner.invoke(
+        app,
+        ["build", str(yml), "--output-dir", str(output_dir), "--readme-only"],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    generate.assert_not_called()
+    # Readme still gets copied.
+    assert (output_dir / "README_PARAMS.md").exists()
+    # myst.yml exists but TOC has no chapter entries.
+    myst = (output_dir / "myst.yml").read_text()
+    assert "file: README_PARAMS.md" in myst
+    assert "greetings_hi" not in myst
+
+
+def test_build_toc_only_skips_papermill_and_readme_copy(tmp_path, mocker):
+    """`--toc-only` re-renders myst.yml and runs jupyter-book; no readme copy, no papermill."""
+    yml = FIXTURES / "sites" / "_param_analyses_test.yml"
+    output_dir = tmp_path / "build"
+    _stub_jupyter_book_build(mocker)
+    generate = mocker.patch("calitp_portfolio.models.Chapter.generate", return_value=[])
+
+    result = runner.invoke(
+        app,
+        ["build", str(yml), "--output-dir", str(output_dir), "--toc-only"],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    generate.assert_not_called()
+    assert not (output_dir / "README_PARAMS.md").exists()
+    # myst.yml still has the full TOC including chapters.
+    myst = (output_dir / "myst.yml").read_text()
+    assert "greetings_hi" in myst
+
+
+def test_build_readme_only_and_toc_only_are_mutually_exclusive(tmp_path):
+    yml = FIXTURES / "sites" / "_param_analyses_test.yml"
+    result = runner.invoke(
+        app,
+        ["build", str(yml), "--output-dir", str(tmp_path / "b"), "--readme-only", "--toc-only"],
+    )
+    assert result.exit_code != 0
+    assert "mutually exclusive" in result.stdout.lower()
+
+
+def test_build_readme_only_rejects_only_flag(tmp_path):
+    yml = FIXTURES / "sites" / "_param_analyses_test.yml"
+    result = runner.invoke(
+        app,
+        ["build", str(yml), "--output-dir", str(tmp_path / "b"), "--readme-only", "--only", "x"],
+    )
+    assert result.exit_code != 0
+    assert "--readme-only" in result.stdout
+
+
+def test_build_toc_only_rejects_limit_flag(tmp_path):
+    yml = FIXTURES / "sites" / "_param_analyses_test.yml"
+    result = runner.invoke(
+        app,
+        ["build", str(yml), "--output-dir", str(tmp_path / "b"), "--toc-only", "--limit", "1"],
+    )
+    assert result.exit_code != 0
+    assert "--toc-only" in result.stdout
+
+
+def test_build_only_errors_on_unknown_slug(tmp_path, mocker):
+    yml = FIXTURES / "sites" / "_param_analyses_test.yml"
+    output_dir = tmp_path / "build"
+    _stub_jupyter_book_build(mocker)
+
+    result = runner.invoke(
+        app,
+        ["build", str(yml), "--output-dir", str(output_dir), "--no-execute", "--only", "nonsense-slug"],
+    )
+
+    assert result.exit_code != 0
+    assert "nonsense-slug" in result.stdout
+
+
 def test_build_exits_nonzero_when_papermill_errors(tmp_path, mocker):
     """continue_on_error collects errors; build should exit nonzero if any happened."""
     yml = FIXTURES / "sites" / "_basic_analyses_test.yml"

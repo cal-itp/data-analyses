@@ -8,6 +8,7 @@ import traceback
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import List, Optional
 
 import typer
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -98,6 +99,29 @@ def _run_subprocess_tee(cmd, cwd, log_file, terminal) -> None:
         raise subprocess.CalledProcessError(proc.returncode, cmd)
 
 
+def _filter_chapters_by_only(site, only: List[str]) -> None:
+    """Mutate site.parts in place to retain only chapters whose identifier matches `only`.
+    Raises ValueError listing any requested slugs that don't appear in the site."""
+    available = {chapter.identifier for part in site.parts for chapter in part.chapters}
+    unknown = [s for s in only if s not in available]
+    if unknown:
+        raise ValueError(f"--only references unknown chapter(s): {', '.join(unknown)}")
+    selected = set(only)
+    for part in site.parts:
+        part.chapters = [c for c in part.chapters if c.identifier in selected]
+
+
+def _limit_chapters(site, n: int) -> None:
+    """Mutate site.parts in place to retain at most `n` chapters total, in source order."""
+    remaining = n
+    for part in site.parts:
+        if remaining <= 0:
+            part.chapters = []
+        else:
+            part.chapters = part.chapters[:remaining]
+            remaining -= len(part.chapters)
+
+
 def build_site(
     yml_path: Path,
     output_dir: Path,
@@ -106,6 +130,10 @@ def build_site(
     prepare_only: bool,
     continue_on_error: bool,
     hide_title_block: bool,
+    only: Optional[List[str]] = None,
+    limit: Optional[int] = None,
+    readme_only: bool = False,
+    toc_only: bool = False,
 ) -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     log_path = output_dir / "build.log"
@@ -119,8 +147,17 @@ def build_site(
             try:
                 site = load_site(yml_path, output_dir)
 
-                typer.echo(f"copying {site.readme.name} from {site.directory} to {output_dir}")
-                shutil.copy(site.readme, output_dir / site.readme.name)
+                if only:
+                    _filter_chapters_by_only(site, only)
+                if limit is not None:
+                    _limit_chapters(site, limit)
+                if readme_only:
+                    # Drop all chapters so the rendered TOC contains only the readme entry.
+                    site.parts = []
+
+                if not toc_only:
+                    typer.echo(f"copying {site.readme.name} from {site.directory} to {output_dir}")
+                    shutil.copy(site.readme, output_dir / site.readme.name)
 
                 myst_path = output_dir / "myst.yml"
                 typer.secho(f"writing config and toc to {myst_path}", fg=typer.colors.GREEN)
@@ -129,16 +166,17 @@ def build_site(
                 _bundle_template_assets(output_dir)
 
                 errors = []
-                for part in site.parts:
-                    for chapter in part.chapters:
-                        errors.extend(
-                            chapter.generate(
-                                execute_papermill=execute_papermill,
-                                continue_on_error=continue_on_error,
-                                prepare_only=prepare_only,
-                                no_stderr=no_stderr,
+                if not (readme_only or toc_only):
+                    for part in site.parts:
+                        for chapter in part.chapters:
+                            errors.extend(
+                                chapter.generate(
+                                    execute_papermill=execute_papermill,
+                                    continue_on_error=continue_on_error,
+                                    prepare_only=prepare_only,
+                                    no_stderr=no_stderr,
+                                )
                             )
-                        )
 
                 _run_subprocess_tee(
                     ["jupyter", "book", "build", "--html", "--ci"],

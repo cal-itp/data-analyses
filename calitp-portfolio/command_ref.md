@@ -15,6 +15,25 @@ ls /tmp/build-sections/   # day_or_night_01-day.md, day_or_night_02-night.md
 ### --hide-title-block diff
 uv run calitp-portfolio build tests/fixtures/sites/_param_manual_title_analyses_test.yml --output-dir /tmp/build-on --no-execute --hide-title-block
 
+### Build only selected chapters
+uv run calitp-portfolio list tests/fixtures/sites/_group_and_params_analyses_test.yml   # grep for the slugs you want
+
+uv run calitp-portfolio build tests/fixtures/sites/_group_and_params_analyses_test.yml \
+  --output-dir /tmp/build-subset --no-execute \
+  --only 00__notebook_with_params_2__greetings_humboldt-transit-authority,00__notebook_with_params_2__greetings_tehama-county
+
+### Limit chapter count (quick smoke build)
+uv run calitp-portfolio build tests/fixtures/sites/_group_and_params_analyses_test.yml \
+  --output-dir /tmp/build-first3 --no-execute --limit 3
+
+### Readme-only (landing page preview)
+uv run calitp-portfolio build tests/fixtures/sites/_param_analyses_test.yml \
+  --output-dir /tmp/build-readme --readme-only
+
+### TOC-only (re-render structure after a yml edit, reuse prior notebook outputs)
+uv run calitp-portfolio build tests/fixtures/sites/_param_analyses_test.yml \
+  --output-dir /tmp/build-toc --toc-only
+
 ---
 
 ## Library API (prepare-script use)
