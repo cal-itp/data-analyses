@@ -4,6 +4,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from calitp_portfolio.cli import app
+from calitp_portfolio.models import GOOGLE_ANALYTICS_TAG_ID
 
 runner = CliRunner()
 
@@ -68,6 +69,17 @@ def test_build_myst_yml_includes_toc_and_title(tmp_path, mocker):
     myst = (output_dir / "myst.yml").read_text()
     assert "title: Basic Analyses Test" in myst
     assert "file: README.md" in myst  # toc entry for the readme
+
+
+def test_build_myst_yml_includes_google_analytics_tag(tmp_path, mocker):
+    """Rendered myst.yml carries the GA tag so deployed sites keep tracking."""
+    yml = FIXTURES / "sites" / "_basic_analyses_test.yml"
+    output_dir = tmp_path / "build"
+    _stub_jupyter_book_build(mocker)
+
+    runner.invoke(app, ["build", str(yml), "--output-dir", str(output_dir), "--no-execute"])
+
+    assert f"analytics_google: '{GOOGLE_ANALYTICS_TAG_ID}'" in (output_dir / "myst.yml").read_text()
 
 
 def test_build_hide_title_block_renders_in_myst_yml(tmp_path, mocker):

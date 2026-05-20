@@ -9,6 +9,8 @@ from papermill import PapermillExecutionError
 from pydantic import BaseModel, Field, field_serializer, field_validator
 from slugify import slugify
 
+GOOGLE_ANALYTICS_TAG_ID = "G-JCX3Z8JZJC"
+
 
 def parse_gs_url(url: str) -> Tuple[str, str]:
     """Split `gs://bucket/path/to/thing` into ('bucket', 'path/to/thing')."""
