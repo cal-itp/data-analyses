@@ -77,6 +77,10 @@ def list_(
 ) -> None:
     """Print the resolved part/chapter tree with slugs, params, and notebook paths."""
     site = load_site(site_yml)
+    typer.echo(site.title)
+    if not any(part.chapters for part in site.parts):
+        typer.echo("(no chapters)")
+        return
     for part in site.parts:
         for chapter in part.chapters:
             part_label = f"[{part.caption}] " if part.caption else ""
