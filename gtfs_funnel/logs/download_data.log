@@ -599,3 +599,36 @@
 2026-03-24 10:33:22.888 | INFO     | __main__:download_one_day:37 - # operators to run: 192
 2026-03-24 10:33:22.889 | INFO     | __main__:download_one_day:41 - *********** Download st data ***********
 2026-03-24 10:34:39.716 | INFO     | __main__:download_one_day:66 - execution time: 0:01:20.730665
+2026-05-20 10:19:22.237 | INFO     | __main__:download_one_day:47 - Analysis date: 2026-04-08
+2026-05-20 10:19:57.347 | INFO     | __main__:download_one_day:47 - Analysis date: 2026-04-08
+2026-05-20 10:19:58.602 | INFO     | __main__:download_one_day:54 - # operators to run: 239
+2026-05-20 10:19:58.602 | INFO     | __main__:download_one_day:58 - *********** Download trips data ***********
+2026-05-20 10:21:24.604 | INFO     | __main__:download_one_day:96 - execution time: 0:01:27.256658
+2026-05-20 10:21:27.365 | INFO     | __main__:download_one_day:23 - Analysis date: 2026-04-08
+2026-05-20 10:21:28.363 | INFO     | __main__:download_one_day:30 - # operators to run: 239
+2026-05-20 10:21:28.363 | INFO     | __main__:download_one_day:34 - *********** Download stops data ***********
+2026-05-20 10:21:54.095 | INFO     | __main__:download_one_day:69 - execution time: 0:00:26.729721
+2026-05-20 10:21:56.486 | INFO     | __main__:download_one_day:22 - Analysis date: 2026-04-08
+2026-05-20 10:21:57.535 | INFO     | __main__:download_one_day:29 - # operators to run: 239
+2026-05-20 10:21:57.536 | INFO     | __main__:download_one_day:33 - *********** Download routelines data ***********
+2026-05-20 10:24:42.593 | INFO     | __main__:download_one_day:63 - execution time: 0:02:46.106472
+2026-05-20 10:24:44.946 | INFO     | __main__:download_one_day:28 - Analysis date: 2026-04-08
+2026-05-20 10:24:48.524 | INFO     | __main__:download_one_day:37 - # operators to run: 196
+2026-05-20 10:24:48.524 | INFO     | __main__:download_one_day:41 - *********** Download st data ***********
+2026-05-20 10:34:00.334 | INFO     | __main__:download_one_day:66 - execution time: 0:09:15.387419
+2026-05-20 11:40:56.592 | INFO     | __main__:download_one_day:47 - Analysis date: 2026-03-11
+2026-05-20 11:40:57.869 | INFO     | __main__:download_one_day:54 - # operators to run: 242
+2026-05-20 11:40:57.869 | INFO     | __main__:download_one_day:58 - *********** Download trips data ***********
+2026-05-20 11:42:33.010 | INFO     | __main__:download_one_day:96 - execution time: 0:01:36.417540
+2026-05-20 11:42:35.473 | INFO     | __main__:download_one_day:23 - Analysis date: 2026-03-11
+2026-05-20 11:42:36.540 | INFO     | __main__:download_one_day:30 - # operators to run: 242
+2026-05-20 11:42:36.541 | INFO     | __main__:download_one_day:34 - *********** Download stops data ***********
+2026-05-20 11:43:03.752 | INFO     | __main__:download_one_day:69 - execution time: 0:00:28.279029
+2026-05-20 11:43:06.026 | INFO     | __main__:download_one_day:22 - Analysis date: 2026-03-11
+2026-05-20 11:43:07.028 | INFO     | __main__:download_one_day:29 - # operators to run: 242
+2026-05-20 11:43:07.028 | INFO     | __main__:download_one_day:33 - *********** Download routelines data ***********
+2026-05-20 11:46:01.910 | INFO     | __main__:download_one_day:63 - execution time: 0:02:55.884069
+2026-05-20 11:46:04.382 | INFO     | __main__:download_one_day:28 - Analysis date: 2026-03-11
+2026-05-20 11:46:07.717 | INFO     | __main__:download_one_day:37 - # operators to run: 201
+2026-05-20 11:46:07.717 | INFO     | __main__:download_one_day:41 - *********** Download st data ***********
+2026-05-20 11:56:05.964 | INFO     | __main__:download_one_day:66 - execution time: 0:10:01.581428
