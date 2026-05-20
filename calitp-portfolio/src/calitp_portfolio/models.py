@@ -52,6 +52,15 @@ class Chapter(BaseModel):
         return slugify_params(self.resolved_params)
 
     @property
+    def identifier(self) -> str:
+        """Unique CLI handle for `list` output and `build --only` filtering.
+        Matches the parameterized notebook filename stem so the slug an analyst
+        sees in `list` is the same string they'd see in build artifacts."""
+        if self.sections:
+            return self.slug
+        return parameterize_filename(0, self.resolved_notebook, self.resolved_params).stem
+
+    @property
     def output_dir(self):
         return self.part.site.output_dir if self.part else self.site.output_dir
 
