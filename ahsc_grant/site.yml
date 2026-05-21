@@ -1,0 +1,6 @@
+title: AHSC Ridership Prediction Dashboard
+directory: ahsc_grant
+readme: ./README.md
+output_dir: site
+deploy:
+  staging: gs://calitp-analysis-staging/ahsc
