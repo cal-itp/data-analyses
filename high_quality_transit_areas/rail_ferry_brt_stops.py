@@ -70,7 +70,9 @@ muni_route_id = [
     "TBUS",
 ]
 
-muni_brt_include = gcs_pandas().read_parquet(f"{GCS_FILE_PATH}operator_input/muni_brt_stops.parquet").stop_id.tolist()
+muni_brt_include = (
+    gcs_pandas().read_parquet(f"{GCS_FILE_PATH}operator_input/2026-05-20_muni_brt_stops.parquet").stop_id.tolist()
+)
 
 """
 Eric double checked for bus shelters
@@ -137,6 +139,8 @@ metro_j_exclude = [
     "141012",
 ]
 
+vta_include = ["65857", "65856", "65859", "65858"]
+
 
 def assemble_stops(analysis_date: str) -> gpd.GeoDataFrame:
     """
@@ -198,9 +202,9 @@ def grab_rail_stops(gdf: gpd.GeoDataFrame, route_types: list = ["0", "1", "2"]) 
 
 def grab_ferry_stops(gdf: gpd.GeoDataFrame, route_types: list = ["4"]) -> gpd.GeoDataFrame:
     """
-    Grab all the ferry stops.
+    Grab all the ferry stops. Per statute, only consider those with bus or rail service also available.
     """
-    # only stops without bus or rail service
+    # these stops have no bus or rail service
     angel_and_alcatraz = ["2483552", "2483550", "43002", "AIF"]
     havasu = ["havasuLanding", "londonBridge"]  # also one of these is in AZ
     no_bus_or_rail = angel_and_alcatraz + havasu
@@ -223,10 +227,11 @@ def grab_brt_stops(gdf: gpd.GeoDataFrame, route_types: list = ["3"]) -> gpd.GeoD
     metro_name = "LA Metro Bus Schedule"
     muni_name = "Bay Area 511 Muni Schedule"
     ac_transit_name = "Bay Area 511 AC Transit Schedule"
+    vta_name = "Santa Clara Valley Transportation Authority"
     # Omni BRT -- too infrequent! "route_short_name": ["sbX"]
 
     brt_operator_stops = gdf[
-        (gdf.route_type.isin(route_types)) & (gdf.name.isin([metro_name, muni_name, ac_transit_name]))
+        (gdf.route_type.isin(route_types)) & (gdf.name.isin([metro_name, muni_name, ac_transit_name, vta_name]))
     ]
 
     muni_brt = brt_operator_stops[
@@ -246,8 +251,10 @@ def grab_brt_stops(gdf: gpd.GeoDataFrame, route_types: list = ["3"]) -> gpd.GeoD
         (brt_operator_stops.name == ac_transit_name) & (brt_operator_stops.route_id.isin(ac_transit_route_id))
     ]
 
+    vta_brt = brt_operator_stops[(brt_operator_stops.name == vta_name) & (brt_operator_stops.stop_id.isin(vta_include))]
+
     brt_stops = (
-        pd.concat([muni_brt, metro_brt, ac_transit_brt], axis=0)
+        pd.concat([muni_brt, metro_brt, ac_transit_brt, vta_brt], axis=0)
         .reset_index(drop=True)
         .assign(hqta_type="major_stop_brt")
     )
