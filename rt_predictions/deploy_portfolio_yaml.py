@@ -17,10 +17,11 @@ import google.auth
 import pandas as pd
 import report_utils
 import typer
-from shared_utils import portfolio_utils
+from calitp_portfolio.models import load_site
+from calitp_portfolio.mutations import generate_parts_flat
 
-RT_TRIP_UPDATES_STOP_YAML = Path("../portfolio/sites/rt_stop_metrics.yml")
-RT_TRIP_UPDATES_OPERATOR_YAML = Path("../portfolio/sites/rt_operator_metrics.yml")
+RT_TRIP_UPDATES_STOP_YAML = Path(__file__).parent / "rt_stop_metrics.yml"
+RT_TRIP_UPDATES_OPERATOR_YAML = Path(__file__).parent / "rt_operator_metrics.yml"
 
 credentials, project = google.auth.default()
 fs = gcsfs.GCSFileSystem()
@@ -129,17 +130,17 @@ def overwrite_yaml(name: str = typer.Argument(default="rt_msa"), month: str = ""
         print(month)
         df = check_stop_and_route_counts(month)
 
-        portfolio_utils.create_portfolio_yaml_chapters_no_sections(
-            RT_TRIP_UPDATES_STOP_YAML, chapter_name="name", chapter_values=sorted(list(df.tu_name))
-        )
+        site = load_site(RT_TRIP_UPDATES_STOP_YAML)
+        site = generate_parts_flat(site, param_key="name", values=sorted(list(df.tu_name)))
+        site.write_yaml(RT_TRIP_UPDATES_STOP_YAML)
 
     elif name == "rt_msa_operators":
         print(month)
         df = check_route_counts(month)
 
-        portfolio_utils.create_portfolio_yaml_chapters_no_sections(
-            RT_TRIP_UPDATES_OPERATOR_YAML, chapter_name="name", chapter_values=sorted(list(df.tu_name))
-        )
+        site = load_site(RT_TRIP_UPDATES_OPERATOR_YAML)
+        site = generate_parts_flat(site, param_key="name", values=sorted(list(df.tu_name)))
+        site.write_yaml(RT_TRIP_UPDATES_OPERATOR_YAML)
 
     return
 

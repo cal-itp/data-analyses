@@ -1,0 +1,4 @@
+# calitp-portfolio build outputs (one dir per site yml stem)
+rt_operator_metrics/
+rt_stop_metrics/
+detour_stops/
