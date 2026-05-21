@@ -1,0 +1,55 @@
+﻿stop_name,direction,change_type
+Burbank & Clybourn,eastbound,no_change
+Burbank & Clybourn,westbound,no_change
+Burbank & Pass/Maple,eastbound,no_change
+Burbank & Pass/Maple,westbound,no_change
+Burbank & Hollywood,eastbound,relocating
+Burbank & Hollywood,westbound,no_change
+Hollywood & Jeffries,eastbound,adding_existing
+Hollywood & Jeffries,westbound,no_change
+Hollywood & Victory Bl,eastbound,adding_existing
+Hollywood & Victory Bl,westbound,no_change
+Hollywood & Pacific,eastbound,adding_existing
+Hollywood & Pacific,westbound,no_change
+Hollywood & Valhalla,eastbound,adding_existing
+Hollywood & Valhalla,westbound,no_change
+Hollywood & Thorton,eastbound,adding_existing
+Hollywood & Thorton,westbound,adding_existing
+New BUR terminal,eastbound,new_stop
+New BUR terminal,westbound,new_stop
+Winona / Ontario,eastbound,new_stop
+Winona / Ontario,westbound,new_stop
+Ontario & Thorton,eastbound,replacing
+Ontario & Thorton,westbound,replacing
+Empire & Ontario,eastbound,adding_existing
+Empire & Ontario,westbound,no_change
+Empire & Buena Vista,eastbound,adding_existing
+Empire & Buena Vista,westbound,no_change
+Empire & Valpreda,eastbound,adding_existing
+Empire & Valpreda,westbound,adding_existing
+Empire & Grismer,eastbound,adding_existing
+Empire & Grismer,westbound,adding_existing
+Amherst Dr / San Fernando,eastbound,new_stop
+Amherst Dr / San Fernando,westbound,new_stop
+Glenoaks & Bethany,eastbound,adding_existing
+Glenoaks & Bethany,westbound,adding_existing
+Glenoaks & Fairmount,eastbound,adding_existing
+Glenoaks & Fairmount,westbound,adding_existing
+Glenoaks & Cypress,eastbound,adding_existing
+Glenoaks & Cypress,westbound,adding_existing
+Glenoaks & Magnolia,eastbound,adding_existing
+Glenoaks & Magnolia,westbound,adding_existing
+Glenoaks & Olive,eastbound,new_stop
+Glenoaks & Olive,westbound,new_stop
+Glenoaks & Verdugo,eastbound,adding_existing
+Glenoaks & Verdugo,westbound,new_stop
+Glenoaks & Providencia,eastbound,adding_existing
+Glenoaks & Providencia,westbound,adding_existing
+Glenoaks / Alameda,eastbound,adding_existing
+Glenoaks / Alameda,westbound,adding_existing
+Alameda & San Fernando,eastbound,adding_existing
+Alameda & San Fernando,westbound,adding_existing
+Flower & Alameda,eastbound,adding_existing
+Flower & Alameda,westbound,adding_existing
+Metrolink Station (Olive overpass loop),eastbound,no_change
+Metrolink Station (Olive overpass loop),westbound,no_change
