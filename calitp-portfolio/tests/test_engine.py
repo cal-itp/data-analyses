@@ -114,3 +114,24 @@ def test_resolver_fires_when_params_match():
 
     assert district_name(district=3) == "Three"
     assert district_name(district=12) == "12"  # humanize.apnumber returns digits for >10
+
+
+def test_capture_parameters_cell_with_no_outputs_does_not_crash(mocker):
+    """%%capture_parameters cell errors, dont crash."""
+    nb_man = _load_nb_man("notebook_with_params_1.ipynb")
+    nb_man.nb.cells[2].outputs = []  # capture_parameters cell ended up with no outputs
+
+    _run_engine(nb_man, params={"greetings": "Original"}, mocker=mocker)
+
+    # Original param value is preserved; markdown cell 3 ("# {greetings}") uses it
+    assert nb_man.nb.cells[3].source == "# Original"
+
+
+def test_capture_parameters_cell_with_malformed_output_does_not_crash(mocker):
+    """%%capture_parameters cell doesn't contain parseable JSON."""
+    nb_man = _load_nb_man("notebook_with_params_1.ipynb")
+    nb_man.nb.cells[2].outputs = [{"output_type": "stream", "name": "stdout", "text": "not valid json"}]
+
+    _run_engine(nb_man, params={"greetings": "Original"}, mocker=mocker)
+
+    assert nb_man.nb.cells[3].source == "# Original"

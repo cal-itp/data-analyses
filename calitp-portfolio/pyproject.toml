@@ -15,6 +15,8 @@ dependencies = [
     "humanize>=4.6",
     "jupyter-book==2.1.1",
     "google-cloud-storage>=2.10",
+    "ipython>=8.0",
+    "rich>=13.0",
 ]
 
 [project.scripts]

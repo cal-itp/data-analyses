@@ -3,6 +3,8 @@ import json
 import humanize
 from papermill.engines import NBClientEngine, papermill_engines
 
+from calitp_portfolio import magics  # noqa: F401 -- exposes %%capture_parameters for notebook-side imports
+
 
 def district_name(district, **_):
     return humanize.apnumber(district).title()
@@ -43,9 +45,12 @@ class EngineWithParameterizedMarkdown(NBClientEngine):
             if cell.cell_type == "code":
                 cell.metadata.tags.append("remove-input")
 
-                # Consider importing this name from calitp.magics
                 if "%%capture_parameters" in cell.source:
-                    params = {**params, **json.loads(cell.outputs[0]["text"])}
+                    # Cell may have no outputs (capture errored, magic not registered, last expr was None);
+                    try:
+                        params = {**params, **json.loads(cell.outputs[0]["text"])}
+                    except (IndexError, KeyError, json.JSONDecodeError, TypeError):
+                        pass
 
                 if "%%capture" in cell.source:
                     cell.outputs = []
