@@ -1,0 +1,8 @@
+title: SB125 Fund Split Analysis
+directory: sb125_analyses/sb125_fund_split_analysis
+readme: ./README.md
+parts:
+  - chapters:
+      - notebook: ./sb125_fund_split_analysis.ipynb
+deploy:
+  staging: gs://calitp-analysis-staging/sb125-fund-split-analysis
