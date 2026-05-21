@@ -12,7 +12,8 @@ from functools import cache
 from pathlib import Path
 
 from calitp_data_analysis.gcs_pandas import GCSPandas
-from shared_utils import portfolio_utils
+from calitp_portfolio.models import load_site
+from calitp_portfolio.mutations import generate_parts_flat
 from update_vars import GCS_FILE_PATH, MONTH, YEAR
 
 sys.path.append(os.path.abspath("../"))
@@ -24,7 +25,7 @@ def gcs_pandas():
     return GCSPandas()
 
 
-PORTFOLIO_SITE_YAML = Path("../../portfolio/sites/ntd_monthly_ridership.yml")
+PORTFOLIO_SITE_YAML = Path(__file__).parent / "ntd_monthly_ridership.yml"
 
 if __name__ == "__main__":
 
@@ -36,6 +37,6 @@ if __name__ == "__main__":
         .to_frame()
     )
 
-    portfolio_utils.create_portfolio_yaml_chapters_no_sections(
-        PORTFOLIO_SITE_YAML, chapter_name="rtpa", chapter_values=list(df.rtpa_name)
-    )
+    site = load_site(PORTFOLIO_SITE_YAML)
+    site = generate_parts_flat(site, param_key="rtpa", values=list(df.rtpa_name))
+    site.write_yaml(PORTFOLIO_SITE_YAML)
