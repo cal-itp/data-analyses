@@ -4,10 +4,12 @@ sets the parameterization for the analysis site.
 """
 
 from functools import cache
+from pathlib import Path
 
 import pandas as pd
 from calitp_data_analysis.gcs_pandas import GCSPandas
-from shared_utils import portfolio_utils
+from calitp_portfolio.models import load_site
+from calitp_portfolio.mutations import generate_parts_grouped
 from update_vars import GTFS_DATA_DICT, file_name
 
 
@@ -16,7 +18,7 @@ def gcs_pandas():
     return GCSPandas()
 
 
-SITE_YML = "../portfolio/sites/gtfs_digest.yml"
+SITE_YML = Path(__file__).parent / "gtfs_digest.yml"
 
 
 def generate_operator_grain_yaml() -> pd.DataFrame:
@@ -42,8 +44,10 @@ if __name__ == "__main__":
 
     final = generate_operator_grain_yaml()
 
-    portfolio_utils.create_portfolio_yaml_chapters_with_groups(
-        SITE_YML,
-        final,
-        param_info={"column": "analysis_name", "name": "analysis_name"},
-    )
+    groups = {
+        f"District {district}": final[final["caltrans_district"] == district]["analysis_name"].unique().tolist()
+        for district in sorted(final["caltrans_district"].unique())
+    }
+    site = load_site(SITE_YML)
+    site = generate_parts_grouped(site, param_key="analysis_name", groups=groups)
+    site.write_yaml(SITE_YML)

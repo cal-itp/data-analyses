@@ -1,0 +1,4 @@
+# calitp-portfolio build outputs (one dir per site yml stem)
+district_digest/
+legislative_district_digest/
+gtfs_digest/
