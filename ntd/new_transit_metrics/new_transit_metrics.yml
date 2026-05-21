@@ -1,0 +1,48 @@
+title: New Transit Performance Metrics
+directory: ntd/new_transit_metrics
+readme: ./README.md
+notebook: new_transit_metrics.ipynb
+parts:
+  - chapters:
+      - params:
+          rtpa: Butte County Association of Governments
+      - params:
+          rtpa: El Dorado County Transportation Commission
+      - params:
+          rtpa: Fresno Council of Governments
+      - params:
+          rtpa: Kern Council of Governments
+      - params:
+          rtpa: Kings County Association of Governments
+      - params:
+          rtpa: Madera County Transportation Commission
+      - params:
+          rtpa: Merced County Association of Governments
+      - params:
+          rtpa: Metropolitan Transportation Commission
+      - params:
+          rtpa: Placer County Transportation Planning Agency
+      - params:
+          rtpa: Sacramento Area Council of Governments
+      - params:
+          rtpa: San Diego Association of Governments
+      - params:
+          rtpa: San Joaquin Council of Governments
+      - params:
+          rtpa: San Luis Obispo Council of Governments
+      - params:
+          rtpa: Santa Barbara County Association of Governments
+      - params:
+          rtpa: Santa Cruz County Regional Transportation Commission
+      - params:
+          rtpa: Shasta Regional Transportation Agency
+      - params:
+          rtpa: Southern California Association of Governments
+      - params:
+          rtpa: Stanislaus Council of Governments
+      - params:
+          rtpa: Transportation Agency for Monterey County
+      - params:
+          rtpa: Tulare County Association of Governments
+deploy:
+  staging: gs://calitp-analysis-staging/new-transit-metrics
