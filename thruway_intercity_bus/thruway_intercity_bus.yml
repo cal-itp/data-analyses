@@ -1,0 +1,11 @@
+title: Thruway Bus Analysis
+directory: thruway_intercity_bus
+readme: ./README.md
+parts:
+  - caption: Thruway Bus Analysis
+    chapters:
+      - notebook: ./04_gtfs_link_charts.ipynb
+      - notebook: ./05_ridership_time_series.ipynb
+      - notebook: ./06_cost_time_series.ipynb
+deploy:
+  staging: gs://calitp-analysis-staging/thruway-intercity-bus
