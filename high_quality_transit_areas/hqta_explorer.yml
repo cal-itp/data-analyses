@@ -1,0 +1,11 @@
+title: HQ Transit Corridor & Major Bus Stop Explorer
+directory: high_quality_transit_areas
+readme: ./explorer/README.md
+parts:
+  - chapters:
+      - notebook: ./18_stop_frequency_collinear.ipynb
+      - notebook: ./19_spatial_pathway.ipynb
+      - notebook: ./20_branching_pathway.ipynb
+      - notebook: ./21_final_maps.ipynb
+deploy:
+  staging: gs://calitp-analysis-staging/hqta-explorer
