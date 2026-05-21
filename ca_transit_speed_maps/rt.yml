@@ -1,0 +1,6 @@
+title: California Transit Speed Maps
+directory: ca_transit_speed_maps
+readme: ./README.md
+notebook: ./01_new_speedmaps.ipynb
+deploy:
+  staging: gs://calitp-analysis-staging/rt

@@ -7,10 +7,14 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 import os
+from pathlib import Path
 
 import pandas as pd
-from shared_utils import portfolio_utils
+from calitp_portfolio.models import load_site
+from calitp_portfolio.mutations import generate_parts_grouped
 from update_vars_index import PROGRESS_PATH
+
+SITE_YML = Path(__file__).parent / "rt.yml"
 
 
 def stage_portfolio():
@@ -34,10 +38,16 @@ def deploy_portfolio():
 if __name__ == "__main__":
 
     speedmaps_index_joined = pd.read_parquet(PROGRESS_PATH).dropna().sort_values(["caltrans_district", "analysis_name"])
-    portfolio_utils.create_portfolio_yaml_chapters_with_groups(
-        portfolio_site_yaml="../portfolio/sites/rt.yml",
-        df=speedmaps_index_joined,
-        param_info={"column": "analysis_name", "name": "analysis_name"},
-    )
+    groups = {
+        f"District {district}": speedmaps_index_joined[speedmaps_index_joined["caltrans_district"] == district][
+            "analysis_name"
+        ]
+        .unique()
+        .tolist()
+        for district in sorted(speedmaps_index_joined["caltrans_district"].unique())
+    }
+    site = load_site(SITE_YML)
+    site = generate_parts_grouped(site, param_key="analysis_name", groups=groups)
+    site.write_yaml(SITE_YML)
     stage_portfolio()
     deploy_portfolio()
