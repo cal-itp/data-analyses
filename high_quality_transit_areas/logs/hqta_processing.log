@@ -477,3 +477,17 @@
 2026-03-24 21:46:14.974 | INFO     | __main__:<module>:155 - D2_assemble_hqta_polygons 2026-02-11 execution time: 0:00:12.314210
 2026-03-24 23:23:09.271 | INFO     | __main__:<module>:278 - D1_assemble_hqta_points 2026-02-11 execution time: 0:00:19.014408
 2026-03-24 23:23:33.357 | INFO     | __main__:<module>:155 - D2_assemble_hqta_polygons 2026-02-11 execution time: 0:00:12.457069
+2026-05-21 04:33:21.053 | INFO     | __main__:<module>:325 - A1_rail_ferry_brt_stops 2026-04-08
+2026-05-21 04:36:26.682 | INFO     | __main__:<module>:325 - A1_rail_ferry_brt_stops 2026-04-08
+2026-05-21 04:38:17.876 | INFO     | __main__:<module>:325 - A1_rail_ferry_brt_stops 2026-04-08
+2026-05-21 04:39:51.828 | INFO     | __main__:<module>:325 - A1_rail_ferry_brt_stops 2026-04-08
+2026-05-21 04:44:28.554 | INFO     | __main__:<module>:325 - A1_rail_ferry_brt_stops 2026-04-08
+2026-05-21 04:45:09.732 | INFO     | __main__:<module>:342 - A1_rail_ferry_brt_stops 2026-04-08 execution time: 0:00:41.178042
+2026-05-21 04:55:15.549 | INFO     | __main__:<module>:228 - B1_create_hqta_segments execution time: 0:09:54.444229
+2026-05-21 04:58:00.074 | INFO     | __main__:<module>:444 - B2_create_aggregate_stop_frequencies 2026-04-08 execution time: 0:02:09.770716
+2026-05-21 04:58:39.041 | INFO     | __main__:<module>:263 - B3_sjoin_stops_to_segments 2026-04-08 execution time: 0:00:26.875892
+2026-05-21 04:59:06.193 | INFO     | __main__:<module>:179 - C1_prep_pairwise_intersections 2026-04-08 execution time: 0:00:20.259059
+2026-05-21 05:07:42.433 | INFO     | __main__:<module>:121 - C2_find_intersections 2026-04-08 execution time: 0:00:07.298231
+2026-05-21 05:10:08.231 | INFO     | __main__:<module>:191 - C3_create_bus_hqta_types 2026-04-08 execution time: 0:00:22.346356
+2026-05-21 05:10:40.294 | INFO     | __main__:<module>:278 - D1_assemble_hqta_points 2026-04-08 execution time: 0:00:23.402265
+2026-05-21 05:11:03.801 | INFO     | __main__:<module>:155 - D2_assemble_hqta_polygons 2026-04-08 execution time: 0:00:13.470625
