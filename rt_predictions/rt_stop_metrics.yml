@@ -1,0 +1,6 @@
+title: GTFS Real-Time Stop Metrics
+directory: rt_predictions
+readme: ./README.md
+notebook: ./stop_report.ipynb
+deploy:
+  staging: gs://calitp-analysis-staging/rt-stop-metrics
