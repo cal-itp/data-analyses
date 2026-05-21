@@ -8,7 +8,7 @@ parts:
   - params:
       name: Lake Vehicle Positions
   - params:
-      name: Metrolink VehiclePositions
+      name: Metrolink Vehicle Positions
   - params:
       name: Montebello Vehicle Positions
   - params:
