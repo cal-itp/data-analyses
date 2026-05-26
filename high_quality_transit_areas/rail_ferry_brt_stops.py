@@ -227,7 +227,7 @@ def grab_brt_stops(gdf: gpd.GeoDataFrame, route_types: list = ["3"]) -> gpd.GeoD
     metro_name = "LA Metro Bus Schedule"
     muni_name = "Bay Area 511 Muni Schedule"
     ac_transit_name = "Bay Area 511 AC Transit Schedule"
-    vta_name = "Santa Clara Valley Transportation Authority"
+    vta_name = "Bay Area 511 Santa Clara Transit Schedule"
     # Omni BRT -- too infrequent! "route_short_name": ["sbX"]
 
     brt_operator_stops = gdf[
