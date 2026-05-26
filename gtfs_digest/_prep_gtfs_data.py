@@ -27,11 +27,11 @@ def prep_schedule_rt_route_direction_summary(file_name: str) -> pd.DataFrame:
         [
             "month_first_day", "analysis_name", "route_name", "direction_id",
             "frequency_all_day", "frequency_offpeak", "frequency_peak",
-            "daily_service_hours", "daily_trips_peak", "daily_trips_offpeak",
+            "daily_trips_peak", "daily_trips_offpeak",
             "daily_trips_all_day", "day_type", "route_type", "route_typology",
         ]
     ].drop_duplicates().reset_index()
-
+    # "daily_service_hours", 
     # Clean columns
     df2.route_typology = df2.route_typology.str.title()
     df2.columns = df2.columns.str.replace("_", " ").str.title()
@@ -39,8 +39,8 @@ def prep_schedule_rt_route_direction_summary(file_name: str) -> pd.DataFrame:
     df2 = df2.rename(columns={"Direction Id": "Direction", "Month First Day": "Date", "Route Name": "Route"})
 
     # Add calculated columns
-    df2["Daily Service Minutes"] = df2["Daily Service Hours"] * 60
-    df2["Average Scheduled Minutes"] = df2["Daily Service Minutes"] / df2["Daily Trips All Day"]
+    # df2["Daily Service Minutes"] = df2["Daily Service Hours"] * 60
+    # df2["Average Scheduled Minutes"] = df2["Daily Service Minutes"] / df2["Daily Trips All Day"]
     df2["Headway All Day"] = 60 / df2["Frequency All Day"]
     df2["Headway Peak"] = 60 / df2["Frequency Peak"]
     df2["Headway Offpeak"] = 60 / df2["Frequency Offpeak"]
