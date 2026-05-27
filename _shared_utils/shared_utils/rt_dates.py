@@ -92,8 +92,9 @@ DATES = {
     "dec2025": "2025-12-17",
     "jan2026": "2026-01-14",
     "feb2026": "2026-02-11",
-    "mar2026": "2026-03-11",  # pending backfill
+    "mar2026": "2026-03-11",
     "apr2026": "2026-04-08",
+    "may2026": "2026-05-13",
 }
 
 years_available = list(range(2023, datetime.datetime.now().year + 1))

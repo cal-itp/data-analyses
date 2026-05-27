@@ -73,6 +73,6 @@ if __name__ == "__main__":
     print(f"will append from these previous dates if missing: {ANALYSIS_DATE_LIST[1:]}")
     with open("../gtfs_funnel/published_operators.yml", "r") as f:
         operators = yaml.safe_load(f)
-        operators = {key.isoformat(): operators[key] for key in operators.keys()}
+        # operators = {key.isoformat(): operators[key] for key in operators.keys()}
     speedmaps_index = build_speedmaps_index(ANALYSIS_DATE_LIST, operators)
     speedmaps_index.to_parquet(PROGRESS_PATH)

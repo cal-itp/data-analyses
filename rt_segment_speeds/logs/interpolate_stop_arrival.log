@@ -88,3 +88,5 @@ interpolate arrivals for stop_segments 2024-12-11:  2024-12-11: 0:14:09.409333
 2026-05-20 17:20:16.890 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:181 - interpolate arrivals for speedmap_segments 2026-03-11:  2026-03-11: 0:03:05.591394
 2026-05-20 18:01:10.835 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:181 - interpolate arrivals for rt_stop_times 2026-04-08:  2026-04-08: 0:05:14.018014
 2026-05-20 18:11:44.064 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:181 - interpolate arrivals for speedmap_segments 2026-04-08:  2026-04-08: 0:03:06.067915
+2026-05-27 11:59:35.686 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:181 - interpolate arrivals for rt_stop_times 2026-05-13:  2026-05-13: 0:04:49.289133
+2026-05-27 12:08:28.930 | INFO     | interpolate_stop_arrival:interpolate_stop_arrivals:181 - interpolate arrivals for speedmap_segments 2026-05-13:  2026-05-13: 0:02:06.277206

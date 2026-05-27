@@ -63,3 +63,5 @@
 2026-05-20 16:54:28.316 | INFO     | __main__:<module>:188 - speedmap segments and proxy_stop_times 2026-03-11: 0:02:50.571913
 2026-05-20 17:44:21.597 | INFO     | __main__:<module>:142 - cut segments 2026-04-08: 0:08:09.836731
 2026-05-20 17:47:11.313 | INFO     | __main__:<module>:188 - speedmap segments and proxy_stop_times 2026-04-08: 0:02:36.862885
+2026-05-27 11:42:50.689 | INFO     | __main__:<module>:142 - cut segments 2026-05-13: 0:08:24.013456
+2026-05-27 11:45:34.095 | INFO     | __main__:<module>:188 - speedmap segments and proxy_stop_times 2026-05-13: 0:02:29.891226
