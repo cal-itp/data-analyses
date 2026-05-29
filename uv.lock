@@ -3244,7 +3244,7 @@ wheels = [
 
 [[package]]
 name = "shared-utils"
-version = "5.0.4"
+version = "5.0.5"
 source = { editable = "_shared_utils" }
 dependencies = [
     { name = "altair" },
