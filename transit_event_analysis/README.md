@@ -33,7 +33,7 @@ Identifies **bus and rail transit stops** near any venue and displays interactiv
 
 ## Refreshing the Stops Data
 
-The notebook reads from `df_dim_stops_latest.parquet` in the root directory.  
+The notebook reads from `df_dim_stops_latest.parquet` in the root directory.
 This file contains the latest transit stops data fetched from BigQuery.
 
 If you need to refresh the data (e.g. new agencies or stops have been added):
