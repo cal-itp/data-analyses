@@ -24,22 +24,26 @@ FIXTURES = Path(__file__).parent / "fixtures" / "built_html"
 
 
 def test_clean_dir_passes():
-    result = runner.invoke(app, ["check", "--html", str(FIXTURES / "clean")])
+    result = runner.invoke(app, ["axe-check", "--html", str(FIXTURES / "clean")])
     assert result.exit_code == 0
     assert "no violations" in result.stdout
 
 
-def test_violating_dir_fails_with_dedup_and_report(tmp_path):
-    report = tmp_path / "axe-report.json"
+def test_violating_dir_fails_with_dedup_and_report(tmp_path, monkeypatch):
+    # `--report` is a bare flag that writes axe-report.json to the cwd.
+    monkeypatch.chdir(tmp_path)
     result = runner.invoke(
         app,
-        ["check", "--html", str(FIXTURES / "violating"), "--report", str(report)],
+        ["axe-check", "--html", str(FIXTURES / "violating"), "--report"],
     )
     assert result.exit_code == 1
     assert "image-alt" in result.stdout
     assert "2 pages affected" in result.stdout  # dedup across page1.html + page2.html
 
-    saved = json.loads(report.read_text())
+    saved = json.loads((tmp_path / "axe-report.json").read_text())
     assert len(saved) == 2  # one entry per scanned file
     rule_ids = {v["id"] for page in saved for v in page.get("violations", [])}
     assert "image-alt" in rule_ids
+    # report is trimmed to actionable categories — axe's bulky `passes` (a result
+    # per element that passed each rule) is dropped to keep the file small.
+    assert all("passes" not in page for page in saved)

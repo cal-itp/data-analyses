@@ -6,6 +6,7 @@ import typer
 
 from calitp_portfolio import auth, deployer
 from calitp_portfolio.builder import build_site
+from calitp_portfolio.check import DEFAULT_REPORT_FILENAME
 from calitp_portfolio.check import run as run_check
 from calitp_portfolio.indexer import load_manifest, render_index
 from calitp_portfolio.models import load_site
@@ -249,8 +250,8 @@ _WCAG_PRESETS = {
 _ALL_IMPACTS = {"minor", "moderate", "serious", "critical"}
 
 
-@app.command()
-def check(
+@app.command(name="axe-check")
+def axe_check(
     site_yml: Optional[Path] = typer.Argument(
         None, exists=True, dir_okay=False, readable=True, help="Site yml; build dir is derived."
     ),
@@ -263,7 +264,24 @@ def check(
     ),
     no_dedupe: bool = typer.Option(False, "--no-dedupe", help="Show one entry per page instead of grouping by rule."),
     skip_axe_check: bool = typer.Option(False, "--skip-axe-check", help="Skip the axe CLI pre-flight."),
-    report: Optional[Path] = typer.Option(None, "--report", help="Write the full axe JSON report to this path."),
+    report: bool = typer.Option(
+        False, "--report", help=f"Write the full axe JSON report to {DEFAULT_REPORT_FILENAME} in the current directory."
+    ),
+    serve: Optional[bool] = typer.Option(
+        None,
+        "--serve/--no-serve",
+        help="Serve over http so client-rendered charts/maps load (default: on for <site.yml>, off for --html).",
+    ),
+    load_delay: Optional[int] = typer.Option(
+        None,
+        "--load-delay",
+        help="Milliseconds to wait after page load before auditing, so MyST/Vega/Folium render. Default 3000 when serving.",
+    ),
+    base_url: Optional[str] = typer.Option(
+        None,
+        "--base-url",
+        help="URL prefix the built site expects (e.g. 'gtfs-digest'). Derived from the deploy target in <site.yml> mode.",
+    ),
 ) -> None:
     """Run an accessibility scan against the built HTML."""
     if wcag not in _WCAG_PRESETS:
@@ -282,7 +300,10 @@ def check(
         impacts=impacts,
         dedupe=not no_dedupe,
         skip_axe_check=skip_axe_check,
-        report_path=report,
+        report_path=Path(DEFAULT_REPORT_FILENAME) if report else None,
+        serve=serve,
+        load_delay_ms=load_delay,
+        base_url=base_url,
     )
     if exit_code != 0:
         raise typer.Exit(code=exit_code)
