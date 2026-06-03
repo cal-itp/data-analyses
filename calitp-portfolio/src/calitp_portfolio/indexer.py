@@ -4,7 +4,7 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pydantic import BaseModel
 
-from calitp_portfolio.models import DeployTargets
+from calitp_portfolio.models import GOOGLE_ANALYTICS_TAG_ID, DeployTargets
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
@@ -36,5 +36,5 @@ def render_index(manifest: SitesManifest, target: str = "staging") -> str:
     return template.render(
         sites=manifest.sites,
         test_sites=test_sites,
-        google_analytics_id="",
+        google_analytics_id=GOOGLE_ANALYTICS_TAG_ID,
     )

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Cal-ITP Data Analyses Portfolio</title>
     <link rel="icon" href="https://raw.githubusercontent.com/cal-itp/data-analyses/refs/heads/main/portfolio/templates/assets/favicon.ico" type="image/x-icon">
-    <!-- Shamelessly stolen -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;family=Raleway:wght@700&amp;display=swap">
      <style type="text/css">
 
@@ -31,7 +30,7 @@
           background-color: #FFBE00;
         }
     </style>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=TAG_ID"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ google_analytics_id }}"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -42,7 +41,7 @@
 </head>
 <body class="container">
     <div class="header-container">
-        <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/refs/heads/main/portfolio/templates/assets/CT%2BDDS-Logo_FC-Black_Horizontal_Digital.png" alt="Alt text" width="274" height="72" style="margin-top: 50px;">
+        <img src="https://raw.githubusercontent.com/cal-itp/data-analyses/refs/heads/main/portfolio/templates/assets/CT%2BDDS-Logo_FC-Black_Horizontal_Digital.png" alt="Caltrans Data and Digital Services logo" width="274" height="72" style="margin-top: 50px;">
     </div>
     <header class="d-flex align-items-center pb-3 mb-5 border-bottom">
         <a href="/" class="d-flex align-items-center text-body-emphasis text-decoration-none">
@@ -67,7 +66,7 @@
         <p><p>
         {% if test_sites %}
             <h3>Test Projects</h3>
-            <p>Examples of projects to build sites. Source code can be found <a href="https://github.com/cal-itp/data-analyses/tree/mov/1956-fix-build-portfolio/tests/fixtures/portfolio/">on GitHub.</a></p>
+            <p>Examples of projects to build sites. Source code can be found <a href="https://github.com/cal-itp/data-analyses/tree/main/calitp-portfolio/tests/fixtures/portfolio/">on GitHub.</a></p>
             {% for test_site in test_sites -%}
             <p><a href="/{{ test_site.name }}/">{{ test_site.title }}</a></p>
             {% endfor %}
@@ -87,5 +86,5 @@
           <p><p>
     </main>
 
-    <footer class="pt-5 my-5 text-body-secondary border-top"><img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/templates/assets/Calitp_logo_MAIN.png" alt="Alt text" width="160" height="80"><br>Caltrans®, the California Department of Transportation® and the Caltrans logo are registered service marks of the California Department of Transportation and may not be copied, distributed, displayed, reproduced or transmitted in any form without prior written permission from the California Department of Transportation.
+    <footer class="pt-5 my-5 text-body-secondary border-top"><img src="https://raw.githubusercontent.com/cal-itp/data-analyses/main/portfolio/templates/assets/Calitp_logo_MAIN.png" alt="Cal-ITP logo" width="160" height="80"><br>Caltrans®, the California Department of Transportation® and the Caltrans logo are registered service marks of the California Department of Transportation and may not be copied, distributed, displayed, reproduced or transmitted in any form without prior written permission from the California Department of Transportation.
     </footer>

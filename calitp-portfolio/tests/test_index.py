@@ -35,6 +35,17 @@ def test_index_renders_index(tmp_path):
     assert html.index("GTFS Digest") < html.index("RT Speeds") < html.index("AHSC")
 
 
+def test_index_renders_google_analytics_tag(tmp_path):
+    sites_yml = FIXTURES / "sites" / "sites.yml"
+    output = tmp_path / "index.html"
+
+    result = runner.invoke(app, ["index", str(sites_yml), "--output", str(output)])
+
+    assert result.exit_code == 0, result.stdout
+    html = output.read_text()
+    assert "gtag('config', 'G-JCX3Z8JZJC')" in html
+
+
 def test_index_prod_target_excludes_test_sites(tmp_path):
     sites_yml = FIXTURES / "sites" / "sites.yml"
     output = tmp_path / "index.html"
