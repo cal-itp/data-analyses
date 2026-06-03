@@ -32,31 +32,6 @@ A chapter's **identifier** (e.g. `00__notebook_with_params_2__greetings_humboldt
 is the stable handle used by `list` output and `build --only` — it matches the
 parameterized notebook's filename stem.
 
-### Example `site.yml`
-
-```yaml
-title: Group and Params Analyses Test
-directory: tests/fixtures/portfolio
-readme: ./tests/fixtures/portfolio/README_GP.md
-notebook: tests/fixtures/portfolio/notebook_with_params_2.ipynb
-parts:
-  - caption: District 01 Eureka
-    chapters:
-      - params:
-          greetings: Humboldt Transit Authority
-      - params:
-          greetings: Lake Transit Authority
-  - caption: District 02 Redding
-    chapters:
-      - params:
-          greetings: Tehama County
-deploy:
-  staging: gs://calitp-analysis-staging/_group_and_params_analyses_test
-  # prod:  gs://calitp-analysis/group_and_params   # add when ready to release
-```
-
-This produces one page per `greetings` value, grouped under two TOC sections.
-
 ## Installation
 
 `calitp-portfolio` is a [uv workspace](../../README.md) member of `data-analyses`.
@@ -112,6 +87,31 @@ uv run calitp-portfolio build sites/gtfs_digest.yml
 uv run calitp-portfolio build sites/gtfs_digest.yml --output-dir /tmp/out --no-execute
 ```
 
+A `site.yml` looks like:
+
+```yaml
+title: Group and Params Analyses Test
+directory: tests/fixtures/portfolio
+readme: ./tests/fixtures/portfolio/README_GP.md
+notebook: tests/fixtures/portfolio/notebook_with_params_2.ipynb
+parts:
+  - caption: District 01 Eureka
+    chapters:
+      - params:
+          greetings: Humboldt Transit Authority
+      - params:
+          greetings: Lake Transit Authority
+  - caption: District 02 Redding
+    chapters:
+      - params:
+          greetings: Tehama County
+deploy:
+  staging: gs://calitp-analysis-staging/_group_and_params_analyses_test
+  # prod:  gs://calitp-analysis/group_and_params   # add when ready to release
+```
+
+This produces one page per `greetings` value, grouped under two TOC sections.
+
 Artifacts land in `--output-dir` (default `<yml dir>/<yml stem>/`): parameterized
 notebooks per chapter, a generated `myst.yml` (config + TOC), bundled template
 assets, the built site under `_build/html/`, plus a `build.log` and a
@@ -149,8 +149,48 @@ uv run calitp-portfolio index sites.yml --output /tmp/index.html
 uv run calitp-portfolio index sites.yml --deploy --target prod
 ```
 
-Test sites (`test_sites:` in the manifest) are linked only on the `staging`
-target.
+Where each `site.yml` describes one portfolio site, the single `sites.yml`
+manifest describes the **landing page** that links them all together
+(`SitesManifest` in `indexer.py`):
+
+```yaml
+deploy:
+  staging: gs://calitp-analysis-staging/index.html
+  # prod:  gs://calitp-analysis/index.html   # add when ready to release
+
+sites:
+  - title: GTFS Digest          # link text on the landing page
+    name: gtfs_digest           # URL path segment: rendered as a link to /gtfs_digest/
+    source: ./gtfs_digest/      # where the site's source lives (repo path or URL)
+  - title: RT Speeds
+    name: rt
+    source: https://github.com/cal-itp/data-analyses/tree/main/ca_transit_speed_maps/
+
+test_sites:                     # linked only on the staging build
+  - title: Group Analyses Test
+    name: _group_analyses_test
+    source: ./tests/fixtures/portfolio/
+```
+
+| Field | Role |
+|-------|------|
+| `deploy` | Same shape as a site's deploy block (`staging` required, `prod` optional) — but here each URL is the full blob path of the index page itself (`gs://…/index.html`), since `index --deploy` uploads a single file rather than syncing a directory. |
+| `sites` / `test_sites` | Lists of site entries. `test_sites` render under a separate "Test Projects" heading, and only when the target is `staging` — a prod index never links test sites. |
+| `title` | The link text shown on the landing page. |
+| `name` | The URL path the link points to: `/<name>/`, relative to the bucket's domain root. It must match the final path segment of that site's own `deploy:` target — e.g. a site deployed to `gs://calitp-analysis-staging/gtfs_digest` is linked as `name: gtfs_digest`. |
+| `source` | A pointer (repo-relative path or URL) to the site's source, kept as provenance in the manifest; not currently rendered on the page. |
+
+`index` then works in two steps:
+
+1. **Render** — `load_manifest` parses and pydantic-validates the manifest, and
+   `render_index` feeds it through the bundled Jinja2 template
+   (`templates/index.html`): the Caltrans/DDS-branded landing page with one link
+   per site, plus the static Reports and Open Data Portal sections. The result is
+   written to `--output`, defaulting to `index.html` next to the manifest.
+2. **Deploy (optional)** — with `--deploy`, the `deploy.<target>` URL is
+   resolved (`--target prod` errors if `prod:` is unset, same guard as site
+   deploys), the auth pre-flight runs, and the rendered file is uploaded to
+   that exact blob path.
 
 ### `deploy`
 
@@ -222,29 +262,12 @@ everything down to `minor`.
 ## Library API
 
 For prepare-scripts that generate a `site.yml` programmatically (the replacements
-for `_shared_utils.portfolio_utils.create_portfolio_yaml_chapters_*`), load a
-`Site`, mutate its parts, and re-dump. See [`command_ref.md`](command_ref.md) for
-worked examples reproducing each fixture.
-
-```python
-from pathlib import Path
-from calitp_portfolio.models import load_site
-from calitp_portfolio.mutations import generate_parts_flat
-
-site = load_site(Path("sites/gtfs_digest.yml"))
-site = generate_parts_flat(
-    site,
-    param_key="greetings",
-    values=["Humboldt Transit Authority", "Tehama County"],
-)
-site.write_yaml(Path("sites/gtfs_digest.yml"))
-```
-
-Three generators cover the common shapes:
-
-- `generate_parts_flat` — one part, N chapters varying a single param.
-- `generate_parts_grouped` — N captioned parts, each with M chapters.
-- `generate_parts_sections` — one part, N chapters each with sub-sections.
+for `_shared_utils.portfolio_utils.create_portfolio_yaml_chapters_*`): load a
+`Site` with `load_site`, regenerate its `parts:` with one of the three
+`mutations` generators (`generate_parts_flat`, `generate_parts_grouped`,
+`generate_parts_sections`), and write it back with `Site.write_yaml`. See
+[`library_api.md`](library_api.md) for detailed documentation and worked
+examples reproducing each fixture.
 
 ## Authoring notebooks
 
