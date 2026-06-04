@@ -51,25 +51,12 @@ using the following explanatory variables:
 | Variable | Meaning |
 |---|---|
 | `n_routes` | Number of transit routes serving the stop |
-| `log_arrivals` | Log-transformed number of vehicle arrivals |
+| `n_arrivals` | Number of vehicle arrivals |
 | `land_use_index` | Composite index based on population, jobs and non-work destinations |
-| `log_workers_with_no_car_adj` | Log-transformed workers without access to a car |
-| `log_total_youth_adj` | Log-transformed youth population |
-| `log_inc_total_lowincome_adj` | Log-transformed low-income population |
-| `log_disabled_pop_adj` | Log-transformed disabled population |
+| `workers_with_no_car_adj` | Number of workers without access to a car |
+| `poverty_pop_adj` | Low-income population |
+| `disabled_pop_adj` | Disabled population |
 
 ---
-
-## Why Were Log Transformations Used?
-
-Several variables were transformed using the logarithm function:
-This was done because:
-
-- socioeconomic variables can vary greatly across stops,
-- log transformation reduces the impact of extremely large values,
-- it helps stabilize the model,
-- relationships become more linear and easier to model.
-
-The log1p() function is specifically used because it safely handles zero values.
 
 ```python
