@@ -151,7 +151,10 @@ def _run_axe(urls: List[str], tags: List[str], load_delay_ms: int = 0) -> List[d
         cmd += ["--load-delay", str(load_delay_ms)]
     for opt in CONTAINER_SAFE_CHROME_OPTIONS:
         cmd.extend(["--chrome-options", opt])
-    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    # Have the chromedriver npm package download the driver matching the
+    # installed Chrome, instead of its own (often newer) pinned default.
+    env = {**os.environ, "DETECT_CHROMEDRIVER_VERSION": "true"}
+    result = subprocess.run(cmd, capture_output=True, text=True, check=False, env=env)
     # axe exits non-zero when it finds violations (normal), and --load-delay
     # prints a "Waiting for N milliseconds..." preamble ahead of the JSON, so
     # locate the array start rather than assuming stdout begins with "[".
