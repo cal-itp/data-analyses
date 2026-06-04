@@ -6,6 +6,7 @@ requires-python = "==3.11.*"
 members = [
     "cal-itp-data-analyses",
     "calitp-data-analysis",
+    "calitp-portfolio",
     "portfolio",
     "rt-analysis",
     "rt-predictions",
@@ -358,6 +359,7 @@ source = { virtual = "." }
 [package.dev-dependencies]
 dev = [
     { name = "black" },
+    { name = "calitp-portfolio" },
     { name = "ipykernel" },
     { name = "isort" },
     { name = "nbdime" },
@@ -379,6 +381,7 @@ portfolio = [
 ]
 test = [
     { name = "black" },
+    { name = "calitp-portfolio" },
     { name = "ipykernel" },
     { name = "isort" },
     { name = "nbdime" },
@@ -398,6 +401,7 @@ test = [
 [package.metadata.requires-dev]
 dev = [
     { name = "black", specifier = "==24.10.0" },
+    { name = "calitp-portfolio", editable = "calitp-portfolio" },
     { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "isort", specifier = "==5.10.1" },
     { name = "nbdime", specifier = ">=4.0.4" },
@@ -419,6 +423,7 @@ portfolio = [
 ]
 test = [
     { name = "black", specifier = "==24.10.0" },
+    { name = "calitp-portfolio", editable = "calitp-portfolio" },
     { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "isort", specifier = "==5.10.1" },
     { name = "nbdime", specifier = ">=4.0.4" },
@@ -468,6 +473,41 @@ requires-dist = [
     { name = "shapely", specifier = ">=2.0.1,<3.0.0" },
     { name = "sqlalchemy", specifier = ">=2.0.0,<3.0.0" },
     { name = "sqlalchemy-bigquery", specifier = ">=1.6.1,<2.0.0" },
+]
+
+[[package]]
+name = "calitp-portfolio"
+version = "0.1.0"
+source = { editable = "calitp-portfolio" }
+dependencies = [
+    { name = "google-cloud-storage" },
+    { name = "humanize" },
+    { name = "ipython" },
+    { name = "jinja2" },
+    { name = "jupyter-book" },
+    { name = "nbformat" },
+    { name = "papermill" },
+    { name = "pydantic" },
+    { name = "python-slugify" },
+    { name = "pyyaml" },
+    { name = "rich" },
+    { name = "typer" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "google-cloud-storage", specifier = ">=2.10" },
+    { name = "humanize", specifier = ">=4.6" },
+    { name = "ipython", specifier = ">=8.0" },
+    { name = "jinja2", specifier = ">=3.0" },
+    { name = "jupyter-book", specifier = "==2.1.1" },
+    { name = "nbformat", specifier = ">=5.8" },
+    { name = "papermill", specifier = ">=2.4" },
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "python-slugify", specifier = ">=8.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "rich", specifier = ">=13.0" },
+    { name = "typer", specifier = ">=0.15" },
 ]
 
 [[package]]
@@ -2483,7 +2523,7 @@ requires-dist = [
     { name = "pyaml", specifier = "==21.10.1" },
     { name = "pydantic", specifier = ">=2.0" },
     { name = "shared-utils", editable = "_shared_utils" },
-    { name = "typer", specifier = ">=0.9" },
+    { name = "typer", specifier = ">=0.12" },
 ]
 
 [[package]]

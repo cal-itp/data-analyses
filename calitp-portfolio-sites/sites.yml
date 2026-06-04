@@ -1,0 +1,75 @@
+# Manifest for the analysis portfolio landing page:
+#   production: https://analysis.dds.dot.ca.gov/
+#   staging:    https://analysis-staging.dds.dot.ca.gov/
+# Rendered and deployed with `calitp-portfolio index` — see README.md.
+
+deploy:
+  staging: gs://calitp-analysis-staging/index.html
+  prod: gs://calitp-analysis/index.html
+
+sites:
+  - title: AHSC Ridership Prediction Dashboard
+    name: ahsc
+    source: ./ahsc_grant/
+  - title: California Transit Speed Maps
+    name: rt
+    source: ./ca_transit_speed_maps/
+  - title: District GTFS Digest
+    name: district_digest
+    source: ./gtfs_digest/
+  - title: GTFS Digest
+    name: gtfs_digest
+    source: ./gtfs_digest/
+  - title: GTFS Real-Time Operator Summary Metrics
+    name: rt_operator_metrics
+    source: ./rt_predictions/
+  - title: GTFS Real-Time Stop Metrics
+    name: rt_stop_metrics
+    source: ./rt_predictions/
+  - title: HQ Transit Corridor & Major Bus Stop Explorer
+    name: hqta_explorer
+    source: ./high_quality_transit_areas/
+  - title: Legislative District GTFS Digest
+    name: legislative_district_digest
+    source: ./gtfs_digest/
+  - title: NTD Annual Ridership by RTPA
+    name: ntd_annual_ridership_report
+    source: ./ntd/annual_ridership_report/
+  - title: NTD Monthly Ridership by RTPA
+    name: ntd_monthly_ridership
+    source: ./ntd/monthly_ridership_report/
+  - title: New Transit Performance Metrics
+    name: new_transit_metrics
+    source: ./ntd/new_transit_metrics/
+  - title: Potential Detour Stops using GTFS Vehicle Positions
+    name: detour_stops
+    source: ./rt_predictions/
+  - title: SB125 Fund Split Analysis
+    name: sb125_fund_split_analysis
+    source: ./sb125_analyses/sb125_fund_split_analysis/
+  - title: Thruway Bus Analysis
+    name: thruway_intercity_bus
+    source: ./thruway_intercity_bus/
+
+test_sites:
+  - title: Basic Analyses Test
+    name: _basic_analyses_test
+    source: ./calitp-portfolio-sites/examples/
+  - title: Group Analyses Test
+    name: _group_analyses_test
+    source: ./calitp-portfolio-sites/examples/
+  - title: Group and Params Analyses Test
+    name: _group_and_params_analyses_test
+    source: ./calitp-portfolio-sites/examples/
+  - title: Param Analyses Test
+    name: _param_analyses_test
+    source: ./calitp-portfolio-sites/examples/
+  - title: Param Analyses with Title Test
+    name: _param_manual_title_analyses_test
+    source: ./calitp-portfolio-sites/examples/
+  - title: Readme Only Analyses Test
+    name: _readme_only_analyses_test
+    source: ./calitp-portfolio-sites/examples/
+  - title: Section Analyses Test
+    name: _section_analyses_test
+    source: ./calitp-portfolio-sites/examples/

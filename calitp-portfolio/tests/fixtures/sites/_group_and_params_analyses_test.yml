@@ -1,0 +1,23 @@
+title: Group and Params Analyses Test
+directory: tests/fixtures/portfolio
+readme: ./tests/fixtures/portfolio/README_GP.md
+notebook: tests/fixtures/portfolio/notebook_with_params_2.ipynb
+parts:
+  - caption: District 01 Eureka
+    chapters:
+      - params:
+          greetings: Humboldt Transit Authority
+      - params:
+          greetings: Lake Transit Authority
+      - params:
+          greetings: Mendocino Transit Authority
+      - params:
+          greetings: Redwood Coast Transit Authority
+  - caption: District 02 Redding
+    chapters:
+      - params:
+          greetings: Redding Area Bus Authority
+      - params:
+          greetings: Tehama County
+deploy:
+  staging: gs://calitp-analysis-staging/_group_and_params_analyses_test

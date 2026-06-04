@@ -1,0 +1,10 @@
+toc:
+    -   file: README_SECTIONS.md
+    -   children:
+            -   pattern: day_or_night_01-day/*
+        file: day_or_night_01-day.md
+        title: Daily Greetings
+    -   children:
+            -   pattern: day_or_night_02-night/*
+        file: day_or_night_02-night.md
+        title: Night Greetings

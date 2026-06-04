@@ -1,0 +1,37 @@
+[project]
+name = "calitp-portfolio"
+version = "0.1.0"
+description = "CLI for building, validating, and deploying Cal-ITP portfolio sites."
+authors = [{ name = "Cal-ITP" }]
+requires-python = ">=3.11.0, <3.12.0"
+dependencies = [
+    "typer>=0.15",
+    "pydantic>=2.0",
+    "jinja2>=3.0",
+    "pyyaml>=6.0",
+    "python-slugify>=8.0",
+    "papermill>=2.4",
+    "nbformat>=5.8",
+    "humanize>=4.6",
+    "jupyter-book==2.1.1",
+    "google-cloud-storage>=2.10",
+    "ipython>=8.0",
+    "rich>=13.0",
+]
+
+[project.scripts]
+calitp-portfolio = "calitp_portfolio.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/calitp_portfolio"]
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
