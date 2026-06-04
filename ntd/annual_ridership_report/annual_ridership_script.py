@@ -7,7 +7,7 @@ import gcsfs
 
 sys.path.append(os.path.abspath("../monthly_ridership_report"))  # for update_var
 sys.path.append(os.path.abspath("../"))  # for module
-_01_ntd_ridership_utils = importlib.import_module("_01_ntd_ridership_utils")
+_01_ntd_ridership_utils = importlib.import_module("ridership_report_utils._01_ntd_ridership_utils")
 update_vars = importlib.import_module("update_vars")
 
 
