@@ -7,8 +7,12 @@ parts:
       analysis_name: Humboldt Transit Authority
   - params:
       analysis_name: Mendocino Transit Authority
+  - params:
+      analysis_name: Redwood Coast Transit Authority
 - caption: District 02 - Redding
   chapters:
+  - params:
+      analysis_name: Redding Area Bus Authority
   - params:
       analysis_name: Tehama County
 - caption: District 03 - Marysville / Sacramento
@@ -25,6 +29,8 @@ parts:
       analysis_name: Sacramento Regional Transit District
   - params:
       analysis_name: University of California, Davis
+  - params:
+      analysis_name: Yolo County Transportation District
 - caption: District 04 - Bay Area / Oakland
   chapters:
   - params:
@@ -37,6 +43,8 @@ parts:
       analysis_name: City and County of San Francisco
   - params:
       analysis_name: City of Fairfield
+  - params:
+      analysis_name: City of Petaluma
   - params:
       analysis_name: City of Santa Rosa
   - params:
@@ -68,8 +76,6 @@ parts:
   - params:
       analysis_name: Solano Transportation Authority
   - params:
-      analysis_name: Sonoma County Transit Schedule
-  - params:
       analysis_name: Sonoma-Marin Area Rail Transit District
   - params:
       analysis_name: University of California, Berkeley
@@ -85,6 +91,8 @@ parts:
       analysis_name: San Luis Obispo Regional Transit Authority
   - params:
       analysis_name: Santa Barbara Metropolitan Transit District
+  - params:
+      analysis_name: Santa Cruz Metro
   - params:
       analysis_name: Santa Cruz Metropolitan Transit District
 - caption: District 06 - Fresno / Bakersfield
@@ -108,11 +116,11 @@ parts:
   - params:
       analysis_name: City of Arcadia
   - params:
+      analysis_name: City of Baldwin Park
+  - params:
       analysis_name: City of Burbank
   - params:
       analysis_name: City of Commerce
-  - params:
-      analysis_name: City of Culver City
   - params:
       analysis_name: City of Downey
   - params:
@@ -143,6 +151,8 @@ parts:
       analysis_name: Long Beach Transit
   - params:
       analysis_name: Los Angeles County Metropolitan Transportation Authority
+  - params:
+      analysis_name: Los Angeles World Airports
   - params:
       analysis_name: University of California, Los Angeles
   - params:
@@ -185,13 +195,19 @@ parts:
 - caption: District 11 - San Diego
   chapters:
   - params:
+      analysis_name: North County Transit District
+  - params:
       analysis_name: San Diego Metropolitan Transit System, Airport, Flagship Cruises
+  - params:
+      analysis_name: University of California, San Diego
 - caption: District 12 - Santa Ana
   chapters:
   - params:
       analysis_name: Anaheim Transportation Network
   - params:
       analysis_name: City of Irvine
+  - params:
+      analysis_name: City of Mission Viejo
   - params:
       analysis_name: Orange County Transportation Authority
 readme: ./ca_transit_speed_maps/README.md

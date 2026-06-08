@@ -20,9 +20,10 @@ preprocess_vp:
 	python vp_condenser.py
 
 funnel_gtfs_single_day:
-#	make download_gtfs_data
+	make download_gtfs_data
 	make preprocess_schedule_vp_dependency
 	make preprocess_vp
+	python track_publish_dates.py # used in ca_transit_speed_maps, high_quality_transit_areas
 
 all:
 	make funnel_gtfs_single_day

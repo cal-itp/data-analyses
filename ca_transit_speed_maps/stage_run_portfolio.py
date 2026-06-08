@@ -13,16 +13,24 @@ from shared_utils import portfolio_utils
 from update_vars_index import PROGRESS_PATH
 
 
+def data_analyses_root_dir():
+
+    if "jovyan" in os.getcwd():
+        os.chdir("/home/jovyan/data-analyses")
+    else:
+        os.chdir("..")
+
+
 def stage_portfolio():
 
-    os.chdir("/home/jovyan/data-analyses")
+    data_analyses_root_dir()
     os.system("python3 portfolio/portfolio.py clean rt")
     os.system("python3 portfolio/portfolio.py build rt --no-stderr")
 
 
 def deploy_portfolio():
 
-    os.chdir("/home/jovyan/data-analyses")
+    #    data_analyses_root_dir()
     os.system(
         "python3 portfolio/portfolio.py build rt --no-execute-papermill --hide-title-block --deploy --target staging"
     )
