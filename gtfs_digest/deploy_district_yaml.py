@@ -15,7 +15,7 @@ import typer
 from pathlib import Path
 
 from shared_utils import portfolio_utils
-from update_vars import GTFS_DATA_DICT, file_name
+from update_vars import GTFS_DATA_DICT, file_name, SHARED_GCS
 
 from functools import cache
 from calitp_data_analysis.gcs_pandas import GCSPandas
@@ -59,7 +59,7 @@ def overwrite_yaml(
          
     elif name == "legislative_district":
         
-        df = pd.read_parquet(
+        df = gcs_pandas().read_parquet(
             f"{SHARED_GCS}crosswalk_transit_operators_legislative_districts.parquet",
             columns = ["legislative_district"]
         ).drop_duplicates()

@@ -1,7 +1,7 @@
 digest_report:
 	#python something_download_script.py
-	uv run python make gtfs_digest_data
-	uv run python make portfolio_deploy
+	make gtfs_digest_data
+	make portfolio_deploy
 
 portfolio_deploy:
 	#python _yml_gtfs_digest_orgs.py # run this after the files are created in merge_*
