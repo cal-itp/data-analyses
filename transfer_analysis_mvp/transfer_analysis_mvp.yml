@@ -1,0 +1,8 @@
+title: Transfer Analysis Demo
+directory: ./
+readme: ./README.md
+parts:
+  - chapters:
+      - notebook: ./02_test_deploy.ipynb
+deploy:
+  staging: gs://calitp-analysis-staging/transfer_analysis_mvp
