@@ -18,6 +18,7 @@ from update_vars import (
     MS_TRANSIT_THRESHOLD,
     SHARED_STOP_THRESHOLD,
     TARGET_AREA_DIFFERENCE,
+    TARGET_METERS_DIFFERENCE,
     analysis_date,
 )
 
@@ -150,8 +151,8 @@ def evaluate_overlaps(
                 "route_direction_pair": pair,
                 "schedule_gtfs_dataset_key": gtfs_dataset_key,
                 "branching_qualify": True,
-                "unique_km_rt0": area_ratios[0],
-                "unique_km_rt1": area_ratios[1],
+                "unique_km_rt0": area_ratios[0] * (TARGET_METERS_DIFFERENCE / 1000),
+                "unique_km_rt1": area_ratios[1] * (TARGET_METERS_DIFFERENCE / 1000),
                 "intersect_geom": intersect,
             }
             unique_qualify_pairs += [results]
