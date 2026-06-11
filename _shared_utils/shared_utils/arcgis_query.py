@@ -123,8 +123,8 @@ if __name__ == "__main__":
         "caltrans_district": CALTRANS_DISTRICTS_URL,
         "ca_congressional_districts": LEGISLATIVE_DICT["ca_congressional_districts"],
         **ROADS_DICT,
+        "public_road_functional_classification": CRS_FUNCTIONAL_CLASSICIATION_URL,
     }
-
     for dataset_name, url in esri_datasets.items():
         print(dataset_name)
         gdf = gdf_from_esri_feature_service(url)
