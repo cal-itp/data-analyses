@@ -45,7 +45,7 @@ def load_schedule_rt_route_direction_summary(
 
     crosswalk_df = gcs_pandas().read_parquet(crosswalk_url)[["name", "analysis_name"]].drop_duplicates()
     
-    m1 = pd.merge(df, crosswalk_df, on="name", how="inner")
+    m1 = pd.merge(df, crosswalk_df, left_on="schedule_name", right_on = "name", how="inner")
 
     gcs_pandas().data_frame_to_parquet(
         m1,

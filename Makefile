@@ -69,17 +69,17 @@ build_new_transit_metrics_report:
 
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
-	cd gtfs_digest/ && make digest_report && cd ..
+	# cd gtfs_digest/ && make digest_report && cd ..
 	make build_production_portfolio_site
 
 build_district_digest:
 	$(eval export site = district_digest)
-	cd gtfs_digest/ && python deploy_district_yaml.py district && cd ..
+	cd gtfs_digest/ && uv run python deploy_district_yaml.py district && cd ..
 	make build_production_portfolio_site
 
 build_legislative_district_digest:
 	$(eval export site = legislative_district_digest)
-	cd gtfs_digest/ && python deploy_district_yaml.py legislative_district && cd ..
+	cd gtfs_digest/ && uv run python deploy_district_yaml.py legislative_district && cd ..
 	make build_production_portfolio_site
 
 build_fund_split:

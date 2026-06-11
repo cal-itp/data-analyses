@@ -39,7 +39,7 @@ def prep_gdf(gdf:gpd.GeoDataFrame)->gpd.GeoDataFrame:
     .drop(columns = [ 'Year', 'Month', 'Month First Day'])
                        )
 
-    gdf = gdf.dissolve(by = "Analysis Name").reset_index()
+    # gdf = gdf.dissolve(by = "Analysis Name").reset_index()
     
     gdf = gdf.reset_index(drop=False)
     gdf = gdf.rename(columns={"index": "Number"})
@@ -157,9 +157,9 @@ def load_buffered_shn_map(district:int) -> gpd.GeoDataFrame:
     return gdf2
 
 
-def load_shn_transit_routes(district:str, pct: int)->gpd.GeoDataFrame:
+def load_shn_transit_routes(district:str, pct: int, month:str)->gpd.GeoDataFrame:
     OPEN_DATA_GCS = "gs://calitp-analytics-data/data-analyses/open_data/"
-    gdf = gpd.read_parquet(f"{OPEN_DATA_GCS}export/ca_transit_routes_{previous_month}.parquet",
+    gdf = gpd.read_parquet(f"{OPEN_DATA_GCS}export/ca_transit_routes_{month}.parquet",
                              storage_options={"token": credentials.token})
 
     # Clean district name because there are some extra spaces

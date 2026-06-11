@@ -98,6 +98,8 @@ parts:
   - params:
       analysis_name: Solano Transportation Authority
   - params:
+      analysis_name: Sonoma County Transit Schedule
+  - params:
       analysis_name: Sonoma-Marin Area Rail Transit District
   - params:
       analysis_name: Western Contra Costa Transit Authority
@@ -120,7 +122,9 @@ parts:
   - params:
       analysis_name: Santa Barbara Metropolitan Transit District
   - params:
-      analysis_name: UCSC and City of Santa Cruz Beach Shuttle
+      analysis_name: Santa Cruz Metro
+  - params:
+      analysis_name: Santa Cruz Metropolitan Transit District
 - caption: District 06-Fresno / Bakersfield
   chapters:
   - params:
@@ -173,6 +177,8 @@ parts:
       analysis_name: City of Cerritos
   - params:
       analysis_name: City of Commerce
+  - params:
+      analysis_name: City of Compton
   - params:
       analysis_name: City of Cudahy
   - params:
@@ -236,7 +242,8 @@ parts:
   - params:
       analysis_name: Palos Verdes Peninsula Transit Authority
   - params:
-      analysis_name: Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark, Ojai, Simi Valley, Thousand Oaks)
+      analysis_name: Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark,
+        Ojai, Simi Valley, Thousand Oaks)
 - caption: District 08-San Bernardino / Riverside
   chapters:
   - params:
@@ -301,8 +308,6 @@ parts:
       analysis_name: Yuma County Intergovernmental Public Transportation Authority
 - caption: District 12-Orange County
   chapters:
-  - params:
-      analysis_name: Anaheim Transportation Network
   - params:
       analysis_name: City of Laguna Beach
   - params:

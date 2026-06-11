@@ -27,11 +27,11 @@ def prep_schedule_rt_route_direction_summary(file_name: str) -> pd.DataFrame:
         [
             "month_first_day", "analysis_name", "route_name", "direction_id",
             "frequency_all_day", "frequency_offpeak", "frequency_peak",
-            "daily_service_hours", "daily_trips_peak", "daily_trips_offpeak",
-            "daily_trips_all_day", "day_type", "route_type", "route_typology",
+            "daily_trips_peak", "daily_trips_offpeak",
+            "daily_trips_all_day", "day_type", "route_type", "daily_service_hours", "route_typology",
         ]
     ].drop_duplicates().reset_index()
-
+    
     # Clean columns
     df2.route_typology = df2.route_typology.str.title()
     df2.columns = df2.columns.str.replace("_", " ").str.title()
