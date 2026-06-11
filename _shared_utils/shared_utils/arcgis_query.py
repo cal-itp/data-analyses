@@ -9,8 +9,8 @@ from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 import geopandas as gpd
 import pandas as pd
+from calitp_data_analysis import utils
 from calitp_data_analysis.sql import to_snakecase
-from shared_utils import utils
 
 
 def gdf_from_esri_feature_service(url):
