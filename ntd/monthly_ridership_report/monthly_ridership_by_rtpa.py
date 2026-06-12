@@ -7,21 +7,15 @@ NTD Monthly Ridership by RTPA
 """
 
 import os
-import sys
 from functools import cache
 
 import gcsfs
-
-# import importlib
 import update_vars
 from calitp_data_analysis.gcs_pandas import GCSPandas
+
+# import sys # ACTIVATE THIS LINE AND BELOW WHEN RUNNING REPORT. TEMP FIX TO PASS PRE-COMMIT CHECKS
+# sys.path.append(os.path.abspath("../"))  # for riderhsip_report_utils.
 from ridership_report_utils import _01_ntd_ridership_utils
-
-sys.path.append(os.path.abspath("../"))  # for module
-# sys.path.append(os.path.abspath("../monthly_ridership_report"))  # for update_var
-
-# _01_ntd_ridership_utils = importlib.import_module("_01_ntd_ridership_utils")
-# update_vars = importlib.import_module("update_vars")
 
 
 @cache
