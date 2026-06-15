@@ -34,7 +34,7 @@ def gcs_pandas():
     return GCSPandas()
 
 
-catalog = intake.open_catalog("*.yml")
+catalog = intake.open_catalog("catalog.yml")
 
 ac_transit_route_id = ["1T"]
 metro_route_desc = ["METRO SILVER LINE", "METRO ORANGE LINE", "METRO J LINE", "METRO G LINE"]
@@ -186,7 +186,9 @@ def assemble_stops(analysis_date: str) -> gpd.GeoDataFrame:
     stops = pd.concat([stops, lookback_stops])
 
     stops_with_geom = pd.merge(stops, stops_with_route, on=["feed_key", "stop_id"], how="inner")
-    stops_with_geom = portfolio_utils.standardize_operator_info_for_exports(stops_with_geom, analysis_date)
+    xwalk = _utils.get_agency_crosswalk()
+    stops_with_geom = stops_with_geom.merge(xwalk, on="schedule_gtfs_dataset_key")
+    # stops_with_geom = portfolio_utils.standardize_operator_info_for_exports(stops_with_geom, analysis_date)
     drop_cols = ["name_original", "base64_url", "caltrans_district", "source_record_id"]
     stops_with_geom = stops_with_geom.drop(columns=drop_cols)
 
@@ -302,7 +304,7 @@ def compile_rail_ferry_brt_stops(
         .drop_duplicates()
     )
     df2 = pd.concat([df, stations_entrances])
-
+    print(df2.columns)
     keep_cols = ["schedule_gtfs_dataset_key", "stop_id", "stop_name", "route_id", "route_type", "hqta_type", "geometry"]
     # keep_cols += ["parent_station", "location_type"]  # for testing
 
