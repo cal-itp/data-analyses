@@ -189,8 +189,7 @@ def assemble_stops(analysis_date: str) -> gpd.GeoDataFrame:
     xwalk = _utils.get_agency_crosswalk()
     stops_with_geom = stops_with_geom.merge(xwalk, on="schedule_gtfs_dataset_key")
     # stops_with_geom = portfolio_utils.standardize_operator_info_for_exports(stops_with_geom, analysis_date)
-    drop_cols = ["name_original", "base64_url", "caltrans_district", "source_record_id"]
-    stops_with_geom = stops_with_geom.drop(columns=drop_cols)
+    stops_with_geom = stops_with_geom.drop(columns=["base64_url"])
 
     return stops_with_geom
 
@@ -296,7 +295,7 @@ def compile_rail_ferry_brt_stops(
     """
     df = pd.concat(rail_ferry_brt_gdfs, axis=0, ignore_index=True)
     stop_info = df[~df.parent_station.isna()][
-        ["schedule_gtfs_dataset_key", "route_id", "route_type", "hqta_type", "parent_station"]
+        ["schedule_gtfs_dataset_key", "name", "agency", "route_id", "route_type", "hqta_type", "parent_station"]
     ]
     stations_entrances = (
         stations_entrances.merge(stop_info, on=["parent_station", "schedule_gtfs_dataset_key"])
@@ -305,7 +304,17 @@ def compile_rail_ferry_brt_stops(
     )
     df2 = pd.concat([df, stations_entrances])
     print(df2.columns)
-    keep_cols = ["schedule_gtfs_dataset_key", "stop_id", "stop_name", "route_id", "route_type", "hqta_type", "geometry"]
+    keep_cols = [
+        "schedule_gtfs_dataset_key",
+        "name",
+        "agency",
+        "stop_id",
+        "stop_name",
+        "route_id",
+        "route_type",
+        "hqta_type",
+        "geometry",
+    ]
     # keep_cols += ["parent_station", "location_type"]  # for testing
 
     df3 = (

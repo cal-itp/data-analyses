@@ -12,7 +12,6 @@ import geopandas as gpd
 import google.auth
 import intake
 import pandas as pd
-from assemble_hqta_points import get_agency_crosswalk
 from calitp_data_analysis import geography_utils, utils
 from loguru import logger
 from prep_pairwise_intersections import prep_bus_corridors
@@ -25,7 +24,7 @@ from update_vars import (
     analysis_date,
 )
 
-catalog = intake.open_catalog("*.yml")
+catalog = intake.open_catalog("catalog.yml")
 
 credentials, _ = google.auth.default()
 
@@ -56,7 +55,7 @@ def buffer_hq_corridor_bus(
         hqta_type="hq_corridor_bus",
     ).pipe(_utils.primary_rename)
 
-    agency_info = get_agency_crosswalk()
+    agency_info = _utils.get_agency_crosswalk()
 
     # Make sure gtfs_dataset_name and organization columns are added
     corridors2 = pd.merge(

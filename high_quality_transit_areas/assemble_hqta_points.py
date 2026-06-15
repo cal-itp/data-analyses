@@ -43,7 +43,7 @@ def gcs_geopandas():
 
 
 fs = get_fs()
-catalog = intake.open_catalog("*.yml")
+catalog = intake.open_catalog("catalog.yml")
 
 
 def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
