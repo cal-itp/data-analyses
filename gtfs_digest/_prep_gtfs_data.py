@@ -1,8 +1,8 @@
 from functools import cache
-import geopandas as gpd
-import pandas as pd
-import google.auth
 
+import geopandas as gpd
+import google.auth
+import pandas as pd
 from calitp_data_analysis import geography_utils, utils
 from calitp_data_analysis.gcs_pandas import GCSPandas
 from update_vars import GTFS_DATA_DICT, file_name
@@ -23,15 +23,29 @@ def prep_schedule_rt_route_direction_summary(file_name: str) -> pd.DataFrame:
     )
 
     # Select relevant columns
-    df2 = df[
-        [
-            "month_first_day", "analysis_name", "route_name", "direction_id",
-            "frequency_all_day", "frequency_offpeak", "frequency_peak",
-            "daily_trips_peak", "daily_trips_offpeak",
-            "daily_trips_all_day", "day_type", "route_type", "daily_service_hours", "route_typology",
+    df2 = (
+        df[
+            [
+                "month_first_day",
+                "analysis_name",
+                "route_name",
+                "direction_id",
+                "frequency_all_day",
+                "frequency_offpeak",
+                "frequency_peak",
+                "daily_trips_peak",
+                "daily_trips_offpeak",
+                "daily_trips_all_day",
+                "day_type",
+                "route_type",
+                "daily_service_hours",
+                "route_typology",
+            ]
         ]
-    ].drop_duplicates().reset_index()
-    
+        .drop_duplicates()
+        .reset_index()
+    )
+
     # Clean columns
     df2.route_typology = df2.route_typology.str.title()
     df2.columns = df2.columns.str.replace("_", " ").str.title()
@@ -46,7 +60,10 @@ def prep_schedule_rt_route_direction_summary(file_name: str) -> pd.DataFrame:
     df2["Headway Offpeak"] = 60 / df2["Frequency Offpeak"]
 
     # Save processed file
-    gcs_pandas().data_frame_to_parquet(df2, f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.schedule_rt_route_direction}_{file_name}.parquet")
+    gcs_pandas().data_frame_to_parquet(
+        df2,
+        f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.schedule_rt_route_direction}_{file_name}.parquet",
+    )
     return df2
 
 
@@ -59,20 +76,37 @@ def prep_operator_summary(file_name: str) -> pd.DataFrame:
     # Select relevant columns
     df2 = df[
         [
-            "month_first_day", "analysis_name", "caltrans_district", "vp_name", "tu_name",
-            "n_trips", "day_type", "daily_trips", "ttl_service_hours", "n_routes", "n_days",
-            "n_shapes", "n_stops", "vp_messages_per_minute", "n_vp_trips", "daily_vp_trips",
-            "pct_vp_trips", "tu_messages_per_minute",
-            "n_tu_trips", "daily_tu_trips", "pct_tu_trips", 
+            "month_first_day",
+            "analysis_name",
+            "caltrans_district",
+            "vp_name",
+            "tu_name",
+            "n_trips",
+            "day_type",
+            "daily_trips",
+            "ttl_service_hours",  # "daily_service_hours",
+            "n_routes",
+            "n_days",
+            "n_shapes",
+            "n_stops",
+            "daily_arrivals",
+            "vp_messages_per_minute",
+            "n_vp_trips",
+            "daily_vp_trips",
+            "pct_vp_trips",
+            "tu_messages_per_minute",
+            "n_tu_trips",
+            "daily_tu_trips",
+            "pct_tu_trips",
         ]
     ]
-    
+
     # Multiply percetnage columns by 100. Clip any values above 100.
     df2.pct_tu_trips = df2.pct_tu_trips * 100
     df2.pct_vp_trips = df2.pct_vp_trips * 100
     df2.pct_tu_trips = df2.pct_tu_trips.clip(upper=100.0)
     df2.pct_vp_trips = df2.pct_vp_trips.clip(upper=100.0)
-    
+
     # Clean columns
     df2.columns = df2.columns.str.replace("_", " ").str.title()
     df2 = df2.rename(columns={"Month First Day": "Date"})
@@ -82,7 +116,7 @@ def prep_operator_summary(file_name: str) -> pd.DataFrame:
     gcs_pandas().data_frame_to_parquet(
         df2,
         f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/"
-        f"{GTFS_DATA_DICT.gtfs_digest_rollup.operator_summary}_{file_name}.parquet"
+        f"{GTFS_DATA_DICT.gtfs_digest_rollup.operator_summary}_{file_name}.parquet",
     )
 
     return df2
@@ -96,10 +130,9 @@ def prep_fct_monthly_routes(file_name: str) -> pd.DataFrame:
     )
 
     # Keep most recent route geography
-    gdf2 = (
-        gdf.sort_values(by=["month_first_day", "analysis_name", "route_name"], ascending=[False, True, True])
-        .drop_duplicates(subset=["analysis_name", "route_name"])
-    )
+    gdf2 = gdf.sort_values(
+        by=["month_first_day", "analysis_name", "route_name"], ascending=[False, True, True]
+    ).drop_duplicates(subset=["analysis_name", "route_name"])
 
     # Drop unnecessary columns
     gdf2 = gdf2.drop(columns=["shape_id", "shape_array_key", "n_trips", "direction_id"])
@@ -122,8 +155,10 @@ def prep_fct_monthly_routes(file_name: str) -> pd.DataFrame:
 
 def prep_fct_operator_hourly_summary(file_name: str) -> pd.DataFrame:
 
-    df = gcs_pandas().read_parquet(f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}raw/{GTFS_DATA_DICT.gtfs_digest_rollup.hourly_day_type_summary}_{file_name}.parquet")
-    
+    df = gcs_pandas().read_parquet(
+        f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}raw/{GTFS_DATA_DICT.gtfs_digest_rollup.hourly_day_type_summary}_{file_name}.parquet"
+    )
+
     # Prepare data
     df2 = (
         df.groupby(["analysis_name", "month_first_day", "day_type", "departure_hour"])
@@ -137,9 +172,13 @@ def prep_fct_operator_hourly_summary(file_name: str) -> pd.DataFrame:
 
     df2["Date"] = df2["Date"].dt.strftime("%m-%Y")
 
-    gcs_pandas().data_frame_to_parquet(df2, f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.hourly_day_type_summary}_{file_name}.parquet")
-    
+    gcs_pandas().data_frame_to_parquet(
+        df2,
+        f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.hourly_day_type_summary}_{file_name}.parquet",
+    )
+
     return df2
+
 
 if __name__ == "__main__":
     schedule_rt_route_direction_summary_df = prep_schedule_rt_route_direction_summary(file_name)
