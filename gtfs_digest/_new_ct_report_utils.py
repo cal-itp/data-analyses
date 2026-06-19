@@ -50,8 +50,13 @@ def prep_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
 
 def create_operator_table(df: pd.DataFrame) -> pd.DataFrame:
     cols_to_keep = ["Analysis Name", "Daily Trips", "N Routes", "N Shapes", "N Stops", "Daily Arrivals"]
-    df2 = df[cols_to_keep]
-    df2 = df2.rename(columns={"Analysis Name": "Operator"})
+
+    df2 = df[cols_to_keep].rename(columns={"Analysis Name": "Operator"})
+
+    # Add new columns and round columns that potentially could have decimals
+    df2["Arrivals per Stop"] = df2["Daily Arrivals"].divide(df2["N Stops"]).round(2)
+    df2[["Daily Trips", "Daily Arrivals"]] = df2[["Daily Trips", "Daily Arrivals"]].fillna(0).round(0).astype("Int64")
+
     df2.columns = df2.columns.str.replace("N", "#")
     return df2
 
@@ -108,6 +113,7 @@ def create_summary_table(df: pd.DataFrame, district_col: str = "Caltrans Distric
     # These need to be calculated again separately
     agg1["Arrivals per Stop"] = agg1["Daily Arrivals"].divide(agg1["N Stops"]).round(2)
     agg1["Trips per Operator"] = agg1["N Trips"].divide(agg1["N Operators"]).round(2)
+    agg1[["Daily Trips", "Daily Arrivals"]] = agg1[["Daily Trips", "Daily Arrivals"]].fillna(0).round(0).astype("Int64")
 
     agg2 = transpose_summary_stats(agg1, district_col)
     return agg2
