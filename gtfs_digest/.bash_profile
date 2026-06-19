@@ -1,2 +1,0 @@
-source .profile
-source .profile
