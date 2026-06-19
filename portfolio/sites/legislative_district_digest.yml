@@ -1,7 +1,6 @@
 directory: ./gtfs_digest/
 notebook: ./gtfs_digest/report_legislative_district.ipynb
 parts:
-- caption: Introduction
 - chapters:
   - params:
       district: AD 01
@@ -159,10 +158,6 @@ parts:
       district: AD 77
   - params:
       district: AD 78
-  - params:
-      district: AD 79
-  - params:
-      district: AD 80
   - params:
       district: SD 01
   - params:

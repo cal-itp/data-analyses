@@ -16,5 +16,5 @@ district_yaml:
 	uv run python deploy_district_yaml.py district
 
 legislative_district_yaml:
-	uv run python _legislative_district_prep.py.py
+	uv run python _legislative_district_prep.py
 	uv run python deploy_district_yaml.py legislative_district
