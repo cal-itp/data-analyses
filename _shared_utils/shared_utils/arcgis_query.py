@@ -105,7 +105,9 @@ def combine_legislative_districts(assembly_districts_url: str, senate_districts_
     return gdf
 
 
-def exclude_columns(gdf: gpd.GeoDataFrame, list_of_cols: list = ["Shape__Length", "Shape__Area"]) -> gpd.GeoDataFrame:
+def exclude_columns(
+    gdf: gpd.GeoDataFrame, list_of_cols: list = ["objectid", "shape__area", "shape__length"]
+) -> gpd.GeoDataFrame:
     """
     Drop a couple of columns that tend to show up for ESRI.
     """
@@ -120,7 +122,7 @@ if __name__ == "__main__":
 
     esri_datasets = {
         "ca_county": COUNTY_POLYGONS_URL,
-        "caltrans_district": CALTRANS_DISTRICTS_URL,
+        "caltrans_districts": CALTRANS_DISTRICTS_URL,
         "ca_congressional_districts": LEGISLATIVE_DICT["ca_congressional_districts"],
         **ROADS_DICT,
         "public_road_functional_classification": CRS_FUNCTIONAL_CLASSICIATION_URL,
