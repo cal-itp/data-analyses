@@ -69,7 +69,7 @@ build_new_transit_metrics_report:
 
 build_gtfs_digest:
 	$(eval export site = gtfs_digest)
-	# cd gtfs_digest/ && make digest_report && cd ..
+	cd gtfs_digest/ && make digest_report && cd ..
 	make build_production_portfolio_site
 
 build_district_digest:

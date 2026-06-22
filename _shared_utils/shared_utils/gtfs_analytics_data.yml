@@ -140,16 +140,13 @@ shared_data:
 
 gtfs_digest_rollup:
   dir: ${gcs_paths.DIGEST_GCS}
-  # point to where in BQ these datasets are
-  # In BQ: dataset = mart_gtfs / mart_gtfs_rollup
-  # In BQ: table = fct_scheduled_trips, fct_monthly_scheduled_trips, etc
-  bq_dataset: "mart_gtfs_rollup"
   schedule_rt_route_direction: "fct_monthly_schedule_rt_route_direction_summary"
   route_map: "fct_monthly_routes"
   operator_summary: "fct_monthly_operator_summary"
   hourly_day_type_summary: "fct_operator_hourly_summary"
   ntd_profile: "ntd_profile"
   crosswalk: "crosswalk"
+  crosswalk_legislative: "crosswalk_transit_operators_legislative_districts"
 
 open_data_rollup:
   bq_dataset: "mart_gtfs_rollup"

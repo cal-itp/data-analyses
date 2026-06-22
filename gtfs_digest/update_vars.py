@@ -1,4 +1,4 @@
-from shared_utils import catalog_utils, rt_dates
+from shared_utils import catalog_utils
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
@@ -6,7 +6,7 @@ analysis_month = "2026-04-01"
 last_year = "2025-04-01"
 previous_month = "2026-03-01"
 
-file_name = analysis_month.replace("-","_")[0:7]
+file_name = analysis_month.replace("-", "_")[0:7]
 
 SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
 RT_SCHED_GCS = GTFS_DATA_DICT.gcs_paths.RT_SCHED_GCS
