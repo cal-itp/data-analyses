@@ -12,6 +12,27 @@ import pandas as pd
 from calitp_data_analysis import utils
 from calitp_data_analysis.sql import to_snakecase
 
+SHARED_GCS = "gs://calitp-analytics-data/data-analyses/shared_data/"
+
+COUNTY_POLYGONS_URL = "https://services1.arcgis.com/jUJYIo9tSA7EHvfZ/arcgis/rest/services/California_County_Boundaries/FeatureServer/0/query"
+
+CALTRANS_DISTRICTS_URL = (
+    "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHboundary/District_Tiger_Lines/FeatureServer/0/query/"
+)
+
+LEGISLATIVE_BASE = "https://services3.arcgis.com/fdvHcZVgB2QSRNkL/arcgis/rest/services/Legislative/FeatureServer/"
+
+LEGISLATIVE_DICT = {
+    "ca_assembly_districts": f"{LEGISLATIVE_BASE}0/query/",
+    "ca_senate_districts": f"{LEGISLATIVE_BASE}1/query/",
+    "ca_congressional_districts": f"{LEGISLATIVE_BASE}2/query/",
+}
+
+CALTRANS_BASE = "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/"
+CRS_FUNCTIONAL_CLASSICIATION_URL = f"{CALTRANS_BASE}CRS_Functional_Classification/FeatureServer/0/query/"
+SHN_LINES_URL = f"{CALTRANS_BASE}SHN_Lines/FeatureServer/0/query/"
+SHN_POSTMILES_URL = f"{CALTRANS_BASE}SHN_Postmiles_Tenth/FeatureServer/0/query/"
+
 
 def gdf_from_esri_feature_service(url):
     """
@@ -51,36 +72,6 @@ def gdf_from_esri_feature_service(url):
     return pd.concat(gdfs).reset_index(drop=True)
 
 
-SHARED_GCS = "gs://calitp-analytics-data/data-analyses/shared_data/"
-
-COUNTY_POLYGONS_URL = (
-    "https://services1.arcgis.com/jUJYIo9tSA7EHvfZ/"
-    "arcgis/rest/services/California_County_Boundaries/FeatureServer/0/query"
-)
-
-LEGISLATIVE_BASE = "https://services3.arcgis.com/fdvHcZVgB2QSRNkL/" "arcgis/rest/services/Legislative/FeatureServer/"
-
-LEGISLATIVE_DICT = {
-    "ca_assembly_districts": f"{LEGISLATIVE_BASE}0/query/",
-    "ca_senate_districts": f"{LEGISLATIVE_BASE}1/query/",
-    "ca_congressional_districts": f"{LEGISLATIVE_BASE}2/query/",
-}
-
-CALTRANS_BASE = "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/"
-SHN_LINES_URL = f"{CALTRANS_BASE}SHN_Lines/FeatureServer/0/query/"
-SHN_POSTMILES_URL = f"{CALTRANS_BASE}SHN_Postmiles_Tenth/FeatureServer/0/query/"
-CRS_FUNCTIONAL_CLASSICIATION_URL = f"{CALTRANS_BASE}gi/FeatureServer/0/query/"
-CALTRANS_DISTRICTS_URL = (
-    "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/" "CHboundary/District_Tiger_Lines/FeatureServer/0/query/"
-)
-
-ROADS_DICT = {
-    "state_highway_network_raw": SHN_LINES_URL,
-    "state_highway_network_postmiles": SHN_POSTMILES_URL,
-}
-
-
-# legislative district combines senate and assembly
 def combine_legislative_districts(assembly_districts_url: str, senate_districts_url: str) -> gpd.GeoDataFrame:
     """
     Create a combined assembly district and senate districts
@@ -124,7 +115,8 @@ if __name__ == "__main__":
         "ca_county": COUNTY_POLYGONS_URL,
         "caltrans_districts": CALTRANS_DISTRICTS_URL,
         "ca_congressional_districts": LEGISLATIVE_DICT["ca_congressional_districts"],
-        **ROADS_DICT,
+        "state_highway_network_raw": SHN_LINES_URL,
+        "state_highway_network_postmiles": SHN_POSTMILES_URL,
         "public_road_functional_classification": CRS_FUNCTIONAL_CLASSICIATION_URL,
     }
     for dataset_name, url in esri_datasets.items():
