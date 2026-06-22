@@ -48,16 +48,40 @@ def prep_gdf(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     return gdf
 
 
-def create_operator_table(df: pd.DataFrame) -> pd.DataFrame:
-    cols_to_keep = ["Analysis Name", "Daily Trips", "N Routes", "N Shapes", "N Stops", "Daily Arrivals"]
+def create_operator_table(df: pd.DataFrame, district_col: str = "Caltrans District") -> pd.DataFrame:
 
-    df2 = df[cols_to_keep].rename(columns={"Analysis Name": "Operator"})
+    # df is weekday day_type - 12 months per operator summary
+    df2 = (
+        df
+        # sort so that complete entries of schedule + vp + tu show up first,
+        # then the most recent date of complete data
+        # if vp or tu is always missing, then it getes sorted by most daily scheduled daily trips first
+        .sort_values(
+            [district_col, "Analysis Name", "VP Name", "TU Name", "Daily Trips", "Date"],
+            ascending=[True, True, True, True, False, False],
+        )
+        .drop_duplicates(subset=[district_col, "Analysis Name"], keep="first")
+        .reset_index()
+    )
 
-    # Add new columns and round columns that potentially could have decimals
-    df2["Arrivals per Stop"] = df2["Daily Arrivals"].divide(df2["N Stops"]).round(2)
+    # These need to be calculated again separately
+    df2["Arrivals per Stop"] = df2["Daily Arrivals"].divide(df2["N Stops"]).round(1)
     df2[["Daily Trips", "Daily Arrivals"]] = df2[["Daily Trips", "Daily Arrivals"]].fillna(0).round(0).astype("Int64")
 
+    cols_to_keep = [
+        "Analysis Name",
+        district_col,
+        "Daily Trips",
+        "N Routes",
+        "N Shapes",
+        "N Stops",
+        "Daily Arrivals",
+        "Arrivals per Stop",
+    ]
+
+    df2 = df2[cols_to_keep].rename(columns={"Analysis Name": "Operator"})
     df2.columns = df2.columns.str.replace("N", "#")
+
     return df2
 
 
@@ -96,8 +120,12 @@ def transpose_summary_stats(df: pd.DataFrame, district_col: str = "Caltrans Dist
 
 
 def create_summary_table(df: pd.DataFrame, district_col: str = "Caltrans District") -> pd.DataFrame:
-    sum_me = ["N Trips", "N Stops", "N Routes", "Daily Arrivals"]
 
+    df = create_operator_table(df, district_col)
+
+    sum_me = ["Daily Trips", "N Stops", "N Routes", "Daily Arrivals"]
+
+    # df is weekday day_type - 12 months per operator summary
     agg1 = (
         df.groupby(district_col, observed=True, group_keys=False)
         .agg(
@@ -111,8 +139,8 @@ def create_summary_table(df: pd.DataFrame, district_col: str = "Caltrans Distric
     )
 
     # These need to be calculated again separately
-    agg1["Arrivals per Stop"] = agg1["Daily Arrivals"].divide(agg1["N Stops"]).round(2)
-    agg1["Trips per Operator"] = agg1["N Trips"].divide(agg1["N Operators"]).round(2)
+    agg1["Arrivals per Stop"] = agg1["Daily Arrivals"].divide(agg1["N Stops"]).round(1)
+    agg1["Trips per Operator"] = agg1["Daily Trips"].divide(agg1["N Operators"]).round(1)
     agg1[["Daily Trips", "Daily Arrivals"]] = agg1[["Daily Trips", "Daily Arrivals"]].fillna(0).round(0).astype("Int64")
 
     agg2 = transpose_summary_stats(agg1, district_col)
@@ -126,20 +154,41 @@ State Highway Network
 
 def load_ct_district(district: int) -> gpd.GeoDataFrame:
     """
-    Load in Caltrans Shape.
+    Load in Caltrans Districts Shape.
     """
     DISTRICT_FILE = f"{SHARED_GCS}caltrans_districts.parquet"
 
-    ca_geojson = (
+    district_geojson = (
         gcs_geopandas()
-        .read_parquet(
-            DISTRICT_FILE,
-        )
+        .read_parquet(DISTRICT_FILE, filters=[[("district", "==", district)]], columns=["geometry"])
         .to_crs(geography_utils.CA_NAD83Albers_m)
     )
 
-    district_geojson = ca_geojson.loc[ca_geojson.district == district][["geometry"]]
+    district_geojson = set_district_boundary_color(district_geojson, district)
 
+    return district_geojson
+
+
+def load_legislative_district(district: str) -> gpd.GeoDataFrame:
+    """
+    Load in legislative district
+    (assembly districts + senate districts combined)
+    geoparquet.
+    """
+    DISTRICT_FILE = f"{SHARED_GCS}legislative_districts.parquet"
+
+    district_geojson = (
+        gcs_geopandas()
+        .read_parquet(DISTRICT_FILE, filters=[[("legislative_district", "==", district)]], columns=["geometry"])
+        .to_crs(geography_utils.CA_NAD83Albers_m)
+    )
+
+    district_geojson = set_district_boundary_color(district_geojson, district)
+
+    return district_geojson
+
+
+def set_district_boundary_color(district_geojson: gpd.GeoDataFrame, district) -> gpd.GeoDataFrame:
     # Add color column
     district_geojson["color"] = [(58, 25, 79)]
     district_geojson["description"] = f"geometry for district {district}"
