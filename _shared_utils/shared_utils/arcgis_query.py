@@ -69,7 +69,7 @@ LEGISLATIVE_DICT = {
 CALTRANS_BASE = "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/"
 SHN_LINES_URL = f"{CALTRANS_BASE}SHN_Lines/FeatureServer/0/query/"
 SHN_POSTMILES_URL = f"{CALTRANS_BASE}SHN_Postmiles_Tenth/FeatureServer/0/query/"
-CRS_FUNCTIONAL_CLASSICIATION_URL = f"{CALTRANS_BASE}CRS_Functional_Classification/FeatureServer/0/query/"
+CRS_FUNCTIONAL_CLASSICIATION_URL = f"{CALTRANS_BASE}gi/FeatureServer/0/query/"
 CALTRANS_DISTRICTS_URL = (
     "https://caltrans-gis.dot.ca.gov/arcgis/rest/services/" "CHboundary/District_Tiger_Lines/FeatureServer/0/query/"
 )
