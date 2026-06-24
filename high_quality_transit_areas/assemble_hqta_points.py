@@ -21,7 +21,6 @@ import pandas as pd
 from calitp_data_analysis import geography_utils, get_fs, utils
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from calitp_data_analysis.gcs_pandas import GCSPandas
-from calitp_data_analysis.sql import query_sql
 from loguru import logger
 from shared_utils import gtfs_utils_v2
 from update_vars import (
@@ -44,7 +43,7 @@ def gcs_geopandas():
 
 
 fs = get_fs()
-catalog = intake.open_catalog("*.yml")
+catalog = intake.open_catalog("catalog.yml")
 
 
 def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
@@ -117,26 +116,6 @@ def combine_stops_by_hq_types(crs: str) -> gpd.GeoDataFrame:
     return with_stops
 
 
-def get_agency_crosswalk() -> pd.DataFrame:
-    """
-    Simplified version using analysis_name from warehouse
-    """
-
-    query = """
-    SELECT
-    key AS schedule_gtfs_dataset_key,
-    analysis_name AS agency,
-    base64_url
-    FROM
-    cal-itp-data-infra.mart_transit_database.dim_gtfs_datasets
-    WHERE _is_current = TRUE
-    AND analysis_name IS NOT NULL
-    """
-
-    df = query_sql(query)
-    return df
-
-
 def add_route_agency_info(gdf: gpd.GeoDataFrame, analysis_date: str) -> gpd.GeoDataFrame:
     """
     Make sure route info is filled in for all stops.
@@ -146,9 +125,7 @@ def add_route_agency_info(gdf: gpd.GeoDataFrame, analysis_date: str) -> gpd.GeoD
     """
     stop_with_route_crosswalk = catalog.stops_info_crosswalk().read()
 
-    #  TODO lookback and concat
-    # agency_info = get_agency_crosswalk(analysis_date)
-    agency_info = get_agency_crosswalk()
+    agency_info = _utils.get_agency_crosswalk()
 
     # Make sure all the stops have route_id. Currently station entrances are not in crosswalk, so left join.
     # Station entrances do have route_id added in rail_ferry_brt, but we may want to rethink this at some point

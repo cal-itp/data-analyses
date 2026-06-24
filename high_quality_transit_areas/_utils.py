@@ -5,6 +5,7 @@ Shared utility functions for HQTA
 import geopandas as gpd
 import intake
 import pandas as pd
+from calitp_data_analysis.sql import query_sql
 from shared_utils import portfolio_utils
 
 catalog = intake.open_catalog("catalog.yml")
@@ -63,3 +64,23 @@ def append_analysis_name(df: pd.DataFrame) -> pd.DataFrame:
     lookback_analysis_name = pd.concat(lookback_analysis_name)
 
     return lookback_analysis_name
+
+
+def get_agency_crosswalk() -> pd.DataFrame:
+    """
+    Simplified version using analysis_name from warehouse
+    """
+
+    query = """
+    SELECT
+    key AS schedule_gtfs_dataset_key,
+    analysis_name AS agency,
+    base64_url
+    FROM
+    cal-itp-data-infra.mart_transit_database.dim_gtfs_datasets
+    WHERE _is_current = TRUE
+    AND analysis_name IS NOT NULL
+    """
+
+    df = query_sql(query)
+    return df
