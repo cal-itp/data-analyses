@@ -71,26 +71,19 @@ def add_county_abbrev(df, county_name_col):
     ### read county data in from the shared_data catalog
     catalog = intake.open_catalog("../../_shared_utils/shared_utils/shared_data_catalog.yml")
     
-    # counties = to_snakecase((catalog.ca_counties.read()))[["name", "cnty_fips"]]
-    # counties.cnty_fips   = counties.cnty_fips.astype(int)
-    
-    counties = to_snakecase((catalog.ca_counties.read()))[["name"]]
+    counties = to_snakecase((catalog.ca_counties.read()))
     county_codes = to_snakecase((pd.read_excel(f"{GCS_FILE_PATH}/CountyNameToCodeLookUp.xlsx")))
     
     ### create dict to map
-    county_mapping = pd.merge(county_codes, counties, left_on ="county_name", right_on = "name",how = "inner")
-    county_mapping = county_mapping.drop(columns = ["name"])
+    county_mapping = pd.merge(county_codes, counties, on = ["county_name"], how = "inner")
     county_mapping = county_mapping.rename(columns = {"rca_county_code":"county_name_abbrev"})
 
+    # There are 2 county_codes now.
+    df = df.rename(columns = {"county_code":'og_county_code'}) 
     df = pd.merge(df, county_mapping, on = ["county_name"], how = "left")
-    
-    # df = df.drop(columns = ["cnty_fips"])
-    
-    ### map values to the df
-    #df[f"{county_name_col}_abbrev"] = df[county_name_col].map(county_mapping)
-    
-    #df[f"{county_name_col}_abbrev"] = df[f"{county_name_col}_abbrev"].fillna('NA')
-    
+
+    df = df.drop(columns = ["county_code"])
+    df = df.rename(columns = {"og_county_code":'county_code'}) 
     return df
 
 
@@ -583,7 +576,7 @@ def get_new_desc_title(df):
     
     #remove project method column values so that the title function wont double count
     proj_unique_cat.loc[proj_unique_cat['project_type'] == 'Project', 'project_method'] = ""
-    proj_unique_cat['project_type'] = proj_unique_cat['project_type'].replace('Project', np.NaN)
+    proj_unique_cat['project_type'] = proj_unique_cat['project_type'].replace('Project', np.nan)
     
     #update for the projects not in the first round of descriptions
     proj_unique_cat_title =  add_description_4_no_match(proj_unique_cat, 'improvement_type_description')
@@ -686,10 +679,10 @@ def get_clean_data(df, full_or_agg = ''):
     
         return df
 
-def run_script_original(file_name, recipient_column, df_agg_level):
+def run_script_original(file_name:str, sheet:str, recipient_column:str, df_agg_level:str):
     
     ### Read in data
-    proj_list = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}"))
+    proj_list = to_snakecase(pd.read_excel(f"{GCS_FILE_PATH}/{file_name}", sheet_name = sheet))
     proj_list = proj_list.rename(columns = {"summary_recipient": "summary_recipient_defined_text_field_1_value"})
     
     ### run function to get new program codes
