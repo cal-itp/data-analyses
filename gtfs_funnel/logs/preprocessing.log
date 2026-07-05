@@ -33,3 +33,5 @@
 2026-05-20 13:50:56.503 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2026-03-11: 0:02:40.671302
 2026-05-20 15:21:22.787 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2026-04-08: 0:02:21.974672
 2026-05-27 11:15:19.988 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2026-05-13: 0:02:20.472651
+2026-06-18 14:52:57.281 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2026-06-18: 0:02:22.491288
+2026-06-18 22:24:57.686 | INFO     | __main__:assemble_stop_times_with_direction:274 - scheduled stop times with direction 2026-06-10: 0:02:23.567198

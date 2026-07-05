@@ -462,3 +462,39 @@
 2026-05-27 11:10:52.723 | INFO     | __main__:<module>:124 - path: calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2026-05-13_concat/
 2026-05-27 11:12:53.283 | INFO     | __main__:<module>:136 - remove batched parquets
 2026-05-27 11:12:53.285 | INFO     | __main__:<module>:139 - execution time: 0:03:52.419234
+2026-06-18 14:44:13.612 | INFO     | __main__:<module>:132 - Analysis date: 2026-06-18
+2026-06-18 14:45:12.641 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 0 to GCS: 0:00:59.027560
+2026-06-18 14:45:53.440 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 1 to GCS: 0:00:40.798935
+2026-06-18 14:48:09.550 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 2 to GCS: 0:02:16.109472
+2026-06-18 14:49:00.775 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 3 to GCS: 0:00:51.223683
+2026-06-18 14:49:00.775 | INFO     | __main__:<module>:139 - execution time: 0:04:47.161842
+2026-06-18 14:49:03.936 | INFO     | __main__:<module>:101 - Analysis date: 2026-06-18
+2026-06-18 14:49:08.302 | INFO     | __main__:<module>:109 - concat and filter batched data: 0:00:04.365833
+2026-06-18 14:50:00.584 | INFO     | __main__:<module>:116 - export concatenated vp: 0:00:52.282570
+2026-06-18 14:50:00.585 | INFO     | __main__:<module>:124 - path: calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2026-06-18_concat/
+2026-06-18 14:50:29.491 | INFO     | __main__:<module>:136 - remove batched parquets
+2026-06-18 14:50:29.493 | INFO     | __main__:<module>:139 - execution time: 0:01:25.556706
+2026-06-18 21:20:40.902 | INFO     | __main__:<module>:132 - Analysis date: 2026-06-18
+2026-06-18 21:21:39.747 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 0 to GCS: 0:00:58.844269
+2026-06-18 21:22:20.617 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 1 to GCS: 0:00:40.869029
+2026-06-18 21:24:37.372 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 2 to GCS: 0:02:16.753778
+2026-06-18 21:25:29.511 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 3 to GCS: 0:00:52.138229
+2026-06-18 21:25:29.511 | INFO     | __main__:<module>:139 - execution time: 0:04:48.608902
+2026-06-18 21:25:32.950 | INFO     | __main__:<module>:101 - Analysis date: 2026-06-18
+2026-06-18 21:25:37.172 | INFO     | __main__:<module>:109 - concat and filter batched data: 0:00:04.221135
+2026-06-18 21:26:29.808 | INFO     | __main__:<module>:116 - export concatenated vp: 0:00:52.636336
+2026-06-18 21:26:29.809 | INFO     | __main__:<module>:124 - path: calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2026-06-18_concat/
+2026-06-18 21:26:59.739 | INFO     | __main__:<module>:136 - remove batched parquets
+2026-06-18 21:26:59.741 | INFO     | __main__:<module>:139 - execution time: 0:01:26.790369
+2026-06-18 21:42:39.137 | INFO     | __main__:<module>:132 - Analysis date: 2026-06-10
+2026-06-18 21:48:00.265 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 0 to GCS: 0:05:21.126648
+2026-06-18 21:52:15.405 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 1 to GCS: 0:04:15.138443
+2026-06-18 22:13:16.755 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 2 to GCS: 0:21:01.349494
+2026-06-18 22:18:03.646 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 3 to GCS: 0:04:46.889299
+2026-06-18 22:18:03.648 | INFO     | __main__:<module>:139 - execution time: 0:35:24.509418
+2026-06-18 22:18:06.994 | INFO     | __main__:<module>:101 - Analysis date: 2026-06-10
+2026-06-18 22:18:12.822 | INFO     | __main__:<module>:109 - concat and filter batched data: 0:00:05.827592
+2026-06-18 22:20:22.830 | INFO     | __main__:<module>:116 - export concatenated vp: 0:02:10.007801
+2026-06-18 22:20:22.831 | INFO     | __main__:<module>:124 - path: calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2026-06-10_concat/
+2026-06-18 22:22:28.459 | INFO     | __main__:<module>:136 - remove batched parquets
+2026-06-18 22:22:28.462 | INFO     | __main__:<module>:139 - execution time: 0:04:21.467607
