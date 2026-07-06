@@ -68,7 +68,8 @@ def append_analysis_name(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_agency_crosswalk() -> pd.DataFrame:
     """
-    Simplified version using analysis_name from warehouse
+    Simplified version using analysis_name from warehouse.
+    Consider broader lookback refactor, using rollup tables once count bug fixed.
     """
 
     query = """
@@ -78,7 +79,7 @@ def get_agency_crosswalk() -> pd.DataFrame:
     base64_url
     FROM
     cal-itp-data-infra.mart_transit_database.dim_gtfs_datasets
-    WHERE _is_current = TRUE
+    WHERE _valid_to >= TIMESTAMP(DATE_SUB(CURRENT_DATE(), INTERVAL 180 DAY))
     AND analysis_name IS NOT NULL
     """
 
