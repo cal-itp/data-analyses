@@ -15,6 +15,7 @@ dependencies = [
     "gt_extras==0.0.8",
     "intake==0.6.4",
     "intake-geopandas>=0.3.0",
+    "intake-parquet",
     "itables==2.7.3",
     "loguru>=0.6.0,<0.7",
     "mapclassify>=2.8.0,<3",
@@ -35,6 +36,7 @@ dependencies = [
     "stonesoup==1.8",
     "tqdm>=4.66.0",
     "xmltodict>=0.13.0,<0.14",
+    "pyaml>=21.10.1",
 ]
 
 [dependency-groups]
