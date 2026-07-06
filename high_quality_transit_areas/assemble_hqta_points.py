@@ -211,6 +211,7 @@ def read_standardize_mpo_input(mpo_data_path=MPO_DATA_PATH, fs=fs) -> gpd.GeoDat
         assert set(required_cols).issubset(mpo_gdf.columns)
         filter_cols = [col for col in all_cols if col in mpo_gdf.columns]
         mpo_gdf = mpo_gdf[filter_cols]
+        mpo_gdf = mpo_gdf.to_crs(PROJECT_CRS)
         mpo_gdfs += [mpo_gdf]
     return pd.concat(mpo_gdfs)
 
