@@ -31,7 +31,7 @@ def load_crosswalk() -> pd.DataFrame:
         date_col=None,
     )
     df2 = (
-        df.dropna(subset=["ntd_id", "ntd_id_2022"])
+        df
         .drop_duplicates(
             subset=["analysis_name", "organization_name", "schedule_gtfs_dataset_name"]
         )
