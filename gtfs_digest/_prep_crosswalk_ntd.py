@@ -59,6 +59,7 @@ def load_crosswalk() -> pd.DataFrame:
         ]
     ]
 
+    print(f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet")
     gcs_pandas().data_frame_to_parquet(df2, f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet")
     
     return df2
