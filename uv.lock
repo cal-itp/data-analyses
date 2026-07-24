@@ -9,7 +9,6 @@ members = [
     "calitp-portfolio",
     "portfolio",
     "rt-analysis",
-    "rt-predictions",
     "sb125-analyses",
     "segment-speed-utils",
     "shared-utils",
@@ -3396,25 +3395,6 @@ wheels = [
 name = "rt-analysis"
 version = "0.4.2"
 source = { editable = "rt_delay" }
-
-[[package]]
-name = "rt-predictions"
-version = "0.1.0"
-source = { virtual = "rt_predictions" }
-dependencies = [
-    { name = "calitp-data-analysis" },
-    { name = "shared-utils" },
-    { name = "vegafusion" },
-    { name = "vl-convert-python" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "calitp-data-analysis", editable = "calitp-data-analysis" },
-    { name = "shared-utils", editable = "_shared_utils" },
-    { name = "vegafusion", extras = ["embed"], specifier = ">=1.5.0" },
-    { name = "vl-convert-python", specifier = ">=1.6.0" },
-]
 
 [[package]]
 name = "rtree"

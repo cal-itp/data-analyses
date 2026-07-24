@@ -13,7 +13,6 @@ members = [
     "portfolio",
     "rt_segment_speeds",
     "rt_delay",
-    "rt_predictions",
     "thruway_intercity_bus",
     "sb125_analyses",
 ]
