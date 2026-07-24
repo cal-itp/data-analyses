@@ -22,22 +22,22 @@ sites:
     source: ./gtfs_digest/
   - title: GTFS Real-Time Operator Summary Metrics
     name: rt_operator_metrics
-    source: ./rt_predictions/
+    source: https://github.com/cal-itp/gtfs-curator/tree/main/rt_predictions/
   - title: GTFS Real-Time Stop Metrics
     name: rt_stop_metrics
-    source: ./rt_predictions/
+    source: https://github.com/cal-itp/gtfs-curator/tree/main/rt_predictions/
   - title: HQ Transit Corridor & Major Bus Stop Explorer
     name: hqta_explorer
     source: ./high_quality_transit_areas/
   - title: Legislative District GTFS Digest
     name: legislative_district_digest
-    source: ./gtfs_digest/
+    source: https://github.com/cal-itp/gtfs-curator/tree/main/gtfs_digest/
   - title: NTD Annual Ridership by RTPA
-    name: ntd_annual_ridership_report
-    source: ./ntd/annual_ridership_report/
+    name: ntd_annual_ridership
+    source: https://github.com/cal-itp/ntd-snapshot/tree/main/annual_ridership/
   - title: NTD Monthly Ridership by RTPA
     name: ntd_monthly_ridership
-    source: ./ntd/monthly_ridership_report/
+    source: https://github.com/cal-itp/ntd-snapshot/tree/main/monthly_ridership/
   - title: New Transit Performance Metrics
     name: new_transit_metrics
     source: ./ntd/new_transit_metrics/
