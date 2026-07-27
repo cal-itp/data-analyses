@@ -4,11 +4,15 @@ parts:
 - caption: District 01-Eureka
   chapters:
   - params:
+      analysis_name: Curry Public Transit
+  - params:
       analysis_name: Humboldt Transit Authority
   - params:
       analysis_name: Lake Transit Authority
   - params:
       analysis_name: Mendocino Transit Authority
+  - params:
+      analysis_name: POINT
   - params:
       analysis_name: Redwood Coast Transit Authority
   - params:
@@ -30,6 +34,8 @@ parts:
 - caption: District 03-Marysville / Sacramento
   chapters:
   - params:
+      analysis_name: Amtrak
+  - params:
       analysis_name: Butte County Association of Governments
   - params:
       analysis_name: City of Elk Grove
@@ -50,6 +56,8 @@ parts:
   - params:
       analysis_name: Tahoe Transportation District
   - params:
+      analysis_name: Tahoe Truckee Area Regional Transportation, North Lake Tahoe
+  - params:
       analysis_name: Town of Truckee
   - params:
       analysis_name: University of California, Davis
@@ -62,11 +70,17 @@ parts:
   - params:
       analysis_name: Alameda-Contra Costa Transit District
   - params:
+      analysis_name: Angel Island-Tiburon Ferry Company
+  - params:
+      analysis_name: Capitol Corridor Joint Powers Authority
+  - params:
       analysis_name: Central Contra Costa Transit Authority
   - params:
       analysis_name: City and County of San Francisco
   - params:
       analysis_name: City of Fairfield
+  - params:
+      analysis_name: City of Mountain View
   - params:
       analysis_name: City of Petaluma
   - params:
@@ -74,11 +88,17 @@ parts:
   - params:
       analysis_name: City of Santa Rosa
   - params:
+      analysis_name: City of South San Francisco
+  - params:
       analysis_name: City of Union City
   - params:
       analysis_name: City of Vacaville
   - params:
+      analysis_name: Commute.org and Menlo Park Community Shuttles Schedule
+  - params:
       analysis_name: Eastern Contra Costa Transit Authority
+  - params:
+      analysis_name: Emeryville Transportation Management Agency
   - params:
       analysis_name: Golden Gate Bridge, Highway and Transportation District
   - params:
@@ -86,11 +106,21 @@ parts:
   - params:
       analysis_name: Marin County Transit District
   - params:
+      analysis_name: Mission Bay Transportation Management Agency
+  - params:
+      analysis_name: Mountain View Transportation Management Association
+  - params:
       analysis_name: Napa Valley Transportation Authority
   - params:
       analysis_name: Peninsula Corridor Joint Powers Board
   - params:
+      analysis_name: Presidio Trust
+  - params:
       analysis_name: San Francisco Bay Area Rapid Transit District
+  - params:
+      analysis_name: San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule
+  - params:
+      analysis_name: San Francisco International Airport
   - params:
       analysis_name: San Mateo County Transit District
   - params:
@@ -101,6 +131,12 @@ parts:
       analysis_name: Sonoma County Transit Schedule
   - params:
       analysis_name: Sonoma-Marin Area Rail Transit District
+  - params:
+      analysis_name: Stanford University
+  - params:
+      analysis_name: Treasure Island Community Development
+  - params:
+      analysis_name: University of California, Berkeley
   - params:
       analysis_name: Western Contra Costa Transit Authority
 - caption: District 05-San Luis Obispo / Santa Barbara
@@ -125,10 +161,14 @@ parts:
       analysis_name: Santa Cruz Metro
   - params:
       analysis_name: Santa Cruz Metropolitan Transit District
+  - params:
+      analysis_name: UCSC and City of Santa Cruz Beach Shuttle
 - caption: District 06-Fresno / Bakersfield
   chapters:
   - params:
       analysis_name: City of Arvin
+  - params:
+      analysis_name: City of Clovis
   - params:
       analysis_name: City of Delano
   - params:
@@ -174,8 +214,6 @@ parts:
   - params:
       analysis_name: City of Carson
   - params:
-      analysis_name: City of Cerritos
-  - params:
       analysis_name: City of Commerce
   - params:
       analysis_name: City of Compton
@@ -188,8 +226,6 @@ parts:
   - params:
       analysis_name: City of El Monte
   - params:
-      analysis_name: City of El Segundo
-  - params:
       analysis_name: City of Gardena
   - params:
       analysis_name: City of Glendale
@@ -199,6 +235,8 @@ parts:
       analysis_name: City of Huntington Park
   - params:
       analysis_name: City of Inglewood
+  - params:
+      analysis_name: City of La Puente
   - params:
       analysis_name: City of Lawndale
   - params:
@@ -226,11 +264,15 @@ parts:
   - params:
       analysis_name: City of South Gate
   - params:
+      analysis_name: City of Thousand Oaks
+  - params:
       analysis_name: City of Torrance
   - params:
       analysis_name: City of West Covina
   - params:
       analysis_name: City of West Hollywood
+  - params:
+      analysis_name: FlixBus and Greyhound
   - params:
       analysis_name: Foothill Transit
   - params:
@@ -240,7 +282,15 @@ parts:
   - params:
       analysis_name: Los Angeles County Metropolitan Transportation Authority
   - params:
+      analysis_name: Los Angeles World Airports
+  - params:
       analysis_name: Palos Verdes Peninsula Transit Authority
+  - params:
+      analysis_name: San Pedro Property Owners Alliance
+  - params:
+      analysis_name: Southern California Regional Rail Authority
+  - params:
+      analysis_name: University of California, Los Angeles
   - params:
       analysis_name: Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark,
         Ojai, Simi Valley, Thousand Oaks)
@@ -248,6 +298,10 @@ parts:
   chapters:
   - params:
       analysis_name: Chemehuevi Indian Tribe
+  - params:
+      analysis_name: City of Banning
+  - params:
+      analysis_name: City of Beaumont
   - params:
       analysis_name: City of Corona
   - params:
@@ -260,8 +314,6 @@ parts:
       analysis_name: Palo Verde Valley Transit Agency
   - params:
       analysis_name: Riverside Transit Agency
-  - params:
-      analysis_name: Southern California Regional Rail Authority
   - params:
       analysis_name: SunLine Transit Agency
   - params:
@@ -283,9 +335,13 @@ parts:
   - params:
       analysis_name: City of Manteca
   - params:
+      analysis_name: City of Ripon
+  - params:
       analysis_name: City of Tracy
   - params:
       analysis_name: City of Turlock
+  - params:
+      analysis_name: San Joaquin Joint Powers Authority
   - params:
       analysis_name: San Joaquin Regional Rail Commission
   - params:
@@ -297,7 +353,11 @@ parts:
   - params:
       analysis_name: Tuolumne County Transit Agency
   - params:
+      analysis_name: University of California, Merced
+  - params:
       analysis_name: Yosemite Area Regional Transportation System
+  - params:
+      analysis_name: Yosemite National Park
 - caption: District 11-San Diego
   chapters:
   - params:
@@ -305,12 +365,28 @@ parts:
   - params:
       analysis_name: North County Transit District
   - params:
+      analysis_name: San Diego International Airport
+  - params:
+      analysis_name: San Diego Metropolitan Transit System, Airport, Flagship Cruises
+  - params:
+      analysis_name: University of California, San Diego
+  - params:
       analysis_name: Yuma County Intergovernmental Public Transportation Authority
 - caption: District 12-Orange County
   chapters:
   - params:
+      analysis_name: City of Irvine
+  - params:
       analysis_name: City of Laguna Beach
   - params:
+      analysis_name: City of Mission Viejo
+  - params:
+      analysis_name: City of San Clemente
+  - params:
+      analysis_name: City of San Juan Capistrano
+  - params:
       analysis_name: Orange County Transportation Authority
+  - params:
+      analysis_name: University of California, Irvine
 readme: ./gtfs_digest/README.md
 title: GTFS Digest

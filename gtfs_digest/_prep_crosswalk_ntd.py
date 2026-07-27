@@ -31,7 +31,7 @@ def load_crosswalk() -> pd.DataFrame:
         date_col=None,
     )
     df2 = (
-        df.dropna(subset=["ntd_id", "ntd_id_2022"])
+        df
         .drop_duplicates(
             subset=["analysis_name", "organization_name", "schedule_gtfs_dataset_name"]
         )
@@ -59,6 +59,7 @@ def load_crosswalk() -> pd.DataFrame:
         ]
     ]
 
+    print(f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet")
     gcs_pandas().data_frame_to_parquet(df2, f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}processed/{GTFS_DATA_DICT.gtfs_digest_rollup.crosswalk}_{file_name}.parquet")
     
     return df2

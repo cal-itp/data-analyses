@@ -52,8 +52,8 @@ def load_schedule_rt_route_direction_summary(
         f"{GTFS_DATA_DICT.gcs_paths.DIGEST_GCS}raw/"
         f"{GTFS_DATA_DICT.gtfs_digest_rollup.schedule_rt_route_direction}_{file_name}.parquet"
     )
-
-    return m1
+    
+    return df
 
 
 def load_operator_summary(
