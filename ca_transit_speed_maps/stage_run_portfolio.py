@@ -47,5 +47,12 @@ if __name__ == "__main__":
         df=speedmaps_index_joined,
         param_info={"column": "analysis_name", "name": "analysis_name"},
     )
-    stage_portfolio()
-    deploy_portfolio()
+
+# TODO add below to yml to use new cli
+
+# deploy:
+#   staging: gs://calitp-analysis-staging/rt
+#   prod:  gs://calitp-analysis/rt   # add when ready to release
+
+# stage_portfolio()
+# deploy_portfolio()
