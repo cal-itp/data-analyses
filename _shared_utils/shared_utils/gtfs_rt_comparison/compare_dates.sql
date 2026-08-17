@@ -1,1 +1,0 @@
-select service_date
