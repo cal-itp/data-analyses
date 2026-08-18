@@ -38,19 +38,22 @@ sites:
   - title: NTD Monthly Ridership by RTPA
     name: ntd_monthly_ridership
     source: https://github.com/cal-itp/ntd-snapshot/tree/main/monthly_ridership/
-  - title: New Transit Performance Metrics
-    name: new_transit_metrics
-    source: ./ntd/new_transit_metrics/
+  - title: UCLA NTD Transit Performance Metrics
+    name: ucla_ntd_performance_metrics
+    source: https://github.com/cal-itp/ntd-snapshot/tree/main/ucla_performance_metrics/
   - title: Potential Detour Stops using GTFS Vehicle Positions
     name: detour_stops
-    source: ./rt_predictions/
+    source: https://github.com/cal-itp/gtfs-curator/tree/main/rt_vehicle_positions/
   - title: SB125 Fund Split Analysis
     name: sb125_fund_split_analysis
     source: ./sb125_analyses/sb125_fund_split_analysis/
   - title: Thruway Bus Analysis
     name: thruway_intercity_bus
     source: ./thruway_intercity_bus/
-
+  - title: Transit Events Analysis
+    name: transit_events
+    source: https://github.com/cal-itp/gtfs-curator/tree/main/transit_events/
+    
 test_sites:
   - title: Basic Analyses Test
     name: _basic_analyses_test
