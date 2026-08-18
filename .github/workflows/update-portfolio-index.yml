@@ -1,6 +1,5 @@
 name: Update and deploy portfolio index site
 
-
 on:
   push:
     branches:
