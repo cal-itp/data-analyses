@@ -1,6 +1,6 @@
 [project]
 name = "calitp-portfolio"
-version = "0.1.0"
+version = "0.1.1"
 description = "CLI for building, validating, and deploying Cal-ITP portfolio sites."
 authors = [{ name = "Cal-ITP" }]
 requires-python = ">=3.11.0, <3.12.0"
