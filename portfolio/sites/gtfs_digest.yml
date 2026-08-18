@@ -388,5 +388,9 @@ parts:
       analysis_name: Orange County Transportation Authority
   - params:
       analysis_name: University of California, Irvine
+
 readme: ./gtfs_digest/README.md
 title: GTFS Digest
+deploy:
+    staging: gs://calitp-analysis-staging/gtfs_digest
+    prod: gs://calitp-analysis/gtfs_digest
