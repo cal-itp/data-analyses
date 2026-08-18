@@ -48,6 +48,7 @@ def append_previous(speedmap_segs: pd.DataFrame, date: str, operators: dict) -> 
     currently via '../gtfs_funnel/published_operators.yml'
     """
     previous_segs = read_segs(date)
+    # print(previous_segs.info())
     previous_segs = previous_segs[previous_segs.name.isin(operators[date])]
     previous_segs["analysis_date"] = date
     speedmap_segs = pd.concat([speedmap_segs, previous_segs])
@@ -73,6 +74,7 @@ if __name__ == "__main__":
     print(f"will append from these previous dates if missing: {ANALYSIS_DATE_LIST[1:]}")
     with open("../gtfs_funnel/published_operators.yml", "r") as f:
         operators = yaml.safe_load(f)
-        # operators = {key.isoformat(): operators[key] for key in operators.keys()}
+        if not isinstance(list(operators.keys())[0], str):
+            operators = {key.isoformat(): operators[key] for key in operators.keys()}
     speedmaps_index = build_speedmaps_index(ANALYSIS_DATE_LIST, operators)
     speedmaps_index.to_parquet(PROGRESS_PATH)

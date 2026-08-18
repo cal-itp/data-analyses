@@ -97,6 +97,9 @@ def map_excluded_shapes(
     title = f"{speedmap_segs.analysis_name.iloc[0]} {display_date} Excluded Shapes {time_of_day}"
 
     shapes_gdf = shapes_gdf[["shape_id", "route_id", "route_short_name", "geometry"]]
+    if shapes_gdf.empty:
+        # TODO log/raise
+        return {}
     speedmap_segs = speedmap_segs.dissolve()
     speedmap_segs.geometry = speedmap_segs.buffer(35)  # slightly bigger than parallel_offset in rt_utils
     excluded_shapes = shapes_gdf.overlay(speedmap_segs, how="difference")

@@ -70,6 +70,8 @@ parts:
   - params:
       analysis_name: San Francisco Bay Ferry and Oakland Alameda Water Shuttle Schedule
   - params:
+      analysis_name: San Francisco International Airport
+  - params:
       analysis_name: San Mateo County Transit District
   - params:
       analysis_name: Santa Clara Valley Transportation Authority
@@ -93,8 +95,6 @@ parts:
       analysis_name: Santa Barbara Metropolitan Transit District
   - params:
       analysis_name: Santa Cruz Metro
-  - params:
-      analysis_name: Santa Cruz Metropolitan Transit District
 - caption: District 06 - Fresno / Bakersfield
   chapters:
   - params:
@@ -114,6 +114,8 @@ parts:
   - params:
       analysis_name: Antelope Valley Transit Authority
   - params:
+      analysis_name: City of Alhambra
+  - params:
       analysis_name: City of Arcadia
   - params:
       analysis_name: City of Baldwin Park
@@ -121,6 +123,8 @@ parts:
       analysis_name: City of Burbank
   - params:
       analysis_name: City of Commerce
+  - params:
+      analysis_name: City of Culver City
   - params:
       analysis_name: City of Downey
   - params:
@@ -154,6 +158,8 @@ parts:
   - params:
       analysis_name: Los Angeles World Airports
   - params:
+      analysis_name: Southern California Regional Rail Authority
+  - params:
       analysis_name: University of California, Los Angeles
   - params:
       analysis_name: Ventura County (VCTC, Gold Coast, Cities of Camarillo, Moorpark,
@@ -168,16 +174,14 @@ parts:
       analysis_name: OmniTrans
   - params:
       analysis_name: Riverside Transit Agency
-  - params:
-      analysis_name: Southern California Regional Rail Authority
-  - params:
-      analysis_name: SunLine Transit Agency
 - caption: District 09 - Bishop
   chapters:
   - params:
       analysis_name: Eastern Sierra Transit Authority
 - caption: District 10 - Stockton
   chapters:
+  - params:
+      analysis_name: City of Escalon
   - params:
       analysis_name: City of Manteca
   - params:
@@ -203,12 +207,13 @@ parts:
 - caption: District 12 - Santa Ana
   chapters:
   - params:
-      analysis_name: Anaheim Transportation Network
-  - params:
       analysis_name: City of Irvine
   - params:
-      analysis_name: City of Mission Viejo
+      analysis_name: City of San Clemente
   - params:
       analysis_name: Orange County Transportation Authority
 readme: ./ca_transit_speed_maps/README.md
 title: California Transit Speed Maps
+deploy:
+  staging: gs://calitp-analysis-staging/rt
+  prod:  gs://calitp-analysis/rt   # add when ready to release

@@ -4,8 +4,8 @@ download_gtfs_data:
 	python download_stops.py
 	python download_shapes.py
 	python download_stop_times.py
-#	python download_vehicle_positions.py
-#	python concatenate_vehicle_positions.py
+	python download_vehicle_positions.py
+	python concatenate_vehicle_positions.py
 
 preprocess_schedule_vp_dependency:
 	python stop_times_with_direction.py
@@ -20,9 +20,9 @@ preprocess_vp:
 	python vp_condenser.py
 
 funnel_gtfs_single_day:
-	make download_gtfs_data
+#	make download_gtfs_data
 	make preprocess_schedule_vp_dependency
-#	make preprocess_vp
+	make preprocess_vp
 	python track_publish_dates.py # used in ca_transit_speed_maps, high_quality_transit_areas
 
 all:
