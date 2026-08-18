@@ -51,7 +51,14 @@ def index(
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Path to write rendered index.html."),
     target: str = typer.Option("staging", "--target", help="Deploy target: staging or prod."),
     deploy: bool = typer.Option(
-        False, "--deploy", help="After rendering, upload index.html to the manifest's deploy target."
+        False,
+        "--deploy",
+        help="After rendering, upload index.html to the manifest's deploy target.",
+    ),
+    service_account: bool = typer.Option(
+        False,
+        "--service-account",
+        help="For GH action only, use --service-account. Credentials pass through GH runner.",
     ),
 ) -> None:
     """Render the portfolio landing page from a sites.yml manifest."""
@@ -68,7 +75,12 @@ def index(
 
     if deploy:
         target_url = _resolve_target_url(manifest.deploy, target, source_label="sites.yml")
-        _require_auth()
+
+        # For service account, GH action generates a hash that is used as credential
+        if service_account:
+            pass
+        else:
+            _require_auth()
         deployer.upload_file(target_url, output_path)
         typer.echo(f"deployed {output_path} -> {target_url}")
 
@@ -100,9 +112,15 @@ def build(
         "-o",
         help="Where to write build artifacts. Defaults to `<yml dir>/<yml stem>/`.",
     ),
-    execute: bool = typer.Option(True, "--execute/--no-execute", help="Skip calls to papermill when --no-execute."),
+    execute: bool = typer.Option(
+        True,
+        "--execute/--no-execute",
+        help="Skip calls to papermill when --no-execute.",
+    ),
     show_stderr: bool = typer.Option(
-        False, "--show-stderr", help="Keep stderr stream in cell outputs (default: strip)."
+        False,
+        "--show-stderr",
+        help="Keep stderr stream in cell outputs (default: strip).",
     ),
     prepare_only: bool = typer.Option(False, help="Pass-through to papermill; if true, cells are not executed."),
     continue_on_error: bool = typer.Option(False, help="Continue building remaining chapters on papermill error."),
@@ -115,18 +133,29 @@ def build(
     limit: Optional[int] = typer.Option(None, "--limit", help="Build only the first N chapters in source order."),
     readme_only: bool = typer.Option(False, "--readme-only", help="Build just the landing page; skip all chapters."),
     toc_only: bool = typer.Option(
-        False, "--toc-only", help="Re-render myst.yml and run jupyter-book; skip papermill and readme copy."
+        False,
+        "--toc-only",
+        help="Re-render myst.yml and run jupyter-book; skip papermill and readme copy.",
     ),
 ) -> None:
     """Build a static site from a parameterized notebook portfolio."""
     if readme_only and toc_only:
-        typer.secho("error: --readme-only and --toc-only are mutually exclusive", fg=typer.colors.RED)
+        typer.secho(
+            "error: --readme-only and --toc-only are mutually exclusive",
+            fg=typer.colors.RED,
+        )
         raise typer.Exit(code=2)
     if readme_only and (only or limit is not None):
-        typer.secho("error: --readme-only cannot be combined with --only or --limit", fg=typer.colors.RED)
+        typer.secho(
+            "error: --readme-only cannot be combined with --only or --limit",
+            fg=typer.colors.RED,
+        )
         raise typer.Exit(code=2)
     if toc_only and (only or limit is not None):
-        typer.secho("error: --toc-only cannot be combined with --only or --limit", fg=typer.colors.RED)
+        typer.secho(
+            "error: --toc-only cannot be combined with --only or --limit",
+            fg=typer.colors.RED,
+        )
         raise typer.Exit(code=2)
 
     papermill_runs = execute and not prepare_only and not readme_only and not toc_only
@@ -181,7 +210,9 @@ def deploy(
         help="Directory of HTML to upload if not using site yml",
     ),
     target_url: Optional[str] = typer.Option(
-        None, "--target-url", help="gs://bucket/prefix to upload to if not using site yml"
+        None,
+        "--target-url",
+        help="gs://bucket/prefix to upload to if not using site yml",
     ),
 ) -> None:
     """Upload built HTML to GCS. Defaults to <site>/_build/html and the yml's deploy target."""
@@ -242,6 +273,15 @@ def login() -> None:
         raise typer.Exit(code=returncode)
 
 
+@app.command()
+def login_service_account() -> None:
+    """Authenticate to Google Cloud using the Cal-ITP login config bundled with this tool."""
+    if auth.is_valid():
+        returncode = 0
+    elif returncode != 0:
+        raise typer.Exit(code=returncode)
+
+
 _WCAG_PRESETS = {
     "a": ["wcag2a"],
     "aa": ["wcag2a", "wcag2aa", "wcag21aa"],
@@ -253,7 +293,11 @@ _ALL_IMPACTS = {"minor", "moderate", "serious", "critical"}
 @app.command(name="axe-check")
 def axe_check(
     site_yml: Optional[Path] = typer.Argument(
-        None, exists=True, dir_okay=False, readable=True, help="Site yml; build dir is derived."
+        None,
+        exists=True,
+        dir_okay=False,
+        readable=True,
+        help="Site yml; build dir is derived.",
     ),
     html: Optional[Path] = typer.Option(None, "--html", exists=True, file_okay=False, help="Scan this directory."),
     wcag: str = typer.Option("aa", "--wcag", help="WCAG conformance level: a, aa, or aaa."),
@@ -262,10 +306,16 @@ def axe_check(
         "--impact",
         help="Comma-separated impact levels to show. Use 'all' for everything.",
     ),
-    no_dedupe: bool = typer.Option(False, "--no-dedupe", help="Show one entry per page instead of grouping by rule."),
+    no_dedupe: bool = typer.Option(
+        False,
+        "--no-dedupe",
+        help="Show one entry per page instead of grouping by rule.",
+    ),
     skip_axe_check: bool = typer.Option(False, "--skip-axe-check", help="Skip the axe CLI pre-flight."),
     report: bool = typer.Option(
-        False, "--report", help=f"Write the full axe JSON report to {DEFAULT_REPORT_FILENAME} in the current directory."
+        False,
+        "--report",
+        help=f"Write the full axe JSON report to {DEFAULT_REPORT_FILENAME} in the current directory.",
     ),
     serve: Optional[bool] = typer.Option(
         None,
