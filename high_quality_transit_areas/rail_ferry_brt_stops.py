@@ -37,6 +37,29 @@ def gcs_pandas():
 catalog = intake.open_catalog("catalog.yml")
 
 ac_transit_route_id = ["1T"]
+# include non-Tempo AC Transit BRT stops by stop_id
+ac_transit_stop_ids = ['52728',
+'53334',
+'58888',
+'52643',
+'52642',
+'58858',
+'55570',
+'55593',
+'54655',
+'56888',
+'52333',
+'51606',
+'51584',
+'51579',
+'53888',
+'55558',
+'57999',
+'55777',
+'59400',
+'50542',
+'59555',
+]
 metro_route_desc = ["METRO SILVER LINE", "METRO ORANGE LINE", "METRO J LINE", "METRO G LINE"]
 
 muni_route_id = [
@@ -249,7 +272,8 @@ def grab_brt_stops(gdf: gpd.GeoDataFrame, route_types: list = ["3"]) -> gpd.GeoD
     ]
 
     ac_transit_brt = brt_operator_stops[
-        (brt_operator_stops.name == ac_transit_name) & (brt_operator_stops.route_id.isin(ac_transit_route_id))
+        (brt_operator_stops.name == ac_transit_name) &
+        ((brt_operator_stops.route_id.isin(ac_transit_route_id)) | (brt_operator_stops.stop_id.isin(ac_transit_stop_ids)))
     ]
 
     vta_brt = brt_operator_stops[(brt_operator_stops.name == vta_name) & (brt_operator_stops.stop_id.isin(vta_include))]
