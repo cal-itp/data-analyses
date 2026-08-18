@@ -392,5 +392,5 @@ parts:
 readme: ./gtfs_digest/README.md
 title: GTFS Digest
 deploy:
-    staging: gs://calitp-analysis-staging/gtfs_digest
-    prod: gs://calitp-analysis/gtfs_digest
+  staging: gs://calitp-analysis-staging/gtfs_digest
+  prod: gs://calitp-analysis/gtfs_digest
