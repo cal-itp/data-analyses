@@ -11,11 +11,7 @@ from calitp_portfolio.check import run as run_check
 from calitp_portfolio.indexer import load_manifest, render_index
 from calitp_portfolio.models import load_site
 
-AUTH_FAIL_MSG = (
-    "error: Auth check failed.\n"
-    "  No valid credentials found.\n"
-    "  Run: uv run calitp-portfolio login"
-)
+AUTH_FAIL_MSG = "error: Auth check failed.\n" "  No valid credentials found.\n" "  Run: uv run calitp-portfolio login"
 
 app = typer.Typer(
     name="calitp-portfolio",
@@ -52,12 +48,8 @@ def _resolve_target_url(deploy, target: str, source_label: str) -> str:
 @app.command()
 def index(
     sites_yml: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
-    output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Path to write rendered index.html."
-    ),
-    target: str = typer.Option(
-        "staging", "--target", help="Deploy target: staging or prod."
-    ),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Path to write rendered index.html."),
+    target: str = typer.Option("staging", "--target", help="Deploy target: staging or prod."),
     deploy: bool = typer.Option(
         False,
         "--deploy",
@@ -82,9 +74,7 @@ def index(
     typer.echo(f"wrote {output_path}")
 
     if deploy:
-        target_url = _resolve_target_url(
-            manifest.deploy, target, source_label="sites.yml"
-        )
+        target_url = _resolve_target_url(manifest.deploy, target, source_label="sites.yml")
 
         # For service account, GH action generates a hash that is used as credential
         if service_account:
@@ -110,9 +100,7 @@ def list_(
             part_label = f"[{part.caption}] " if part.caption else ""
             params = dict(chapter.resolved_params) or "{}"
             notebook = chapter.resolved_notebook
-            typer.echo(
-                f"{part_label}{chapter.identifier}  params={params}  notebook={notebook}"
-            )
+            typer.echo(f"{part_label}{chapter.identifier}  params={params}  notebook={notebook}")
 
 
 @app.command()
@@ -134,26 +122,16 @@ def build(
         "--show-stderr",
         help="Keep stderr stream in cell outputs (default: strip).",
     ),
-    prepare_only: bool = typer.Option(
-        False, help="Pass-through to papermill; if true, cells are not executed."
-    ),
-    continue_on_error: bool = typer.Option(
-        False, help="Continue building remaining chapters on papermill error."
-    ),
-    hide_title_block: bool = typer.Option(
-        False, help="If true, will hide the title block for all pages."
-    ),
+    prepare_only: bool = typer.Option(False, help="Pass-through to papermill; if true, cells are not executed."),
+    continue_on_error: bool = typer.Option(False, help="Continue building remaining chapters on papermill error."),
+    hide_title_block: bool = typer.Option(False, help="If true, will hide the title block for all pages."),
     only: Optional[str] = typer.Option(
         None,
         "--only",
         help="Comma-separated chapter identifiers to build (see `calitp-portfolio list`).",
     ),
-    limit: Optional[int] = typer.Option(
-        None, "--limit", help="Build only the first N chapters in source order."
-    ),
-    readme_only: bool = typer.Option(
-        False, "--readme-only", help="Build just the landing page; skip all chapters."
-    ),
+    limit: Optional[int] = typer.Option(None, "--limit", help="Build only the first N chapters in source order."),
+    readme_only: bool = typer.Option(False, "--readme-only", help="Build just the landing page; skip all chapters."),
     toc_only: bool = typer.Option(
         False,
         "--toc-only",
@@ -186,9 +164,7 @@ def build(
 
     only_slugs = [s.strip() for s in only.split(",")] if only else None
     if only_slugs:
-        available = {
-            c.identifier for p in load_site(site_yml).parts for c in p.chapters
-        }
+        available = {c.identifier for p in load_site(site_yml).parts for c in p.chapters}
         unknown = [s for s in only_slugs if s not in available]
         if unknown:
             typer.secho(
@@ -224,9 +200,7 @@ def deploy(
         readable=True,
         help="Site yml for deployment.",
     ),
-    target: str = typer.Option(
-        "staging", "--target", help="Deploy target: staging or prod."
-    ),
+    target: str = typer.Option("staging", "--target", help="Deploy target: staging or prod."),
     html: Optional[Path] = typer.Option(
         None,
         "--html",
@@ -248,22 +222,16 @@ def deploy(
     generic = html is not None or target_url is not None
     if generic:
         if html is None or target_url is None:
-            raise typer.BadParameter(
-                "--html and --target-url must be provided together"
-            )
+            raise typer.BadParameter("--html and --target-url must be provided together")
         if site_yml is not None:
-            raise typer.BadParameter(
-                "provide either a site yml or --html/--target-url, not both"
-            )
+            raise typer.BadParameter("provide either a site yml or --html/--target-url, not both")
         resolved_url = target_url
         html_dir = html
     else:
         if site_yml is None:
             raise typer.BadParameter("provide a site yml, or --html with --target-url")
         site = load_site(site_yml)
-        resolved_url = _resolve_target_url(
-            site.deploy, target, source_label=str(site_yml)
-        )
+        resolved_url = _resolve_target_url(site.deploy, target, source_label=str(site_yml))
         html_dir = site.output_dir / "_build" / "html"
         if not html_dir.is_dir():
             typer.secho(
@@ -281,9 +249,7 @@ def deploy(
 @app.command()
 def clean(
     site_yml: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
-    all_: bool = typer.Option(
-        False, "--all", help="Also remove parameterized notebook output dirs."
-    ),
+    all_: bool = typer.Option(False, "--all", help="Also remove parameterized notebook output dirs."),
 ) -> None:
     """Remove a site's build artifacts. Idempotent."""
     site = load_site(site_yml)
@@ -333,12 +299,8 @@ def axe_check(
         readable=True,
         help="Site yml; build dir is derived.",
     ),
-    html: Optional[Path] = typer.Option(
-        None, "--html", exists=True, file_okay=False, help="Scan this directory."
-    ),
-    wcag: str = typer.Option(
-        "aa", "--wcag", help="WCAG conformance level: a, aa, or aaa."
-    ),
+    html: Optional[Path] = typer.Option(None, "--html", exists=True, file_okay=False, help="Scan this directory."),
+    wcag: str = typer.Option("aa", "--wcag", help="WCAG conformance level: a, aa, or aaa."),
     impact: str = typer.Option(
         "serious,critical",
         "--impact",
@@ -349,9 +311,7 @@ def axe_check(
         "--no-dedupe",
         help="Show one entry per page instead of grouping by rule.",
     ),
-    skip_axe_check: bool = typer.Option(
-        False, "--skip-axe-check", help="Skip the axe CLI pre-flight."
-    ),
+    skip_axe_check: bool = typer.Option(False, "--skip-axe-check", help="Skip the axe CLI pre-flight."),
     report: bool = typer.Option(
         False,
         "--report",
@@ -378,16 +338,10 @@ def axe_check(
         raise typer.BadParameter(f"--wcag must be one of: {', '.join(_WCAG_PRESETS)}")
     tags = _WCAG_PRESETS[wcag]
 
-    impacts = (
-        _ALL_IMPACTS
-        if impact == "all"
-        else {i.strip() for i in impact.split(",") if i.strip()}
-    )
+    impacts = _ALL_IMPACTS if impact == "all" else {i.strip() for i in impact.split(",") if i.strip()}
     unknown = impacts - _ALL_IMPACTS
     if unknown:
-        raise typer.BadParameter(
-            f"--impact: unknown levels {sorted(unknown)}; use {sorted(_ALL_IMPACTS)} or 'all'"
-        )
+        raise typer.BadParameter(f"--impact: unknown levels {sorted(unknown)}; use {sorted(_ALL_IMPACTS)} or 'all'")
 
     exit_code = run_check(
         yml_path=site_yml,

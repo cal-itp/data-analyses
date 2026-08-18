@@ -53,7 +53,7 @@ sites:
   - title: Transit Events Analysis
     name: transit_events
     source: https://github.com/cal-itp/gtfs-curator/tree/main/transit_events/
-    
+
 test_sites:
   - title: Basic Analyses Test
     name: _basic_analyses_test
