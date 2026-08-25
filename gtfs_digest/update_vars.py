@@ -2,9 +2,9 @@ from shared_utils import catalog_utils
 
 GTFS_DATA_DICT = catalog_utils.get_catalog("gtfs_analytics_data")
 
-analysis_month = "2026-06-01"
-last_year = "2025-06-01"
-previous_month = "2026-05-01"
+analysis_month = "2026-07-01"
+last_year = "2025-07-01"
+previous_month = "2026-06-01"
 
 file_name = analysis_month.replace("-", "_")[0:7]
 

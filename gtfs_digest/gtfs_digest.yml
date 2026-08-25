@@ -1,5 +1,7 @@
-directory: ./gtfs_digest/
-notebook: ./gtfs_digest/report_operator.ipynb
+readme: README.md
+title: GTFS Digest
+directory: .
+notebook: report_operator.ipynb
 parts:
 - caption: District 01-Eureka
   chapters:
@@ -389,8 +391,6 @@ parts:
   - params:
       analysis_name: University of California, Irvine
 
-readme: ./gtfs_digest/README.md
-title: GTFS Digest
 deploy:
   staging: gs://calitp-analysis-staging/gtfs_digest
   prod: gs://calitp-analysis/gtfs_digest
