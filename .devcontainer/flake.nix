@@ -28,21 +28,20 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             # Shell integration caching tool
-            nix-direnv
+            # nix-direnv
 
             # Core Python & Packaging
             python311
             wrappedUv
-            # uv
 
             # Standalone Tools
-            black
-            pre-commit
+            #black
+            #pre-commit
             nixfmt
 
             # System / Ops Utilities
             google-cloud-sdk
-            terraform
+            #terraform
             gdal
             gh
             git

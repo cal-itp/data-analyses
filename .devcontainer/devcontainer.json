@@ -5,16 +5,16 @@
     "ghcr.io/devcontainers/features/nix:1": {
       "version": "latest"
     },
-    "ghcr.io/devcontainers-community/features/direnv:1": {
-      "version": "latest"
-    },
+    // "ghcr.io/devcontainers-community/features/direnv:1": {
+    //   "version": "latest"
+    // },
     "ghcr.io/devcontainers/features/docker-in-docker:4.0.0": {
       "version": "latest",
       "moby": true
     }
   },
   "onCreateCommand": "sudo mkdir -p /etc/nix && echo 'experimental-features = nix-command flakes' | sudo tee -a /etc/nix/nix.conf && if [ -x $(command -v zsh) ]; then sudo mkdir -p /etc/zsh && echo 'eval \"$(direnv hook zsh)\"' | sudo tee -a /etc/zsh/zshrc; fi && if [ -x $(command -v fish) ]; then sudo mkdir -p /etc/fish/conf.d && echo 'direnv hook fish | source' | sudo tee /etc/fish/conf.d/direnv.fish; fi",
-  "postStartCommand": "direnv allow",
+  // "postStartCommand": "direnv allow",
   "containerEnv": {
     "LC_ALL": "C.UTF-8",
     "LANG": "C.UTF-8",
@@ -41,8 +41,9 @@
       },
       "extensions": [
         "jnoortheen.nix-ide",
-        "mkhl.direnv",
+        // "mkhl.direnv",
         "ms-python.python",
+        "ms-toolsai.jupyter",
         "tamasfe.even-better-toml",
         "ms-azuretools.vscode-docker",
         "davidanson.vscode-markdownlint",
