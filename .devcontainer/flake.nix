@@ -28,10 +28,9 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             # Shell integration caching tool
-            # nix-direnv
+            nix-direnv
 
             # Core Python & Packaging
-            python311
             wrappedUv
 
             # Standalone Tools
