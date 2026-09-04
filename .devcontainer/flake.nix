@@ -19,10 +19,10 @@
           system = system;
           config.allowUnfree = true;
         };
-        wrappedUv = pkgs.writeShellScriptBin "uv" ''
-          export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
-          exec ${pkgs.uv}/bin/uv "$@"
-        '';
+        # wrappedUv = pkgs.writeShellScriptBin "uv" ''
+        #   export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
+        #   exec ${pkgs.uv}/bin/uv "$@"
+        # '';
       in
       {
         devShells.default = pkgs.mkShell {
@@ -31,7 +31,7 @@
             nix-direnv
 
             # Core Python & Packaging
-            wrappedUv
+            uv
 
             # Standalone Tools
             #black
@@ -48,7 +48,11 @@
             rsync
             curl
             openssh
+            zlib
           ];
+
+          # Environment variables to make UV use a static python install
+          LD_LIBRARY_PATH = nixpkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc pkgs.zlib];
         };
       }
     );
