@@ -446,3 +446,7 @@
 2026-09-09 12:00:13.151 | INFO     | __main__:merge_in_vp_direction:87 - read vp_direction
 2026-09-09 12:01:32.075 | INFO     | __main__:merge_in_vp_direction:116 - 2026-08-12: export usable vp with direction: 0:01:24.263724
 2026-09-09 12:01:33.701 | INFO     | __main__:<module>:139 - 2026-08-12: pare down vp, add direction execution time: 0:05:27.578329
+2026-09-09 15:14:05.329 | INFO     | __main__:<module>:184 - compute dwell df: 0:05:31.345597
+2026-09-09 15:14:25.697 | INFO     | __main__:<module>:192 - unmerged vp with dwell time 2026-08-12: 0:05:51.713735
+2026-09-09 15:17:16.379 | INFO     | __main__:<module>:65 - merge with original and export: 0:01:07.372489
+2026-09-09 15:21:24.456 | INFO     | __main__:<module>:86 - 2026-08-12: condense vp for trip 0:03:49.187238
