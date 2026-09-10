@@ -149,3 +149,4 @@ portfolio/*
 !portfolio/*.txt
 !portfolio/*.toml
 !portfolio/*.yml
+.vscode/settings.json

@@ -11,6 +11,7 @@ from typing import Literal, Optional
 import pandas as pd
 from calitp_data_analysis import utils
 from calitp_data_analysis.gcs_pandas import GCSPandas
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
 from dask import compute, delayed
 from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling, helpers, segment_calcs
@@ -23,8 +24,12 @@ from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 def gcs_pandas():
     return GCSPandas()
 
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
 
-def merge_schedule_columns_for_speedmaps(df: pd.DataFrame, analysis_date: str):
+
+def merge_schedule_columns_for_speedmaps(df: pd.DataFrame, analysis_date: str, with_all_day: bool):
     """
     Merge in additional columns from scheduled trip table.
     Want route_short_name, as well as n_scheduled_trips and
@@ -34,7 +39,8 @@ def merge_schedule_columns_for_speedmaps(df: pd.DataFrame, analysis_date: str):
 
     time_buckets = gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)
 
-    trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols, get_pandas=True).merge(
+    trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols, get_pandas=True)
+    trips = trips.merge(
         time_buckets, on="trip_instance_key", how="inner"
     )
 
@@ -44,11 +50,19 @@ def merge_schedule_columns_for_speedmaps(df: pd.DataFrame, analysis_date: str):
     schedule_trip_counts = gtfs_schedule_wrangling.count_trips_by_group(
         trips, group_cols=route_cols + ["time_of_day"]
     ).rename(columns={"n_trips": "n_trips_sch"})
-
     # Add a trips per hour within each time-of-day bucket
     schedule_trip_counts["trips_hr_sch"] = schedule_trip_counts.apply(
         lambda x: round(x.n_trips_sch / time_helpers.HOURS_BY_TIME_OF_DAY[x.time_of_day], 3), axis=1
     )
+
+    if with_all_day:
+        schedule_trip_counts_all_day = gtfs_schedule_wrangling.count_trips_by_group(
+        trips, group_cols=route_cols
+            ).rename(columns={"n_trips": "n_trips_sch"}).assign(time_of_day = 'All Day')
+        schedule_trip_counts_all_day["trips_hr_sch"] = schedule_trip_counts.apply(
+        lambda x: round(x.n_trips_sch / 24, 3), axis=1 # use 24 hours for now
+        )
+        schedule_trip_counts = pd.concat([schedule_trip_counts, schedule_trip_counts_all_day])
 
     df2 = pd.merge(df, schedule_trip_counts, on=route_cols + ["time_of_day"], how="inner").merge(
         trips[route_cols + ["route_short_name"]].drop_duplicates(), on=route_cols, how="inner"
@@ -100,11 +114,12 @@ def aggregate_by_time_of_day(
         .pipe(segment_calcs.calculate_avg_speeds, group_cols)
         .assign(time_of_day = 'All Day')
     )
-    df = pd.concat([df_by_time_period, df_all_day])
+
+    df = delayed(pd.concat)([df_by_time_period, df_all_day], axis=0)
     
 
     if segment_type == "speedmap_segments":
-        df = delayed(merge_schedule_columns_for_speedmaps)(df, analysis_date).pipe(
+        df = delayed(merge_schedule_columns_for_speedmaps)(df, analysis_date, with_all_day = True).pipe(
             gtfs_schedule_wrangling.merge_operator_identifiers, [analysis_date], columns=CROSSWALK_COLS
         )
 
@@ -129,7 +144,8 @@ def aggregate_by_time_of_day(
     ]
     avg_speeds_with_geom = avg_speeds_with_geom.drop(columns=drop_cols).drop_duplicates()
 
-    utils.geoparquet_gcs_export(avg_speeds_with_geom, SEGMENT_GCS, f"{EXPORT_FILE}_{analysis_date}")
+    print(f'{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet')
+    gcs_geopandas().geo_data_frame_to_parquet(avg_speeds_with_geom, f'{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet')
 
     del avg_speeds_with_geom
 
