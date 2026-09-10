@@ -10,8 +10,6 @@ gcs_paths:
   SCHED_GCS: ${.GCS}gtfs_schedule/
   RT_SCHED_GCS: ${.GCS}rt_vs_schedule/
   SHARED_GCS: ${.GCS}shared_data/
-  PREDICTIONS_GCS: ${.GCS}rt_predictions/
-  DIGEST_GCS: ${.GCS}gtfs_digest/
   PUBLIC_GCS: "gs://calitp-publish-data-analysis/"
 
 speed_vars:
@@ -50,9 +48,6 @@ rt_vs_schedule_tables:
   schedule_rt_stop_times: "schedule_rt_stop_times"
   early_trip_minutes: -5
   late_trip_minutes: 5
-
-digest_tables:
-  dir: ${gcs_paths.RT_SCHED_GCS}
 
 rt_stop_times:
   dir: ${gcs_paths.SEGMENT_GCS}
@@ -137,18 +132,3 @@ shared_data:
   condensed_shn: condensed_shn_onekm
   road_cols: ["linearid", "mtfcc"]
   road_segment_cols: ["linearid", "mtfcc", "fullname", "segment_sequence"]
-
-gtfs_digest_rollup:
-  dir: ${gcs_paths.DIGEST_GCS}
-  schedule_rt_route_direction: "fct_monthly_schedule_rt_route_direction_summary"
-  route_map: "fct_monthly_routes"
-  operator_summary: "fct_monthly_operator_summary"
-  hourly_day_type_summary: "fct_operator_hourly_summary"
-  ntd_profile: "ntd_profile"
-  crosswalk: "crosswalk"
-  crosswalk_legislative: "crosswalk_transit_operators_legislative_districts"
-
-open_data_rollup:
-  bq_dataset: "mart_gtfs_rollup"
-  ca_transit_routes: "fct_monthly_routes"
-  ca_transit_stops: "fct_monthly_scheduled_stops"
