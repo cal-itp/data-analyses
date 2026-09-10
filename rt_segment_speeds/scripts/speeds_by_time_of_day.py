@@ -64,6 +64,8 @@ def aggregate_by_time_of_day(
     Set the time-of-day single day aggregation
     and calculate 20th/50th/80th percentile speeds.
     These daily metrics feed into multi-day metrics.
+
+    Try adding an "All Day" aggregation as well.
     """
     start = datetime.datetime.now()
 
@@ -79,7 +81,7 @@ def aggregate_by_time_of_day(
     OPERATOR_COLS = ["schedule_gtfs_dataset_key"]
     CROSSWALK_COLS = [*dict_inputs["crosswalk_cols"]]
 
-    group_cols = OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["stop_pair_name", "time_of_day"]
+    group_cols = OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["stop_pair_name"] 
 
     df = (
         delayed(gcs_pandas().read_parquet)(
@@ -90,8 +92,16 @@ def aggregate_by_time_of_day(
             filters=[[("speed_mph", "<=", MAX_SPEED)]],
         )
         .dropna(subset="speed_mph")
-        .pipe(segment_calcs.calculate_avg_speeds, group_cols)
     )
+    df_by_time_period = df.pipe(segment_calcs.calculate_avg_speeds, group_cols + ["time_of_day"])
+    df_all_day = (
+        df
+        .drop(columns=['time_of_day'])
+        .pipe(segment_calcs.calculate_avg_speeds, group_cols)
+        .assign(time_of_day = 'All Day')
+    )
+    df = pd.concat([df_by_time_period, df_all_day])
+    
 
     if segment_type == "speedmap_segments":
         df = delayed(merge_schedule_columns_for_speedmaps)(df, analysis_date).pipe(
