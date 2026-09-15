@@ -32,6 +32,11 @@
             # Standalone Tools
             nixfmt
 
+            # Portfolio Dependencies
+            nodejs_22
+            chromium
+            chromedriver
+
             # System / Ops Utilities
             google-cloud-sdk
             gdal
@@ -47,6 +52,13 @@
           ];
           # Set UV to use the local cache
           UV_CACHE_DIR="$/workspaces/data-analyses/.uv-cache";
+          # Node 17+ defaults to "verbatim" DNS ordering, which resolves
+          # localhost to ::1 (IPv6) first in this container. That makes
+          # myst's local build server (binds to the first resolved address)
+          # and its own page-export fetches (which hit 127.0.0.1) land on
+          # different loopback interfaces, causing ECONNREFUSED. Forcing
+          # IPv4-first keeps both sides consistent.
+          NODE_OPTIONS = "--dns-result-order=ipv4first";
         };
       }
     );
