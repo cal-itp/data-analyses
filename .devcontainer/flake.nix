@@ -19,10 +19,6 @@
           system = system;
           config.allowUnfree = true;
         };
-        # wrappedUv = pkgs.writeShellScriptBin "uv" ''
-        #   export LD_LIBRARY_PATH="${pkgs.stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH"
-        #   exec ${pkgs.uv}/bin/uv "$@"
-        # '';
       in
       {
         devShells.default = pkgs.mkShell {
@@ -34,25 +30,23 @@
             uv
 
             # Standalone Tools
-            #black
-            #pre-commit
             nixfmt
 
             # System / Ops Utilities
             google-cloud-sdk
-            #terraform
             gdal
             gh
             git
             gnumake
             rsync
             curl
-            openssh
+            # Kerberos-enabled build: Debian's /etc/ssh/ssh_config sets
+            # GSSAPIAuthentication, which plain `openssh` rejects with a warning
+            opensshWithKerberos
             zlib
           ];
-
-          # Environment variables to make UV use a static python install
-          LD_LIBRARY_PATH = nixpkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc pkgs.zlib];
+          # Set UV to use the local cache
+          UV_CACHE_DIR="$/workspaces/data-analyses/.uv-cache";
         };
       }
     );
