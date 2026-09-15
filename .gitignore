@@ -112,6 +112,7 @@ celerybeat.pid
 .env
 _env
 .venv
+.uv-cache/
 env/
 venv/
 ENV/
