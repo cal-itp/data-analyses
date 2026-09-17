@@ -38,7 +38,11 @@
             chromedriver
 
             # System / Ops Utilities
-            google-cloud-sdk
+
+            # Python >=3.13 enables VERIFY_X509_STRICT by default, which
+            # rejects the Caltrans SSL-inspection certs.
+            # Build gcloud against 3.12 to workaround.
+            (google-cloud-sdk.override { python314 = python312; })
             gdal
             gh
             git
