@@ -19,6 +19,10 @@
           system = system;
           config.allowUnfree = true;
         };
+        # utility to allow easy login to google cloud
+        glogin = pkgs.writeShellScriptBin "glogin" ''
+            gcloud auth application-default login --login-config=/workspaces/data-analyses/iac/login.json
+        '';
       in
       {
         devShells.default = pkgs.mkShell {
@@ -41,8 +45,8 @@
 
             # Python >=3.13 enables VERIFY_X509_STRICT by default, which
             # rejects the Caltrans SSL-inspection certs.
-            # Build gcloud against 3.12 to workaround.
             (google-cloud-sdk.override { python314 = python312; })
+            glogin
             gdal
             gh
             git
@@ -63,6 +67,12 @@
           # different loopback interfaces, causing ECONNREFUSED. Forcing
           # IPv4-first keeps both sides consistent.
           NODE_OPTIONS = "--dns-result-order=ipv4first";
+
+          # Set environment vars for CT SSL MITM certs
+          SSL_CERT_FILE = "/home/ssl_certs/ca-certificates.crt";
+          REQUESTS_CA_BUNDLE = "/home/ssl_certs/ca-certificates.crt";
+          #GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = "/home/ssl_certs/ca-certificates.crt";
+          #NIX_SSL_CERT_FILE =  "/home/ssl_certs/ca-certificates.crt";
         };
       }
     );
