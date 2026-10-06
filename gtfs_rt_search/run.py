@@ -57,12 +57,14 @@ def run_search(
     config_warnings: Optional[list[str]] = None,
     output_dir: Optional[Path] = None,
     metadata: Optional[pd.DataFrame] = None,
+    verbose: bool = False,
 ) -> pd.DataFrame:
     """
     Resolve -> poll -> summarize. Returns the per-feed summary frame and writes it to parquet.
 
     Pass `metadata` to supply warehouse rows directly and skip the BigQuery call (useful from a
-    notebook, or against a fixture).
+    notebook, or against a fixture). Pass `verbose` to print one line per HTTP request as it is
+    made, including the gap since that feed's previous request.
     """
     config_warnings = list(config_warnings or [])
     run_dir = (output_dir or config.output.dir) / _run_timestamp()
@@ -90,8 +92,14 @@ def run_search(
         f"({config.n_polls} ticks per feed); writing to {run_dir}"
     )
 
-    samples, poll_log = run_polling(to_poll, config, samples_dir)
-    print(f"collected {len(samples):,} position update(s) across {len(poll_log):,} poll(s)")
+    if verbose:
+        print(
+            f"approximately {config.n_polls * len(to_poll):,} requests total "
+            f"({config.n_polls:,} per feed); tracing each one below\n"
+        )
+
+    samples, poll_log = run_polling(to_poll, config, samples_dir, verbose=verbose)
+    print(f"\ncollected {len(samples):,} position update(s) across {len(poll_log):,} poll(s)")
 
     summary, gaps = summarize_run(samples, poll_log, config, targets, config_warnings)
 
@@ -115,6 +123,12 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     parser.add_argument("--config", default="config.yml", help="path to the YAML config (default: config.yml)")
     parser.add_argument("--output-dir", default=None, help="override output.dir from the config")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="print one line per HTTP request as it is made, with the gap since that feed's previous request",
+    )
     args = parser.parse_args(argv)
 
     config, warnings = load_config(args.config)
@@ -122,6 +136,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         config,
         config_warnings=warnings,
         output_dir=Path(args.output_dir) if args.output_dir else None,
+        verbose=args.verbose,
     )
     return 0
 

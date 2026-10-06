@@ -1,9 +1,17 @@
 import pandas as pd
 import pytest
+import requests
 from config import CriteriaConfig, OutputConfig, SamplingConfig, SearchConfig
 from feeds import FeedTarget
 from google.transit import gtfs_realtime_pb2
-from poller import SAMPLE_COLUMNS, _FeedWorker, parse_feed_message, slugify
+from poller import (
+    _TRACE_NAME_WIDTH,
+    SAMPLE_COLUMNS,
+    _FeedWorker,
+    _fit,
+    parse_feed_message,
+    slugify,
+)
 
 FEED = "Test Feed"
 
@@ -233,3 +241,213 @@ def test_sample_rows_match_the_declared_schema():
     # And the frame built from them is well-formed.
     df = pd.DataFrame(worker.sample_rows, columns=SAMPLE_COLUMNS)
     assert list(df.columns) == SAMPLE_COLUMNS
+
+
+# -- verbose tracing -------------------------------------------------------------------
+
+
+class FakeResponse:
+    def __init__(self, content=b"", status_code=200, raise_exc=None):
+        self.content = content
+        self.status_code = status_code
+        self._raise_exc = raise_exc
+
+    def raise_for_status(self):
+        if self._raise_exc is not None:
+            raise self._raise_exc
+
+
+class FakeSession:
+    """Stands in for requests.Session so _fetch_once can run without network."""
+
+    def __init__(self, outcome):
+        self.outcome = outcome
+        self.calls = 0
+
+    def get(self, url, timeout=None, headers=None):
+        self.calls += 1
+        if isinstance(self.outcome, Exception):
+            raise self.outcome
+        return self.outcome
+
+
+def count_prints(monkeypatch):
+    """Capture every print call so 'one call per request' can be asserted literally."""
+    calls = []
+    import builtins
+
+    real_print = builtins.print
+
+    def spy(*args, **kwargs):
+        calls.append(" ".join(str(a) for a in args))
+        return real_print(*args, **kwargs)
+
+    monkeypatch.setattr(builtins, "print", spy)
+    return calls
+
+
+def good_response():
+    content = build_feed_message(
+        [{"entity_id": "e1", "vehicle_id": "b1", "timestamp": 100, "lat": 34.0, "lon": -118.0}]
+    )
+    return FakeResponse(content=content, status_code=200)
+
+
+def test_verbose_prints_exactly_one_line_per_request(monkeypatch):
+    worker = make_worker()
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+
+    worker._fetch_once(FakeSession(good_response()), 0, 0.0)
+    assert len(calls) == 1
+
+    worker._fetch_once(FakeSession(good_response()), 1, 5.0)
+    assert len(calls) == 2
+
+
+def test_verbose_off_prints_nothing(monkeypatch):
+    worker = make_worker()
+    calls = count_prints(monkeypatch)
+    worker._fetch_once(FakeSession(good_response()), 0, 0.0)
+    assert calls == []
+    # The poll is still logged; only the printing is suppressed.
+    assert len(worker.poll_log_rows) == 1
+
+
+def test_verbose_line_carries_tick_status_and_vehicle_count(monkeypatch):
+    worker = make_worker()
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+    worker._fetch_once(FakeSession(good_response()), 7, 0.0)
+    line = calls[0]
+    assert "#7" in line
+    assert "200" in line
+    assert "Test Feed" in line
+
+
+def test_since_column_is_blank_on_first_request_then_shows_the_gap(monkeypatch):
+    worker = make_worker()
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+
+    worker._fetch_once(FakeSession(good_response()), 0, 0.0)
+    # Nothing to compare the first request against.
+    assert "-" in calls[0]
+
+    worker._last_request_monotonic -= 5.0  # pretend the previous request was 5s ago
+    worker._fetch_once(FakeSession(good_response()), 1, 5.0)
+    assert "5.0" in calls[1]
+
+
+def test_error_response_is_printed_with_its_detail(monkeypatch):
+    worker = make_worker()
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+
+    exc = requests.exceptions.HTTPError("503 Server Error: Service Unavailable for url: http://x/vp")
+    exc.response = FakeResponse(status_code=503)
+    worker._fetch_once(FakeSession(exc), 3, 0.0)
+
+    # Still one print call, with the error detail attached to the same line.
+    assert len(calls) == 1
+    assert "503" in calls[0]
+    assert "http_error" in calls[0]
+    assert "Service Unavailable" in calls[0]
+
+
+def test_rate_limit_response_is_visible(monkeypatch):
+    """429 is the response that matters most for API-key feeds, so it must be legible."""
+    worker = make_worker()
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+
+    exc = requests.exceptions.HTTPError("429 Client Error: Too Many Requests for url: http://x/vp")
+    exc.response = FakeResponse(status_code=429)
+    worker._fetch_once(FakeSession(exc), 4, 0.0)
+
+    assert "429" in calls[0]
+    assert "Too Many Requests" in calls[0]
+    assert worker.poll_log_rows[0]["error_type"] == "http_error"
+    assert worker.poll_log_rows[0]["http_status"] == 429
+
+
+def test_timeout_is_traced_without_a_status(monkeypatch):
+    worker = make_worker()
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+    worker._fetch_once(FakeSession(requests.exceptions.Timeout("timed out")), 2, 0.0)
+    assert len(calls) == 1
+    assert "timeout" in calls[0]
+
+
+def test_fetch_never_raises_and_always_logs_one_row():
+    """The finally block must log exactly one poll row whatever the outcome."""
+    for outcome in (
+        good_response(),
+        requests.exceptions.Timeout("timed out"),
+        requests.exceptions.SSLError("bad cert"),
+        FakeResponse(content=b"not a protobuf", status_code=200),
+    ):
+        worker = make_worker()
+        worker._fetch_once(FakeSession(outcome), 0, 0.0)
+        assert len(worker.poll_log_rows) == 1
+
+
+def test_long_feed_names_are_truncated_to_keep_columns_aligned(monkeypatch):
+    long_name = "Antelope Valley Transit Authority Vehicle Positions"
+    assert len(_fit(long_name, _TRACE_NAME_WIDTH)) == _TRACE_NAME_WIDTH
+    assert len(_fit("short", _TRACE_NAME_WIDTH)) == _TRACE_NAME_WIDTH
+
+    worker = make_worker()
+    worker.target = FeedTarget(long_name, "ok", url="http://x/vp")
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+    worker._fetch_once(FakeSession(good_response()), 0, 0.0)
+    assert long_name[:20] in calls[0]
+
+
+def test_redact_masks_credentials_in_urls():
+    from poller import redact
+
+    assert redact("...for url: https://api.511.org/vp?api_key=abc123&agency=EM") == (
+        "...for url: https://api.511.org/vp?api_key=***&agency=EM"
+    )
+    # Case and separator variations publishers actually use.
+    for param in ("API_KEY", "apikey", "api-key", "token", "access_token", "secret", "auth"):
+        assert "***" in redact(f"https://x/vp?{param}=s3cret")
+        assert "s3cret" not in redact(f"https://x/vp?{param}=s3cret")
+    # Non-secret params are left alone.
+    assert redact("https://x/vp?agency=EM&format=pb") == "https://x/vp?agency=EM&format=pb"
+    assert redact(None) is None
+    assert redact("") == ""
+
+
+def test_api_key_is_not_printed_in_a_traced_error(monkeypatch):
+    """Verbose mode exists to watch keyed feeds, so it must not echo the key."""
+    worker = make_worker()
+    worker.target = FeedTarget("Keyed Feed", "ok", url="https://api.511.org/vp?api_key=SUPERSECRET")
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+
+    exc = requests.exceptions.HTTPError(
+        "429 Client Error: Too Many Requests for url: https://api.511.org/vp?api_key=SUPERSECRET"
+    )
+    exc.response = FakeResponse(status_code=429)
+    worker._fetch_once(FakeSession(exc), 0, 0.0)
+
+    assert "SUPERSECRET" not in calls[0]
+    assert "api_key=***" in calls[0]
+    assert "429" in calls[0]
+
+
+def test_error_rows_keep_the_latency_column_aligned(monkeypatch):
+    """A long error_type must not shunt later columns out of line."""
+    from poller import TRACE_HEADER
+
+    worker = make_worker()
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+    worker._fetch_once(FakeSession(requests.exceptions.ConnectionError("no route")), 0, 0.0)
+
+    first_line = calls[0].split("\n")[0]
+    assert len(first_line) == len(TRACE_HEADER), (len(first_line), len(TRACE_HEADER))

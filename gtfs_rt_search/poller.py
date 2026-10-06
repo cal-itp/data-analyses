@@ -12,6 +12,7 @@ import dataclasses
 import re
 import threading
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -23,6 +24,18 @@ from google.transit import gtfs_realtime_pb2
 
 # How late a tick may start before we give up on it rather than chase the schedule.
 LATE_TOLERANCE_SECONDS = 0.5
+
+# Verbose tracing is emitted from every feed thread at once, so serialise it: without this the
+# lines interleave and the timings become unreadable, which defeats the point of tracing them.
+_TRACE_LOCK = threading.Lock()
+
+# Width of the feed-name column in verbose output.
+_TRACE_NAME_WIDTH = 28
+
+TRACE_HEADER = (
+    f"{'time':<12}  {'feed':<{_TRACE_NAME_WIDTH}}  {'tick':>5}  {'since':>7}  "
+    f"{'status':>6}  {'size':>7}  {'vehicles':>8}  {'latency':>8}"
+)
 
 ERROR_OK = "ok"
 ERROR_TIMEOUT = "timeout"
@@ -95,6 +108,39 @@ def sample_frame(rows: list[dict[str, Any]]) -> pd.DataFrame:
 def slugify(name: str) -> str:
     """Filesystem-safe feed name for a parquet partition directory."""
     return _SLUG_RE.sub("-", name.lower()).strip("-") or "feed"
+
+
+def _fit(text: str, width: int) -> str:
+    """Pad or truncate to an exact width so verbose columns stay aligned."""
+    if len(text) <= width:
+        return f"{text:<{width}}"
+    return text[: width - 1] + "."
+
+
+# Query parameters whose values are credentials. Feed URLs carry keys inline (511 uses
+# ?api_key=...), and requests embeds the full URL in its exception messages, so anything printed
+# or logged has to be scrubbed first.
+_SECRET_PARAM_RE = re.compile(
+    r"([?&](?:api[_-]?key|key|token|access[_-]?token|secret|password|passwd|auth[a-z_]*)=)([^&\s]+)",
+    re.IGNORECASE,
+)
+
+
+def redact(text: Optional[str]) -> Optional[str]:
+    """Mask credential values in any URL appearing in text."""
+    if not text:
+        return text
+    return _SECRET_PARAM_RE.sub(r"\1***", text)
+
+
+def _format_size(n_bytes: Optional[int]) -> str:
+    if n_bytes is None:
+        return f"{'-':>7}"
+    if n_bytes < 1024:
+        return f"{n_bytes:6d}B"
+    if n_bytes < 1024 * 1024:
+        return f"{n_bytes / 1024:6.1f}K"
+    return f"{n_bytes / (1024 * 1024):6.1f}M"
 
 
 @dataclasses.dataclass
@@ -203,12 +249,14 @@ class _FeedWorker:
         semaphore: threading.Semaphore,
         samples_dir: Optional[Path],
         stop_event: threading.Event,
+        verbose: bool = False,
     ):
         self.target = target
         self.config = config
         self.semaphore = semaphore
         self.samples_dir = samples_dir
         self.stop_event = stop_event
+        self.verbose = verbose
 
         self.poll_log_rows: list[dict[str, Any]] = []
         self.sample_rows: list[dict[str, Any]] = []
@@ -220,6 +268,10 @@ class _FeedWorker:
         self._last_seen_poll_seq: dict[str, int] = {}
         self._absence_pending: dict[str, bool] = {}
         self._last_ok_poll_seq: Optional[int] = None
+
+        # When this feed last actually issued a request, for the "since" column. Measured per
+        # feed, so it shows the real spacing between pings rather than the intended cadence.
+        self._last_request_monotonic: Optional[float] = None
 
     # -- recording -------------------------------------------------------------------
 
@@ -292,9 +344,58 @@ class _FeedWorker:
 
     # -- fetching --------------------------------------------------------------------
 
+    def _trace(
+        self,
+        poll_seq: int,
+        requested_at: float,
+        since_last: Optional[float],
+        latency_ms: Optional[float],
+        http_status: Optional[int],
+        n_bytes: Optional[int],
+        n_entities: Optional[int],
+        error_type: str,
+        error_msg: Optional[str],
+    ) -> None:
+        """
+        Emit exactly one line per request, under a lock so threads cannot interleave.
+
+        The "since" column is the gap since this feed's previous request, which is the number to
+        watch when a feed is rate limited: it should track poll_interval_seconds, and anything
+        materially smaller is a burst.
+        """
+        stamp = datetime.fromtimestamp(requested_at).strftime("%H:%M:%S.%f")[:-3]
+        since = f"{since_last:>6.2f}s" if since_last is not None else f"{'-':>7}"
+        latency = f"{latency_ms:>6.0f}ms" if latency_ms is not None else f"{'-':>8}"
+
+        line = f"{stamp:<12}  {_fit(self.target.feed_name, _TRACE_NAME_WIDTH)}  " f"{'#' + str(poll_seq):>5}  {since}  "
+        if error_type == ERROR_OK:
+            line += f"{http_status or 0:>6}  {_format_size(n_bytes)}  {n_entities:>8}  {latency}"
+        else:
+            status = str(http_status) if http_status is not None else "-"
+            # error_type spans the size and vehicles columns, which are meaningless on a failure,
+            # so the latency column still lines up with the header.
+            line += f"{status:>6}  {error_type:<17}  {latency}"
+            if error_msg:
+                # Same print call, so the detail can never be split from its request line, and
+                # redacted so an inline api_key never reaches the terminal or a captured log.
+                line += f"\n{'':<14}└─ {redact(error_msg)}"
+
+        with _TRACE_LOCK:
+            print(line, flush=True)
+
     def _fetch_once(self, session: requests.Session, poll_seq: int, scheduled_at: float) -> None:
         requested_at = time.time()
         started = time.monotonic()
+
+        since_last = None if self._last_request_monotonic is None else started - self._last_request_monotonic
+        self._last_request_monotonic = started
+
+        latency_ms: Optional[float] = None
+        http_status: Optional[int] = None
+        n_bytes: Optional[int] = None
+        n_entities: Optional[int] = None
+        error_type, error_msg = ERROR_OK, None
+
         try:
             response = session.get(
                 self.target.url,
@@ -304,32 +405,40 @@ class _FeedWorker:
             latency_ms = (time.monotonic() - started) * 1000.0
             response.raise_for_status()
             records, _ = parse_feed_message(response.content)
+            http_status = response.status_code
+            n_bytes = len(response.content)
+            n_entities = len(records)
             self._record_entities(poll_seq, scheduled_at, requested_at, records)
-            self._log_poll(
-                poll_seq=poll_seq,
-                scheduled_at=scheduled_at,
-                requested_at=requested_at,
-                http_status=response.status_code,
-                n_bytes=len(response.content),
-                latency_ms=latency_ms,
-                error_type=ERROR_OK,
-                error_msg=None,
-                n_entities=len(records),
-            )
         except Exception as exc:  # noqa: BLE001 - every failure must be logged, never raised
             error_type, error_msg = _classify_error(exc)
-            status = getattr(getattr(exc, "response", None), "status_code", None)
+            http_status = getattr(getattr(exc, "response", None), "status_code", None)
+            if latency_ms is None:
+                latency_ms = (time.monotonic() - started) * 1000.0
+        finally:
+            # One log row and, in verbose mode, one printed line per request - whatever happened.
             self._log_poll(
                 poll_seq=poll_seq,
                 scheduled_at=scheduled_at,
                 requested_at=requested_at,
-                http_status=status,
-                n_bytes=None,
-                latency_ms=(time.monotonic() - started) * 1000.0,
+                http_status=http_status,
+                n_bytes=n_bytes,
+                latency_ms=latency_ms,
                 error_type=error_type,
                 error_msg=error_msg,
-                n_entities=None,
+                n_entities=n_entities,
             )
+            if self.verbose:
+                self._trace(
+                    poll_seq=poll_seq,
+                    requested_at=requested_at,
+                    since_last=since_last,
+                    latency_ms=latency_ms,
+                    http_status=http_status,
+                    n_bytes=n_bytes,
+                    n_entities=n_entities,
+                    error_type=error_type,
+                    error_msg=error_msg,
+                )
 
     def run(self, t0: float) -> None:
         """Poll on deadlines anchored to t0 so the cadence cannot drift over a long run."""
@@ -391,19 +500,25 @@ def run_polling(
     targets: list[FeedTarget],
     config: SearchConfig,
     samples_dir: Optional[Path] = None,
+    verbose: bool = False,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Poll every pollable target for the configured duration.
 
     Returns (samples_df, poll_log_df). When samples_dir is given, samples are flushed to parquet
     parts as the run proceeds and read back at the end; otherwise they are held in memory.
+
+    With verbose, every request prints one line as it is made - see _FeedWorker._trace.
     """
     if not targets:
         return sample_frame([]), pd.DataFrame(columns=POLL_LOG_COLUMNS)
 
     semaphore = threading.BoundedSemaphore(config.sampling.max_concurrent_requests)
     stop_event = threading.Event()
-    workers = [_FeedWorker(t, config, semaphore, samples_dir, stop_event) for t in targets]
+    workers = [_FeedWorker(t, config, semaphore, samples_dir, stop_event, verbose) for t in targets]
+
+    if verbose:
+        print(TRACE_HEADER, flush=True)
 
     t0 = time.monotonic()
     threads = [

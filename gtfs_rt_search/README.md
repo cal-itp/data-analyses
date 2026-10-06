@@ -32,6 +32,23 @@ same convention as `gtfs_funnel/Makefile`.
 > root. `gtfs-realtime-bindings` is declared both here and in the root `dev` group, so the shared
 > environment already has it.
 
+### Tracing requests
+
+`-v` / `--verbose` prints one line per HTTP request as it is made:
+
+```
+time          feed                           tick    since  status     size  vehicles   latency
+13:08:09.450  Long Beach VehiclePositions      #0        -     200     4.4K       131      90ms
+13:08:10.140  Long Beach VehiclePositions      #1    5.29s     200     4.4K       131      91ms
+13:08:10.265  Antelope Valley Transit Aut.     #1    0.58s     429  http_error              0ms
+              └─ 429 Client Error: Too Many Requests for url: https://api.511.org/vp?api_key=***
+```
+
+**`since` is the column to watch**: the gap since that feed's *previous actual request*, not the
+intended cadence. It should track `poll_interval_seconds`; anything materially smaller is a burst.
+Failures print the response detail on a continuation line of the same output, with credentials in
+the URL masked.
+
 Feed names in `config.yml` must match `dim_gtfs_datasets.name` exactly for a current
 `type = 'vehicle_positions'` row. An unknown name is a hard error, not a silent skip.
 
@@ -94,6 +111,10 @@ Feeds that never get polled still appear, with a status saying why: `skipped_aut
 - **Absence is tracked in the poller**, not derived later. The timestamp dedupe discards
   present-but-unchanged observations, so `had_absence_since_last_change` is the only surviving
   record of a vehicle vanishing from a feed.
+- **Verbose tracing is redacted, the parquet outputs are not (yet).** `poller.redact` masks
+  credential query parameters in printed error text, but `feed_summary.parquet` still stores the
+  raw `url` (`metrics.py`) and `poll_log.parquet` still stores the raw `error_msg`. Fix that before
+  enabling feeds whose URLs carry inline API keys.
 - **`gtfs-realtime-bindings` is pinned `<3`.** 3.0.0 requires `protobuf>=7.34`, but the
   `google-api-core` / `googleapis-common-protos` / `grpcio-status` stack caps `protobuf<7`.
 - `dim_gtfs_datasets.csv` (a full local export) is gitignored; `tests/fixtures/` holds a trimmed
