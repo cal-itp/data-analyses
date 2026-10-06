@@ -1,0 +1,29 @@
+# Which GTFS-RT VehiclePositions feeds publish fresh positions often enough for speed analysis?
+#
+# Names must match dim_gtfs_datasets.name exactly for a current type='vehicle_positions' row.
+# An unknown name is a hard error rather than a silent skip - see feeds.resolve_feeds.
+feeds:
+  - VCTC Vehicle Positions
+  - Long Beach VehiclePositions
+  # Resolution paths worth knowing about, left commented so a default run stays clean:
+  # - Big Blue Bus Swiftly Vehicle Positions      # has_authentication + private + deprecated -> skipped_auth
+  # - Emery Go-Round TripShot Vehicle Positions   # current replacement for the retired egrshuttle feed
+
+sampling:
+  duration_minutes: 30
+  poll_interval_seconds: 5
+  request_timeout_seconds: 10
+  max_concurrent_requests: 10
+  flush_every_polls: 200
+
+criteria:
+  movement_threshold_meters: 10 # k - a position must move this far for the gap to count
+  max_update_gap_seconds: 20 # n - and that movement gap must be no longer than this
+  min_pass_fraction: 0.9
+  stale_gap_seconds: 600 # drop gaps longer than this as dropouts, not cadence
+  exclude_absence_gaps: true # drop gaps straddling a failed/skipped poll or a vehicle's absence
+
+output:
+  dir: ./outputs
+  percentiles: [10, 50, 85]
+  write_raw_samples: true

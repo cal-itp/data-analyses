@@ -7,6 +7,7 @@ members = [
     "cal-itp-data-analyses",
     "calitp-data-analysis",
     "calitp-portfolio",
+    "gtfs-rt-search",
     "portfolio",
     "rt-analysis",
     "sb125-analyses",
@@ -368,6 +369,7 @@ source = { virtual = "." }
 dev = [
     { name = "black" },
     { name = "calitp-portfolio" },
+    { name = "gtfs-realtime-bindings" },
     { name = "ipykernel" },
     { name = "isort" },
     { name = "nbdime" },
@@ -390,6 +392,7 @@ portfolio = [
 test = [
     { name = "black" },
     { name = "calitp-portfolio" },
+    { name = "gtfs-realtime-bindings" },
     { name = "ipykernel" },
     { name = "isort" },
     { name = "nbdime" },
@@ -410,6 +413,7 @@ test = [
 dev = [
     { name = "black", specifier = "==24.10.0" },
     { name = "calitp-portfolio", editable = "calitp-portfolio" },
+    { name = "gtfs-realtime-bindings" },
     { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "isort", specifier = "==5.10.1" },
     { name = "nbdime", specifier = ">=4.0.4" },
@@ -432,6 +436,7 @@ portfolio = [
 test = [
     { name = "black", specifier = "==24.10.0" },
     { name = "calitp-portfolio", editable = "calitp-portfolio" },
+    { name = "gtfs-realtime-bindings" },
     { name = "ipykernel", specifier = ">=6.29.0" },
     { name = "isort", specifier = "==5.10.1" },
     { name = "nbdime", specifier = ">=4.0.4" },
@@ -1374,6 +1379,37 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/e0/e4/028aee7667f7e41765ab694d1eba18682417f76695b7293dd9579cdc3bd9/gt_extras-0.0.8.tar.gz", hash = "sha256:c59dde8c8ff99b72ff2f4ad7c29de075565b9ca74f6ba8abea0e4b25e05a376c", size = 1485858, upload-time = "2025-08-18T16:44:22.443Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/62/b1/3b990d3c0c0414e68d7abd679fc63271dafbf156404a3a393ebf446e85f9/gt_extras-0.0.8-py3-none-any.whl", hash = "sha256:24df115734ba6b2d49f6773bc2de5e711382b6ebd3c45b17843b0b46800bd70a", size = 90033, upload-time = "2025-08-18T16:44:20.961Z" },
+]
+
+[[package]]
+name = "gtfs-realtime-bindings"
+version = "2.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "protobuf" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/42/63/3e3d190df599b6d25e2c0793f6653bb696c1be8480263ef417ea70a40f25/gtfs_realtime_bindings-2.2.0.tar.gz", hash = "sha256:1e184075ff6aae1f8e8c91ae28eb946af5e5b656b743a41a7bca37818784886b", size = 12013, upload-time = "2026-07-29T19:12:47.132Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/14/a73fbb70b7948cd2d2f1c48846889fc6c944a6aede25a31d8111a1d48dcf/gtfs_realtime_bindings-2.2.0-py3-none-any.whl", hash = "sha256:4f222a962bcb8715d9305cc08e7f7662cc70e7479f377e2694439a50724bc676", size = 11297, upload-time = "2026-07-29T19:12:46.089Z" },
+]
+
+[[package]]
+name = "gtfs-rt-search"
+version = "0.1.0"
+source = { virtual = "gtfs_rt_search" }
+dependencies = [
+    { name = "calitp-data-analysis" },
+    { name = "gtfs-realtime-bindings" },
+    { name = "pyarrow" },
+    { name = "pyyaml" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "calitp-data-analysis", editable = "calitp-data-analysis" },
+    { name = "gtfs-realtime-bindings", specifier = ">=2.2.0,<3" },
+    { name = "pyarrow" },
+    { name = "pyyaml" },
 ]
 
 [[package]]

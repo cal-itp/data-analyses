@@ -2,7 +2,9 @@
   description = "Cal-ITP Data Infrastructure Dev Environment";
 
   inputs = {
+    #claude-code.url = "github:sadjow/claude-code-nix";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    #nixpkgs.overlays = [ claude-code.overlays.default ];
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -29,6 +31,8 @@
           buildInputs = with pkgs; [
             # Shell integration caching tool
             nix-direnv
+
+            claude-code
 
             # Core Python & Packaging
             uv

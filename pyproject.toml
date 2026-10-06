@@ -15,6 +15,7 @@ members = [
     "rt_delay",
     "thruway_intercity_bus",
     "sb125_analyses",
+    "gtfs_rt_search",
 ]
 
 [tool.uv]
@@ -23,6 +24,9 @@ package = false
 [dependency-groups]
 dev = [
     "shared-utils",
+    # Listed only so the shared workspace venv gets it: gtfs_rt_search sets package = false and
+    # so cannot be depended on directly. Its pyproject.toml holds the version constraint.
+    "gtfs-realtime-bindings",
     "segment-speed-utils",
     "rt-analysis",
     "calitp-portfolio",

@@ -1,0 +1,108 @@
+# gtfs_rt_search
+
+Which GTFS-Realtime VehiclePositions feeds actually publish fresh positions often enough to be
+useful for speed/delay analysis?
+
+The warehouse archive can't answer that cleanly, so this tool polls the **live** feed URLs
+directly and measures the update cadence it observes.
+
+## The measurement
+
+For each vehicle, when its position moves at least **k** metres between two consecutive updates,
+the gap between those updates must be at most **n** seconds. A feed is **frequent** when at least
+`min_pass_fraction` of those movement gaps pass.
+
+Alongside the pass/fail, every run reports p10/p50/p85 of update gaps (no movement check) and of
+movement gaps, so a feed that just misses the threshold is still legible.
+
+## Usage
+
+```bash
+cd gtfs_rt_search
+python run.py --config config.yml      # or: make search
+```
+
+This uses the shared repo environment created by `make install_env` at the root, following the
+same convention as `gtfs_funnel/Makefile`.
+
+> [!WARNING]
+> Do **not** run `uv sync` or `uv run` from inside this directory. The uv workspace shares one
+> venv at the repo root, so syncing from a member directory prunes it to just that member's
+> dependencies and uninstalls everything else. Recover with `uv sync --all-groups` from the repo
+> root. `gtfs-realtime-bindings` is declared both here and in the root `dev` group, so the shared
+> environment already has it.
+
+Feed names in `config.yml` must match `dim_gtfs_datasets.name` exactly for a current
+`type = 'vehicle_positions'` row. An unknown name is a hard error, not a silent skip.
+
+Resolving names needs BigQuery credentials — run `glogin` first.
+
+From a notebook:
+
+```python
+from config import load_config
+from run import run_search
+
+config, warnings = load_config("config.yml")
+summary = run_search(config, warnings)
+```
+
+Outputs land in `outputs/<run_ts>/`: `feed_summary.parquet`, `poll_log.parquet`, `gaps.parquet`,
+and `raw_samples/feed=<slug>/part-*.parquet` when `write_raw_samples` is on. Samples are flushed
+during the run, so a Ctrl-C still leaves usable data.
+
+## Reading the output
+
+`is_frequent` is the headline, but it is `None` whenever the measurement can't support a verdict.
+Three guards exist because each of these can otherwise manufacture a false "frequent":
+
+| Field | Meaning |
+|---|---|
+| `status = degraded_timestamps` | The feed mostly lacks `vehicle.timestamp`, so gaps fall back to our own poll clock and every gap would look like `poll_interval`. `is_frequent` is withheld. |
+| `resolution_limited` | `update_gap_p50` is at most 1.5x the poll interval — we polled too slowly to resolve the real cadence. |
+| `unstable_vehicle_ids` | More than 3x as many distinct vehicle ids as the median fleet per poll. Ids are churning, so every update looks like a first sighting. |
+
+`is_regional` marks a combined-regional feed covering several operators — don't read such a result
+as one agency's cadence.
+
+Exclusions are always counted, never silently dropped: `n_excluded_stale`, `n_excluded_absence`,
+`n_excluded_failed_poll`, `n_invalid_gaps`. If those are a large share of total gaps, the pass
+fraction is resting on thin data.
+
+Feeds that never get polled still appear, with a status saying why: `skipped_auth`,
+`ambiguous_name`, `unresolved_url_template`, `skipped_no_url`.
+
+## Layout
+
+| File | Role |
+|---|---|
+| `config.py` | YAML → frozen dataclasses, with validation and unknown-key rejection |
+| `feeds.py` | Feed name → URL against `dim_gtfs_datasets` |
+| `poller.py` | Fixed-cadence polling and protobuf extraction |
+| `metrics.py` | Gaps, haversine, percentiles, the frequent determination |
+| `run.py` | CLI and `run_search()` |
+
+## Notes for maintainers
+
+- **`has_authentication` is nullable and never `False`** — it is `True` or `NULL`. Since
+  `bool(float("nan")) is True` in Python, a plain truthiness test would skip every feed. Use
+  `feeds._is_true`.
+- **Gaps pair in poll order, not timestamp order.** Sorting by timestamp would reorder a feed's
+  backwards timestamp into a plausible positive gap and the `is_invalid` check could never fire.
+- **`median_vehicles_per_poll` comes from `poll_log.n_entities`**, not from the samples — samples
+  hold only timestamp changes and so cannot report fleet size.
+- **Absence is tracked in the poller**, not derived later. The timestamp dedupe discards
+  present-but-unchanged observations, so `had_absence_since_last_change` is the only surviving
+  record of a vehicle vanishing from a feed.
+- **`gtfs-realtime-bindings` is pinned `<3`.** 3.0.0 requires `protobuf>=7.34`, but the
+  `google-api-core` / `googleapis-common-protos` / `grpcio-status` stack caps `protobuf<7`.
+- `dim_gtfs_datasets.csv` (a full local export) is gitignored; `tests/fixtures/` holds a trimmed
+  copy for the offline tests.
+
+## Tests
+
+```bash
+pytest tests
+```
+
+All offline — no credentials, no network.

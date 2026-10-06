@@ -1,0 +1,16 @@
+[project]
+name = "gtfs-rt-search"
+version = "0.1.0"
+requires-python = ">=3.11.0, <3.12.0"
+dependencies = [
+    "calitp-data-analysis",             # BigQuery engine; brings pandas + requests
+    "gtfs-realtime-bindings>=2.2.0,<3", # <3 keeps protobuf<7, which the google-* stack requires
+    "pyyaml",
+    "pyarrow",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+calitp-data-analysis = { workspace = true }
