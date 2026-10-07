@@ -49,6 +49,29 @@ intended cadence. It should track `poll_interval_seconds`; anything materially s
 Failures print the response detail on a continuation line of the same output, with credentials in
 the URL masked.
 
+### Request-rate protection
+
+Two guards keep the request rate honest, which matters for feeds behind an API key. Neither ever
+issues an extra request; both decline to send and record why, so suppressed ticks are visible in
+`poll_log.parquet` rather than silent.
+
+| Guard | Behaviour | Logged as |
+|---|---|---|
+| **Spacing floor** | Two requests to one feed can never land closer than `min_spacing_seconds`. Checked immediately before the request, *after* the semaphore — the absolute-deadline schedule alone does not prevent a burst, because a thread can wait nearly a whole interval for a slot and then find its next tick already due. | `skipped_rate` |
+| **Rate-limit backoff** | A `429` or `503` suspends that feed. `Retry-After` is honoured exactly and uncapped; without it, backoff is exponential from the poll interval (5s → 10s → 20s → …) capped at `BACKOFF_MAX_SECONDS`. A success resets the ladder. | `skipped_backoff` |
+
+The floor is `poll_interval_seconds - LATE_TOLERANCE_SECONDS` (clamped to half the interval), which
+is derived rather than picked: a tick may start up to `LATE_TOLERANCE_SECONDS` late, so one firing
+late followed by one firing on time are genuinely that much closer than the interval. Using the
+interval itself would skip roughly half of all ticks on ordinary jitter.
+
+A breach skips the tick rather than waiting it out. Waiting would shift the feed permanently behind
+its schedule; skipping costs one sample and keeps the absolute cadence intact, matching the existing
+"skip rather than catch up" rule.
+
+`403` deliberately does **not** trigger backoff: publishers use it both for quota exhaustion and for
+a bad key, and silently backing off would hide the latter.
+
 Feed names in `config.yml` must match `dim_gtfs_datasets.name` exactly for a current
 `type = 'vehicle_positions'` row. An unknown name is a hard error, not a silent skip.
 
@@ -88,6 +111,12 @@ fraction is resting on thin data.
 
 Feeds that never get polled still appear, with a status saying why: `skipped_auth`,
 `ambiguous_name`, `unresolved_url_template`, `skipped_no_url`.
+
+In `poll_log.parquet`, `error_type` is one of `ok`, `timeout`, `ssl`, `connection`, `http_error`,
+`parse_error`, `skipped_slow`, `skipped_rate`, `skipped_backoff`. The three `skipped_*` values mean
+no request was sent, so they count as failed polls and their gaps are excluded — a feed showing many
+`skipped_backoff` ticks is rate limiting you, and its measurement rests on much less data than the
+tick count suggests.
 
 ## Layout
 

@@ -1,3 +1,7 @@
+import time
+from datetime import datetime
+from datetime import timezone as dt_timezone
+
 import pandas as pd
 import pytest
 import requests
@@ -247,14 +251,20 @@ def test_sample_rows_match_the_declared_schema():
 
 
 class FakeResponse:
-    def __init__(self, content=b"", status_code=200, raise_exc=None):
+    def __init__(self, content=b"", status_code=200, raise_exc=None, headers=None):
         self.content = content
         self.status_code = status_code
+        self.headers = headers or {}
         self._raise_exc = raise_exc
 
     def raise_for_status(self):
         if self._raise_exc is not None:
             raise self._raise_exc
+
+
+def FakeResponseWithHeaders(headers):  # noqa: N802 - reads as a constructor at call sites
+    """A rate-limit response carrying only the headers a backoff decision needs."""
+    return FakeResponse(status_code=429, headers=headers)
 
 
 class FakeSession:
@@ -451,3 +461,251 @@ def test_error_rows_keep_the_latency_column_aligned(monkeypatch):
 
     first_line = calls[0].split("\n")[0]
     assert len(first_line) == len(TRACE_HEADER), (len(first_line), len(TRACE_HEADER))
+
+
+# -- spacing floor ---------------------------------------------------------------------
+
+
+def test_min_spacing_is_derived_from_the_late_tolerance():
+    from poller import LATE_TOLERANCE_SECONDS, min_spacing_seconds
+
+    # Using the interval itself would skip ~half of all ticks on ordinary jitter.
+    assert min_spacing_seconds(5.0) == 5.0 - LATE_TOLERANCE_SECONDS
+    assert min_spacing_seconds(20.0) == 20.0 - LATE_TOLERANCE_SECONDS
+    # Half-interval clamp keeps protection when the interval is below the tolerance.
+    assert min_spacing_seconds(0.4) == pytest.approx(0.2)
+    assert min_spacing_seconds(1.0) == pytest.approx(0.5)
+
+
+def test_no_shortfall_before_the_first_request():
+    worker = make_worker()
+    assert worker.spacing_shortfall(now=1000.0) == 0.0
+
+
+def test_no_shortfall_at_the_normal_cadence():
+    """A tick arriving one interval later must not be treated as a burst."""
+    worker = make_worker()  # poll_interval_seconds = 5
+    worker._last_request_monotonic = 1000.0
+    assert worker.spacing_shortfall(now=1005.0) == 0.0
+    # Even arriving slightly early, within the late tolerance, is legitimate.
+    assert worker.spacing_shortfall(now=1004.5) == 0.0
+
+
+def test_shortfall_reported_for_a_back_to_back_request():
+    worker = make_worker()
+    worker._last_request_monotonic = 1000.0
+    # The burst case from the audit: 0.13s after the previous request.
+    shortfall = worker.spacing_shortfall(now=1000.13)
+    assert shortfall > 0
+    assert shortfall == pytest.approx(4.5 - 0.13)
+
+
+def test_fetch_updates_the_spacing_clock():
+    worker = make_worker()
+    assert worker._last_request_monotonic is None
+    worker._fetch_once(FakeSession(good_response()), 0, 0.0)
+    assert worker._last_request_monotonic is not None
+
+
+def test_run_skips_a_tick_that_would_breach_the_spacing_floor():
+    """
+    End to end through run(): pre-seed the clock so every tick is inside the floor, and assert
+    nothing is sent. This is the burst the audit found, now refused.
+    """
+    import threading
+
+    config = SearchConfig(
+        feeds=(FEED,),
+        sampling=SamplingConfig(
+            duration_minutes=4 / 60, poll_interval_seconds=1, request_timeout_seconds=1, flush_every_polls=0
+        ),
+        criteria=CriteriaConfig(movement_threshold_meters=10.0, max_update_gap_seconds=20.0),
+        output=OutputConfig(),
+    )
+    session = FakeSession(good_response())
+    worker = _FeedWorker(
+        FeedTarget(FEED, "ok", url="http://x/vp"),
+        config,
+        threading.BoundedSemaphore(1),
+        None,
+        threading.Event(),
+    )
+    # Pretend a request just happened, so the floor blocks the first ticks.
+    worker._last_request_monotonic = time.monotonic() + 60
+    worker.run(t0=time.monotonic(), session=session)
+
+    assert session.calls == 0
+    assert {r["error_type"] for r in worker.poll_log_rows} == {"skipped_rate"}
+    assert all(r["requested_at"] is None for r in worker.poll_log_rows)
+
+
+def test_run_sends_normally_when_spacing_allows():
+    import threading
+
+    config = SearchConfig(
+        feeds=(FEED,),
+        sampling=SamplingConfig(
+            duration_minutes=3 / 60, poll_interval_seconds=1, request_timeout_seconds=1, flush_every_polls=0
+        ),
+        criteria=CriteriaConfig(movement_threshold_meters=10.0, max_update_gap_seconds=20.0),
+        output=OutputConfig(),
+    )
+    session = FakeSession(good_response())
+    worker = _FeedWorker(
+        FeedTarget(FEED, "ok", url="http://x/vp"),
+        config,
+        threading.BoundedSemaphore(1),
+        None,
+        threading.Event(),
+    )
+    worker.run(t0=time.monotonic(), session=session)
+    assert session.calls == config.n_polls
+    assert {r["error_type"] for r in worker.poll_log_rows} == {"ok"}
+
+
+# -- rate-limit backoff ----------------------------------------------------------------
+
+
+def rate_limited(status=429, headers=None):
+    exc = requests.exceptions.HTTPError(f"{status} Client Error for url: http://x/vp")
+    response = FakeResponse(status_code=status)
+    response.headers = headers or {}
+    exc.response = response
+    return exc
+
+
+def test_parse_retry_after_delta_seconds():
+    from poller import parse_retry_after
+
+    assert parse_retry_after("120") == 120.0
+    assert parse_retry_after("0") == 0.0
+    assert parse_retry_after(" 30 ") == 30.0
+    # Negative values clamp rather than scheduling into the past.
+    assert parse_retry_after("-5") == 0.0
+
+
+def test_parse_retry_after_http_date():
+    from poller import parse_retry_after
+
+    # 60s in the future, expressed as an HTTP-date.
+    now = time.time()
+    future = datetime.fromtimestamp(now + 60, tz=dt_timezone.utc)
+    header = future.strftime("%a, %d %b %Y %H:%M:%S GMT")
+    parsed = parse_retry_after(header, now=now)
+    assert parsed == pytest.approx(60, abs=2)
+
+
+def test_parse_retry_after_handles_absent_and_junk():
+    from poller import parse_retry_after
+
+    assert parse_retry_after(None) is None
+    assert parse_retry_after("") is None
+    assert parse_retry_after("   ") is None
+    assert parse_retry_after("soon please") is None
+
+
+def test_429_starts_a_backoff():
+    worker = make_worker()
+    assert worker.backoff_remaining(time.monotonic()) == 0.0
+    worker._fetch_once(FakeSession(rate_limited(429)), 0, 0.0)
+    assert worker.backoff_remaining(time.monotonic()) > 0
+    assert worker._consecutive_rate_limits == 1
+
+
+def test_503_also_starts_a_backoff():
+    worker = make_worker()
+    worker._fetch_once(FakeSession(rate_limited(503)), 0, 0.0)
+    assert worker.backoff_remaining(time.monotonic()) > 0
+
+
+def test_403_does_not_start_a_backoff():
+    """403 can mean a bad key; backing off silently would hide a misconfiguration."""
+    worker = make_worker()
+    worker._fetch_once(FakeSession(rate_limited(403)), 0, 0.0)
+    assert worker.backoff_remaining(time.monotonic()) == 0.0
+
+
+def test_retry_after_is_honoured_exactly_and_not_capped():
+    """The publisher's instruction wins: returning early is how a key gets suspended."""
+    from poller import BACKOFF_MAX_SECONDS
+
+    worker = make_worker()
+    long_wait = BACKOFF_MAX_SECONDS * 4
+    delay = worker.enter_backoff(FakeResponseWithHeaders({"Retry-After": str(int(long_wait))}), now=1000.0)
+    assert delay == long_wait
+    assert worker.backoff_remaining(1000.0) == pytest.approx(long_wait)
+
+
+def test_exponential_fallback_without_a_retry_after_header():
+    from poller import BACKOFF_MAX_SECONDS
+
+    worker = make_worker()  # interval 5s -> base 5s
+    delays = [worker.enter_backoff(FakeResponseWithHeaders({}), now=1000.0) for _ in range(4)]
+    assert delays == [5.0, 10.0, 20.0, 40.0]
+    # And it is capped.
+    for _ in range(20):
+        last = worker.enter_backoff(FakeResponseWithHeaders({}), now=1000.0)
+    assert last == BACKOFF_MAX_SECONDS
+
+
+def test_backoff_expires():
+    worker = make_worker()
+    worker.enter_backoff(FakeResponseWithHeaders({"Retry-After": "10"}), now=1000.0)
+    assert worker.backoff_remaining(1005.0) == pytest.approx(5.0)
+    assert worker.backoff_remaining(1010.0) == 0.0
+    assert worker._backoff_until is None
+
+
+def test_backoff_never_shortens_on_a_second_hit():
+    worker = make_worker()
+    worker.enter_backoff(FakeResponseWithHeaders({"Retry-After": "100"}), now=1000.0)
+    worker.enter_backoff(FakeResponseWithHeaders({"Retry-After": "1"}), now=1000.0)
+    assert worker.backoff_remaining(1000.0) == pytest.approx(100.0)
+
+
+def test_success_resets_the_backoff_ladder():
+    worker = make_worker()
+    worker._fetch_once(FakeSession(rate_limited(429)), 0, 0.0)
+    assert worker._consecutive_rate_limits == 1
+    worker._fetch_once(FakeSession(good_response()), 1, 0.0)
+    assert worker._consecutive_rate_limits == 0
+    assert worker.backoff_remaining(time.monotonic()) == 0.0
+
+
+def test_backoff_is_reported_in_the_log_and_trace(monkeypatch):
+    worker = make_worker()
+    worker.verbose = True
+    calls = count_prints(monkeypatch)
+    worker._fetch_once(FakeSession(rate_limited(429, {"Retry-After": "90"})), 0, 0.0)
+
+    assert "backing off 90s" in worker.poll_log_rows[0]["error_msg"]
+    assert "backing off 90s" in calls[0]
+
+
+def test_run_suppresses_requests_while_backing_off():
+    """A 429 on the first tick must stop the remaining ticks, not merely be logged."""
+    import threading
+
+    config = SearchConfig(
+        feeds=(FEED,),
+        sampling=SamplingConfig(
+            duration_minutes=5 / 60, poll_interval_seconds=1, request_timeout_seconds=1, flush_every_polls=0
+        ),
+        criteria=CriteriaConfig(movement_threshold_meters=10.0, max_update_gap_seconds=20.0),
+        output=OutputConfig(),
+    )
+    session = FakeSession(rate_limited(429, {"Retry-After": "3600"}))
+    worker = _FeedWorker(
+        FeedTarget(FEED, "ok", url="http://x/vp"),
+        config,
+        threading.BoundedSemaphore(1),
+        None,
+        threading.Event(),
+    )
+    worker.run(t0=time.monotonic(), session=session)
+
+    # Exactly one request went out; every later tick was suppressed.
+    assert session.calls == 1
+    types = [r["error_type"] for r in worker.poll_log_rows]
+    assert types[0] == "http_error"
+    assert set(types[1:]) == {"skipped_backoff"}

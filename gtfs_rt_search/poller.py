@@ -4,6 +4,16 @@ Poll live GTFS-RT VehiclePositions feeds at a fixed cadence and record position 
 One thread per feed, each owning its own session and state, with a semaphore capping concurrent
 HTTP calls. A shared worker pool would backlog as soon as feeds outnumber workers, which is
 exactly the case this tool runs in, and a slow feed must never stall another feed's cadence.
+
+Two guards keep the request rate honest, which matters for feeds behind an API key:
+
+* a spacing floor, so two requests to one feed can never land closer than min_spacing_seconds -
+  the absolute-deadline schedule alone does not prevent this, see _FeedWorker.spacing_shortfall
+* rate-limit backoff, so a 429 or 503 suspends that feed rather than being logged and ignored
+
+Both decline to send and record why; neither ever issues an extra request. Every tick is logged
+with one of error_type: ok, timeout, ssl, connection, http_error, parse_error, skipped_slow,
+skipped_rate, skipped_backoff.
 """
 
 from __future__ import annotations
@@ -12,7 +22,8 @@ import dataclasses
 import re
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -24,6 +35,14 @@ from google.transit import gtfs_realtime_pb2
 
 # How late a tick may start before we give up on it rather than chase the schedule.
 LATE_TOLERANCE_SECONDS = 0.5
+
+# Statuses that mean "you are asking too often". 429 is the explicit one; 503 is what overloaded
+# feeds return and it carries Retry-After just as often. 403 is deliberately NOT here: publishers
+# use it for quota exhaustion and for a bad key, and silently backing off would hide the latter.
+RATE_LIMIT_STATUSES = frozenset({429, 503})
+
+# Exponential backoff used only when a rate-limit response carries no Retry-After header.
+BACKOFF_MAX_SECONDS = 300.0
 
 # Verbose tracing is emitted from every feed thread at once, so serialise it: without this the
 # lines interleave and the timings become unreadable, which defeats the point of tracing them.
@@ -44,6 +63,10 @@ ERROR_CONNECTION = "connection"
 ERROR_HTTP = "http_error"
 ERROR_PARSE = "parse_error"
 ERROR_SKIPPED_SLOW = "skipped_slow"
+# Tick not sent because it would have landed too close to this feed's previous request.
+ERROR_SKIPPED_RATE = "skipped_rate"
+# Tick not sent because the feed rate limited us and we are still backing off.
+ERROR_SKIPPED_BACKOFF = "skipped_backoff"
 
 POLL_LOG_COLUMNS = [
     "feed_name",
@@ -131,6 +154,47 @@ def redact(text: Optional[str]) -> Optional[str]:
     if not text:
         return text
     return _SECRET_PARAM_RE.sub(r"\1***", text)
+
+
+def parse_retry_after(value: Optional[str], now: Optional[float] = None) -> Optional[float]:
+    """
+    Seconds to wait per an HTTP Retry-After header, which may be delta-seconds or an HTTP-date.
+
+    Returns None when absent or unparseable, so the caller falls back to exponential backoff.
+    """
+    if value is None:
+        return None
+    value = value.strip()
+    if not value:
+        return None
+
+    try:
+        return max(0.0, float(int(value)))
+    except ValueError:
+        pass
+
+    try:
+        when = parsedate_to_datetime(value)
+    except (TypeError, ValueError):
+        return None
+    if when is None:
+        return None
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=timezone.utc)
+    reference = datetime.now(timezone.utc) if now is None else datetime.fromtimestamp(now, tz=timezone.utc)
+    return max(0.0, (when - reference).total_seconds())
+
+
+def min_spacing_seconds(poll_interval_seconds: float) -> float:
+    """
+    The closest together two requests to the same feed may legitimately be.
+
+    Derived from LATE_TOLERANCE_SECONDS rather than picked: a tick may start up to that late, so
+    one firing late followed by one firing on time are genuinely that much closer than the
+    interval. Using the interval itself as the floor would skip roughly half of all ticks on
+    ordinary jitter. The half-interval clamp keeps some protection at sub-second intervals.
+    """
+    return max(poll_interval_seconds - LATE_TOLERANCE_SECONDS, poll_interval_seconds * 0.5)
 
 
 def _format_size(n_bytes: Optional[int]) -> str:
@@ -269,9 +333,13 @@ class _FeedWorker:
         self._absence_pending: dict[str, bool] = {}
         self._last_ok_poll_seq: Optional[int] = None
 
-        # When this feed last actually issued a request, for the "since" column. Measured per
-        # feed, so it shows the real spacing between pings rather than the intended cadence.
+        # When this feed last actually issued a request. Enforces the spacing floor and feeds the
+        # "since" column, so it reflects real spacing between pings, not the intended cadence.
         self._last_request_monotonic: Optional[float] = None
+
+        # Rate-limit backoff: suppress this feed's requests until this monotonic time.
+        self._backoff_until: Optional[float] = None
+        self._consecutive_rate_limits = 0
 
     # -- recording -------------------------------------------------------------------
 
@@ -342,6 +410,60 @@ class _FeedWorker:
         """Samples held in memory (only populated when not writing parquet parts)."""
         return sample_frame(getattr(self, "_retained", []))
 
+    # -- rate gates ------------------------------------------------------------------
+
+    def spacing_shortfall(self, now: float) -> float:
+        """
+        Seconds still owed before this feed may be pinged again; 0 when clear.
+
+        This is the guarantee the absolute-deadline schedule does not give on its own. A thread
+        can sit on the semaphore for nearly a whole interval, fire, and then find its next tick
+        already due - producing two requests back to back. Checked immediately before the
+        request, after the semaphore, which is the only point where the answer is authoritative.
+        """
+        if self._last_request_monotonic is None:
+            return 0.0
+        earliest = self._last_request_monotonic + min_spacing_seconds(self.config.sampling.poll_interval_seconds)
+        return max(0.0, earliest - now)
+
+    def backoff_remaining(self, now: float) -> float:
+        """Seconds left on a rate-limit backoff; 0 when not backing off."""
+        if self._backoff_until is None:
+            return 0.0
+        remaining = self._backoff_until - now
+        if remaining <= 0:
+            self._backoff_until = None
+            return 0.0
+        return remaining
+
+    def enter_backoff(self, response: Any, now: float) -> float:
+        """
+        Start or extend a backoff after a rate-limit response. Returns the delay applied.
+
+        Retry-After is honoured exactly, uncapped: it is the publisher telling us when to return,
+        and coming back sooner is how a key gets suspended. A long one simply ends this feed's
+        run. Only the no-header fallback is exponential and capped.
+        """
+        self._consecutive_rate_limits += 1
+
+        headers = getattr(response, "headers", None) or {}
+        retry_after = parse_retry_after(headers.get("Retry-After"), now=None)
+
+        if retry_after is None:
+            interval = self.config.sampling.poll_interval_seconds
+            base = max(interval, 1.0)
+            delay = min(base * (2 ** (self._consecutive_rate_limits - 1)), BACKOFF_MAX_SECONDS)
+        else:
+            delay = retry_after
+
+        self._backoff_until = max(self._backoff_until or 0.0, now + delay)
+        return delay
+
+    def reset_backoff(self) -> None:
+        """A successful response clears the backoff ladder."""
+        self._backoff_until = None
+        self._consecutive_rate_limits = 0
+
     # -- fetching --------------------------------------------------------------------
 
     def _trace(
@@ -409,11 +531,16 @@ class _FeedWorker:
             n_bytes = len(response.content)
             n_entities = len(records)
             self._record_entities(poll_seq, scheduled_at, requested_at, records)
+            self.reset_backoff()
         except Exception as exc:  # noqa: BLE001 - every failure must be logged, never raised
             error_type, error_msg = _classify_error(exc)
-            http_status = getattr(getattr(exc, "response", None), "status_code", None)
+            failed_response = getattr(exc, "response", None)
+            http_status = getattr(failed_response, "status_code", None)
             if latency_ms is None:
                 latency_ms = (time.monotonic() - started) * 1000.0
+            if http_status in RATE_LIMIT_STATUSES:
+                delay = self.enter_backoff(failed_response, time.monotonic())
+                error_msg = f"{error_msg} [backing off {delay:.0f}s]"
         finally:
             # One log row and, in verbose mode, one printed line per request - whatever happened.
             self._log_poll(
@@ -440,13 +567,19 @@ class _FeedWorker:
                     error_msg=error_msg,
                 )
 
-    def run(self, t0: float) -> None:
-        """Poll on deadlines anchored to t0 so the cadence cannot drift over a long run."""
+    def run(self, t0: float, session: Optional[requests.Session] = None) -> None:
+        """
+        Poll on deadlines anchored to t0 so the cadence cannot drift over a long run.
+
+        `session` exists so tests can drive the loop without network; normally each worker owns
+        its own, since requests sessions are not thread-safe.
+        """
         interval = self.config.sampling.poll_interval_seconds
         n_polls = self.config.n_polls
         flush_every = self.config.sampling.flush_every_polls
 
-        session = requests.Session()
+        owns_session = session is None
+        session = requests.Session() if owns_session else session
         try:
             for poll_seq in range(n_polls):
                 if self.stop_event.is_set():
@@ -473,6 +606,19 @@ class _FeedWorker:
                     )
                     continue
 
+                # Rate limited and still serving the penalty: checked before taking a slot, since
+                # holding one while deliberately not sending would starve the other feeds.
+                backoff = self.backoff_remaining(now)
+                if backoff > 0:
+                    self._log_poll(
+                        poll_seq=poll_seq,
+                        scheduled_at=scheduled_at,
+                        requested_at=None,
+                        error_type=ERROR_SKIPPED_BACKOFF,
+                        error_msg=f"rate limited; {backoff:.0f}s of backoff remaining",
+                    )
+                    continue
+
                 # Don't queue behind the semaphore past our next deadline either.
                 budget = max(0.0, (deadline + interval) - time.monotonic())
                 if not self.semaphore.acquire(timeout=budget):
@@ -485,6 +631,20 @@ class _FeedWorker:
                     )
                     continue
                 try:
+                    # Spacing floor, re-checked here because acquiring the semaphore may itself
+                    # have consumed most of an interval. Skip rather than wait: waiting would
+                    # shift this feed permanently behind its schedule, while skipping costs one
+                    # sample and keeps the absolute cadence intact.
+                    shortfall = self.spacing_shortfall(time.monotonic())
+                    if shortfall > 0:
+                        self._log_poll(
+                            poll_seq=poll_seq,
+                            scheduled_at=scheduled_at,
+                            requested_at=None,
+                            error_type=ERROR_SKIPPED_RATE,
+                            error_msg=f"would land {shortfall:.2f}s inside the minimum spacing",
+                        )
+                        continue
                     self._fetch_once(session, poll_seq, scheduled_at)
                 finally:
                     self.semaphore.release()
@@ -493,7 +653,8 @@ class _FeedWorker:
                     self._flush()
         finally:
             self._flush()
-            session.close()
+            if owns_session:
+                session.close()
 
 
 def run_polling(
