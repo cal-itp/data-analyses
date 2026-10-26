@@ -16,4 +16,6 @@ def color_waits(x):
         color = "yellow"
     elif total_secs < 1200:
         color = "orange"
+    else:
+        color = "gray"
     return f"background-color: {color};"
