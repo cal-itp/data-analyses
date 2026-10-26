@@ -9,9 +9,8 @@ from functools import cache
 from typing import Literal, Optional
 
 import pandas as pd
-from calitp_data_analysis import utils
-from calitp_data_analysis.gcs_pandas import GCSPandas
 from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+from calitp_data_analysis.gcs_pandas import GCSPandas
 from dask import compute, delayed
 from loguru import logger
 from segment_speed_utils import gtfs_schedule_wrangling, helpers, segment_calcs
@@ -23,6 +22,7 @@ from update_vars import GTFS_DATA_DICT, SEGMENT_GCS
 @cache
 def gcs_pandas():
     return GCSPandas()
+
 
 @cache
 def gcs_geopandas():
@@ -40,9 +40,7 @@ def merge_schedule_columns_for_speedmaps(df: pd.DataFrame, analysis_date: str, w
     time_buckets = gtfs_schedule_wrangling.get_trip_time_buckets(analysis_date)
 
     trips = helpers.import_scheduled_trips(analysis_date, columns=keep_trip_cols, get_pandas=True)
-    trips = trips.merge(
-        time_buckets, on="trip_instance_key", how="inner"
-    )
+    trips = trips.merge(time_buckets, on="trip_instance_key", how="inner")
 
     route_cols = ["schedule_gtfs_dataset_key", "route_id", "shape_id"]
 
@@ -56,11 +54,13 @@ def merge_schedule_columns_for_speedmaps(df: pd.DataFrame, analysis_date: str, w
     )
 
     if with_all_day:
-        schedule_trip_counts_all_day = gtfs_schedule_wrangling.count_trips_by_group(
-        trips, group_cols=route_cols
-            ).rename(columns={"n_trips": "n_trips_sch"}).assign(time_of_day = 'All Day')
+        schedule_trip_counts_all_day = (
+            gtfs_schedule_wrangling.count_trips_by_group(trips, group_cols=route_cols)
+            .rename(columns={"n_trips": "n_trips_sch"})
+            .assign(time_of_day="All Day")
+        )
         schedule_trip_counts_all_day["trips_hr_sch"] = schedule_trip_counts.apply(
-        lambda x: round(x.n_trips_sch / 24, 3), axis=1 # use 24 hours for now
+            lambda x: round(x.n_trips_sch / 24, 3), axis=1  # use 24 hours for now
         )
         schedule_trip_counts = pd.concat([schedule_trip_counts, schedule_trip_counts_all_day])
 
@@ -95,31 +95,26 @@ def aggregate_by_time_of_day(
     OPERATOR_COLS = ["schedule_gtfs_dataset_key"]
     CROSSWALK_COLS = [*dict_inputs["crosswalk_cols"]]
 
-    group_cols = OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["stop_pair_name"] 
+    group_cols = OPERATOR_COLS + SEGMENT_COLS_NO_GEOM + ["stop_pair_name"]
 
-    df = (
-        delayed(gcs_pandas().read_parquet)(
-            f"{SEGMENT_GCS}{SPEED_FILE}_{analysis_date}.parquet",
-            columns=OPERATOR_COLS
-            + SEGMENT_COLS_NO_GEOM
-            + ["trip_instance_key", "stop_pair_name", "time_of_day", "speed_mph"],
-            filters=[[("speed_mph", "<=", MAX_SPEED)]],
-        )
-        .dropna(subset="speed_mph")
-    )
+    df = delayed(gcs_pandas().read_parquet)(
+        f"{SEGMENT_GCS}{SPEED_FILE}_{analysis_date}.parquet",
+        columns=OPERATOR_COLS
+        + SEGMENT_COLS_NO_GEOM
+        + ["trip_instance_key", "stop_pair_name", "time_of_day", "speed_mph"],
+        filters=[[("speed_mph", "<=", MAX_SPEED)]],
+    ).dropna(subset="speed_mph")
     df_by_time_period = df.pipe(segment_calcs.calculate_avg_speeds, group_cols + ["time_of_day"])
     df_all_day = (
-        df
-        .drop(columns=['time_of_day'])
+        df.drop(columns=["time_of_day"])
         .pipe(segment_calcs.calculate_avg_speeds, group_cols)
-        .assign(time_of_day = 'All Day')
+        .assign(time_of_day="All Day")
     )
 
     df = delayed(pd.concat)([df_by_time_period, df_all_day], axis=0)
-    
 
     if segment_type == "speedmap_segments":
-        df = delayed(merge_schedule_columns_for_speedmaps)(df, analysis_date, with_all_day = True).pipe(
+        df = delayed(merge_schedule_columns_for_speedmaps)(df, analysis_date, with_all_day=True).pipe(
             gtfs_schedule_wrangling.merge_operator_identifiers, [analysis_date], columns=CROSSWALK_COLS
         )
 
@@ -144,8 +139,10 @@ def aggregate_by_time_of_day(
     ]
     avg_speeds_with_geom = avg_speeds_with_geom.drop(columns=drop_cols).drop_duplicates()
 
-    print(f'{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet')
-    gcs_geopandas().geo_data_frame_to_parquet(avg_speeds_with_geom, f'{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet')
+    print(f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet")
+    gcs_geopandas().geo_data_frame_to_parquet(
+        avg_speeds_with_geom, f"{SEGMENT_GCS}{EXPORT_FILE}_{analysis_date}.parquet"
+    )
 
     del avg_speeds_with_geom
 
