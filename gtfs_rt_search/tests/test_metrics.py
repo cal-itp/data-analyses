@@ -377,3 +377,41 @@ def test_percentile_columns_follow_the_configured_percentiles():
     assert "update_gap_p25" in summary and "update_gap_p75" in summary
     # p50 is still computed internally for the quantization guard.
     assert summary["quantization_ratio"] is not None
+
+
+# -- credential redaction in outputs ---------------------------------------------------
+
+
+def test_summary_url_column_is_redacted():
+    """
+    feed_summary.parquet is an artifact people share, so a resolved credential must not be in it.
+    """
+    from auth import clear_registered_secrets, register_secret_value
+
+    clear_registered_secrets()
+    try:
+        register_secret_value("real-key-123456")
+        target = FeedTarget(
+            FEED,
+            "ok",
+            url="https://api.511.org/transit/vehiclepositions?api_key=real-key-123456&agency=EM",
+            secret_names=("MTC_511_API_KEY",),
+        )
+        summary = summarize_feed(FEED, pd.DataFrame(), ok_log(2), make_config(), target)
+
+        assert "real-key-123456" not in summary["url"]
+        assert "***" in summary["url"]
+        # The non-secret part of the URL is still there, so the feed stays identifiable.
+        assert "agency=EM" in summary["url"]
+    finally:
+        clear_registered_secrets()
+
+
+def test_summary_url_is_redacted_even_for_an_unregistered_key():
+    """Falls back to parameter-name masking for a key baked into the warehouse URI."""
+    from auth import clear_registered_secrets
+
+    clear_registered_secrets()
+    target = FeedTarget(FEED, "ok", url="https://x/vp?api_key=never-registered-key")
+    summary = summarize_feed(FEED, pd.DataFrame(), ok_log(2), make_config(), target)
+    assert "never-registered-key" not in summary["url"]

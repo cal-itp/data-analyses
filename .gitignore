@@ -153,3 +153,8 @@ portfolio/*
 
 # direnv
 .direnv/
+
+# gtfs_rt_search: full warehouse export used for local development (2MB, exceeds the
+# check-added-large-files hook). A trimmed fixture lives in tests/fixtures/ instead.
+gtfs_rt_search/dim_gtfs_datasets.csv
+gtfs_rt_search/outputs/

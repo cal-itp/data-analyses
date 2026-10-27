@@ -24,6 +24,7 @@ from typing import Optional
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import pandas as pd  # noqa: E402
+from auth import SecretResolver  # noqa: E402
 from config import SearchConfig, load_config  # noqa: E402
 from feeds import fetch_feed_metadata, pollable_targets, resolve_feeds  # noqa: E402
 from metrics import summarize_run  # noqa: E402
@@ -58,6 +59,8 @@ def run_search(
     output_dir: Optional[Path] = None,
     metadata: Optional[pd.DataFrame] = None,
     verbose: bool = False,
+    resolve_secrets: bool = True,
+    secret_resolver: Optional[SecretResolver] = None,
 ) -> pd.DataFrame:
     """
     Resolve -> poll -> summarize. Returns the per-feed summary frame and writes it to parquet.
@@ -65,6 +68,10 @@ def run_search(
     Pass `metadata` to supply warehouse rows directly and skip the BigQuery call (useful from a
     notebook, or against a fixture). Pass `verbose` to print one line per HTTP request as it is
     made, including the gap since that feed's previous request.
+
+    Feed URLs holding a {{ SECRET_NAME }} placeholder have the credential filled in from Google
+    Cloud Secret Manager; pass resolve_secrets=False to leave them unresolved, or secret_resolver
+    to supply your own.
     """
     config_warnings = list(config_warnings or [])
     run_dir = (output_dir or config.output.dir) / _run_timestamp()
@@ -73,7 +80,12 @@ def run_search(
     print(f"resolving {len(config.feeds)} feed name(s) against the warehouse ...")
     if metadata is None:
         metadata = fetch_feed_metadata(config.feeds)
-    targets = resolve_feeds(config.feeds, metadata)
+
+    # A URL holding {{ SECRET_NAME }} has its credential filled in from Secret Manager. Built
+    # lazily per run so the API is only touched when a feed actually needs a key.
+    if secret_resolver is None and resolve_secrets:
+        secret_resolver = SecretResolver()
+    targets = resolve_feeds(config.feeds, metadata, secret_resolver=secret_resolver)
 
     to_poll = pollable_targets(targets)
     for target in targets:
@@ -129,6 +141,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="print one line per HTTP request as it is made, with the gap since that feed's previous request",
     )
+    parser.add_argument(
+        "--no-secrets",
+        action="store_true",
+        help="do not resolve {{ SECRET_NAME }} placeholders from Secret Manager; such feeds are skipped",
+    )
     args = parser.parse_args(argv)
 
     config, warnings = load_config(args.config)
@@ -137,6 +154,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         config_warnings=warnings,
         output_dir=Path(args.output_dir) if args.output_dir else None,
         verbose=args.verbose,
+        resolve_secrets=not args.no_secrets,
     )
     return 0
 

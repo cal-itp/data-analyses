@@ -29,8 +29,13 @@ same convention as `gtfs_funnel/Makefile`.
 > Do **not** run `uv sync` or `uv run` from inside this directory. The uv workspace shares one
 > venv at the repo root, so syncing from a member directory prunes it to just that member's
 > dependencies and uninstalls everything else. Recover with `uv sync --all-groups` from the repo
-> root. `gtfs-realtime-bindings` is declared both here and in the root `dev` group, so the shared
-> environment already has it.
+> root. `gtfs-realtime-bindings` and `google-cloud-secret-manager` are declared both here and in the
+> root `dev` group, so the shared environment already has them.
+
+Feed names in `config.yml` must match `dim_gtfs_datasets.name` exactly for a current
+`type = 'vehicle_positions'` row. An unknown name is a hard error, not a silent skip.
+
+Both resolving names and reading secrets need Google credentials — run `glogin` first.
 
 ### Tracing requests
 
@@ -48,6 +53,47 @@ time          feed                           tick    since  status     size  veh
 intended cadence. It should track `poll_interval_seconds`; anything materially smaller is a burst.
 Failures print the response detail on a continuation line of the same output, with credentials in
 the URL masked.
+
+### Authenticated feeds
+
+Some warehouse URIs are templates holding a credential placeholder:
+
+```
+https://api.511.org/transit/vehiclepositions?api_key={{ MTC_511_API_KEY}}&agency=EM
+```
+
+The text inside the braces is the **Google Cloud Secret Manager secret id, exactly as stored** — no
+prefixing, no case changes. Whitespace inside the braces is ignored, which matters because the real
+warehouse spacing is lopsided (`{{ NAME}}`). The value is read from project `cal-itp-data-infra`
+(override with `GTFS_RT_SECRET_PROJECT`) at version `latest`, substituted into the URL, and cached
+per secret id — 46 current feeds share `MTC_511_API_KEY`, so that is one API call, not 46.
+
+This changes what `has_authentication` means. It is no longer an automatic skip:
+
+| Situation | Status |
+|---|---|
+| `has_authentication`, URL has a `{{ }}` we resolved | **`ok`** — polled |
+| URL has a `{{ }}` but the secret can't be read (no ADC, not found, denied) | `secret_unavailable` |
+| URL has a `{{ }}` and resolution is disabled (`--no-secrets`) | `unresolved_url_template` |
+| `has_authentication`, URL has no `{{ }}` to fill in | `skipped_auth` |
+
+Resolution needs credentials that can read the secret — run `glogin` first. A failure is per-feed
+and never aborts the run. Pass `--no-secrets` to skip resolution entirely.
+
+### Credential redaction
+
+Resolved secrets stay in memory and reach nothing else. `FeedTarget.url` holds the real URL because
+the poller must fetch it; `FeedTarget.safe_url` is what gets printed or written.
+
+`auth.redact` masks two ways, and both are needed:
+
+- **by value** — every resolved secret is registered, so it is masked wherever it appears, whatever
+  the parameter happens to be called
+- **by parameter name** — a fallback (`api_key`, `token`, `secret`, `auth*`, …) for a credential
+  baked into the warehouse URI that this tool never resolved
+
+Applied at `_classify_error` (before truncation, so a cut can't leave a usable fragment), at
+`safe_url`, and again in the verbose trace. Verified by byte-scanning every output parquet.
 
 ### Request-rate protection
 
@@ -72,12 +118,7 @@ its schedule; skipping costs one sample and keeps the absolute cadence intact, m
 `403` deliberately does **not** trigger backoff: publishers use it both for quota exhaustion and for
 a bad key, and silently backing off would hide the latter.
 
-Feed names in `config.yml` must match `dim_gtfs_datasets.name` exactly for a current
-`type = 'vehicle_positions'` row. An unknown name is a hard error, not a silent skip.
-
-Resolving names needs BigQuery credentials — run `glogin` first.
-
-From a notebook:
+### From a notebook
 
 ```python
 from config import load_config
@@ -110,7 +151,7 @@ Exclusions are always counted, never silently dropped: `n_excluded_stale`, `n_ex
 fraction is resting on thin data.
 
 Feeds that never get polled still appear, with a status saying why: `skipped_auth`,
-`ambiguous_name`, `unresolved_url_template`, `skipped_no_url`.
+`ambiguous_name`, `unresolved_url_template`, `secret_unavailable`, `skipped_no_url`.
 
 In `poll_log.parquet`, `error_type` is one of `ok`, `timeout`, `ssl`, `connection`, `http_error`,
 `parse_error`, `skipped_slow`, `skipped_rate`, `skipped_backoff`. The three `skipped_*` values mean
@@ -140,10 +181,10 @@ tick count suggests.
 - **Absence is tracked in the poller**, not derived later. The timestamp dedupe discards
   present-but-unchanged observations, so `had_absence_since_last_change` is the only surviving
   record of a vehicle vanishing from a feed.
-- **Verbose tracing is redacted, the parquet outputs are not (yet).** `poller.redact` masks
-  credential query parameters in printed error text, but `feed_summary.parquet` still stores the
-  raw `url` (`metrics.py`) and `poll_log.parquet` still stores the raw `error_msg`. Fix that before
-  enabling feeds whose URLs carry inline API keys.
+- **Redaction covers the outputs, not just the console.** `auth.redact` masks
+  by registered secret value and by parameter name; `feed_summary.parquet` stores `safe_url` and
+  `poll_log.parquet` stores an already-redacted `error_msg`. The registry is process-wide, so tests
+  must call `clear_registered_secrets()`. Never write `target.url` to disk - use `safe_url`.
 - **`gtfs-realtime-bindings` is pinned `<3`.** 3.0.0 requires `protobuf>=7.34`, but the
   `google-api-core` / `googleapis-common-protos` / `grpcio-status` stack caps `protobuf<7`.
 - `dim_gtfs_datasets.csv` (a full local export) is gitignored; `tests/fixtures/` holds a trimmed

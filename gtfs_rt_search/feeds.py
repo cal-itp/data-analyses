@@ -14,6 +14,7 @@ import math
 from typing import Any, Iterable, Optional
 
 import pandas as pd
+from auth import SecretResolutionError, has_placeholder, placeholder_names, redact
 
 DIM_GTFS_DATASETS = "`cal-itp-data-infra.mart_transit_database.dim_gtfs_datasets`"
 DIM_PROVIDER_GTFS_DATA = "`cal-itp-data-infra.mart_transit_database.dim_provider_gtfs_data`"
@@ -24,6 +25,8 @@ STATUS_SKIPPED_AUTH = "skipped_auth"
 STATUS_AMBIGUOUS_NAME = "ambiguous_name"
 STATUS_UNRESOLVED_URL_TEMPLATE = "unresolved_url_template"
 STATUS_NO_URL = "skipped_no_url"
+# A {{ }} placeholder was found but its secret could not be read.
+STATUS_SECRET_UNAVAILABLE = "secret_unavailable"
 
 
 class FeedResolutionError(ValueError):
@@ -46,10 +49,22 @@ class FeedTarget:
     deprecated_date: Optional[str] = None
     duplicate_of: Optional[str] = None
     notes: tuple[str, ...] = ()
+    secret_names: tuple[str, ...] = ()
 
     @property
     def is_pollable(self) -> bool:
         return self.status == STATUS_OK and bool(self.url)
+
+    @property
+    def safe_url(self) -> Optional[str]:
+        """
+        The URL with any credential masked.
+
+        `url` holds the real thing because the poller has to fetch it; this is what may be
+        printed or written to disk. Secret values resolved from Secret Manager are registered for
+        redaction, so they are masked here even when the parameter name is unrecognised.
+        """
+        return redact(self.url)
 
 
 def _is_true(value: Any) -> bool:
@@ -166,12 +181,21 @@ def _resolve_url(row: pd.Series) -> tuple[Optional[str], tuple[str, ...]]:
     return decoded, tuple(notes)
 
 
-def resolve_feeds(names: Iterable[str], df: pd.DataFrame) -> list[FeedTarget]:
+def resolve_feeds(
+    names: Iterable[str],
+    df: pd.DataFrame,
+    secret_resolver: Optional[Any] = None,
+) -> list[FeedTarget]:
     """
     Turn warehouse rows into FeedTargets, one per requested name.
 
-    Pure function over a DataFrame so it is testable without network access. Raises on names
-    that returned no row - a silent drop would understate the search.
+    Pure function over a DataFrame apart from `secret_resolver`, which is injected so the whole
+    decision table stays testable offline against a stub. Raises on names that returned no row - a
+    silent drop would understate the search.
+
+    Without a resolver, a URL holding a {{ }} placeholder is reported unresolved rather than being
+    fetched literally. With one, the placeholder is filled from Secret Manager and the feed becomes
+    pollable even when has_authentication is set.
     """
     names = list(names)
     if df is None or df.empty:
@@ -244,12 +268,6 @@ def resolve_feeds(names: Iterable[str], df: pd.DataFrame) -> list[FeedTarget]:
             deprecated_date=deprecated_date,
         )
 
-        if _is_true(row.get("has_authentication")):
-            targets.append(
-                FeedTarget(status=STATUS_SKIPPED_AUTH, notes=tuple(notes + ["has_authentication is set"]), **common)
-            )
-            continue
-
         url, url_notes = _resolve_url(row)
         notes.extend(url_notes)
 
@@ -257,14 +275,62 @@ def resolve_feeds(names: Iterable[str], df: pd.DataFrame) -> list[FeedTarget]:
             targets.append(FeedTarget(status=STATUS_NO_URL, notes=tuple(notes), **common))
             continue
 
-        # Some warehouse URIs are templates holding a secret placeholder, e.g.
-        # "...?api_key={{ MTC_511_API_KEY}}". Fetching that literally would be meaningless.
-        if "{{" in url:
+        # A warehouse URI may be a template holding a credential placeholder, e.g.
+        # "...?api_key={{ MTC_511_API_KEY}}". The braces name a Secret Manager secret, so given a
+        # resolver we can fill it in and poll the feed rather than skipping it.
+        secret_names = tuple(placeholder_names(url))
+        injected = False
+
+        if secret_names:
+            if secret_resolver is None:
+                targets.append(
+                    FeedTarget(
+                        status=STATUS_UNRESOLVED_URL_TEMPLATE,
+                        url=url,
+                        secret_names=secret_names,
+                        notes=tuple(
+                            notes + [f"url needs secret(s) {', '.join(secret_names)} but no resolver was configured"]
+                        ),
+                        **common,
+                    )
+                )
+                continue
+            try:
+                url = secret_resolver.resolve(url)
+            except SecretResolutionError as exc:
+                targets.append(
+                    FeedTarget(
+                        status=STATUS_SECRET_UNAVAILABLE,
+                        secret_names=secret_names,
+                        notes=tuple(notes + [redact(str(exc))]),
+                        **common,
+                    )
+                )
+                continue
+            injected = True
+            notes.append(f"credential injected from Secret Manager: {', '.join(secret_names)}")
+
+        # A resolver that substituted nothing useful, or a placeholder syntax we do not parse.
+        if has_placeholder(url):
             targets.append(
                 FeedTarget(
                     status=STATUS_UNRESOLVED_URL_TEMPLATE,
                     url=url,
+                    secret_names=secret_names,
                     notes=tuple(notes + ["url still contains an unsubstituted {{ placeholder }}"]),
+                    **common,
+                )
+            )
+            continue
+
+        # Authentication is only a blocker when we have no credential to supply. A feed flagged
+        # has_authentication whose URL carried a placeholder we just filled in is pollable.
+        if _is_true(row.get("has_authentication")) and not injected:
+            targets.append(
+                FeedTarget(
+                    status=STATUS_SKIPPED_AUTH,
+                    secret_names=secret_names,
+                    notes=tuple(notes + ["has_authentication is set and the url carries no {{ secret }} to fill in"]),
                     **common,
                 )
             )
@@ -275,6 +341,7 @@ def resolve_feeds(names: Iterable[str], df: pd.DataFrame) -> list[FeedTarget]:
                 FeedTarget(
                     status=STATUS_OK,
                     url=url,
+                    secret_names=secret_names,
                     duplicate_of=seen_urls[url],
                     notes=tuple(notes + [f"same URL as {seen_urls[url]!r}; fetched once"]),
                     **common,
@@ -283,7 +350,7 @@ def resolve_feeds(names: Iterable[str], df: pd.DataFrame) -> list[FeedTarget]:
             continue
 
         seen_urls[url] = name
-        targets.append(FeedTarget(status=STATUS_OK, url=url, notes=tuple(notes), **common))
+        targets.append(FeedTarget(status=STATUS_OK, url=url, secret_names=secret_names, notes=tuple(notes), **common))
 
     return targets
 

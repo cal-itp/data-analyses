@@ -292,7 +292,9 @@ def summarize_feed(
     summary: dict[str, Any] = {
         "feed_name": feed_name,
         "status": target.status if target is not None else STATUS_OK,
-        "url": target.url if target is not None else None,
+        # safe_url, never url: this column is written to parquet and shared, and a resolved
+        # Secret Manager credential must not travel with it.
+        "url": target.safe_url if target is not None else None,
         "n_polls_attempted": n_polls_attempted,
         "n_polls_ok": n_polls_ok,
         "n_polls_failed": n_polls_failed,

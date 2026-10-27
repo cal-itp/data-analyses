@@ -24,9 +24,12 @@ package = false
 [dependency-groups]
 dev = [
     "shared-utils",
-    # Listed only so the shared workspace venv gets it: gtfs_rt_search sets package = false and
-    # so cannot be depended on directly. Its pyproject.toml holds the version constraint.
+    # Listed only so the shared workspace venv gets them: gtfs_rt_search sets package = false and
+    # so cannot be depended on directly. Its pyproject.toml holds the version constraints.
     "gtfs-realtime-bindings",
+    "google-cloud-secret-manager",
+    "folium",
+    "geopandas",
     "segment-speed-utils",
     "rt-analysis",
     "calitp-portfolio",

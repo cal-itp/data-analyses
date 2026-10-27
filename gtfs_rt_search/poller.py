@@ -29,6 +29,10 @@ from typing import Any, Optional
 
 import pandas as pd
 import requests
+
+# redact is re-exported here: one shared registry masks both parameter names and the secret values
+# resolved from Secret Manager, so the poller cannot print a key that auth.py filled in.
+from auth import redact
 from config import SearchConfig
 from feeds import FeedTarget
 from google.transit import gtfs_realtime_pb2
@@ -138,22 +142,6 @@ def _fit(text: str, width: int) -> str:
     if len(text) <= width:
         return f"{text:<{width}}"
     return text[: width - 1] + "."
-
-
-# Query parameters whose values are credentials. Feed URLs carry keys inline (511 uses
-# ?api_key=...), and requests embeds the full URL in its exception messages, so anything printed
-# or logged has to be scrubbed first.
-_SECRET_PARAM_RE = re.compile(
-    r"([?&](?:api[_-]?key|key|token|access[_-]?token|secret|password|passwd|auth[a-z_]*)=)([^&\s]+)",
-    re.IGNORECASE,
-)
-
-
-def redact(text: Optional[str]) -> Optional[str]:
-    """Mask credential values in any URL appearing in text."""
-    if not text:
-        return text
-    return _SECRET_PARAM_RE.sub(r"\1***", text)
 
 
 def parse_retry_after(value: Optional[str], now: Optional[float] = None) -> Optional[float]:
@@ -284,16 +272,27 @@ def parse_feed_message(content: bytes) -> tuple[list[EntityRecord], Optional[int
 
 
 def _classify_error(exc: Exception) -> tuple[str, str]:
-    """Map a requests exception to a legible error_type. SSL gets its own bucket."""
+    """
+    Map a requests exception to a legible error_type. SSL gets its own bucket.
+
+    Messages are redacted before truncation, not after: requests embeds the full URL - including
+    any inline api_key - in its exception text, and truncating first could leave a usable fragment
+    of a key in the poll log.
+    """
     if isinstance(exc, requests.exceptions.SSLError):
-        return ERROR_SSL, str(exc)[:300]
+        return ERROR_SSL, _safe_message(exc)
     if isinstance(exc, requests.exceptions.Timeout):
-        return ERROR_TIMEOUT, str(exc)[:300]
+        return ERROR_TIMEOUT, _safe_message(exc)
     if isinstance(exc, requests.exceptions.ConnectionError):
-        return ERROR_CONNECTION, str(exc)[:300]
+        return ERROR_CONNECTION, _safe_message(exc)
     if isinstance(exc, requests.exceptions.HTTPError):
-        return ERROR_HTTP, str(exc)[:300]
-    return ERROR_PARSE, f"{type(exc).__name__}: {exc}"[:300]
+        return ERROR_HTTP, _safe_message(exc)
+    return ERROR_PARSE, _safe_message(exc, with_type=True)
+
+
+def _safe_message(exc: Exception, with_type: bool = False) -> str:
+    text = f"{type(exc).__name__}: {exc}" if with_type else str(exc)
+    return (redact(text) or "")[:300]
 
 
 class _FeedWorker:
