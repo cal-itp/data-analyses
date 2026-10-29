@@ -16,16 +16,16 @@
    "mounts": [
     "source=${localEnv:HOME}/devcontainer_ssl,target=/home/ssl_certs,type=bind"
   ],
-  "onCreateCommand": "sudo mkdir -p /etc/nix && echo 'experimental-features = nix-command flakes' | sudo tee -a /etc/nix/nix.conf && if [ -x $(command -v zsh) ]; then sudo mkdir -p /etc/zsh && echo 'eval \"$(direnv hook zsh)\"' | sudo tee -a /etc/zsh/zshrc; fi && if [ -x $(command -v fish) ]; then sudo mkdir -p /etc/fish/conf.d && echo 'direnv hook fish | source' | sudo tee /etc/fish/conf.d/direnv.fish; fi",
+  "onCreateCommand": "sudo sh -c 'for c in CTROOTCA01 CTISSUINGCA01 CTISSUINGCA02; do sed \"s/\\r$//\" /home/ssl_certs/$c.pem > /usr/local/share/ca-certificates/$c.crt; done && update-ca-certificates' && sudo mkdir -p /etc/nix && echo 'experimental-features = nix-command flakes' | sudo tee -a /etc/nix/nix.conf && if [ -x $(command -v zsh) ]; then sudo mkdir -p /etc/zsh && echo 'eval \"$(direnv hook zsh)\"' | sudo tee -a /etc/zsh/zshrc; fi && if [ -x $(command -v fish) ]; then sudo mkdir -p /etc/fish/conf.d && echo 'direnv hook fish | source' | sudo tee /etc/fish/conf.d/direnv.fish; fi",
   "postStartCommand": "direnv allow",
   "containerEnv": {
     "LC_ALL": "C.UTF-8",
     "LANG": "C.UTF-8",
     "TZ": "America/Los_Angeles",
-    "SSL_CERT_FILE": "/home/ssl_certs/ca-certificates.crt",
-    "REQUESTS_CA_BUNDLE": "/home/ssl_certs/ca-certificates.crt",
-    "GRPC_DEFAULT_SSL_ROOTS_FILE_PATH": "/home/ssl_certs/ca-certificates.crt",
-    "NIX_SSL_CERT_FILE": "/home/ssl_certs/ca-certificates.crt"
+    "SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt",
+    "REQUESTS_CA_BUNDLE": "/etc/ssl/certs/ca-certificates.crt",
+    "GRPC_DEFAULT_SSL_ROOTS_FILE_PATH": "/etc/ssl/certs/ca-certificates.crt",
+    "NIX_SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt"
   },
   "forwardPorts": [
     8080
