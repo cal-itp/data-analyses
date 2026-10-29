@@ -23,26 +23,33 @@ mkdir -p ~/devcontainer_ssl
 
 ### 1. Obtain Caltrans root and issuing certificates from Onramp
 
-* `CTROOTCA01`: _link TBD_
-* `CTISSUINGCA01`: _link TBD_
-* `CTISSUINGCA02`: _link TBD_
+Download all three certificates from [Onramp](https://itsecurity.onramp.dot.ca.gov/caltrans-proxy-certificate-information) to your local system.
 
 ### 2. Place the certs on your host machine
 
 On first boot, the devcontainer mounts `~/devcontainer_ssl` from the host into the
 container at `/home/ssl_certs`.
 
-Create the folder and copy the three certificate files in, named **exactly** as below:
+Create the folder and copy the three certificate files.
 
 ```bash
 mkdir -p ~/devcontainer_ssl
-cp /path/to/CTROOTCA01.crt ~/devcontainer_ssl/
-cp /path/to/CTISSUINGCA01.crt ~/devcontainer_ssl/
-cp /path/to/CTISSUINGCA02.crt ~/devcontainer_ssl/
+cp /path/to/CTROOTCA01.cer ~/devcontainer_ssl/
+cp /path/to/CTISSUINGCA01.cer ~/devcontainer_ssl/
+cp /path/to/CTISSUINGCA02.cer ~/devcontainer_ssl/
 ```
 
-File names must match either `CTROOTCA01.crt`, `CTISSUINGCA01.crt`, and
-`CTISSUINGCA02.crt` or `CTROOTCA01.pem`, `CTISSUINGCA01.pem`, and
+If you are on a Windows system you will need to copy the files from your Windows filesystem to the WSL filesystem. Caltrans users should replace `<username>` with their S-number. (i.e. `/mnt/c/Users/s999999/Downloads/...`)
+
+```bash
+mkdir -p ~/devcontainer_ssl
+cp /mnt/c/Users/<username>/Downloads/CTROOTCA01.cer ~/devcontainer_ssl/
+cp /mnt/c/Users/<username>/Downloads/CTISSUINGCA01.cer ~/devcontainer_ssl/
+cp /mnt/c/Users/<username>/Downloads/CTISSUINGCA02.cer ~/devcontainer_ssl/
+```
+
+File names must match either `CTROOTCA01.cer`, `CTISSUINGCA01.cer`, and
+`CTISSUINGCA02.cer` or `CTROOTCA01.pem`, `CTISSUINGCA01.pem`, and
 `CTISSUINGCA02.pem`  exactly. Otherwise they will not be copied properly.
 
 ## Instructions for All Users
