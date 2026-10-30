@@ -23,6 +23,7 @@
         glogin = pkgs.writeShellScriptBin "glogin" ''
             gcloud auth application-default login --login-config=/workspaces/data-analyses/iac/login.json
         '';
+        ssl_path = "/etc/ssl/certs/ca-certificates.crt";
       in
       {
         devShells.default = pkgs.mkShell {
@@ -59,7 +60,7 @@
             zlib
           ];
           # Set UV to use the local cache
-          UV_CACHE_DIR="$/workspaces/data-analyses/.uv-cache";
+          UV_CACHE_DIR = "$/workspaces/data-analyses/.uv-cache";
           # Node 17+ defaults to "verbatim" DNS ordering, which resolves
           # localhost to ::1 (IPv6) first in this container. That makes
           # myst's local build server (binds to the first resolved address)
@@ -68,10 +69,16 @@
           # IPv4-first keeps both sides consistent.
           NODE_OPTIONS = "--dns-result-order=ipv4first";
 
-          SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
-          REQUESTS_CA_BUNDLE = "/etc/ssl/certs/ca-certificates.crt";
-          GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = "/etc/ssl/certs/ca-certificates.crt";
-          NIX_SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
+          # Set various utilities to use the system cert store, which includes the Caltrans certs
+          REQUESTS_CA_BUNDLE = ssl_path;
+          GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = ssl_path;
+          NIX_SSL_CERT_FILE = ssl_path;
+
+          # Something is un-setting SSL_CERT_FILE when it's defined in pkgs.mkShell
+          # This is a super messy workaround to fix it, there's probably a better way
+          shellHook = ''
+            export SSL_CERT_FILE=$REQUESTS_CA_BUNDLE
+          '';
         };
       }
     );

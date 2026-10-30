@@ -2,7 +2,7 @@
 
 This devcontainer gives you a consistent Nix-based dev environment for this repo,
 and includes workarounds needed to run on the Caltrans (CT) network, which does
-SSL inspection (MITM) on outbound traffic. Without the setup below, tools will fail with SSL/certificate errors for Caltrans users.
+SSL inspection (MITM) on outbound traffic.
 
 ## Prerequisites
 
@@ -13,62 +13,42 @@ SSL inspection (MITM) on outbound traffic. Without the setup below, tools will f
 
 While these instructions should work on either Windows or Linux, they are only tested from a Linux (Ubuntu on WSL2) environment. For this reason, Windows users are recommended to clone the repo to the WSL file system and open the directory in VS Code by cc-ing into the repo folder and running `code .`.
 
-## Caltrans Network Setup
+## Setup Instructions
 
-This only needs to be run the first time. For non-Caltrans users, you can skip these steps, and just run the following:
+### 1. Configure WSL to communicate through the Caltrans network (WSL2 on CT laptop only only)
 
-```bash
-mkdir -p ~/devcontainer_ssl
-```
+To communicate on the Caltrans Network, WSL's "Networking Mode" setting must be set to "Mirrored".
 
-### 1. Obtain Caltrans root and issuing certificates from Onramp
+1. Open WSL Settings from the Start menu
+2. Select "Networking" from the left panel
+3. Set "Networking Mode" to "Mirrored". It should be the first option on the page.
 
-Download all three certificates from [Onramp](https://itsecurity.onramp.dot.ca.gov/caltrans-proxy-certificate-information) to your local system.
 
-### 2. Place the certs on your host machine
+### 2. Start and Configure Docker Desktop or Rancher Desktop
 
-On first boot, the devcontainer mounts `~/devcontainer_ssl` from the host into the
-container at `/home/ssl_certs`.
+Open Docker Desktop or Rancher Desktop, and wait for it to initialize.
 
-Create the folder and copy the three certificate files.
+On WSL, you will need to make Docker available to your WSL distro. On Rancher Desktop, open settings (ctrl + ,), select WSL, then check the box next to the distribution you're using. Then click Apply, and restart Rancher Desktop if prompted to.
 
-```bash
-mkdir -p ~/devcontainer_ssl
-cp /path/to/CTROOTCA01.cer ~/devcontainer_ssl/
-cp /path/to/CTISSUINGCA01.cer ~/devcontainer_ssl/
-cp /path/to/CTISSUINGCA02.cer ~/devcontainer_ssl/
-```
+### 2.5 Optional: Connect to the Caltrans Network
 
-If you are on a Windows system you will need to copy the files from your Windows filesystem to the WSL filesystem. Caltrans users should replace `<username>` with their S-number. (i.e. `/mnt/c/Users/s999999/Downloads/...`)
+If you intend to develop on the Caltrans network, you will need to be connected before you build the devcontainer. You can do this either by connecting to the dotsecure network in a physical Caltrans facility, or by connecting to the VPN. A network connection is needed so the devcontainer can download the SSL certificates it needs from Onramp.n 
 
-```bash
-mkdir -p ~/devcontainer_ssl
-cp /mnt/c/Users/<username>/Downloads/CTROOTCA01.cer ~/devcontainer_ssl/
-cp /mnt/c/Users/<username>/Downloads/CTISSUINGCA01.cer ~/devcontainer_ssl/
-cp /mnt/c/Users/<username>/Downloads/CTISSUINGCA02.cer ~/devcontainer_ssl/
-```
+If you are not connected, or do not have access, the devcontainer will still build, but will not function correctly if you connect to the Caltrans network later. You can fix this by connecting to the network, then running **Dev Containers: Rebuild and Reopen in Container**.
 
-File names must match either `CTROOTCA01.cer`, `CTISSUINGCA01.cer`, and
-`CTISSUINGCA02.cer` or `CTROOTCA01.pem`, `CTISSUINGCA01.pem`, and
-`CTISSUINGCA02.pem`  exactly. Otherwise they will not be copied properly.
-
-## Instructions for All Users
-
-### 1. Open the repo in the devcontainer
+### 3. Open the repo in the devcontainer
 
 From VS Code, open the repo folder and run **Dev Containers: Reopen in
 Container** from the Command Palette (`ctrl+shift+p` by default to open the Command Palette → `Dev Containers: Reopen in Container`). The first build will download the container's Linux distribution and install packages, so it will take longer than subsequent runs.
 
-If this is your first time running the container, you may need to use a non-Caltrans network (no VPN, no wifi) so the operating system the container runs on can download without the SSL certs being present. Once the first build runs, this won't occur again.
-
-### 2. Authenticate to Google Cloud with `glogin`
+### 4. Authenticate to Google Cloud with `glogin`
 
 Run `glogin` to authenticate and create an application-default certificate. The certificate will last 8 hours, after that you will need to re-run.
 
 This runs `gcloud auth application-default login` against the login config at
 [`iac/login.json`](../iac/login.json).
 
-### 3. Enjoy Developing
+### 5. Enjoy Developing
 
 You can now work in VS Code - see below for some common tasks you can do:
 
