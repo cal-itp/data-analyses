@@ -10,7 +10,7 @@ FROM mcr.microsoft.com/devcontainers/base:bookworm
 # network the download fails and the certs are skipped, since they aren't
 # needed there. This means if you are planning on developing on the CT network
 # it is important to also build the container on the CT network.
-# 
+#
 # update-ca-certificates only picks up files ending in .crt.
 
 ARG CT_CERT_BASE_URL=https://itsecurity.onramp.dot.ca.gov/downloads/itsecurity/files/PKI
@@ -25,7 +25,7 @@ RUN set -e; \
             echo "(*) Could not download $c (not on the CT network?), skipping"; \
             continue; \
         fi; \
-        echo "$sha  /tmp/$c.cer" | sha256sum -c -; \ 
+        echo "$sha  /tmp/$c.cer" | sha256sum -c -; \
         sed 's/\r$//' /tmp/$c.cer > /usr/local/share/ca-certificates/$c.crt; \
         rm /tmp/$c.cer; \
     done; \

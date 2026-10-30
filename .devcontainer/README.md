@@ -32,7 +32,7 @@ On WSL, you will need to make Docker available to your WSL distro. On Rancher De
 
 ### 2.5 Optional: Connect to the Caltrans Network
 
-If you intend to develop on the Caltrans network, you will need to be connected before you build the devcontainer. You can do this either by connecting to the dotsecure network in a physical Caltrans facility, or by connecting to the VPN. A network connection is needed so the devcontainer can download the SSL certificates it needs from Onramp.n 
+If you intend to develop on the Caltrans network, you will need to be connected before you build the devcontainer. You can do this either by connecting to the dotsecure network in a physical Caltrans facility, or by connecting to the VPN. A network connection is needed so the devcontainer can download the SSL certificates it needs from Onramp.
 
 If you are not connected, or do not have access, the devcontainer will still build, but will not function correctly if you connect to the Caltrans network later. You can fix this by connecting to the network, then running **Dev Containers: Rebuild and Reopen in Container**.
 
