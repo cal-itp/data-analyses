@@ -67,6 +67,11 @@
           # different loopback interfaces, causing ECONNREFUSED. Forcing
           # IPv4-first keeps both sides consistent.
           NODE_OPTIONS = "--dns-result-order=ipv4first";
+
+          SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
+          REQUESTS_CA_BUNDLE = "/etc/ssl/certs/ca-certificates.crt";
+          GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = "/etc/ssl/certs/ca-certificates.crt";
+          NIX_SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
         };
       }
     );
