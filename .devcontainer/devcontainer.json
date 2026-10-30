@@ -22,12 +22,7 @@
   "forwardPorts": [
     8080
   ],
-  "portsAttributes": {
-    "8080": {
-      "label": "Airflow UI",
-      "onAutoForward": "notify"
-    }
-  },
+
   "customizations": {
     "vscode": {
       "editor.formatOnSave": true,
