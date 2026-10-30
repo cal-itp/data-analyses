@@ -67,12 +67,6 @@
           # different loopback interfaces, causing ECONNREFUSED. Forcing
           # IPv4-first keeps both sides consistent.
           NODE_OPTIONS = "--dns-result-order=ipv4first";
-
-          # Set environment vars for CT SSL MITM certs
-          SSL_CERT_FILE = "/home/ssl_certs/ca-certificates.crt";
-          REQUESTS_CA_BUNDLE = "/home/ssl_certs/ca-certificates.crt";
-          #GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = "/home/ssl_certs/ca-certificates.crt";
-          #NIX_SSL_CERT_FILE =  "/home/ssl_certs/ca-certificates.crt";
         };
       }
     );

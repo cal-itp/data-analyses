@@ -16,7 +16,7 @@
    "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/devcontainer_ssl,target=/home/ssl_certs,type=bind,consistency=cached"
   ],
-  "onCreateCommand": "sudo sh -c 'for c in CTROOTCA01 CTISSUINGCA01 CTISSUINGCA02; do src=/home/ssl_certs/$c.pem; [ -f \"$src\" ] || src=/home/ssl_certs/$c.cer; [ -f \"$src\" ] && sed \"s/\\r$//\" \"$src\" > /usr/local/share/ca-certificates/$c.cer; done && update-ca-certificates' && sudo mkdir -p /etc/nix && echo 'experimental-features = nix-command flakes' | sudo tee -a /etc/nix/nix.conf && if [ -x $(command -v zsh) ]; then sudo mkdir -p /etc/zsh && echo 'eval \"$(direnv hook zsh)\"' | sudo tee -a /etc/zsh/zshrc; fi && if [ -x $(command -v fish) ]; then sudo mkdir -p /etc/fish/conf.d && echo 'direnv hook fish | source' | sudo tee /etc/fish/conf.d/direnv.fish; fi",
+  "onCreateCommand": "sudo sh -c 'for c in CTROOTCA01 CTISSUINGCA01 CTISSUINGCA02; do src=/home/ssl_certs/$c.pem; [ -f \"$src\" ] || src=/home/ssl_certs/$c.cer; [ -f \"$src\" ] && sed \"s/\\r$//\" \"$src\" > /usr/local/share/ca-certificates/$c.pem; done && update-ca-certificates' && sudo mkdir -p /etc/nix && echo 'experimental-features = nix-command flakes' | sudo tee -a /etc/nix/nix.conf && if [ -x $(command -v zsh) ]; then sudo mkdir -p /etc/zsh && echo 'eval \"$(direnv hook zsh)\"' | sudo tee -a /etc/zsh/zshrc; fi && if [ -x $(command -v fish) ]; then sudo mkdir -p /etc/fish/conf.d && echo 'direnv hook fish | source' | sudo tee /etc/fish/conf.d/direnv.fish; fi",
   "postStartCommand": "direnv allow",
   "containerEnv": {
     "LC_ALL": "C.UTF-8",
