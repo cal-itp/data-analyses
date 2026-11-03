@@ -6,14 +6,40 @@ SSL inspection (MITM) on outbound traffic.
 
 ## Prerequisites
 
+* WSL running Ubuntu (recommended)
 * Docker Desktop (not available to Caltrans users) or Rancher Desktop
   * For Caltrans users, follow [instructions](https://gist.github.com/mrtopsyt/1325d021a8fd6cdd9e7239dc7b7df348) for an IT-assisted install of Rancher Desktop
 * [VS Code](https://code.visualstudio.com/) with the
   [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed.
 
-While these instructions should work on either Windows or Linux, they are only tested from a Linux (Ubuntu on WSL2) environment. For this reason, Windows users are recommended to clone the repo to the WSL file system and open the directory in VS Code by cc-ing into the repo folder and running `code .`.
-
 ## Setup Instructions
+
+### 0. Clone the Repository
+
+Clone the repository locally. On a Caltrans Windows Laptop, there are two ways to do this. It is recommended to follow these instructions when you are *not* connected to the Caltrans network. You only need to follow one of the following sets of instructions.
+
+#### Windows Instructions
+
+If you already have Git set up and authenticated on Windows, it is probably easiest to clone the repo on Windows. Open cmd from the start menu, navigate to the folder you want to work in (with `cc`), and run
+
+```cmd
+git clone git@github.com:cal-itp/data-analyses.git
+```
+
+#### WSL Instructions
+
+If you do not have Git set up on Windows, it will be easiest to run it from Ubuntu. Open Ubuntu from the start menu, and clone it with:
+
+```bash
+git clone git@github.com:cal-itp/data-analyses.git
+```
+
+If you get an authentication error, you may need to authenticate to Git first. Run the below commands one-by-one and follow the prompts. You will be prompted for the password you provided when you first set up WSL. Then try to clone the repo again.
+
+```bash
+sudo apt-get install gh
+gh auth login
+```
 
 ### 1. Configure WSL to communicate through the Caltrans network (WSL2 on CT laptop only only)
 
@@ -23,30 +49,36 @@ To communicate on the Caltrans Network, WSL's "Networking Mode" setting must be 
 2. Select "Networking" from the left panel
 3. Set "Networking Mode" to "Mirrored". It should be the first option on the page.
 
-
 ### 2. Start and Configure Docker Desktop or Rancher Desktop
 
-Open Docker Desktop or Rancher Desktop, and wait for it to initialize.
+Open Docker Desktop or Rancher Desktop, and wait for it to initialize (for Rancher Desktop, the status bar in the bottom left corner should be gone).
 
-On WSL, you will need to make Docker available to your WSL distro. On Rancher Desktop, open settings (ctrl + ,), select WSL, then check the box next to the distribution you're using. Then click Apply, and restart Rancher Desktop if prompted to.
+On WSL, you will need to make Docker available to your WSL distro. In Rancher Desktop, open settings (ctrl + ,), select WSL, then check the box next to the distribution you're using. Then click Apply, and restart Rancher Desktop if prompted to.
 
 ### 2.5 Optional: Connect to the Caltrans Network
 
-If you intend to develop on the Caltrans network, you will need to be connected before you build the devcontainer. You can do this either by connecting to the dotsecure network in a physical Caltrans facility, or by connecting to the VPN. A network connection is needed so the devcontainer can download the SSL certificates it needs from Onramp.
+If you intend to develop on the Caltrans network, you will need to be connected before you build the devcontainer. You can do this either by connecting to the dotsecure network in a physical Caltrans facility, or by connecting to the VPN. Being on the Caltrans network is needed so the devcontainer can download the SSL certificates it needs from Onramp.
 
 If you are not connected, or do not have access, the devcontainer will still build, but will not function correctly if you connect to the Caltrans network later. You can fix this by connecting to the network, then running **Dev Containers: Rebuild and Reopen in Container**.
 
 ### 3. Open the repo in the devcontainer
 
-From VS Code, open the repo folder and run **Dev Containers: Reopen in
-Container** from the Command Palette (`ctrl+shift+p` by default to open the Command Palette → `Dev Containers: Reopen in Container`). The first build will download the container's Linux distribution and install packages, so it will take longer than subsequent runs.
+Open the repo in VS Code:
+
+* If you cloned the repo in Windows, open VS Code, select "Open Folder" from the main page or the File menu, and select the `data-analyses` folder.
+* If you cloned the repo in Ubuntu, open "Ubuntu" from the start menu, then run:
+
+```bash
+code ./path/to/data-analyses
+```
+
+Once you have the folder open, run **Dev Containers: Reopen in Container** from the Command Palette (`ctrl+shift+p` by default to open the Command Palette → `Dev Containers: Reopen in Container`). The first build will download the container's Linux distribution and install packages, so it will take longer than subsequent runs.
+
+If you do not see anay "Dev Containers" options in the command palette, you may not have the Dev Containers extension installed. Open the Extensions menu from the left sidebar in VS Code, search "Dev Containers", and install the extension from Microsoft - it should have a checkmark next to it. Then repeat these steps.
 
 ### 4. Authenticate to Google Cloud with `glogin`
 
-Run `glogin` to authenticate and create an application-default certificate. The certificate will last 8 hours, after that you will need to re-run.
-
-This runs `gcloud auth application-default login` against the login config at
-[`iac/login.json`](../iac/login.json).
+From the VS Code tetrminal (open with Terminal -> New Terminal), run `glogin` to authenticate and create an application-default certificate. The certificate will last 8 hours, after that you will need to re-run.
 
 ### 5. Enjoy Developing
 
@@ -54,7 +86,7 @@ You can now work in VS Code - see below for some common tasks you can do:
 
 #### Running Python
 
-You can set up the Python environment with `uv sync` from the repo root and run a Python interpreter with `uv run python`. After running `uv sync`, you can also run notebooks in the VS Code window by selecting the local cal-itp-data-analyses kernel.
+You can set up the Python environment with `uv sync` from the repo root and run a Python interpreter with `uv run python`. After running `uv sync`, you can also run notebooks in the VS Code window by selecting the local `cal-itp-data-analyses` kernel.
 
 If you have worked outside of a devcontainer on this system, you may have issues with the virtual environment - fix it by deleting the venv (`rm -rf .venv`).
 
