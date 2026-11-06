@@ -16,6 +16,12 @@ For longer-term projects, consider making a new repository!
 
 If you are developing in JupyterHub, follow the [JupyterHub setup docs](https://docs.calitp.org/data-infra/analytics_tools/jupyterhub.html).
 
+### Devcontainer (Caltrans network)
+
+A devcontainer is provided for developing locally. See the
+[devcontainer setup guide](./.devcontainer/README.md) for how to configure the
+required SSL certs and get the Nix-based dev environment running.
+
 
 ### Contributing
 
