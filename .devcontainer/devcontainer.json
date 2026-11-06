@@ -1,5 +1,5 @@
 {
-  "name": "Cal-ITP Data Analyses (Nix + DinD)",
+  "name": "Cal-ITP Data Analyses (Nix)",
   "build": {
     "dockerfile": "Dockerfile"
   },

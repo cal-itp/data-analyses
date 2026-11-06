@@ -24,6 +24,7 @@
             gcloud auth application-default login --login-config=/workspaces/data-analyses/iac/login.json
         '';
         ssl_path = "/etc/ssl/certs/ca-certificates.crt";
+        repo_path = "/workspaces/data-analyses/";
       in
       {
         devShells.default = pkgs.mkShell {
@@ -60,7 +61,7 @@
             zlib
           ];
           # Set UV to use the local cache
-          UV_CACHE_DIR = "$/workspaces/data-analyses/.uv-cache";
+          UV_CACHE_DIR = repo_path + "/.uv-cache";
           # Node 17+ defaults to "verbatim" DNS ordering, which resolves
           # localhost to ::1 (IPv6) first in this container. That makes
           # myst's local build server (binds to the first resolved address)
@@ -73,6 +74,11 @@
           REQUESTS_CA_BUNDLE = ssl_path;
           GRPC_DEFAULT_SSL_ROOTS_FILE_PATH = ssl_path;
           NIX_SSL_CERT_FILE = ssl_path;
+
+          # Configure git to accept the working directory as trusted
+          GIT_CONFIG_COUNT = 1;
+          GIT_CONFIG_KEY_0 = "safe.directory";
+          GIT_CONFIG_VALUE_0 = repo_path;
 
           # Something is un-setting SSL_CERT_FILE when it's defined in pkgs.mkShell
           # This is a super messy workaround to fix it, there's probably a better way
