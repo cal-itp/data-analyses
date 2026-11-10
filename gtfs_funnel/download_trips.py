@@ -10,6 +10,7 @@ import datetime as dt  # noqa: E402
 import sys  # noqa: E402
 from functools import cache  # noqa: E402
 
+import pandas as pd  # noqa: E402
 from calitp_data_analysis.gcs_pandas import GCSPandas  # noqa: E402
 from loguru import logger  # noqa: E402
 from shared_utils import gtfs_utils_v2  # noqa: E402
@@ -29,9 +30,19 @@ def get_operators(analysis_date: str):
         selected_date=analysis_date, keep_cols=None, get_df=True, feed_option="use_subfeeds"
     ).rename(columns={"gtfs_dataset_name": "name"})
 
+    # patch until a better fix -- need to use a subfeed for Santa Cruz
+    santa_cruz = (
+        gtfs_utils_v2.schedule_daily_feed_to_gtfs_dataset_name(
+            selected_date=analysis_date, keep_cols=None, get_df=True, feed_option="include_precursor"
+        )
+        .rename(columns={"gtfs_dataset_name": "name"})
+        .query('name.str.contains("Santa Cruz")')
+    )
+    assert len(santa_cruz) == 1, "query should return exactly one Santa Cruz schedule feed"
+
     keep_cols = ["feed_key", "name"]
 
-    operators_to_include = all_operators[keep_cols]
+    operators_to_include = pd.concat([all_operators, santa_cruz])[keep_cols]
 
     # There shouldn't be any duplicates by name, since we got rid
     # of precursor feeds. But, just in case, don't allow dup names.

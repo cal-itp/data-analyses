@@ -543,3 +543,5 @@
 2026-10-26 13:43:10.612 | INFO     | __main__:<module>:124 - path: calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2026-09-16_concat/
 2026-10-26 13:45:21.555 | INFO     | __main__:<module>:136 - remove batched parquets
 2026-10-26 13:45:21.559 | INFO     | __main__:<module>:139 - execution time: 0:04:28.365815
+2026-11-10 11:41:06.945 | INFO     | __main__:<module>:132 - Analysis date: 2026-10-14
+2026-11-10 11:45:47.743 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 0 to GCS: 0:04:40.796924

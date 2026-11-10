@@ -119,10 +119,11 @@ if __name__ == "__main__":
 
     rt_datasets = rt_datasets.rename(columns={"gtfs_dataset_name": "name"})
 
-    # Exclude regional feed and precursors
+    # Exclude regional feed and precursors, but keep Santa Cruz precursor
     exclude = ["Bay Area 511 Regional VehiclePositions"]
     rt_datasets = rt_datasets[
-        ~(rt_datasets.name.isin(exclude)) & (rt_datasets.regional_feed_type != "Regional Precursor Feed")
+        ~(rt_datasets.name.isin(exclude))
+        & ((rt_datasets.regional_feed_type != "Regional Precursor Feed") | rt_datasets.name.str.contains("Santa Cruz"))
     ].reset_index(drop=True)
 
     rt_dataset_names = rt_datasets.name.unique().tolist()
