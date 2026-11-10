@@ -291,7 +291,7 @@ def analyze_corridor_improvements(
         print(f"percent mode: {trip_percent_speedup}")
         df = df.assign(
             improved_corridor_speed_mph=df["corridor_speed_mph"] * (1 + trip_percent_speedup),
-            intervention_assumption=f"{trip_percent_speedup*100}% trip speed increase",
+            intervention_assumption=f"{trip_percent_speedup * 100}% trip speed increase",
         )
         df = df.assign(improved_corridor_speed_mps=df["improved_corridor_speed_mph"] / rt_utils.MPH_PER_MPS)
         df = df.assign(improved_corridor_seconds=df["corridor_meters"] / df["improved_corridor_speed_mps"])
