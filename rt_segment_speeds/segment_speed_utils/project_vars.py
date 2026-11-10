@@ -7,11 +7,10 @@ COMPILED_CACHED_VIEWS = GTFS_DATA_DICT.gcs_paths.COMPILED_CACHED_VIEWS
 SEGMENT_GCS = GTFS_DATA_DICT.gcs_paths.SEGMENT_GCS
 RT_SCHED_GCS = GTFS_DATA_DICT.gcs_paths.RT_SCHED_GCS
 SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
-PREDICTIONS_GCS = GTFS_DATA_DICT.gcs_paths.PREDICTIONS_GCS
 SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
 PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
 
-analysis_date = rt_dates.DATES["aug2026"]
+analysis_date = rt_dates.DATES["sep2026"]
 analysis_date_list = [analysis_date]
 
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)

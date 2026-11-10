@@ -527,3 +527,19 @@
 2026-09-09 10:19:45.176 | INFO     | __main__:<module>:124 - path: calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2026-08-12_concat/
 2026-09-09 10:21:49.393 | INFO     | __main__:<module>:136 - remove batched parquets
 2026-09-09 10:21:49.395 | INFO     | __main__:<module>:139 - execution time: 0:03:28.654199
+2026-10-26 11:04:55.663 | INFO     | __main__:<module>:132 - Analysis date: 2026-09-16
+2026-10-26 11:10:21.856 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 0 to GCS: 0:05:26.191999
+2026-10-26 11:14:31.757 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 1 to GCS: 0:04:09.899022
+2026-10-26 11:54:00.063 | INFO     | __main__:<module>:132 - Analysis date: 2026-09-16
+2026-10-26 12:53:34.513 | INFO     | __main__:<module>:132 - Analysis date: 2026-09-16
+2026-10-26 13:00:04.005 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 0 to GCS: 0:06:29.491506
+2026-10-26 13:04:00.253 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 1 to GCS: 0:03:56.246536
+2026-10-26 13:24:29.451 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 2 to GCS: 0:20:29.197229
+2026-10-26 13:31:18.781 | INFO     | __main__:loop_through_batches_and_download_vp:98 - exported batch 3 to GCS: 0:06:49.327763
+2026-10-26 13:31:18.781 | INFO     | __main__:<module>:139 - execution time: 0:37:44.268079
+2026-10-26 13:40:53.193 | INFO     | __main__:<module>:101 - Analysis date: 2026-09-16
+2026-10-26 13:40:59.630 | INFO     | __main__:<module>:109 - concat and filter batched data: 0:00:06.436740
+2026-10-26 13:43:10.611 | INFO     | __main__:<module>:116 - export concatenated vp: 0:02:10.981245
+2026-10-26 13:43:10.612 | INFO     | __main__:<module>:124 - path: calitp-analytics-data/data-analyses/rt_segment_speeds/vp_2026-09-16_concat/
+2026-10-26 13:45:21.555 | INFO     | __main__:<module>:136 - remove batched parquets
+2026-10-26 13:45:21.559 | INFO     | __main__:<module>:139 - execution time: 0:04:28.365815

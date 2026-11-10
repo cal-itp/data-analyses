@@ -104,3 +104,5 @@
 2026-09-09 15:51:18.824 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:149 - nearest neighbor for speedmap_segments 2026-08-12: 0:02:38.255919
 2026-09-10 10:08:33.519 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:149 - nearest neighbor for speedmap_segments 2026-08-12: 0:04:21.567047
 2026-09-10 10:38:01.397 | INFO     | speeds_by_time_of_day:aggregate_by_time_of_day:147 - speedmap_segments: time-of-day averages for 2026-08-12 execution time: 0:05:08.236098
+2026-10-26 15:16:40.352 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:149 - nearest neighbor for rt_stop_times 2026-09-16: 0:09:42.539046
+2026-10-26 15:31:47.066 | INFO     | nearest_vp_to_stop:nearest_neighbor_for_stop:149 - nearest neighbor for speedmap_segments 2026-09-16: 0:04:53.977381
