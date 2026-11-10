@@ -460,3 +460,13 @@
 2026-10-26 14:21:58.756 | INFO     | __main__:<module>:192 - unmerged vp with dwell time 2026-09-16: 0:06:03.979019
 2026-10-26 14:23:15.374 | INFO     | __main__:<module>:65 - merge with original and export: 0:01:10.948490
 2026-10-26 14:27:11.897 | INFO     | __main__:<module>:86 - 2026-09-16: condense vp for trip 0:03:49.896809
+2026-11-10 12:57:01.594 | INFO     | __main__:pare_down_to_valid_trips:92 - pare down vp: 0:01:18.877135
+2026-11-10 12:57:04.327 | INFO     | __main__:<module>:116 - 2026-10-14: pare down vp execution time: 0:01:21.610152
+2026-11-10 13:00:36.656 | INFO     | __main__:get_vp_direction_column:69 - export vp direction: 0:03:27.121811
+2026-11-10 13:00:40.908 | INFO     | __main__:merge_in_vp_direction:87 - read vp_direction
+2026-11-10 13:01:31.072 | INFO     | __main__:merge_in_vp_direction:116 - 2026-10-14: export usable vp with direction: 0:00:53.311676
+2026-11-10 13:01:32.137 | INFO     | __main__:<module>:139 - 2026-10-14: pare down vp, add direction execution time: 0:04:22.598483
+2026-11-10 13:04:20.348 | INFO     | __main__:<module>:184 - compute dwell df: 0:02:39.746169
+2026-11-10 13:04:28.495 | INFO     | __main__:<module>:192 - unmerged vp with dwell time 2026-10-14: 0:02:47.893085
+2026-11-10 13:05:49.894 | INFO     | __main__:<module>:65 - merge with original and export: 0:01:16.324484
+2026-11-10 13:11:11.357 | INFO     | __main__:<module>:86 - 2026-10-14: condense vp for trip 0:05:15.418035

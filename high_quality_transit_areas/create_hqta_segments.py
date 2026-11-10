@@ -216,7 +216,7 @@ if __name__ == "__main__":
     start = datetime.datetime.now()
 
     # Cut into HQTA segments
-    hqta_segments = select_shapes_and_segment(analysis_date, HQTA_SEGMENT_LENGTH)
+    hqta_segments = select_shapes_and_segment(analysis_date, HQTA_SEGMENT_LENGTH).dropna()
 
     # Use segment azimuth (degrees) to determine direction, accomodate non-grid streets
     geodesic = pyproj.Geod(ellps="WGS84")

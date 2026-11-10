@@ -75,3 +75,5 @@
 2026-09-15 10:30:36.060 | INFO     | speeds_by_time_of_day:aggregate_by_time_of_day:153 - speedmap_segments: time-of-day averages for 2026-06-10 execution time: 0:05:31.211746
 2026-10-26 15:26:25.201 | INFO     | speeds_by_time_of_day:aggregate_by_time_of_day:150 - rt_stop_times: time-of-day averages for 2026-09-16 execution time: 0:02:04.236046
 2026-10-26 16:07:49.970 | INFO     | speeds_by_time_of_day:aggregate_by_time_of_day:150 - speedmap_segments: time-of-day averages for 2026-09-16 execution time: 0:03:30.222926
+2026-11-10 14:14:52.074 | INFO     | speeds_by_time_of_day:aggregate_by_time_of_day:150 - rt_stop_times: time-of-day averages for 2026-10-14 execution time: 0:02:32.596032
+2026-11-10 14:24:55.394 | INFO     | speeds_by_time_of_day:aggregate_by_time_of_day:150 - speedmap_segments: time-of-day averages for 2026-10-14 execution time: 0:03:20.760486

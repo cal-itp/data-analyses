@@ -10,7 +10,7 @@ SCHED_GCS = GTFS_DATA_DICT.gcs_paths.SCHED_GCS
 SHARED_GCS = GTFS_DATA_DICT.gcs_paths.SHARED_GCS
 PUBLIC_GCS = GTFS_DATA_DICT.gcs_paths.PUBLIC_GCS
 
-analysis_date = rt_dates.DATES["sep2026"]
+analysis_date = rt_dates.DATES["oct2026"]
 analysis_date_list = [analysis_date]
 
 oct2023_week = rt_dates.get_week("oct2023", exclude_wed=True)
