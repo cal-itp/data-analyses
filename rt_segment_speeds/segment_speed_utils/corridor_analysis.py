@@ -15,10 +15,24 @@ CORRIDOR_RELEVANCE = 1000 #  meters, or half corridor length
 import google.auth
 credentials, project = google.auth.default()
 
+from functools import cache
+
+from calitp_data_analysis.gcs_pandas import GCSPandas
+
+@cache
+def gcs_pandas():
+    return GCSPandas()
+
+from calitp_data_analysis.gcs_geopandas import GCSGeoPandas
+
+@cache
+def gcs_geopandas():
+    return GCSGeoPandas()
+
 def import_speedmap_segment_speeds(analysis_date: str) -> gpd.GeoDataFrame:
     
     path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.segment_timeofday}_{analysis_date}.parquet'
-    detail = gpd.read_parquet(path, storage_options = {"token": credentials.token})
+    detail = gcs_geopandas().read_parquet(path)
     return detail
 
 def get_max_frequencies(segment_speeds: gpd.GeoDataFrame) -> pd.DataFrame:
@@ -50,7 +64,7 @@ def describe_cleaning(df:pd.DataFrame, cleaning_query:str, message:str):
     
 def import_trip_speeds(analysis_date: str):
     path = f'{catalog.speedmap_segments.dir}{catalog.speedmap_segments.stage4}_{analysis_date}.parquet'
-    st4 = pd.read_parquet(path)
+    st4 = gcs_pandas().read_parquet(path)
     st4 = describe_cleaning(st4, '~speed_mph.isna()', 'segments have no speed')
     # st4 = st4[~st4['speed_mph'].isna()]
     return st4
