@@ -159,7 +159,7 @@ def find_corridor_data(
     corridor_gdf = corridor_gdf.to_crs(geography_utils.CA_NAD83Albers_m)
     corridor_segments = speed_segments_gdf.clip(corridor_gdf)
     attach_geom = (
-        corridor_segments.groupby(["shape_array_key", "segment_id", "geometry"]).agg({"trips_hr_sch": "max"})
+        corridor_segments.groupby(["shape_array_key", "segment_id", "name", "geometry"]).agg({"trips_hr_sch": "max"})
     ).reset_index()
     trip_speeds_df = attach_geom.merge(trip_speeds_df, on=["shape_array_key", "segment_id"]).assign(
         corridor_id=corridor_gdf.corridor_id.iloc[0]
