@@ -55,6 +55,8 @@
             gnumake
             rsync
             curl
+            vim
+            
             # Kerberos-enabled build: Debian's /etc/ssh/ssh_config sets
             # GSSAPIAuthentication, which plain `openssh` rejects with a warning
             opensshWithKerberos
