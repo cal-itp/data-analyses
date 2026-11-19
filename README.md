@@ -6,26 +6,19 @@ This repository is for quick sharing of works in progress and simple analyses.
 For collaborative short-term tasks, create a new folder and work off a separate branch.
 For longer-term projects, consider making a new repository!
 
-
-## Using this Repo
-
-* Use [this link](https://docs.calitp.org/data-infra/analytics_tools/saving_code.html#onboarding-setup) to get started in JupyterHub, set up SSH, and start commiting to the repo!
-
-
-### JupyterHub Developers
-
-If you are developing in JupyterHub, follow the [JupyterHub setup docs](https://docs.calitp.org/data-infra/analytics_tools/jupyterhub.html).
+## Contributing
 
 ### Devcontainer (Caltrans network)
 
 A devcontainer is provided for developing locally. See the
-[devcontainer setup guide](./.devcontainer/README.md) for how to configure the
-required SSL certs and get the Nix-based dev environment running.
+[devcontainer setup guide](./.devcontainer/caltrans-setup.md) 
+for how to use it on a Caltrans-provided laptop
 
+### JupyterHub Developers (end of life)
 
-### Contributing
-
-Follow these steps to start contributing:
+Jupyterhub will not be supported in the future, so we recommend using the devcontainer if possible.
+If you are developing in JupyterHub, follow the [JupyterHub setup docs](https://docs.calitp.org/data-infra/analytics_tools/jupyterhub.html). 
+JupyterHub users can follow these steps to start contributing:
 
 1. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this `data-analyses` repo.
 
