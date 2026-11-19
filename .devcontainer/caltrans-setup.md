@@ -1,5 +1,5 @@
 # Devcontainer Setup (Caltrans Network)
-  
+
 This devcontainer gives you a consistent Nix-based dev environment for this repo,
 and includes workarounds needed to run on the Caltrans (CT) network, which does
 SSL inspection (MITM) on outbound traffic.
@@ -75,7 +75,7 @@ If you intend to develop on the Caltrans network, you will need to be connected 
 
 ### 4. Open a Terminal, and Confirm Packages Work
 
-1. After the container is built, open a terminal window with Terminal -> New Terminal (or ctrl + shift + \`) from the top bar.  
+1. After the container is built, open a terminal window with Terminal -> New Terminal (or ctrl + shift + \`) from the top bar.
    * This should open a terminal window in VS Code and automatically install the rest of the software needed to develop in this repository.
    * It will also take a long time to load on the first run, and be faster the next time it is run.
 2. Confirm that software installed by running `uv` and expect to see a list of potential commands
@@ -117,9 +117,9 @@ cowsay i like buses *and* trains
 
 If you want to set up Python development using a similar container:
 
-1. Copy this entire folder to that repo and make sure it is set up with a uv `pyproject.toml`.  
+1. Copy this entire folder to that repo and make sure it is set up with a uv `pyproject.toml`.
 2. Change the variable `repo_path` in `.devcontainer/flake.nix` to `/workspaces/[repo_name]`
-3. Open in VS Code and follow the instructions for all users to build the container. 
+3. Open in VS Code and follow the instructions for all users to build the container.
 4. Optionally, change the packages installed in `.devcontainer/flake.nix`. Some of them are specific to building the Cal-ITP portfolio and may be unnecessary for your project. You can define them by adding them to the list under `buildInputs = with pkgs;`
 
 ## Running after set up

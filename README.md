@@ -10,14 +10,17 @@ For longer-term projects, consider making a new repository!
 
 ### Devcontainer (Caltrans network)
 
-A devcontainer is provided for developing locally. See the
-[devcontainer setup guide](./.devcontainer/caltrans-setup.md) 
-for how to use it on a Caltrans-provided laptop
+A devcontainer is provided for developing locally. It
+sets up a container and shell environment with all the tools
+you need to develop in this repo and is configured to run on the
+Caltrans network. See the
+[devcontainer setup guide](./.devcontainer/caltrans-setup.md)
+for how to use it on a Caltrans-provided laptop.
 
 ### JupyterHub Developers (end of life)
 
 Jupyterhub will not be supported in the future, so we recommend using the devcontainer if possible.
-If you are developing in JupyterHub, follow the [JupyterHub setup docs](https://docs.calitp.org/data-infra/analytics_tools/jupyterhub.html). 
+If you are developing in JupyterHub, follow the [JupyterHub setup docs](https://docs.calitp.org/data-infra/analytics_tools/jupyterhub.html).
 JupyterHub users can follow these steps to start contributing:
 
 1. [Clone](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) this `data-analyses` repo.
