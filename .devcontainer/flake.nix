@@ -21,7 +21,7 @@
         };
         ssl_path = "/etc/ssl/certs/ca-certificates.crt";
         repo_path = "/workspaces/data-analyses/";
-        
+
         # utility to allow easy login to google cloud
         glogin = pkgs.writeShellScriptBin "glogin" ''
             gcloud auth application-default login --login-config=${repo_path}/iac/login.json
@@ -57,7 +57,7 @@
             rsync
             curl
             vim
-            
+
             # Kerberos-enabled build: Debian's /etc/ssh/ssh_config sets
             # GSSAPIAuthentication, which plain `openssh` rejects with a warning
             opensshWithKerberos
