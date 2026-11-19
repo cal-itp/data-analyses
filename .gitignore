@@ -112,6 +112,7 @@ celerybeat.pid
 .env
 _env
 .venv
+.uv-cache/
 env/
 venv/
 ENV/
@@ -150,4 +151,6 @@ portfolio/*
 !portfolio/*.txt
 !portfolio/*.toml
 !portfolio/*.yml
-.vscode/settings.json
+
+# direnv
+.direnv/
