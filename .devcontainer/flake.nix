@@ -19,12 +19,13 @@
           system = system;
           config.allowUnfree = true;
         };
-        # utility to allow easy login to google cloud
-        glogin = pkgs.writeShellScriptBin "glogin" ''
-            gcloud auth application-default login --login-config=/workspaces/data-analyses/iac/login.json
-        '';
         ssl_path = "/etc/ssl/certs/ca-certificates.crt";
         repo_path = "/workspaces/data-analyses/";
+        
+        # utility to allow easy login to google cloud
+        glogin = pkgs.writeShellScriptBin "glogin" ''
+            gcloud auth application-default login --login-config=${repo_path}/iac/login.json
+        '';
       in
       {
         devShells.default = pkgs.mkShell {
